@@ -53,7 +53,7 @@ import {
 } from '../../../store/api/audioRecordingsApi';
 
 export const AudioRecordingsView = () => {
-  // Filters
+  // Filters - Internal state for immediate UI updates
   const [filters, setFilters] = useState({
     interactionId: '',
     customerPhone: '',
@@ -65,8 +65,24 @@ export const AudioRecordingsView = () => {
     hasAudio: null,
   });
 
+  // Debounced filters - Used for API calls (500ms delay)
+  const [debouncedFilters, setDebouncedFilters] = useState(filters);
+  const [isDebouncing, setIsDebouncing] = useState(false);
+
   const [page, setPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  // Debounce filter changes to reduce API calls while typing
+  useEffect(() => {
+    setIsDebouncing(true);
+    const timer = setTimeout(() => {
+      setDebouncedFilters(filters);
+      setPage(1); // Reset to first page when filters change
+      setIsDebouncing(false);
+    }, 500); // Wait 500ms after user stops typing
+
+    return () => clearTimeout(timer);
+  }, [filters]);
 
   // RTK Query hooks
   const {
@@ -77,13 +93,22 @@ export const AudioRecordingsView = () => {
   } = useGetAudioRecordingsQuery({
     page,
     limit: itemsPerPage,
-    ...filters,
+    ...debouncedFilters, // Use debounced filters instead of immediate filters
+  }, {
+    // Don't refetch automatically when component remounts
+    refetchOnMountOrArgChange: false,
+    // Don't refetch when window regains focus
+    refetchOnFocus: false,
+    // Don't refetch when reconnecting
+    refetchOnReconnect: false,
   });
 
+  // Lazy load call types only when dropdown is opened
+  const [loadCallTypes, setLoadCallTypes] = useState(false);
   const { data: callTypes = [] } = useGetCallTypesQuery(undefined, {
     // Don't fail the component if call types can't be loaded
     refetchOnMountOrArgChange: false,
-    skip: true, // Temporarily skip this query until MSSQL is configured
+    skip: !loadCallTypes, // Only load when dropdown is opened
   });
   const [getAudioUrl] = useLazyGetAudioUrlQuery();
 
@@ -452,12 +477,23 @@ export const AudioRecordingsView = () => {
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography variant="h6">Advanced Filters</Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Typography variant="h6">Advanced Filters</Typography>
+              {isDebouncing && (
+                <Chip
+                  icon={<CircularProgress size={16} />}
+                  label="Typing..."
+                  size="small"
+                  color="info"
+                  variant="outlined"
+                />
+              )}
+            </Box>
             <Box sx={{ display: 'flex', gap: 1 }}>
               <Button
                 variant="contained"
                 onClick={() => refetch()}
-                disabled={loading}
+                disabled={loading || isDebouncing}
                 startIcon={loading ? <CircularProgress size={16} /> : <SearchIcon />}
               >
                 {loading ? 'Loading...' : 'Search'}
@@ -510,6 +546,7 @@ export const AudioRecordingsView = () => {
                   onChange={(e) =>
                     setFilters((prev) => ({ ...prev, callType: e.target.value }))
                   }
+                  onOpen={() => setLoadCallTypes(true)} // Load call types when dropdown opens
                   label="Call Type"
                 >
                   <MenuItem value="">All Types</MenuItem>
