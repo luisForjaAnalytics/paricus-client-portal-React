@@ -95,10 +95,10 @@ export const AudioRecordingsView = () => {
     limit: itemsPerPage,
     ...debouncedFilters, // Use debounced filters instead of immediate filters
   }, {
-    // Don't refetch automatically when component remounts
-    refetchOnMountOrArgChange: false,
-    // Don't refetch when window regains focus
-    refetchOnFocus: false,
+    // Refetch if cache is older than 3 minutes (180 seconds)
+    refetchOnMountOrArgChange: 180,
+    // Refetch when window regains focus (detects changes while user was away)
+    refetchOnFocus: true,
     // Don't refetch when reconnecting
     refetchOnReconnect: false,
   });
