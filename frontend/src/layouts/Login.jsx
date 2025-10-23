@@ -21,7 +21,7 @@ import { setCredentials } from "../store/auth/authSlice";
 const LoginView = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [login, { data, error, isLoading, isSuccess }] = useLoginMutation();
+  const [login, { isLoading }] = useLoginMutation();
 
   // Form state
   const [email, setEmail] = useState("");
@@ -43,8 +43,7 @@ const LoginView = () => {
     try {
       const result = await login({ email, password }).unwrap();
       dispatch(setCredentials(result));
-      console.log("✅ Login result:", result);
-      navigate("/app");
+      navigate("/app/dashboard");
     } catch (error) {
       console.error("❌ Login error:", error);
       setErrorMessage(error?.data?.error || "Invalid credentials");

@@ -4,7 +4,6 @@ import Box from "@mui/material/Box";
 import MuiDrawer from "@mui/material/Drawer";
 import List from "@mui/material/List";
 import CssBaseline from "@mui/material/CssBaseline";
-import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -13,7 +12,7 @@ import { AppBarLayout } from "./component/AppBarLayout";
 import { useTranslation } from "react-i18next";
 import { MenuSections } from "./component/menus/MenuSection.jsx";
 import { Outlet } from "react-router-dom";
-
+import { Language as LanguageIcon } from "@mui/icons-material";
 const drawerWidth = 240;
 
 const openedMixin = (theme) => ({
@@ -97,13 +96,14 @@ export const LayoutAccount = () => {
           display: { xs: "none", md: "flex" },
         }}
       >
-        <DrawerHeader>
-          <Typography
+        <DrawerHeader sx={{ justifyContent: "center" }}>
+          {/* <Typography
             variant="subtitle1"
             sx={{ color: "white", fontWeight: "bold" }}
           >
             {t("brand.name")}
-          </Typography>
+          </Typography> */}
+          <LanguageIcon sx={{ fontSize: 32, color: "white" }} />
         </DrawerHeader>
         <Divider
           sx={{

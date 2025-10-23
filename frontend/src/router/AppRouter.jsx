@@ -16,13 +16,14 @@ import { KnowledgeBaseView } from "../views/knowledgeBaseView/KnowledgeBaseView.
 import { ReportingView } from "../views/reportingView/ReportingView.jsx";
 import { ClientsView } from "../views/admin/usersManagement/clientsView/ClientsView.jsx";
 import { ProfileView } from "../views/ProfileView/ProfileView.jsx";
+import { ErrorView } from "../views/errorView/ErrorView.jsx";
 
 const router = createBrowserRouter(
   [
     {
       path: "/app",
       element: <LayoutAccount />,
-      //errorElement: <ErrorPage />,
+      errorElement: <ErrorView />,
       children: [
         {
           path: "dashboard",

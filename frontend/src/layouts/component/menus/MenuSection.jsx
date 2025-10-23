@@ -4,10 +4,18 @@ import AutoStoriesIcon from "@mui/icons-material/AutoStories";
 import LocalAtmSharpIcon from "@mui/icons-material/LocalAtmSharp";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import SettingsIcon from "@mui/icons-material/Settings";
+import PersonIcon from "@mui/icons-material/Person";
 import { ItemMenu } from "./ItemMenu";
-import { ListItem, MenuItem, Typography } from "@mui/material";
+import {
+  Divider,
+  ListItem,
+  ListItemIcon,
+  MenuItem,
+  Typography,
+} from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { SingOutButton } from "./SingOutButton";
 
 // Drawer menu //
 const menuItems = [
@@ -55,10 +63,12 @@ const menuItems = [
 const menuItemsAvatar = [
   {
     label: "myProfile",
+    icon: <PersonIcon fontSize="small" />,
     route: "users-profile",
   },
   {
     label: "userManagement",
+    icon: <SettingsIcon fontSize="small" />,
     route: "users-management",
   },
 ];
@@ -75,7 +85,7 @@ export const MenuSections = () => {
   );
 };
 
-export const MenuSectionsAvatar = ({ handleCloseUserMenu }) => {
+export const MenuSectionsAvatar = ({ handleCloseUserMenu, userAuth }) => {
   const navigate = useNavigate();
   const handleMenuOption = (route) => {
     navigate(`/app/${route}`);
@@ -84,19 +94,42 @@ export const MenuSectionsAvatar = ({ handleCloseUserMenu }) => {
   const { t } = useTranslation();
   return (
     <>
-      {menuItemsAvatar.map((setting) => (
+      <MenuItem
+        onClick={handleCloseUserMenu}
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "flex-start",
+        }}
+      >
+        <Typography sx={{ textAlign: "justify", fontWeight: "bold" }}>
+          {`${userAuth.firstName} ${userAuth.lastName}`}
+        </Typography>
+
+        <Typography
+          variant="body2"
+          sx={{ textAlign: "justify", color: "text.secondary" }}
+        >
+          {userAuth.email}
+        </Typography>
+      </MenuItem>
+
+      <Divider />
+      {menuItemsAvatar.map((setting, index) => (
         <MenuItem
-          key={setting}
+          key={index}
           onClick={() => {
             handleCloseUserMenu();
             handleMenuOption(setting.route);
           }}
         >
-          <Typography sx={{ textAlign: "center" }}>
+          <ListItemIcon>{setting.icon}</ListItemIcon>
+          <Typography sx={{ textAlign: "center", color: "text.secondary" }}>
             {t(`tooltips.${setting.label}`)}
           </Typography>
         </MenuItem>
       ))}
+      <SingOutButton />
     </>
   );
 };

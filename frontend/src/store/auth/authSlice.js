@@ -6,6 +6,7 @@ const getInitialState = () => {
   const token = localStorage.getItem("token");
   const userStr = localStorage.getItem("user");
   const tokenExpiryStr = localStorage.getItem("tokenExpiry");
+  const permissionsStr = localStorage.getItem("permissions");
 
   if (token && userStr && !isTokenExpired(tokenExpiryStr)) {
     return {
@@ -13,10 +14,17 @@ const getInitialState = () => {
       token,
       isAuthenticated: true,
       tokenExpiry: parseInt(tokenExpiryStr),
+      permissions: permissionsStr ? JSON.parse(permissionsStr) : [],
     };
   }
 
-  return { user: null, token: null, isAuthenticated: false, tokenExpiry: null };
+  return {
+    user: null,
+    token: null,
+    isAuthenticated: false,
+    tokenExpiry: null,
+    permissions: [],
+  };
 };
 
 export const authSlice = createSlice({
@@ -29,12 +37,20 @@ export const authSlice = createSlice({
       state.token = token;
       state.tokenExpiry = tokenExpiry;
       state.isAuthenticated = true;
+      state.permissions = user?.permissions || [];
+
+      // Persist to localStorage
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("tokenExpiry", tokenExpiry);
+      localStorage.setItem("permissions", JSON.stringify(user?.permissions || []));
     },
     clearCredentials: (state) => {
       state.user = null;
       state.token = null;
       state.tokenExpiry = null;
       state.isAuthenticated = false;
+      state.permissions = [];
       localStorage.clear();
     },
   },
@@ -46,12 +62,21 @@ export const authSlice = createSlice({
         state.token = token;
         state.tokenExpiry = tokenExpiry;
         state.isAuthenticated = true;
+        state.permissions = user?.permissions || [];
+
+        // Persist to localStorage
+        localStorage.setItem("token", token);
+        localStorage.setItem("user", JSON.stringify(user));
+        localStorage.setItem("tokenExpiry", tokenExpiry);
+        localStorage.setItem("permissions", JSON.stringify(user?.permissions || []));
       })
       .addMatcher(authApi.endpoints.logout.matchFulfilled, (state) => {
         state.user = null;
         state.token = null;
         state.tokenExpiry = null;
         state.isAuthenticated = false;
+        state.permissions = [];
+        localStorage.clear();
       });
   },
 });

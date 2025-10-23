@@ -12,9 +12,16 @@ export const reportsApi = createApi({
   }),
   tagTypes: ['Reports'],
   endpoints: (builder) => ({
-    // Get client folders
+    // Get client folders (admin only)
     getClientFolders: builder.query({
       query: () => "/client-folders",
+      transformResponse: (response) => response.folders || [],
+      providesTags: ['Reports'],
+    }),
+
+    // Get accessible folders for current user
+    getAccessibleFolders: builder.query({
+      query: () => "/client-folders-accessible",
       transformResponse: (response) => response.folders || [],
       providesTags: ['Reports'],
     }),
@@ -89,6 +96,7 @@ export const reportsApi = createApi({
 
 export const {
   useGetClientFoldersQuery,
+  useGetAccessibleFoldersQuery,
   useGetClientReportsQuery,
   useUploadReportMutation,
   useLazyDownloadReportQuery,

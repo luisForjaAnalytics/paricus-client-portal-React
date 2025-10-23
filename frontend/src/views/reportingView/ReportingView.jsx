@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Button,
@@ -21,93 +21,19 @@ import {
   Description as DescriptionIcon,
   Folder as FolderIcon
 } from '@mui/icons-material';
-import axios from 'axios';
+import {
+  useGetAccessibleFoldersQuery,
+  useGetClientReportsQuery,
+  useLazyDownloadReportQuery,
+} from '../../store/api/reportsApi';
 
-export const ReportingView = () => {
-  // State management
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [accessibleFolders, setAccessibleFolders] = useState([]);
-  const [folderReports, setFolderReports] = useState({});
-  const [loadingFolders, setLoadingFolders] = useState({});
-
-  // Snackbar state
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: '',
-    severity: 'success'
-  });
-
-  useEffect(() => {
-    loadClientReports();
-  }, []);
-
-  const loadAccessibleFolders = async () => {
-    setLoading(true);
-    setError('');
-
-    try {
-      const response = await axios.get('/api/reports/client-folders-accessible');
-      const folders = response.data.folders || [];
-      setAccessibleFolders(folders);
-
-      // Initialize loading states
-      const loadingState = {};
-      folders.forEach(folder => {
-        loadingState[folder] = false;
-      });
-      setLoadingFolders(loadingState);
-
-      // Auto-load reports for each accessible folder
-      for (const folder of folders) {
-        await loadFolderReports(folder);
-      }
-    } catch (err) {
-      console.error('Error loading accessible folders:', err);
-      setError(err.response?.data?.message || 'Failed to load accessible folders');
-      setAccessibleFolders([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadFolderReports = async (folder) => {
-    setLoadingFolders(prev => ({ ...prev, [folder]: true }));
-
-    try {
-      const response = await axios.get(`/api/reports/client/${folder}`);
-      setFolderReports(prev => ({ ...prev, [folder]: response.data.reports || [] }));
-    } catch (err) {
-      console.error(`Error loading reports for folder ${folder}:`, err);
-      showNotification(`Failed to load reports for ${folder}`, 'error');
-      setFolderReports(prev => ({ ...prev, [folder]: [] }));
-    } finally {
-      setLoadingFolders(prev => ({ ...prev, [folder]: false }));
-    }
-  };
-
-  const loadClientReports = async () => {
-    await loadAccessibleFolders();
-  };
-
-  const downloadReport = async (report, folder) => {
-    try {
-      const fileName = report.name;
-      showNotification('Generating download link...', 'info');
-
-      const response = await axios.get(`/api/reports/download/${folder}/${encodeURIComponent(fileName)}`);
-
-      if (response.data.downloadUrl) {
-        window.open(response.data.downloadUrl, '_blank');
-        showNotification('Download started', 'success');
-      } else {
-        throw new Error('No download URL received');
-      }
-    } catch (err) {
-      console.error('Error downloading report:', err);
-      showNotification(err.response?.data?.message || 'Failed to download report', 'error');
-    }
-  };
+// Component to display a single folder's reports using RTK Query
+const FolderReportsSection = ({ folder, downloadReport }) => {
+  const {
+    data: reports = [],
+    isLoading,
+    refetch
+  } = useGetClientReportsQuery(folder);
 
   const formatFolderName = (folderName) => {
     return folderName
@@ -130,6 +56,124 @@ export const ReportingView = () => {
       month: 'short',
       day: 'numeric'
     });
+  };
+
+  return (
+    <Paper variant="outlined" sx={{ p: 2 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <FolderIcon color="primary" />
+          <Typography variant="h6" component="h3">
+            {formatFolderName(folder)}
+          </Typography>
+        </Box>
+        <Button
+          size="small"
+          variant="outlined"
+          startIcon={isLoading ? <CircularProgress size={16} /> : <RefreshIcon />}
+          onClick={() => refetch()}
+          disabled={isLoading}
+        >
+          {isLoading ? 'Loading...' : 'Refresh Reports'}
+        </Button>
+      </Box>
+
+      {/* Reports Grid */}
+      {reports.length > 0 ? (
+        <Grid container spacing={2}>
+          {reports.map((report) => (
+            <Grid item xs={12} sm={6} md={4} key={report.key}>
+              <Paper
+                variant="outlined"
+                sx={{
+                  p: 2,
+                  cursor: 'pointer',
+                  '&:hover': {
+                    boxShadow: 2,
+                    bgcolor: 'action.hover'
+                  },
+                  transition: 'all 0.2s'
+                }}
+                onClick={() => downloadReport(report, folder)}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+                  <PdfIcon sx={{ fontSize: 32, color: 'error.main', flexShrink: 0 }} />
+                  <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                    <Typography
+                      variant="body2"
+                      fontWeight={500}
+                      sx={{
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      {report.name}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" display="block">
+                      {formatFileSize(report.size)}
+                    </Typography>
+                    <Typography variant="caption" color="text.disabled" display="block">
+                      {formatDate(report.lastModified)}
+                    </Typography>
+                  </Box>
+                  <IconButton size="small" color="primary">
+                    <DownloadIcon fontSize="small" />
+                  </IconButton>
+                </Box>
+              </Paper>
+            </Grid>
+          ))}
+        </Grid>
+      ) : !isLoading ? (
+        <Box sx={{ textAlign: 'center', py: 4 }}>
+          <Typography variant="body2" color="text.secondary">
+            No reports found in this folder
+          </Typography>
+        </Box>
+      ) : null}
+    </Paper>
+  );
+};
+
+export const ReportingView = () => {
+  // RTK Query hooks
+  const {
+    data: accessibleFolders = [],
+    isLoading: loading,
+    error: apiError,
+    refetch,
+  } = useGetAccessibleFoldersQuery();
+
+  const [getDownloadUrl] = useLazyDownloadReportQuery();
+
+  // Snackbar state
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success'
+  });
+
+  // Derived error message
+  const error = apiError?.data?.message || apiError?.error || '';
+
+  const downloadReport = async (report, folder) => {
+    try {
+      const fileName = report.name;
+      showNotification('Generating download link...', 'info');
+
+      const result = await getDownloadUrl({ folder, fileName }).unwrap();
+
+      if (result.downloadUrl) {
+        window.open(result.downloadUrl, '_blank');
+        showNotification('Download started', 'success');
+      } else {
+        throw new Error('No download URL received');
+      }
+    } catch (err) {
+      console.error('Error downloading report:', err);
+      showNotification(err.data?.message || 'Failed to download report', 'error');
+    }
   };
 
   const showNotification = (message, severity = 'success') => {
@@ -184,7 +228,7 @@ export const ReportingView = () => {
             <Button
               variant="contained"
               startIcon={loading ? <CircularProgress size={16} color="inherit" /> : <RefreshIcon />}
-              onClick={loadClientReports}
+              onClick={() => refetch()}
               disabled={loading}
             >
               {loading ? 'Loading...' : 'Refresh Reports'}
@@ -209,7 +253,7 @@ export const ReportingView = () => {
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                 {error}
               </Typography>
-              <Button variant="contained" onClick={loadClientReports}>
+              <Button variant="contained" onClick={() => refetch()}>
                 Try Again
               </Button>
             </Box>
@@ -219,80 +263,11 @@ export const ReportingView = () => {
           {!loading && !error && accessibleFolders.length > 0 && (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
               {accessibleFolders.map((folder) => (
-                <Paper key={folder} variant="outlined" sx={{ p: 2 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <FolderIcon color="primary" />
-                      <Typography variant="h6" component="h3">
-                        {formatFolderName(folder)}
-                      </Typography>
-                    </Box>
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      startIcon={loadingFolders[folder] ? <CircularProgress size={16} /> : <RefreshIcon />}
-                      onClick={() => loadFolderReports(folder)}
-                      disabled={loadingFolders[folder]}
-                    >
-                      {loadingFolders[folder] ? 'Loading...' : 'Refresh Reports'}
-                    </Button>
-                  </Box>
-
-                  {/* Reports Grid */}
-                  {folderReports[folder] && folderReports[folder].length > 0 ? (
-                    <Grid container spacing={2}>
-                      {folderReports[folder].map((report) => (
-                        <Grid item xs={12} sm={6} md={4} key={report.key}>
-                          <Paper
-                            variant="outlined"
-                            sx={{
-                              p: 2,
-                              cursor: 'pointer',
-                              '&:hover': {
-                                boxShadow: 2,
-                                bgcolor: 'action.hover'
-                              },
-                              transition: 'all 0.2s'
-                            }}
-                            onClick={() => downloadReport(report, folder)}
-                          >
-                            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
-                              <PdfIcon sx={{ fontSize: 32, color: 'error.main', flexShrink: 0 }} />
-                              <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-                                <Typography
-                                  variant="body2"
-                                  fontWeight={500}
-                                  sx={{
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    whiteSpace: 'nowrap'
-                                  }}
-                                >
-                                  {report.name}
-                                </Typography>
-                                <Typography variant="caption" color="text.secondary" display="block">
-                                  {formatFileSize(report.size)}
-                                </Typography>
-                                <Typography variant="caption" color="text.disabled" display="block">
-                                  {formatDate(report.lastModified)}
-                                </Typography>
-                              </Box>
-                              <IconButton size="small" color="primary">
-                                <DownloadIcon fontSize="small" />
-                              </IconButton>
-                            </Box>
-                          </Paper>
-                        </Grid>
-                      ))}
-                    </Grid>
-                  ) : !loadingFolders[folder] ? (
-                    <Box sx={{ textAlign: 'center', py: 4 }}>
-                      <Typography variant="body2" color="text.secondary">
-                        No reports found in this folder
-                      </Typography>
-                    </Box>
-                  ) : null}
-                </Paper>
+                <FolderReportsSection
+                  key={folder}
+                  folder={folder}
+                  downloadReport={downloadReport}
+                />
               ))}
             </Box>
           )}

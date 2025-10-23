@@ -66,7 +66,7 @@ export const AudioRecordingsView = () => {
   });
 
   const [page, setPage] = useState(1);
-  const [itemsPerPage] = useState(25);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   // RTK Query hooks
   const {
@@ -83,6 +83,7 @@ export const AudioRecordingsView = () => {
   const { data: callTypes = [] } = useGetCallTypesQuery(undefined, {
     // Don't fail the component if call types can't be loaded
     refetchOnMountOrArgChange: false,
+    skip: true, // Temporarily skip this query until MSSQL is configured
   });
   const [getAudioUrl] = useLazyGetAudioUrlQuery();
 
@@ -551,21 +552,40 @@ export const AudioRecordingsView = () => {
       {/* Results Card */}
       <Card>
         <CardContent>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 2 }}>
             <Box>
               <Typography variant="h6">Call Recordings</Typography>
               <Typography variant="body2" color="text.secondary">
-                {totalCount} total recordings found
+                {totalCount} total recordings found • Showing {recordings.length} per page
               </Typography>
             </Box>
-            {currentlyPlaying && (
-              <Chip
-                icon={<MicIcon />}
-                label="Playing Audio"
-                color="success"
-                variant="outlined"
-              />
-            )}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              {currentlyPlaying && (
+                <Chip
+                  icon={<MicIcon />}
+                  label="Playing Audio"
+                  color="success"
+                  variant="outlined"
+                />
+              )}
+              <FormControl size="small" sx={{ minWidth: 120 }}>
+                <InputLabel>Per Page</InputLabel>
+                <Select
+                  value={itemsPerPage}
+                  onChange={(e) => {
+                    setItemsPerPage(e.target.value);
+                    setPage(1); // Reset to first page when changing items per page
+                  }}
+                  label="Per Page"
+                >
+                  <MenuItem value={10}>10 items</MenuItem>
+                  <MenuItem value={15}>15 items</MenuItem>
+                  <MenuItem value={25}>25 items</MenuItem>
+                  <MenuItem value={50}>50 items</MenuItem>
+                  <MenuItem value={100}>100 items</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
           </Box>
 
           {/* Loading State */}
@@ -691,15 +711,26 @@ export const AudioRecordingsView = () => {
               </TableContainer>
 
               {/* Pagination */}
-              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
-                <Pagination
-                  count={totalPages}
-                  page={page}
-                  onChange={(e, value) => setPage(value)}
-                  color="primary"
-                  showFirstButton
-                  showLastButton
-                />
+              <Box sx={{ mt: 3 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1, flexWrap: 'wrap', gap: 1 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Showing {((page - 1) * itemsPerPage) + 1} to {Math.min(page * itemsPerPage, totalCount)} of {totalCount} recordings
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Page {page} of {totalPages}
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                  <Pagination
+                    count={totalPages}
+                    page={page}
+                    onChange={(e, value) => setPage(value)}
+                    color="primary"
+                    showFirstButton
+                    showLastButton
+                    size="large"
+                  />
+                </Box>
               </Box>
             </>
           )}

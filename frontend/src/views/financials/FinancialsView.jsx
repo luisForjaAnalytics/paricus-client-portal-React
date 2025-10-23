@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import {
   Box,
   Card,
@@ -51,42 +51,87 @@ import {
   OpenInNew as OpenIcon,
   CalendarToday as CalendarIcon,
 } from "@mui/icons-material";
-import axios from "axios";
-import { useGetClientFoldersQuery, useGetClientInvoicesAndStatsQuery, useGetFolderStatsQuery } from "../../store/api/invoicesApi";
+import {
+  useGetAllClientsDataQuery,
+  useGetClientInvoicesAndStatsQuery,
+  useGetMyInvoicesQuery,
+  useUploadInvoiceMutation,
+  useUpdateInvoiceMutation,
+  useDeleteInvoiceMutation,
+  useUpdatePaymentLinkMutation,
+  useLazyGetDownloadUrlQuery,
+} from "../../store/api/invoicesApi";
 import { useSelector } from "react-redux";
 
 export const FinancialsView = () => {
   // Auth store
   const authUser = useSelector((state) => state.auth.user);
-  //   useGetClientFoldersQuery,
-  // useGetFolderStatsQuery,
-  // useGetClientInvoicesAndStatsQuery,
 
   // Computed values
   const isAdmin = authUser?.permissions?.includes("admin_invoices");
   const hasViewAccess = authUser?.permissions?.includes("view_invoices");
 
-  // State
-  const [clientFolders, setClientFolders] = useState([]);
+  // Local state for selected folder
   const [selectedFolder, setSelectedFolder] = useState("");
-  const [invoices, setInvoices] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [loadingInvoices, setLoadingInvoices] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState("");
+
+  // RTK Query hooks - Admin queries all clients data
+  const {
+    data: allClientsData,
+    isLoading: loadingAllClients,
+    error: allClientsError,
+    refetch: refetchAllClients,
+  } = useGetAllClientsDataQuery(undefined, {
+    skip: !isAdmin,
+  });
+
+  // RTK Query hooks - Client invoices and stats for selected folder (admin)
+  const {
+    data: clientInvoicesData,
+    isLoading: loadingInvoices,
+    error: invoicesError,
+  } = useGetClientInvoicesAndStatsQuery(selectedFolder, {
+    skip: !isAdmin || !selectedFolder,
+  });
+
+  // RTK Query hooks - Regular user's invoices
+  const {
+    data: myInvoicesData,
+    isLoading: loadingMyInvoices,
+    error: myInvoicesError,
+    refetch: refetchMyInvoices,
+  } = useGetMyInvoicesQuery(undefined, {
+    skip: isAdmin || !hasViewAccess,
+  });
+
+  // RTK Query mutations
+  const [uploadInvoiceMutation, { isLoading: uploading }] = useUploadInvoiceMutation();
+  const [updateInvoiceMutation, { isLoading: savingInvoiceEdit }] = useUpdateInvoiceMutation();
+  const [deleteInvoiceMutation] = useDeleteInvoiceMutation();
+  const [updatePaymentLinkMutation, { isLoading: savingPaymentLink }] = useUpdatePaymentLinkMutation();
+  const [getDownloadUrl] = useLazyGetDownloadUrlQuery();
+
+  // Derived state from RTK Query
+  const clientBreakdowns = allClientsData?.clientBreakdowns || [];
+  const overallStats = allClientsData?.overallStats || null;
+  const invoices = isAdmin
+    ? clientInvoicesData?.invoices || []
+    : myInvoicesData?.invoices || [];
+  const arStats = clientInvoicesData?.stats || null;
+  const clientStats = myInvoicesData?.stats || null;
+  const loading = loadingAllClients || loadingMyInvoices;
+
+  // Error handling for permissions
+  const permissionError = !isAdmin && !hasViewAccess ? "You do not have permission to view invoices" : null;
+  const error = permissionError || allClientsError?.data?.message || invoicesError?.data?.message || myInvoicesError?.data?.message || null;
+
+  // Local state
   const [notification, setNotification] = useState(null);
-  const [arStats, setArStats] = useState(null);
-  const [clientStats, setClientStats] = useState(null);
-  const [overallStats, setOverallStats] = useState(null);
-  const [clientBreakdowns, setClientBreakdowns] = useState([]);
 
   // Modal states
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showPaymentLinkModal, setShowPaymentLinkModal] = useState(false);
   const [showEditInvoiceModal, setShowEditInvoiceModal] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
-  const [savingPaymentLink, setSavingPaymentLink] = useState(false);
-  const [savingInvoiceEdit, setSavingInvoiceEdit] = useState(false);
 
   // Form states
   const [uploadForm, setUploadForm] = useState({
@@ -129,107 +174,16 @@ export const FinancialsView = () => {
         .join(" ")
     : "";
 
-  // Methods
-  const loadAllClientsData = async () => {
-    setLoading(true);
-    setError("");
-
-    try {
-      const foldersResponse = await axios.get("/api/invoices/client-folders");
-      const folders = foldersResponse.data.folders || [];
-      setClientFolders(folders);
-
-      const statsPromises = folders.map((folder) =>
-        axios
-          .get(`/api/invoices/stats/${folder}`)
-          .then((res) => ({
-            folder,
-            folderDisplay: folder
-              .split("-")
-              .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-              .join(" "),
-            hasAccess: true,
-            ...res.data.stats,
-          }))
-          .catch((err) => {
-            if (err.response?.status === 404) {
-              console.warn(`Client folder ${folder} not properly configured`);
-              return null;
-            }
-            return {
-              folder,
-              folderDisplay: folder
-                .split("-")
-                .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                .join(" "),
-              hasAccess: true,
-              totalRevenue: 0,
-              outstandingBalance: 0,
-              overdueAmount: 0,
-              totalInvoices: 0,
-              paidCount: 0,
-              unpaidCount: 0,
-              overdueCount: 0,
-            };
-          })
-      );
-
-      const allStats = await Promise.all(statsPromises);
-      const validStats = allStats.filter((stat) => stat !== null);
-      setClientBreakdowns(validStats);
-
-      const overall = {
-        totalRevenue: validStats.reduce(
-          (sum, client) => sum + (client.totalRevenue || 0),
-          0
-        ),
-        outstandingBalance: validStats.reduce(
-          (sum, client) => sum + (client.outstandingBalance || 0),
-          0
-        ),
-        overdueAmount: validStats.reduce(
-          (sum, client) => sum + (client.overdueAmount || 0),
-          0
-        ),
-        totalClients: validStats.length,
-        totalInvoices: validStats.reduce(
-          (sum, client) => sum + (client.totalInvoices || 0),
-          0
-        ),
-        totalPaidInvoices: validStats.reduce(
-          (sum, client) => sum + (client.paidCount || 0),
-          0
-        ),
-        totalUnpaidInvoices: validStats.reduce(
-          (sum, client) => sum + (client.unpaidCount || 0),
-          0
-        ),
-        totalOverdueInvoices: validStats.reduce(
-          (sum, client) => sum + (client.overdueCount || 0),
-          0
-        ),
-      };
-      setOverallStats(overall);
-
-      if (validStats.length > 0 && !selectedFolder) {
-        setSelectedFolder(validStats[0].folder);
-        await loadClientInvoices(validStats[0].folder);
-      }
-    } catch (err) {
-      console.error("Error loading clients data:", err);
-      setError(
-        err.response?.data?.error ||
-          err.response?.data?.message ||
-          "Failed to load clients data"
-      );
-    } finally {
-      setLoading(false);
+  // Auto-select first folder when data loads
+  React.useEffect(() => {
+    if (isAdmin && clientBreakdowns.length > 0 && !selectedFolder) {
+      setSelectedFolder(clientBreakdowns[0].folder);
     }
-  };
+  }, [isAdmin, clientBreakdowns, selectedFolder]);
 
-  const selectClient = async (clientFolder) => {
+  // Methods
+  const selectClient = (clientFolder) => {
     setSelectedFolder(clientFolder);
-    await loadClientInvoices(clientFolder);
     scrollToInvoices();
   };
 
@@ -242,64 +196,12 @@ export const FinancialsView = () => {
     }, 100);
   };
 
-  const loadClientInvoices = async (clientFolder) => {
-    setLoadingInvoices(true);
-    setError("");
-
-    try {
-      const [invoicesResponse, statsResponse] = await Promise.all([
-        axios.get(`/api/invoices/client/${clientFolder}`),
-        axios.get(`/api/invoices/stats/${clientFolder}`),
-      ]);
-
-      setInvoices(invoicesResponse.data.invoices || []);
-      setArStats(statsResponse.data.stats || null);
-    } catch (err) {
-      console.error("Error loading client invoices:", err);
-      setError(
-        err.response?.data?.message ||
-          err.response?.data?.error ||
-          "Failed to load client invoices"
-      );
-      setInvoices([]);
-      setArStats(null);
-    } finally {
-      setLoadingInvoices(false);
-    }
-  };
-
-  const loadInvoices = async () => {
-    setLoading(true);
-    setError("");
-
-    try {
-      const [invoicesResponse, statsResponse] = await Promise.all([
-        axios.get("/api/invoices"),
-        axios.get("/api/invoices/stats"),
-      ]);
-
-      setInvoices(invoicesResponse.data.invoices || []);
-      setClientStats(statsResponse.data.stats || null);
-    } catch (err) {
-      console.error("Error loading invoices:", err);
-      setError(
-        err.response?.data?.message ||
-          err.response?.data?.error ||
-          "Failed to load invoices"
-      );
-      setInvoices([]);
-      setClientStats(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleFileSelect = (event) => {
     const file = event.target.files?.[0] || null;
     setUploadForm((prev) => ({ ...prev, file }));
   };
 
-  const uploadInvoice = async (e) => {
+  const handleUploadInvoice = async (e) => {
     e.preventDefault();
     if (!uploadForm.file || !selectedFolder) return;
 
@@ -320,8 +222,6 @@ export const FinancialsView = () => {
       return;
     }
 
-    setUploading(true);
-
     try {
       const formData = new FormData();
       formData.append("file", uploadForm.file);
@@ -339,11 +239,7 @@ export const FinancialsView = () => {
         formData.append("paymentMethod", uploadForm.paymentMethod);
       }
 
-      await axios.post(`/api/invoices/upload/${selectedFolder}`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      await uploadInvoiceMutation({ clientFolder: selectedFolder, formData }).unwrap();
 
       showNotification("success", "Invoice uploaded successfully");
       setShowUploadModal(false);
@@ -358,16 +254,13 @@ export const FinancialsView = () => {
         paymentMethod: "",
         file: null,
       });
-      await loadClientInvoices(selectedFolder);
     } catch (err) {
       console.error("Error uploading invoice:", err);
       const errorMessage =
-        err.response?.data?.errors?.map((e) => e.msg).join(", ") ||
-        err.response?.data?.error ||
+        err.data?.errors?.map((e) => e.msg).join(", ") ||
+        err.data?.error ||
         "Failed to upload invoice";
       showNotification("error", errorMessage);
-    } finally {
-      setUploading(false);
     }
   };
 
@@ -378,11 +271,9 @@ export const FinancialsView = () => {
         showNotification("success", "Download started");
       } else {
         const clientFolder = invoice.folder || selectedFolder;
-        const response = await axios.get(
-          `/api/invoices/download/${clientFolder}/${invoice.fileName}`
-        );
-        if (response.data.downloadUrl) {
-          window.open(response.data.downloadUrl, "_blank");
+        const result = await getDownloadUrl({ clientFolder, fileName: invoice.fileName }).unwrap();
+        if (result.downloadUrl) {
+          window.open(result.downloadUrl, "_blank");
           showNotification("success", "Download started");
         }
       }
@@ -390,24 +281,23 @@ export const FinancialsView = () => {
       console.error("Error downloading invoice:", err);
       showNotification(
         "error",
-        err.response?.data?.message || "Failed to download invoice"
+        err.data?.message || "Failed to download invoice"
       );
     }
   };
 
-  const deleteInvoice = async (invoice) => {
+  const handleDeleteInvoice = async (invoice) => {
     if (!window.confirm("Are you sure you want to delete this invoice?"))
       return;
 
     try {
-      await axios.delete(`/api/invoices/delete/${invoice.id}`);
+      await deleteInvoiceMutation(invoice.id).unwrap();
       showNotification("success", "Invoice deleted successfully");
-      await loadClientInvoices(selectedFolder);
     } catch (err) {
       console.error("Error deleting invoice:", err);
       showNotification(
         "error",
-        err.response?.data?.message || "Failed to delete invoice"
+        err.data?.message || "Failed to delete invoice"
       );
     }
   };
@@ -418,35 +308,26 @@ export const FinancialsView = () => {
     setShowPaymentLinkModal(true);
   };
 
-  const savePaymentLink = async (e) => {
+  const handleSavePaymentLink = async (e) => {
     e.preventDefault();
     if (!selectedInvoice || !paymentLinkForm.paymentLink) return;
 
-    setSavingPaymentLink(true);
-
     try {
-      await axios.put(`/api/invoices/payment-link/${selectedInvoice.id}`, {
+      await updatePaymentLinkMutation({
+        id: selectedInvoice.id,
         paymentLink: paymentLinkForm.paymentLink,
-      });
+      }).unwrap();
 
       showNotification("success", "Payment link saved successfully");
       setShowPaymentLinkModal(false);
       setSelectedInvoice(null);
       setPaymentLinkForm({ paymentLink: "" });
-
-      if (isAdmin && selectedFolder) {
-        await loadClientInvoices(selectedFolder);
-      } else {
-        await loadInvoices();
-      }
     } catch (err) {
       console.error("Error saving payment link:", err);
       showNotification(
         "error",
-        err.response?.data?.message || "Failed to save payment link"
+        err.data?.message || "Failed to save payment link"
       );
-    } finally {
-      setSavingPaymentLink(false);
     }
   };
 
@@ -492,14 +373,13 @@ export const FinancialsView = () => {
     return adjustedDate.toISOString();
   };
 
-  const saveInvoiceEdit = async (e) => {
+  const handleSaveInvoiceEdit = async (e) => {
     e.preventDefault();
     if (!editInvoiceForm.id) return;
 
-    setSavingInvoiceEdit(true);
-
     try {
       const updateData = {
+        id: editInvoiceForm.id,
         title: editInvoiceForm.title,
         amount: editInvoiceForm.amount,
         currency: editInvoiceForm.currency,
@@ -513,25 +393,17 @@ export const FinancialsView = () => {
         updateData.paidDate = dateToISOString(editInvoiceForm.paidDate);
       }
 
-      await axios.put(`/api/invoices/${editInvoiceForm.id}`, updateData);
+      await updateInvoiceMutation(updateData).unwrap();
 
       showNotification("success", "Invoice updated successfully");
       setShowEditInvoiceModal(false);
-
-      if (isAdmin && selectedFolder) {
-        await loadClientInvoices(selectedFolder);
-      } else {
-        await loadInvoices();
-      }
     } catch (err) {
       console.error("Error updating invoice:", err);
       const errorMessage =
-        err.response?.data?.error ||
-        err.response?.data?.errors?.[0]?.msg ||
+        err.data?.error ||
+        err.data?.errors?.[0]?.msg ||
         "Failed to update invoice";
       showNotification("error", errorMessage);
-    } finally {
-      setSavingInvoiceEdit(false);
     }
   };
 
@@ -567,20 +439,6 @@ export const FinancialsView = () => {
     };
     return statusColors[status] || "default";
   };
-
-  // Initialize
-  useEffect(() => {
-    const init = async () => {
-      if (isAdmin) {
-        await loadAllClientsData();
-      } else if (hasViewAccess) {
-        await loadInvoices();
-      } else {
-        setError("You do not have permission to view invoices");
-      }
-    };
-    init();
-  }, []);
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
@@ -626,7 +484,7 @@ export const FinancialsView = () => {
                 startIcon={
                   loading ? <CircularProgress size={16} /> : <RefreshIcon />
                 }
-                onClick={loadAllClientsData}
+                onClick={refetchAllClients}
                 disabled={loading}
               >
                 {loading ? "Loading..." : "Refresh All"}
@@ -1057,7 +915,9 @@ export const FinancialsView = () => {
                   <Button
                     variant="outlined"
                     startIcon={<RefreshIcon />}
-                    onClick={() => loadClientInvoices(selectedFolder)}
+                    onClick={() => {
+                      // RTK Query refetches automatically via invalidateTags
+                    }}
                     disabled={loadingInvoices}
                   >
                     Refresh
@@ -1069,7 +929,7 @@ export const FinancialsView = () => {
                   startIcon={
                     loading ? <CircularProgress size={16} /> : <RefreshIcon />
                   }
-                  onClick={loadInvoices}
+                  onClick={refetchMyInvoices}
                   disabled={loading}
                 >
                   {loading ? "Loading..." : "Refresh"}
@@ -1105,8 +965,8 @@ export const FinancialsView = () => {
                   variant="contained"
                   onClick={() =>
                     isAdmin
-                      ? loadClientInvoices(selectedFolder)
-                      : loadInvoices()
+                      ? refetchAllClients()
+                      : refetchMyInvoices()
                   }
                 >
                   Try Again
@@ -1285,7 +1145,7 @@ export const FinancialsView = () => {
                                 <IconButton
                                   color="error"
                                   size="small"
-                                  onClick={() => deleteInvoice(invoice)}
+                                  onClick={() => handleDeleteInvoice(invoice)}
                                 >
                                   <DeleteIcon fontSize="small" />
                                 </IconButton>
@@ -1310,7 +1170,7 @@ export const FinancialsView = () => {
         maxWidth="sm"
         fullWidth
       >
-        <form onSubmit={savePaymentLink}>
+        <form onSubmit={handleSavePaymentLink}>
           <DialogTitle>Set Payment Link</DialogTitle>
           <DialogContent>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
@@ -1352,7 +1212,7 @@ export const FinancialsView = () => {
         maxWidth="md"
         fullWidth
       >
-        <form onSubmit={saveInvoiceEdit}>
+        <form onSubmit={handleSaveInvoiceEdit}>
           <DialogTitle>Edit Invoice</DialogTitle>
           <DialogContent>
             <Grid container spacing={2} sx={{ mt: 1 }}>
@@ -1542,7 +1402,7 @@ export const FinancialsView = () => {
         maxWidth="md"
         fullWidth
       >
-        <form onSubmit={uploadInvoice}>
+        <form onSubmit={handleUploadInvoice}>
           <DialogTitle>Upload New Invoice</DialogTitle>
           <DialogContent>
             <Grid container spacing={2} sx={{ mt: 1 }}>
