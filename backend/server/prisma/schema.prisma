@@ -1,0 +1,191 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Client {
+  id               Int                   @id @default(autoincrement())
+  name             String
+  isActive         Boolean               @default(true) @map("is_active")
+  isProspect       Boolean               @default(false) @map("is_prospect")
+  createdAt        DateTime              @default(now()) @map("created_at")
+  updatedAt        DateTime              @default(now()) @updatedAt @map("updated_at")
+  reports          Report[]
+  roles            Role[]
+  users            User[]
+  knowledgeBase    KnowledgeBase[]
+  folderAccess     ClientFolderAccess[]
+  invoices         Invoice[]
+
+  @@index([isActive])
+  @@index([isProspect])
+  @@index([createdAt])
+  @@map("clients")
+}
+
+model Permission {
+  id              Int              @id @default(autoincrement())
+  permissionName  String           @unique @map("permission_name")
+  description     String?
+  createdAt       DateTime         @default(now()) @map("created_at")
+  rolePermissions RolePermission[]
+
+  @@index([permissionName])
+  @@map("permissions")
+}
+
+model Role {
+  id              Int              @id @default(autoincrement())
+  clientId        Int              @map("client_id")
+  roleName        String           @map("role_name")
+  description     String?
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @default(now()) @updatedAt @map("updated_at")
+  rolePermissions RolePermission[]
+  client          Client           @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  users           User[]
+
+  @@unique([clientId, roleName])
+  @@index([clientId])
+  @@index([roleName])
+  @@index([createdAt])
+  @@map("roles")
+}
+
+model User {
+  id                   Int             @id @default(autoincrement())
+  clientId             Int             @map("client_id")
+  email                String          @unique
+  passwordHash         String          @map("password_hash")
+  firstName            String?         @map("first_name")
+  lastName             String?         @map("last_name")
+  roleId               Int?            @map("role_id")
+  isActive             Boolean         @default(true) @map("is_active")
+  lastLogin            DateTime?       @map("last_login")
+  passwordResetToken   String?         @map("password_reset_token")
+  passwordResetExpires DateTime?       @map("password_reset_expires")
+  createdAt            DateTime        @default(now()) @map("created_at")
+  updatedAt            DateTime        @default(now()) @updatedAt @map("updated_at")
+  role                 Role?           @relation(fields: [roleId], references: [id], onDelete: SetNull)
+  client               Client          @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  knowledgeBase        KnowledgeBase[]
+
+  @@index([email])
+  @@index([clientId])
+  @@index([roleId])
+  @@index([isActive])
+  @@index([lastLogin])
+  @@index([passwordResetToken])
+  @@index([createdAt])
+  @@map("users")
+}
+
+model RolePermission {
+  roleId       Int        @map("role_id")
+  permissionId Int        @map("permission_id")
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@index([roleId])
+  @@index([permissionId])
+  @@map("role_permissions")
+}
+
+model Report {
+  id          Int      @id @default(autoincrement())
+  clientId    Int      @map("client_id")
+  name        String
+  description String?
+  type        String
+  s3Key       String   @map("s3_key")
+  s3Bucket    String   @map("s3_bucket")
+  fileSize    Int?     @map("file_size")
+  mimeType    String   @default("application/pdf") @map("mime_type")
+  generatedAt DateTime @map("generated_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+  @@index([type])
+  @@index([generatedAt])
+  @@index([createdAt])
+  @@index([s3Key])
+  @@map("reports")
+}
+
+model KnowledgeBase {
+  id          Int      @id @default(autoincrement())
+  clientId    Int?     @map("client_id")
+  title       String
+  content     String
+  category    String
+  tags        String?
+  isPublic    Boolean  @default(false) @map("is_public")
+  isActive    Boolean  @default(true) @map("is_active")
+  authorId    Int?     @map("author_id")
+  viewCount   Int      @default(0) @map("view_count")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+  client      Client?  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  author      User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@index([clientId])
+  @@index([authorId])
+  @@index([category])
+  @@index([isPublic])
+  @@index([isActive])
+  @@index([createdAt])
+  @@index([title])
+  @@map("knowledge_base")
+}
+
+model ClientFolderAccess {
+  id          Int      @id @default(autoincrement())
+  clientId    Int      @map("client_id")
+  folderName  String   @map("folder_name")
+  createdAt   DateTime @default(now()) @map("created_at")
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@unique([clientId, folderName])
+  @@index([clientId])
+  @@index([folderName])
+  @@map("client_folder_access")
+}
+
+model Invoice {
+  id            Int      @id @default(autoincrement())
+  clientId      Int      @map("client_id")
+  invoiceNumber String   @unique @map("invoice_number")
+  title         String
+  description   String?
+  amount        Float
+  currency      String   @default("USD")
+  status        String   @default("draft") // draft, sent, viewed, paid, overdue, cancelled
+  dueDate       DateTime @map("due_date")
+  issuedDate    DateTime @map("issued_date")
+  paidDate      DateTime? @map("paid_date")
+  s3Key         String?  @map("s3_key")
+  s3Bucket      String?  @map("s3_bucket")
+  fileSize      Int?     @map("file_size")
+  mimeType      String?  @default("application/pdf") @map("mime_type")
+  paymentLink   String?  @map("payment_link")
+  paymentMethod String?  @map("payment_method")
+  notes         String?
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at")
+  client        Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+  @@index([status])
+  @@index([dueDate])
+  @@index([issuedDate])
+  @@index([invoiceNumber])
+  @@index([createdAt])
+  @@map("invoices")
+}

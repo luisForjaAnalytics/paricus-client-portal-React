@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "node -e \"console.log('\\n🔐 Development Credentials:\\n\\n🔧 BPO Admin: admin@paricus.com / admin123!\\n\\n📱 Flex Mobile:\\n   Admin: admin@flexmobile.com / flex123!\\n   User:  user@flexmobile.com / flexuser123!\\n\\n📞 IM Telecom:\\n   Admin: admin@imtelecom.com / imtelecom123!\\n   User:  user@imtelecom.com / imuser123!\\n\\n🌎 North American Local:\\n   Admin: admin@northamericanlocal.com / northam123!\\n   User:  user@northamericanlocal.com / naluser123!\\n')\" && vite",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -14,12 +14,15 @@
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^7.3.4",
     "@mui/material": "^7.3.4",
+    "@prisma/client": "^6.17.1",
     "@reduxjs/toolkit": "^2.9.0",
-    "@toolpad/core": "^0.16.0",
+    "axios": "^1.12.2",
     "i18next": "^25.6.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "react-i18next": "^16.0.1"
+    "react-i18next": "^16.0.1",
+    "react-redux": "^9.2.0",
+    "react-router-dom": "^7.9.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
@@ -30,6 +33,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.22",
     "globals": "^16.4.0",
+    "prisma": "^6.17.1",
     "vite": "^7.1.7"
   }
 }
