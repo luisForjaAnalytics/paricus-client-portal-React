@@ -70,7 +70,7 @@ export const AudioRecordingsView = () => {
   const [isDebouncing, setIsDebouncing] = useState(false);
 
   const [page, setPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(15);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   // Debounce filter changes to reduce API calls while typing
   useEffect(() => {
