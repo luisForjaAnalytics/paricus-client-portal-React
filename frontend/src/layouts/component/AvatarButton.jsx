@@ -9,10 +9,9 @@ import MenuItem from "@mui/material/MenuItem";
 import { MenuSectionsAvatar } from "./menus/MenuSection";
 import { useSelector } from "react-redux";
 
-
-export const AvatarButton = () => {
+export const AvatarButton = ({ setTitleState }) => {
   const [anchorElUser, setAnchorElUser] = React.useState(null);
-  const userAuth= useSelector(item => (item?.auth || {}).user);
+  const userAuth = useSelector((item) => (item?.auth || {}).user);
 
   const handleOpenUserMenu = (event) => {
     setAnchorElUser(event.currentTarget);
@@ -23,7 +22,7 @@ export const AvatarButton = () => {
   };
 
   return (
-    <Box sx={{ flexGrow: 0, marginLeft: 2, marginBottom:1 }}>
+    <Box sx={{ flexGrow: 0, marginLeft: 2, marginBottom: 1 }}>
       <Tooltip title="Open settings">
         <IconButton
           size="large"
@@ -53,7 +52,11 @@ export const AvatarButton = () => {
         open={Boolean(anchorElUser)}
         onClose={handleCloseUserMenu}
       >
-       <MenuSectionsAvatar handleCloseUserMenu={handleCloseUserMenu}  userAuth={userAuth}/>
+        <MenuSectionsAvatar
+          handleCloseUserMenu={handleCloseUserMenu}
+          userAuth={userAuth}
+          setTitleState={setTitleState}
+        />
       </Menu>
     </Box>
   );

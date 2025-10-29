@@ -29,7 +29,7 @@ export const MobilMenu = () => {
       <Drawer open={open} onClose={toggleDrawer(false)}  sx={{
           "& .MuiDrawer-paper": {
             background:
-              "linear-gradient(to bottom, #035f0bff 0%, #339137ff 100%)",
+              "linear-gradient(to bottom, #0c7b3f 0%, #339137ff 100%)",
             color: "white",
             borderRight: "none",
           },

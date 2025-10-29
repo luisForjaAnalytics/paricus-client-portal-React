@@ -44,9 +44,9 @@ import {
   useUpdateUserMutation,
   useGetClientsQuery,
   useGetRolesQuery,
-} from "../../../store/api/adminApi";
+} from "../../../../../store/api/adminApi";
 
-export const UsersManagement = () => {
+export const UsersManagementView = () => {
   // RTK Query hooks
   const { data: users = [], isLoading: loading } = useGetUsersQuery();
   const { data: clients = [] } = useGetClientsQuery();
@@ -190,10 +190,7 @@ export const UsersManagement = () => {
       closeDialog();
     } catch (error) {
       console.error("Error saving user:", error);
-      showNotification(
-        error.data?.error || "Failed to save user",
-        "error"
-      );
+      showNotification(error.data?.error || "Failed to save user", "error");
     }
   };
 
@@ -243,14 +240,6 @@ export const UsersManagement = () => {
       {/* Header */}
       <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
         <Box>
-          <Typography
-            variant="h4"
-            component="h2"
-            fontWeight="bold"
-            gutterBottom
-          >
-            User Management
-          </Typography>
           <Typography variant="body1" color="text.secondary">
             Manage user accounts and permissions
           </Typography>
@@ -550,4 +539,3 @@ export const UsersManagement = () => {
     </Box>
   );
 };
-

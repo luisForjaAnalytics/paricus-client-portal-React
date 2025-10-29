@@ -9,14 +9,16 @@ import { LayoutAccount } from "../layouts/LayoutAccount";
 import LoginView from "../layouts/Login";
 import { ReportsManagementView } from "../views/reportsManagementView/ReportsManagementView";
 import { FinancialsView } from "../views/financials/FinancialsView";
-import { UsersManagement } from "../views/admin/usersManagement/UsersManagement";
 import { AudioRecordingsView } from "../views/admin/audioRecordingsView/AudioRecordingsView";
 import { Dashboard } from "../views/dashboard/dashboard.jsx";
 import { KnowledgeBaseView } from "../views/knowledgeBaseView/KnowledgeBaseView.jsx";
 import { ReportingView } from "../views/reportingView/ReportingView.jsx";
-import { ClientsView } from "../views/admin/usersManagement/clientsView/ClientsView.jsx";
 import { ProfileView } from "../views/ProfileView/ProfileView.jsx";
 import { ErrorView } from "../views/errorView/ErrorView.jsx";
+import { UserManagementlayout } from "../views/admin/usersManagement/UserManagementlayout.jsx";
+import { ClientsView } from "../views/admin/usersManagement/components/clientsView/ClientsView.jsx";
+import { UsersManagementView } from "../views/admin/usersManagement/components/UsersManagementview/UsersManagementview.jsx";
+import { RolesView } from "../views/admin/usersManagement/components/rolesView/RolesView.jsx";
 
 const router = createBrowserRouter(
   [
@@ -51,7 +53,21 @@ const router = createBrowserRouter(
         },
         {
           path: "users-management",
-          element: <UsersManagement />,
+          element: <UserManagementlayout />,
+          children: [
+            {
+              path: "clients",
+              element: <ClientsView />,
+            },
+            {
+              path: "users",
+              element: <UsersManagementView />,
+            },
+            {
+              path: "rolesPermissions",
+              element: <RolesView />,
+            },
+          ],
         },
         {
           path: "users-profile",

@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useState } from "react";
 import { styled, useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import MuiDrawer from "@mui/material/Drawer";
@@ -56,8 +56,7 @@ const Drawer = styled(MuiDrawer, {
         ...openedMixin(theme),
         "& .MuiDrawer-paper": {
           ...openedMixin(theme),
-          background:
-            "linear-gradient(to bottom, #035f0bff 0%, #339137ff 100%)",
+          background: "#0c7b3f 0% ",
           color: "white",
           borderRight: "none",
         },
@@ -66,8 +65,7 @@ const Drawer = styled(MuiDrawer, {
         ...closedMixin(theme),
         "& .MuiDrawer-paper": {
           ...closedMixin(theme),
-          background:
-            "linear-gradient(to bottom, #0e7717ff 0%, #339137ff 100%)",
+          background: " #0c7b3f 0%",
           color: "white",
           borderRight: "none",
         },
@@ -76,7 +74,8 @@ const Drawer = styled(MuiDrawer, {
 
 export const LayoutAccount = () => {
   const { t } = useTranslation();
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
+  const [titleState, setTitleState] = useState("dashboard");
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -120,7 +119,7 @@ export const LayoutAccount = () => {
             marginBottom: { sx: "none", md: 4 },
           }}
         >
-          <MenuSections />
+          <MenuSections setTitleState={setTitleState} titleState={titleState} />
         </List>
 
         <Divider
@@ -156,9 +155,20 @@ export const LayoutAccount = () => {
         </DrawerHeader>
       </Drawer>
 
-      <Box sx={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
-        <AppBarLayout />
-        <Box>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          flexGrow: 1,
+          backgroundColor: "#ececec60", // gris claro
+        }}
+      >
+        <AppBarLayout titleState={titleState} setTitleState={setTitleState} />
+        <Box
+          sx={{
+            margin: { xs: "0 1.2rem 0 1.2rem", md: "1.5rem 1rem 0 1rem" },
+          }}
+        >
           <Outlet />
         </Box>
       </Box>

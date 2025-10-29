@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Button,
@@ -38,17 +38,27 @@ import {
   Delete as DeleteIcon,
   Shield as ShieldIcon
 } from '@mui/icons-material';
-import axios from 'axios';
+import {
+  useGetRolesQuery,
+  useCreateRoleMutation,
+  useUpdateRoleMutation,
+  useDeleteRoleMutation,
+  useGetClientsQuery,
+  useGetPermissionsQuery,
+  useLazyGetRolePermissionsQuery,
+  useUpdateRolePermissionsMutation
+} from '../../../../../store/api/adminApi';
 
 export const RolesView = () => {
-  // State management
-  const [roles, setRoles] = useState([]);
-  const [clients, setClients] = useState([]);
-  const [permissions, setPermissions] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [savingPermissions, setSavingPermissions] = useState(false);
-  const [deleting, setDeleting] = useState(false);
+  // RTK Query hooks
+  const { data: roles = [], isLoading, error } = useGetRolesQuery();
+  const { data: clients = [] } = useGetClientsQuery();
+  const { data: permissions = [] } = useGetPermissionsQuery();
+  const [createRole, { isLoading: isCreating }] = useCreateRoleMutation();
+  const [updateRole, { isLoading: isUpdating }] = useUpdateRoleMutation();
+  const [deleteRole, { isLoading: isDeleting }] = useDeleteRoleMutation();
+  const [getRolePermissions] = useLazyGetRolePermissionsQuery();
+  const [updateRolePermissions, { isLoading: isUpdatingPermissions }] = useUpdateRolePermissionsMutation();
 
   // Dialog states
   const [dialog, setDialog] = useState(false);
@@ -76,51 +86,8 @@ export const RolesView = () => {
     severity: 'success'
   });
 
-  // Fetch data on mount
-  useEffect(() => {
-    fetchRoles();
-    fetchClients();
-    fetchPermissions();
-  }, []);
-
-  const fetchRoles = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get('/api/admin/roles');
-      const mappedRoles = response.data.roles.map(role => ({
-        id: role.id,
-        client_id: role.clientId,
-        client_name: role.clientName,
-        role_name: role.roleName,
-        description: role.description,
-        permissions_count: role.permissions?.length || 0,
-        created_at: role.createdAt
-      }));
-      setRoles(mappedRoles);
-    } catch (error) {
-      showNotification('Failed to load roles', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchClients = async () => {
-    try {
-      const response = await axios.get('/api/admin/clients');
-      setClients(response.data.clients);
-    } catch (error) {
-      console.error('Error fetching clients:', error);
-    }
-  };
-
-  const fetchPermissions = async () => {
-    try {
-      const response = await axios.get('/api/admin/permissions');
-      setPermissions(response.data.permissions);
-    } catch (error) {
-      console.error('Error fetching permissions:', error);
-    }
-  };
+  // Computed values
+  const isSaving = isCreating || isUpdating;
 
   const openAddDialog = () => {
     setEditingRole(null);
@@ -161,8 +128,8 @@ export const RolesView = () => {
     }
 
     try {
-      const response = await axios.get(`/api/admin/roles/${role.id}/permissions`);
-      setSelectedPermissions(response.data.permissions.map(p => p.permissionId));
+      const result = await getRolePermissions(role.id).unwrap();
+      setSelectedPermissions(result);
     } catch (error) {
       console.error('Error fetching role permissions:', error);
       setSelectedPermissions([]);
@@ -180,15 +147,15 @@ export const RolesView = () => {
   const saveRole = async () => {
     if (!isFormValid()) return;
 
-    setSaving(true);
     try {
       if (editingRole) {
         const updateData = {
+          id: editingRole.id,
           role_name: roleForm.role_name,
           description: roleForm.description,
           client_id: roleForm.client_id
         };
-        await axios.put(`/api/admin/roles/${editingRole.id}`, updateData);
+        await updateRole(updateData).unwrap();
         showNotification('Role updated successfully', 'success');
       } else {
         const roleData = {
@@ -200,21 +167,17 @@ export const RolesView = () => {
 
         if (!roleData.clientId) {
           showNotification('Please select a client for this role', 'error');
-          setSaving(false);
           return;
         }
 
-        await axios.post('/api/admin/roles', roleData);
+        await createRole(roleData).unwrap();
         showNotification('Role created successfully', 'success');
       }
 
-      await fetchRoles();
       closeDialog();
     } catch (error) {
-      const errorMessage = error.response?.data?.error || error.response?.data?.message || 'Failed to save role';
+      const errorMessage = error.data?.error || error.data?.message || 'Failed to save role';
       showNotification(errorMessage, 'error');
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -224,26 +187,17 @@ export const RolesView = () => {
       return;
     }
 
-    setSavingPermissions(true);
     try {
-      await axios.put(`/api/admin/roles/${selectedRole.id}/permissions`, {
+      await updateRolePermissions({
+        roleId: selectedRole.id,
         permissions: selectedPermissions
-      });
-
-      const index = roles.findIndex(r => r.id === selectedRole.id);
-      if (index !== -1) {
-        const updatedRoles = [...roles];
-        updatedRoles[index].permissions_count = selectedPermissions.length;
-        setRoles(updatedRoles);
-      }
+      }).unwrap();
 
       showNotification('Permissions updated successfully', 'success');
       closePermissionsDialog();
     } catch (error) {
-      const errorMessage = error.response?.data?.error || 'Failed to save permissions';
+      const errorMessage = error.data?.error || 'Failed to save permissions';
       showNotification(errorMessage, 'error');
-    } finally {
-      setSavingPermissions(false);
     }
   };
 
@@ -252,19 +206,15 @@ export const RolesView = () => {
     setDeleteDialog(true);
   };
 
-  const deleteRole = async () => {
-    setDeleting(true);
+  const handleDeleteRole = async () => {
     try {
-      await axios.delete(`/api/admin/roles/${roleToDelete.id}`);
-      setRoles(roles.filter(r => r.id !== roleToDelete.id));
+      await deleteRole(roleToDelete.id).unwrap();
       showNotification('Role deleted successfully', 'success');
       setDeleteDialog(false);
       setRoleToDelete(null);
     } catch (error) {
-      const errorMessage = error.response?.data?.error || 'Failed to delete role';
+      const errorMessage = error.data?.error || 'Failed to delete role';
       showNotification(errorMessage, 'error');
-    } finally {
-      setDeleting(false);
     }
   };
 
@@ -309,9 +259,9 @@ export const RolesView = () => {
       {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
         <Box>
-          <Typography variant="h4" component="h2" fontWeight="bold" gutterBottom>
+          {/* <Typography variant="h4" component="h2" fontWeight="bold" gutterBottom>
             Role Management
-          </Typography>
+          </Typography> */}
           <Typography variant="body1" color="text.secondary">
             Manage roles and permissions
           </Typography>
@@ -353,9 +303,13 @@ export const RolesView = () => {
 
       {/* Roles Table */}
       <Card>
-        {loading ? (
+        {isLoading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', p: 8 }}>
             <CircularProgress />
+          </Box>
+        ) : error ? (
+          <Box sx={{ p: 8, textAlign: 'center' }}>
+            <Typography color="error">Failed to load roles</Typography>
           </Box>
         ) : (
           <TableContainer>
@@ -480,9 +434,9 @@ export const RolesView = () => {
           <Button
             variant="contained"
             onClick={saveRole}
-            disabled={saving || !isFormValid()}
+            disabled={isSaving || !isFormValid()}
           >
-            {saving ? 'Saving...' : 'Save'}
+            {isSaving ? 'Saving...' : 'Save'}
           </Button>
         </DialogActions>
       </Dialog>
@@ -517,9 +471,9 @@ export const RolesView = () => {
           <Button
             variant="contained"
             onClick={savePermissions}
-            disabled={savingPermissions}
+            disabled={isUpdatingPermissions}
           >
-            {savingPermissions ? 'Saving...' : 'Save Permissions'}
+            {isUpdatingPermissions ? 'Saving...' : 'Save Permissions'}
           </Button>
         </DialogActions>
       </Dialog>
@@ -538,10 +492,10 @@ export const RolesView = () => {
           <Button
             variant="contained"
             color="error"
-            onClick={deleteRole}
-            disabled={deleting}
+            onClick={handleDeleteRole}
+            disabled={isDeleting}
           >
-            {deleting ? 'Deleting...' : 'Delete'}
+            {isDeleting ? 'Deleting...' : 'Delete'}
           </Button>
         </DialogActions>
       </Dialog>
@@ -560,4 +514,3 @@ export const RolesView = () => {
     </Box>
   );
 };
-

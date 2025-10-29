@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Box,
   Button,
@@ -9,7 +9,6 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
-  Paper,
   Table,
   TableBody,
   TableCell,
@@ -36,14 +35,14 @@ import {
   useCreateClientMutation,
   useUpdateClientMutation,
   useDeleteClientMutation
-} from '../../../../store/api/adminApi';
+} from '../../../../../store/api/adminApi';
 
 export const ClientsView = () => {
   // RTK Query hooks
   const { data: clients = [], isLoading, error } = useGetClientsQuery();
   const [createClient, { isLoading: isCreating }] = useCreateClientMutation();
   const [updateClient, { isLoading: isUpdating }] = useUpdateClientMutation();
-  const [deleteClient, { isLoading: isDeleting }] = useDeleteClientMutation();
+  const [deleteClient] = useDeleteClientMutation();
 
   // State management
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -148,9 +147,9 @@ export const ClientsView = () => {
       {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
         <Box>
-          <Typography variant="h4" component="h2" fontWeight="bold" gutterBottom>
+          {/* <Typography variant="h4" component="h2" fontWeight="bold" gutterBottom>
             Client Management
-          </Typography>
+          </Typography> */}
           <Typography variant="body1" color="text.secondary">
             Manage and configure client accounts
           </Typography>

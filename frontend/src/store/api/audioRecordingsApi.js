@@ -11,8 +11,8 @@ export const audioRecordingsApi = createApi({
     },
   }),
   tagTypes: ['AudioRecordings'],
-  // Keep cached data for 3 minutes after component unmounts
-  keepUnusedDataFor: 180,
+  // Keep cached data for 10 minutes after component unmounts
+  keepUnusedDataFor: 600,
   endpoints: (builder) => ({
     // Get audio recordings with filters and pagination
     getAudioRecordings: builder.query({
@@ -56,4 +56,5 @@ export const {
   useGetAudioRecordingsQuery,
   useGetCallTypesQuery,
   useLazyGetAudioUrlQuery,
+  usePrefetch,
 } = audioRecordingsApi;

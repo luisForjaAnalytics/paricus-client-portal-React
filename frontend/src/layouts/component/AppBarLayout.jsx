@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useState } from "react";
 import { styled, alpha } from "@mui/material/styles";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
@@ -41,11 +41,11 @@ const SearchIconWrapper = styled("div")(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  color: "black", // ícono de búsqueda negro
+  color: "black", 
 }));
 
 const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: "black", // texto negro
+  color: "black", 
   "& .MuiInputBase-input": {
     padding: theme.spacing(1, 1, 1, 0),
     paddingLeft: `calc(1em + ${theme.spacing(4)})`,
@@ -53,10 +53,10 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-export const AppBarLayout = () => {
+export const AppBarLayout = ({titleState, setTitleState}) => {
   const { t } = useTranslation();
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
 
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
@@ -146,17 +146,16 @@ export const AppBarLayout = () => {
         >
           <MobilMenu />
           <Typography
-            variant="h5"
-            noWrap
-            component="div"
+            variant="h4"
+            component="h2"
+            fontWeight="bold"
             sx={{
               flexGrow: 0,
               ml: { xs: 1, sm: 4 },
               display: { xs: "none", sm: "block" },
-              fontWeight: "bold",
             }}
           >
-            {t("navigation.dashboard")}
+            {t(`navigation.${titleState}`)}
           </Typography>
 
           {/* Barra de búsqueda */}
@@ -193,7 +192,7 @@ export const AppBarLayout = () => {
                 <NotificationsIcon sx={{ color: "black" }} />
               </Badge>
             </IconButton>
-            <AvatarButton />
+            <AvatarButton setTitleState={setTitleState}/>
           </Box>
 
           {/* 🔹 MENÚ MÓVIL */}
