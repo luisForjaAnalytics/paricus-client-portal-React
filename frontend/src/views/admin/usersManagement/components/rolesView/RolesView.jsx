@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Box,
   Button,
@@ -10,15 +10,8 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   TextField,
   Typography,
-  CircularProgress,
   Snackbar,
   Alert,
   FormControl,
@@ -31,6 +24,7 @@ import {
   Badge,
   Tooltip
 } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
 import {
   Add as AddIcon,
   Edit as EditIcon,
@@ -254,6 +248,133 @@ export const RolesView = () => {
     return roleName === 'BPO Admin' || roleName === 'Client Admin';
   };
 
+  // DataGrid columns
+  const columns = useMemo(
+    () => [
+      {
+        field: 'id',
+        headerName: 'ID',
+        width: 80,
+        align: 'center',
+        headerAlign: 'center',
+      },
+      {
+        field: 'role_name',
+        headerName: 'Role Name',
+        width: 200,
+        align: 'left',
+        headerAlign: 'left',
+        renderCell: (params) => (
+          <Typography variant="body2" fontWeight={500}>
+            {params.value}
+          </Typography>
+        ),
+      },
+      {
+        field: 'description',
+        headerName: 'Description',
+        width: 250,
+        flex: 1,
+        align: 'left',
+        headerAlign: 'left',
+      },
+      {
+        field: 'client_name',
+        headerName: 'Client',
+        width: 180,
+        align: 'left',
+        headerAlign: 'left',
+        renderCell: (params) => (
+          <Chip
+            label={params.value}
+            color="primary"
+            variant="outlined"
+            size="small"
+          />
+        ),
+      },
+      {
+        field: 'permissions_count',
+        headerName: 'Permissions',
+        width: 150,
+        align: 'center',
+        headerAlign: 'center',
+        renderCell: (params) => (
+          <Badge badgeContent={params.value || 0} color="info">
+            <ShieldIcon color="action" />
+          </Badge>
+        ),
+      },
+      {
+        field: 'created_at',
+        headerName: 'Created',
+        width: 150,
+        align: 'center',
+        headerAlign: 'center',
+        valueFormatter: (value) => formatDate(value),
+      },
+      {
+        field: 'actions',
+        headerName: 'Actions',
+        width: 150,
+        align: 'center',
+        headerAlign: 'center',
+        sortable: false,
+        filterable: false,
+        disableColumnMenu: true,
+        renderCell: (params) => (
+          <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
+            <Tooltip title="Edit role">
+              <IconButton
+                size="small"
+                onClick={() => openEditDialog(params.row.original)}
+              >
+                <EditIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Configure permissions">
+              <IconButton
+                size="small"
+                color="success"
+                onClick={() => openPermissionsDialog(params.row.original)}
+              >
+                <SecurityIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Delete role">
+              <span>
+                <IconButton
+                  size="small"
+                  color="error"
+                  onClick={() => confirmDelete(params.row.original)}
+                  disabled={isProtectedRole(params.row.role_name)}
+                >
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </span>
+            </Tooltip>
+          </Box>
+        ),
+      },
+    ],
+    [openEditDialog, openPermissionsDialog, confirmDelete]
+  );
+
+  // Transform roles data for DataGrid
+  const rows = useMemo(
+    () =>
+      filteredRoles.map((role) => ({
+        id: role.id,
+        role_name: role.role_name,
+        description: role.description,
+        client_name: role.client_name,
+        permissions_count: role.permissions_count || 0,
+        created_at: role.created_at,
+        original: role, // Keep original object for actions
+      })),
+    [filteredRoles]
+  );
+
   return (
     <Box>
       {/* Header */}
@@ -302,91 +423,54 @@ export const RolesView = () => {
       </Card>
 
       {/* Roles Table */}
-      <Card>
-        {isLoading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', p: 8 }}>
-            <CircularProgress />
-          </Box>
-        ) : error ? (
-          <Box sx={{ p: 8, textAlign: 'center' }}>
-            <Typography color="error">Failed to load roles</Typography>
-          </Box>
-        ) : (
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>ID</TableCell>
-                  <TableCell>Role Name</TableCell>
-                  <TableCell>Description</TableCell>
-                  <TableCell>Client</TableCell>
-                  <TableCell>Permissions</TableCell>
-                  <TableCell>Created</TableCell>
-                  <TableCell align="right">Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {filteredRoles.map((role) => (
-                  <TableRow key={role.id} hover>
-                    <TableCell>{role.id}</TableCell>
-                    <TableCell>
-                      <Typography variant="body2" fontWeight={500}>
-                        {role.role_name}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>{role.description}</TableCell>
-                    <TableCell>
-                      <Chip
-                        label={role.client_name}
-                        color="primary"
-                        variant="outlined"
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Badge badgeContent={role.permissions_count || 0} color="info">
-                        <ShieldIcon color="action" />
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{formatDate(role.created_at)}</TableCell>
-                    <TableCell align="right">
-                      <Tooltip title="Edit role">
-                        <IconButton
-                          size="small"
-                          onClick={() => openEditDialog(role)}
-                        >
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Configure permissions">
-                        <IconButton
-                          size="small"
-                          color="success"
-                          onClick={() => openPermissionsDialog(role)}
-                        >
-                          <SecurityIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Delete role">
-                        <span>
-                          <IconButton
-                            size="small"
-                            color="error"
-                            onClick={() => confirmDelete(role)}
-                            disabled={isProtectedRole(role.role_name)}
-                          >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                        </span>
-                      </Tooltip>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        )}
-      </Card>
+      <Box sx={{ height: 600, width: '100%' }}>
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          loading={isLoading}
+          pageSizeOptions={[10, 25, 50]}
+          initialState={{
+            pagination: {
+              paginationModel: { pageSize: 10, page: 0 },
+            },
+          }}
+          disableRowSelectionOnClick
+          sx={{
+            borderRadius: '0.7rem',
+            padding: '1rem 0 0 0',
+            '& .MuiDataGrid-columnHeaders': {
+              backgroundColor: '#f5f5f5 !important',
+              borderBottom: '2px solid #e0e0e0',
+            },
+            '& .MuiDataGrid-columnHeader': {
+              backgroundColor: '#f5f5f5 !important',
+            },
+            '& .MuiDataGrid-columnHeaderTitle': {
+              fontWeight: 600,
+              textTransform: 'uppercase',
+              fontSize: '0.875rem',
+            },
+            '& .MuiDataGrid-sortIcon': {
+              color: '#0c7b3f',
+            },
+            '& .MuiDataGrid-columnHeader--sorted': {
+              backgroundColor: '#e8f5e9 !important',
+            },
+            '& .MuiDataGrid-filler': {
+              backgroundColor: '#f5f5f5 !important',
+            },
+            '& .MuiDataGrid-cell': {
+              borderBottom: '1px solid #f0f0f0',
+            },
+            '& .MuiDataGrid-cell:focus': {
+              outline: 'none',
+            },
+            '& .MuiDataGrid-row:hover': {
+              backgroundColor: 'action.hover',
+            },
+          }}
+        />
+      </Box>
 
       {/* Add/Edit Role Dialog */}
       <Dialog open={dialog} onClose={closeDialog} maxWidth="sm" fullWidth>

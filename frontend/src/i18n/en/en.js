@@ -160,4 +160,44 @@ export default {
       unknownAgent: "Unknown Agent",
     },
   },
+
+  // Invoices
+  invoices: {
+    // Table columns
+    table: {
+      invoiceNumber: "Invoice #",
+      fileName: "File Name",
+      amount: "Amount",
+      status: "Status",
+      dueDate: "Due Date",
+      paymentDate: "Payment Date",
+      paymentLink: "Payment Link",
+      actions: "Actions",
+    },
+
+    // Actions
+    actions: {
+      payNow: "Pay Now",
+      editInvoice: "Edit Invoice",
+      download: "Download",
+      delete: "Delete",
+    },
+
+    // Payment Link Modal
+    paymentLink: {
+      pendingLink: "PENDING LINK",
+      linkSet: "✓ Link Set",
+      updateLink: "Update link",
+      modalTitle: "Set Payment Link",
+      invoiceLabel: "Invoice",
+      urlLabel: "Payment Link URL",
+      urlPlaceholder: "https://example.com/payment/invoice-123",
+      urlHelper: "Enter a valid payment URL (Stripe, PayPal, etc.)",
+      cancel: "Cancel",
+      saving: "Saving...",
+      saveButton: "Save Link",
+      successMessage: "Payment link saved successfully",
+      errorMessage: "Failed to save payment link",
+    },
+  },
 };

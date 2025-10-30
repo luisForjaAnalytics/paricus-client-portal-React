@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Box,
   Button,
@@ -9,12 +9,6 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   TextField,
   Typography,
   CircularProgress,
@@ -24,6 +18,7 @@ import {
   FormControlLabel,
   Tooltip
 } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
 import {
   Add as AddIcon,
   Edit as EditIcon,
@@ -142,6 +137,124 @@ export const ClientsView = () => {
     setSnackbar({ ...snackbar, open: false });
   };
 
+  // DataGrid columns
+  const columns = useMemo(
+    () => [
+      {
+        field: 'name',
+        headerName: 'Client Name',
+        width: 250,
+        align: 'left',
+        headerAlign: 'left',
+        renderCell: (params) => (
+          <Typography variant="body2" fontWeight={500}>
+            {params.value}
+          </Typography>
+        ),
+      },
+      {
+        field: 'type',
+        headerName: 'Type',
+        width: 150,
+        align: 'center',
+        headerAlign: 'center',
+        renderCell: (params) => (
+          <Chip
+            label={params.row.isProspect ? 'Prospect' : 'Client'}
+            color={params.row.isProspect ? 'warning' : 'primary'}
+            size="small"
+          />
+        ),
+      },
+      {
+        field: 'isActive',
+        headerName: 'Status',
+        width: 120,
+        align: 'center',
+        headerAlign: 'center',
+        renderCell: (params) => (
+          <Chip
+            label={params.value ? 'Active' : 'Inactive'}
+            color={params.value ? 'success' : 'error'}
+            size="small"
+          />
+        ),
+      },
+      {
+        field: 'userCount',
+        headerName: 'Users',
+        width: 100,
+        align: 'center',
+        headerAlign: 'center',
+      },
+      {
+        field: 'roleCount',
+        headerName: 'Roles',
+        width: 100,
+        align: 'center',
+        headerAlign: 'center',
+      },
+      {
+        field: 'createdAt',
+        headerName: 'Created',
+        width: 150,
+        align: 'center',
+        headerAlign: 'center',
+        valueFormatter: (value) => formatDate(value),
+      },
+      {
+        field: 'actions',
+        headerName: 'Actions',
+        width: 150,
+        align: 'right',
+        headerAlign: 'right',
+        sortable: false,
+        filterable: false,
+        disableColumnMenu: true,
+        renderCell: (params) => (
+          <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'flex-end' }}>
+            <Tooltip title="Edit client">
+              <IconButton
+                size="small"
+                onClick={() => handleEdit(params.row.original)}
+              >
+                <EditIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Deactivate client">
+              <span>
+                <IconButton
+                  size="small"
+                  onClick={() => handleDeactivate(params.row.original)}
+                  disabled={!params.row.isActive}
+                >
+                  <BlockIcon fontSize="small" />
+                </IconButton>
+              </span>
+            </Tooltip>
+          </Box>
+        ),
+      },
+    ],
+    []
+  );
+
+  // Transform clients data for DataGrid
+  const rows = useMemo(
+    () =>
+      clients.map((client) => ({
+        id: client.id,
+        name: client.name,
+        isProspect: client.isProspect,
+        isActive: client.isActive,
+        userCount: client.userCount || 0,
+        roleCount: client.roleCount || 0,
+        createdAt: client.createdAt,
+        original: client, // Keep original object for actions
+      })),
+    [clients]
+  );
+
   return (
     <Box>
       {/* Header */}
@@ -165,86 +278,54 @@ export const ClientsView = () => {
       </Box>
 
       {/* Data Table */}
-      <Card>
-        {isLoading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', p: 8 }}>
-            <CircularProgress />
-          </Box>
-        ) : error ? (
-          <Box sx={{ p: 8, textAlign: 'center' }}>
-            <Typography color="error">Failed to load clients</Typography>
-          </Box>
-        ) : clients.length === 0 ? (
-          <Box sx={{ p: 8, textAlign: 'center' }}>
-            <Typography color="text.secondary">No clients found</Typography>
-          </Box>
-        ) : (
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Client Name</TableCell>
-                  <TableCell>Type</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Users</TableCell>
-                  <TableCell>Roles</TableCell>
-                  <TableCell>Created</TableCell>
-                  <TableCell align="right">Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {clients.map((client) => (
-                  <TableRow key={client.id} hover>
-                    <TableCell>
-                      <Typography variant="body2" fontWeight={500}>
-                        {client.name}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={client.isProspect ? 'Prospect' : 'Client'}
-                        color={client.isProspect ? 'warning' : 'primary'}
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={client.isActive ? 'Active' : 'Inactive'}
-                        color={client.isActive ? 'success' : 'error'}
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>{client.userCount || 0}</TableCell>
-                    <TableCell>{client.roleCount || 0}</TableCell>
-                    <TableCell>{formatDate(client.createdAt)}</TableCell>
-                    <TableCell align="right">
-                      <Tooltip title="Edit client">
-                        <IconButton
-                          size="small"
-                          onClick={() => handleEdit(client)}
-                        >
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Deactivate client">
-                        <span>
-                          <IconButton
-                            size="small"
-                            onClick={() => handleDeactivate(client)}
-                            disabled={!client.isActive}
-                          >
-                            <BlockIcon fontSize="small" />
-                          </IconButton>
-                        </span>
-                      </Tooltip>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        )}
-      </Card>
+      <Box sx={{ height: 600, width: '100%' }}>
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          loading={isLoading}
+          pageSizeOptions={[10, 25, 50]}
+          initialState={{
+            pagination: {
+              paginationModel: { pageSize: 10, page: 0 },
+            },
+          }}
+          disableRowSelectionOnClick
+          sx={{
+            borderRadius: '0.7rem',
+            padding: '1rem 0 0 0',
+            '& .MuiDataGrid-columnHeaders': {
+              backgroundColor: '#f5f5f5 !important',
+              borderBottom: '2px solid #e0e0e0',
+            },
+            '& .MuiDataGrid-columnHeader': {
+              backgroundColor: '#f5f5f5 !important',
+            },
+            '& .MuiDataGrid-columnHeaderTitle': {
+              fontWeight: 600,
+              textTransform: 'uppercase',
+              fontSize: '0.875rem',
+            },
+            '& .MuiDataGrid-sortIcon': {
+              color: '#0c7b3f',
+            },
+            '& .MuiDataGrid-columnHeader--sorted': {
+              backgroundColor: '#e8f5e9 !important',
+            },
+            '& .MuiDataGrid-filler': {
+              backgroundColor: '#f5f5f5 !important',
+            },
+            '& .MuiDataGrid-cell': {
+              borderBottom: '1px solid #f0f0f0',
+            },
+            '& .MuiDataGrid-cell:focus': {
+              outline: 'none',
+            },
+            '& .MuiDataGrid-row:hover': {
+              backgroundColor: 'action.hover',
+            },
+          }}
+        />
+      </Box>
 
       {/* Create/Edit Dialog */}
       <Dialog

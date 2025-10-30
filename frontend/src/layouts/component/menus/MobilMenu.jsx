@@ -8,6 +8,7 @@ import { MenuSections } from "./MenuSection.jsx";
 
 export const MobilMenu = () => {
   const [open, setOpen] = useState(false);
+  const [titleState, setTitleState] = useState("dashboard");
 
   const toggleDrawer = (newOpen) => () => {
     setOpen(newOpen);
@@ -16,7 +17,7 @@ export const MobilMenu = () => {
   const DrawerList = (
     <Box sx={{ width: 250, }} role="presentation" onClick={toggleDrawer(false)} >
       <List>
-        <MenuSections />
+        <MenuSections setTitleState={setTitleState} titleState={titleState} />
       </List>
     </Box>
   );

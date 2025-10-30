@@ -1,24 +1,29 @@
 import * as React from "react";
-import {
-  DataGrid,
-  Toolbar,
-  ToolbarButton,
-  FilterPanelTrigger,
-} from "@mui/x-data-grid";
+import { DataGrid, Toolbar, ToolbarButton } from "@mui/x-data-grid";
 import Tooltip from "@mui/material/Tooltip";
 import FilterListIcon from "@mui/icons-material/FilterList";
-import { Box, IconButton, CircularProgress, Chip, Button, Typography } from "@mui/material";
+import {
+  Box,
+  IconButton,
+  CircularProgress,
+  Chip,
+  Button,
+  Typography,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+} from "@mui/material";
 import {
   PlayArrow as PlayArrowIcon,
   Stop as StopIcon,
   Download as DownloadIcon,
-  Search as SearchIcon,
-  FilterListOff as FilterListOffIcon,
 } from "@mui/icons-material";
-import PhoneIcon from '@mui/icons-material/Phone';
-import SupportAgentIcon from '@mui/icons-material/SupportAgent';
+import PhoneIcon from "@mui/icons-material/Phone";
+import SupportAgentIcon from "@mui/icons-material/SupportAgent";
 import { useTranslation } from "react-i18next";
 import { AdvancedFilters } from "./AdvancedFilters";
+import { companies } from "./company.js";
 
 // Function to create columns with audio playback handlers
 const createColumns = (
@@ -84,13 +89,20 @@ const createColumns = (
   {
     field: "customerPhone",
     headerName: t("audioRecordings.table.customerPhone"),
-    width:180,
-     flex: 1,
+    width: 180,
+    flex: 1,
     align: "center",
     headerAlign: "center",
     sortable: true,
     renderCell: (params) => (
-      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, justifyContent: "center" }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 0.5,
+          justifyContent: "center",
+        }}
+      >
         <PhoneIcon fontSize="small" sx={{ color: "action.active" }} />
         {params.value || "N/A"}
       </Box>
@@ -99,13 +111,20 @@ const createColumns = (
   {
     field: "agentName",
     headerName: t("audioRecordings.table.agentName"),
-    width: 150,
+    width: 200,
     //flex: 1,
     align: "center",
     headerAlign: "center",
     sortable: true,
     renderCell: (params) => (
-      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, justifyContent: "left" }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 0.5,
+          justifyContent: "left",
+        }}
+      >
         <SupportAgentIcon fontSize="small" sx={{ color: "action.active" }} />
         {params.value || "N/A"}
       </Box>
@@ -115,8 +134,10 @@ const createColumns = (
     field: "actions",
     headerName: t("audioRecordings.table.actions"),
     width: 150,
-    flex: 1,
+    //flex: 1,
     sortable: false,
+    filterable: false,
+    disableColumnMenu: true,
     align: "center",
     headerAlign: "center",
     renderCell: (params) => {
@@ -204,18 +225,6 @@ const transformRecordings = (rowsTable, formatDate) => {
   }));
 };
 
-function CustomToolbar() {
-  return (
-    <Toolbar>
-      <Tooltip title="Filters">
-        <FilterPanelTrigger render={<ToolbarButton />}>
-          <FilterListIcon fontSize="small" />
-        </FilterPanelTrigger>
-      </Tooltip>
-    </Toolbar>
-  );
-}
-
 export const TableView = ({
   dataViewInfo = [],
   loading = false,
@@ -248,21 +257,64 @@ export const TableView = ({
 
     return (
       <>
-        <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+        <Toolbar
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            width: "100%",
+          }}
+        >
           <Box>
             <Typography variant="h6" fontWeight="bold" sx={{ lineHeight: 1.2 }}>
               {t("audioRecordings.results.title")}
             </Typography>
-            <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1 }}>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ lineHeight: 1 }}
+            >
               {totalCount} {t("audioRecordings.results.totalRecordings")}
             </Typography>
           </Box>
 
-          <Tooltip title="Filters" sx={{marginRight:'1rem'}}>
-            <ToolbarButton onClick={() => setIsOpen(!isOpen)}>
-              <FilterListIcon fontSize="small" />
-            </ToolbarButton>
-          </Tooltip>
+          <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+            <FormControl size="small" sx={{ minWidth: 150 }}>
+              <InputLabel id="company-filter-label">Company</InputLabel>
+              <Select
+                labelId="company-filter-label"
+                value={filters.company || ""}
+                onChange={(e) => setCompanyFilter(e.target.value || null)}
+                label="Company"
+                sx={{
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#0c7b3f",
+                  },
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#0c7b3f",
+                  },
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#0c7b3f",
+                  },
+                }}
+              >
+                <MenuItem value="">
+                  <em>All Companies</em>
+                </MenuItem>
+                {companies.map((company, index) => (
+                  <MenuItem key={index} value={company.name}>
+                    {company.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <Tooltip title="Filters" sx={{ marginRight: "1rem" }}>
+              <ToolbarButton onClick={() => setIsOpen(!isOpen)}>
+                <FilterListIcon fontSize="small" />
+              </ToolbarButton>
+            </Tooltip>
+          </Box>
         </Toolbar>
 
         {isOpen && (
@@ -327,7 +379,13 @@ export const TableView = ({
   );
 
   return (
-    <Box sx={{ height: 700, width: "100%" }}>
+    <Box
+      sx={{
+        display: { xs: "none", md: "block" },
+        height: 700,
+        width: { md: "95%", lg: "100%" },
+      }}
+    >
       <DataGrid
         rows={rows}
         columns={columns}
@@ -349,12 +407,14 @@ export const TableView = ({
           columns: {
             columnVisibilityModel: { id: false },
           },
-        //   sorting: {
-        //     sortModel: [{ field: "agentName", sort: "asc" }],
-        //   },
+          //   sorting: {
+          //     sortModel: [{ field: "agentName", sort: "asc" }],
+          //   },
         }}
         //disableRowSelectionOnClick
         sx={{
+          padding: "1rem 0 0 0",
+          borderRadius: "1rem",
           // Header styles - Fondo gris
           "& .MuiDataGrid-columnHeaders": {
             backgroundColor: "#f5f5f5 !important",

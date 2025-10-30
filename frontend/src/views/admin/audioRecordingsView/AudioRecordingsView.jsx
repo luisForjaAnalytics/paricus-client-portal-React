@@ -56,6 +56,7 @@ import { QuickFilters } from "./components/QuickFilters.jsx";
 import { useTranslation } from "react-i18next"; // ADDED: i18n support
 import { AdvancedFilters } from "./components/AdvancedFilters.jsx";
 import { TableView } from "./components/TableView.jsx";
+import { QuickFiltersMovil } from "./components/QuickFiltersMovil.jsx";
 
 export const AudioRecordingsView = () => {
   const { t } = useTranslation(); // ADDED: Translation hook
@@ -79,16 +80,43 @@ export const AudioRecordingsView = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
   // Debounce filter changes to reduce API calls while typing
+  // Apply debounce only to text fields (not company/hasAudio for instant response)
   useEffect(() => {
-    setIsDebouncing(true);
+    const textFields = {
+      interactionId: filters.interactionId,
+      customerPhone: filters.customerPhone,
+      agentName: filters.agentName,
+      callType: filters.callType,
+      startDate: filters.startDate,
+      endDate: filters.endDate,
+    };
+
+    // Only show debouncing indicator for text input changes
+    const hasTextInput = filters.interactionId || filters.customerPhone || filters.agentName;
+    if (hasTextInput) {
+      setIsDebouncing(true);
+    }
+
     const timer = setTimeout(() => {
-      setDebouncedFilters(filters);
-      setPage(1); // Reset to first page when filters change
+      setDebouncedFilters((prev) => ({
+        ...prev,
+        ...textFields,
+      }));
       setIsDebouncing(false);
     }, 500); // Wait 500ms after user stops typing
 
-    return () => clearTimeout(timer);
-  }, [filters]);
+    return () => {
+      clearTimeout(timer);
+      setIsDebouncing(false);
+    };
+  }, [
+    filters.interactionId,
+    filters.customerPhone,
+    filters.agentName,
+    filters.callType,
+    filters.startDate,
+    filters.endDate,
+  ]);
 
   // RTK Query hooks
   const {
@@ -103,8 +131,8 @@ export const AudioRecordingsView = () => {
       ...debouncedFilters, // Use debounced filters instead of immediate filters
     },
     {
-      // Refetch if cache is older than 3 minutes (180 seconds)
-      refetchOnMountOrArgChange: 180,
+      // Use cache for 10 minutes - much faster for repeated queries (data updates hourly)
+      refetchOnMountOrArgChange: 600,
       // Refetch when window regains focus (detects changes while user was away)
       refetchOnFocus: true,
       // Don't refetch when reconnecting
@@ -218,11 +246,13 @@ export const AudioRecordingsView = () => {
 
   const setCompanyFilter = (company) => {
     setFilters((prev) => ({ ...prev, company }));
+    setDebouncedFilters((prev) => ({ ...prev, company })); // Apply immediately without debounce
     setPage(1);
   };
 
   const setAudioFilter = (hasAudio) => {
     setFilters((prev) => ({ ...prev, hasAudio }));
+    setDebouncedFilters((prev) => ({ ...prev, hasAudio })); // Apply immediately without debounce
     setPage(1);
   };
 
@@ -498,6 +528,31 @@ export const AudioRecordingsView = () => {
         setCompanyFilter={setCompanyFilter}
         setAudioFilter={setAudioFilter}
       />
+
+      {/* Mobile-Friendly Collapsible Table */}
+      <QuickFiltersMovil
+        dataViewInfo={recordings}
+        formatDateTime={formatDateTime}
+        toggleAudio={toggleAudio}
+        downloadAudio={downloadAudio}
+        currentlyPlaying={currentlyPlaying}
+        loadingAudioUrl={loadingAudioUrl}
+        handlePrefetchAudio={handlePrefetchAudio}
+        filters={filters}
+        setFilters={setFilters}
+        refetch={refetch}
+        setLoadCallTypes={setLoadCallTypes}
+        isDebouncing={isDebouncing}
+        loading={loading}
+        clearFilters={clearFilters}
+        callTypes={callTypes}
+        page={page}
+        itemsPerPage={itemsPerPage}
+        totalCount={totalCount}
+        onPageChange={setPage}
+        onPageSizeChange={setItemsPerPage}
+      />
+
       {/* Audio Player Control Bar (Fixed Bottom) */}
       <Collapse in={!!currentlyPlaying}>
         <Paper

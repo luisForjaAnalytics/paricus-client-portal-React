@@ -159,4 +159,44 @@ export default {
       unknownAgent: "Agente Desconocido",
     },
   },
+
+  // Facturas
+  invoices: {
+    // Columnas de tabla
+    table: {
+      invoiceNumber: "Factura #",
+      fileName: "Nombre del Archivo",
+      amount: "Monto",
+      status: "Estado",
+      dueDate: "Fecha de Vencimiento",
+      paymentDate: "Fecha de Pago",
+      paymentLink: "Enlace de Pago",
+      actions: "Acciones",
+    },
+
+    // Acciones
+    actions: {
+      payNow: "Pagar Ahora",
+      editInvoice: "Editar Factura",
+      download: "Descargar",
+      delete: "Eliminar",
+    },
+
+    // Modal de Enlace de Pago
+    paymentLink: {
+      pendingLink: "ENLACE PENDIENTE",
+      linkSet: "✓ Enlace Configurado",
+      updateLink: "Actualizar enlace",
+      modalTitle: "Configurar Enlace de Pago",
+      invoiceLabel: "Factura",
+      urlLabel: "URL del Enlace de Pago",
+      urlPlaceholder: "https://ejemplo.com/pago/factura-123",
+      urlHelper: "Ingrese una URL de pago válida (Stripe, PayPal, etc.)",
+      cancel: "Cancelar",
+      saving: "Guardando...",
+      saveButton: "Guardar Enlace",
+      successMessage: "Enlace de pago guardado exitosamente",
+      errorMessage: "Error al guardar el enlace de pago",
+    },
+  },
 };
