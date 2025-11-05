@@ -26,6 +26,11 @@ import {
   useGetClientReportsQuery,
   useLazyDownloadReportQuery,
 } from '../../store/api/reportsApi';
+import {
+  primaryButton,
+  primaryIconButton,
+  outlinedIconButton,
+} from '../../layouts/style/styles';
 
 // Component to display a single folder's reports using RTK Query
 const FolderReportsSection = ({ folder, downloadReport }) => {
@@ -73,6 +78,7 @@ const FolderReportsSection = ({ folder, downloadReport }) => {
           startIcon={isLoading ? <CircularProgress size={16} /> : <RefreshIcon />}
           onClick={() => refetch()}
           disabled={isLoading}
+          sx={outlinedIconButton}
         >
           {isLoading ? 'Loading...' : 'Refresh Reports'}
         </Button>
@@ -230,6 +236,7 @@ export const ReportingView = () => {
               startIcon={loading ? <CircularProgress size={16} color="inherit" /> : <RefreshIcon />}
               onClick={() => refetch()}
               disabled={loading}
+              sx={primaryIconButton}
             >
               {loading ? 'Loading...' : 'Refresh Reports'}
             </Button>
@@ -253,7 +260,7 @@ export const ReportingView = () => {
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                 {error}
               </Typography>
-              <Button variant="contained" onClick={() => refetch()}>
+              <Button variant="contained" onClick={() => refetch()} sx={primaryButton}>
                 Try Again
               </Button>
             </Box>

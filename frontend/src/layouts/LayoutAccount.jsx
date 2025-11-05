@@ -13,6 +13,7 @@ import { useTranslation } from "react-i18next";
 import { MenuSections } from "./component/menus/MenuSection.jsx";
 import { Outlet } from "react-router-dom";
 import { Language as LanguageIcon } from "@mui/icons-material";
+import { colors } from "./style/styles";
 const drawerWidth = 240;
 
 const openedMixin = (theme) => ({
@@ -56,7 +57,7 @@ const Drawer = styled(MuiDrawer, {
         ...openedMixin(theme),
         "& .MuiDrawer-paper": {
           ...openedMixin(theme),
-          background: "#0c7b3f 0% ",
+          backgroundColor: colors.primario,
           color: "white",
           borderRight: "none",
         },
@@ -65,7 +66,7 @@ const Drawer = styled(MuiDrawer, {
         ...closedMixin(theme),
         "& .MuiDrawer-paper": {
           ...closedMixin(theme),
-          background: " #0c7b3f 0%",
+          backgroundColor: colors.primario,
           color: "white",
           borderRight: "none",
         },
@@ -169,7 +170,7 @@ export const LayoutAccount = () => {
             margin: { xs: "0 1.2rem 0 1.2rem", md: "1.5rem 1rem 0 1rem" },
           }}
         >
-          <Outlet />
+          <Outlet context={{ setTitleState }} />
         </Box>
       </Box>
     </Box>

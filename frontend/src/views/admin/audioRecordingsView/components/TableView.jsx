@@ -400,7 +400,7 @@ export const TableView = ({
           pageSize: itemsPerPage,
         }}
         onPaginationModelChange={handlePaginationChange}
-        pageSizeOptions={[10, 25, 50, 100]}
+        pageSizeOptions={[ 10, 25, 50, 100]}
         // Sorting configuration
         sortingOrder={["asc", "desc"]}
         initialState={{

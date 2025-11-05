@@ -1,8 +1,7 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo } from "react";
 import {
   Box,
   Button,
-  Card,
   Chip,
   Dialog,
   DialogActions,
@@ -11,26 +10,31 @@ import {
   IconButton,
   TextField,
   Typography,
-  CircularProgress,
   Snackbar,
   Alert,
   Checkbox,
   FormControlLabel,
-  Tooltip
-} from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
+  Tooltip,
+} from "@mui/material";
+import { DataGrid } from "@mui/x-data-grid";
 import {
   Add as AddIcon,
   Edit as EditIcon,
   Block as BlockIcon,
-  Close as CloseIcon
-} from '@mui/icons-material';
+  Close as CloseIcon,
+} from "@mui/icons-material";
 import {
   useGetClientsQuery,
   useCreateClientMutation,
   useUpdateClientMutation,
-  useDeleteClientMutation
-} from '../../../../../store/api/adminApi';
+  useDeleteClientMutation,
+} from "../../../../../store/api/adminApi";
+import {
+  primaryButton,
+  primaryIconButton,
+  outlinedButton,
+} from "../../../../../layouts/style/styles";
+import { ClientsViewMovil } from "./ClientsViewMovil";
 
 export const ClientsView = () => {
   // RTK Query hooks
@@ -47,16 +51,16 @@ export const ClientsView = () => {
 
   // Form state
   const [clientForm, setClientForm] = useState({
-    name: '',
+    name: "",
     isProspect: false,
-    isActive: true
+    isActive: true,
   });
 
   // Snackbar state
   const [snackbar, setSnackbar] = useState({
     open: false,
-    message: '',
-    severity: 'success'
+    message: "",
+    severity: "success",
   });
 
   // Computed values
@@ -67,7 +71,7 @@ export const ClientsView = () => {
     setClientForm({
       name: client.name,
       isProspect: client.isProspect,
-      isActive: client.isActive
+      isActive: client.isActive,
     });
     setShowCreateDialog(true);
   };
@@ -80,11 +84,11 @@ export const ClientsView = () => {
   const confirmDeactivation = async () => {
     try {
       await deleteClient(clientToDeactivate.id).unwrap();
-      showNotification('Client deactivated successfully', 'success');
+      showNotification("Client deactivated successfully", "success");
       setShowConfirmDialog(false);
       setClientToDeactivate(null);
     } catch (error) {
-      showNotification('Failed to deactivate client', 'error');
+      showNotification("Failed to deactivate client", "error");
     }
   };
 
@@ -94,16 +98,16 @@ export const ClientsView = () => {
     try {
       if (editingClient) {
         await updateClient({ id: editingClient.id, ...clientForm }).unwrap();
-        showNotification('Client updated successfully', 'success');
+        showNotification("Client updated successfully", "success");
       } else {
         await createClient(clientForm).unwrap();
-        showNotification('Client created successfully', 'success');
+        showNotification("Client created successfully", "success");
       }
 
       handleCloseDialog();
     } catch (error) {
-      const errorMessage = error.data?.error || 'An error occurred';
-      showNotification(errorMessage, 'error');
+      const errorMessage = error.data?.error || "An error occurred";
+      showNotification(errorMessage, "error");
     }
   };
 
@@ -111,9 +115,9 @@ export const ClientsView = () => {
     setShowCreateDialog(false);
     setEditingClient(null);
     setClientForm({
-      name: '',
+      name: "",
       isProspect: false,
-      isActive: true
+      isActive: true,
     });
   };
 
@@ -125,11 +129,11 @@ export const ClientsView = () => {
     return new Date(dateString).toLocaleDateString();
   };
 
-  const showNotification = (message, severity = 'success') => {
+  const showNotification = (message, severity = "success") => {
     setSnackbar({
       open: true,
       message,
-      severity
+      severity,
     });
   };
 
@@ -141,11 +145,12 @@ export const ClientsView = () => {
   const columns = useMemo(
     () => [
       {
-        field: 'name',
-        headerName: 'Client Name',
-        width: 250,
-        align: 'left',
-        headerAlign: 'left',
+        field: "name",
+        headerName: "Client Name",
+        // flex: 1,
+        minWidth: 200,
+        align: "left",
+        headerAlign: "left",
         renderCell: (params) => (
           <Typography variant="body2" fontWeight={500}>
             {params.value}
@@ -153,66 +158,66 @@ export const ClientsView = () => {
         ),
       },
       {
-        field: 'type',
-        headerName: 'Type',
-        width: 150,
-        align: 'center',
-        headerAlign: 'center',
+        field: "type",
+        headerName: "Type",
+        width: 130,
+        align: "center",
+        headerAlign: "center",
         renderCell: (params) => (
           <Chip
-            label={params.row.isProspect ? 'Prospect' : 'Client'}
-            color={params.row.isProspect ? 'warning' : 'primary'}
+            label={params.row.isProspect ? "Prospect" : "Client"}
+            color={params.row.isProspect ? "warning" : "primary"}
             size="small"
           />
         ),
       },
       {
-        field: 'isActive',
-        headerName: 'Status',
-        width: 120,
-        align: 'center',
-        headerAlign: 'center',
+        field: "isActive",
+        headerName: "Status",
+        width: 110,
+        align: "center",
+        headerAlign: "center",
         renderCell: (params) => (
           <Chip
-            label={params.value ? 'Active' : 'Inactive'}
-            color={params.value ? 'success' : 'error'}
+            label={params.value ? "Active" : "Inactive"}
+            color={params.value ? "success" : "error"}
             size="small"
           />
         ),
       },
       {
-        field: 'userCount',
-        headerName: 'Users',
-        width: 100,
-        align: 'center',
-        headerAlign: 'center',
+        field: "userCount",
+        headerName: "Users",
+        width: 90,
+        align: "center",
+        headerAlign: "center",
       },
       {
-        field: 'roleCount',
-        headerName: 'Roles',
-        width: 100,
-        align: 'center',
-        headerAlign: 'center',
+        field: "roleCount",
+        headerName: "Roles",
+        width: 90,
+        align: "center",
+        headerAlign: "center",
       },
       {
-        field: 'createdAt',
-        headerName: 'Created',
-        width: 150,
-        align: 'center',
-        headerAlign: 'center',
+        field: "createdAt",
+        headerName: "Created",
+        width: 130,
+        align: "center",
+        headerAlign: "center",
         valueFormatter: (value) => formatDate(value),
       },
       {
-        field: 'actions',
-        headerName: 'Actions',
-        width: 150,
-        align: 'right',
-        headerAlign: 'right',
+        field: "actions",
+        headerName: "Actions",
+        width: 120,
+        align: "center",
+        headerAlign: "center",
         sortable: false,
         filterable: false,
         disableColumnMenu: true,
         renderCell: (params) => (
-          <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'flex-end' }}>
+          <Box sx={{ display: "flex", gap: 0.5, justifyContent: "center" }}>
             <Tooltip title="Edit client">
               <IconButton
                 size="small"
@@ -257,12 +262,16 @@ export const ClientsView = () => {
 
   return (
     <Box>
-      {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
+      {/* Header - Desktop Only */}
+      <Box
+        sx={{
+          display: { xs: "none", md: "flex" },
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          mb: 3,
+        }}
+      >
         <Box>
-          {/* <Typography variant="h4" component="h2" fontWeight="bold" gutterBottom>
-            Client Management
-          </Typography> */}
           <Typography variant="body1" color="text.secondary">
             Manage and configure client accounts
           </Typography>
@@ -271,14 +280,26 @@ export const ClientsView = () => {
           variant="contained"
           startIcon={<AddIcon />}
           onClick={() => setShowCreateDialog(true)}
-          sx={{ mt: 1 }}
+          sx={{ ...primaryIconButton, mt: 1 }}
         >
           Add New Client
         </Button>
       </Box>
 
-      {/* Data Table */}
-      <Box sx={{ height: 600, width: '100%' }}>
+      {/* Data Table - Desktop Only */}
+      <Box
+        sx={{
+          display: { xs: "none", md: "flex" },
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Box
+          sx={{
+            height: "40vh",
+            width: "100vh",
+          }}
+        >
         <DataGrid
           rows={rows}
           columns={columns}
@@ -290,42 +311,56 @@ export const ClientsView = () => {
             },
           }}
           disableRowSelectionOnClick
+          disableColumnResize
           sx={{
-            borderRadius: '0.7rem',
-            padding: '1rem 0 0 0',
-            '& .MuiDataGrid-columnHeaders': {
-              backgroundColor: '#f5f5f5 !important',
-              borderBottom: '2px solid #e0e0e0',
+            borderRadius: "0.7rem",
+            padding: "1rem 0 0 0",
+            "& .MuiDataGrid-columnHeaders": {
+              backgroundColor: "#f5f5f5 !important",
+              borderBottom: "2px solid #e0e0e0",
             },
-            '& .MuiDataGrid-columnHeader': {
-              backgroundColor: '#f5f5f5 !important',
+            "& .MuiDataGrid-columnHeader": {
+              backgroundColor: "#f5f5f5 !important",
             },
-            '& .MuiDataGrid-columnHeaderTitle': {
+            "& .MuiDataGrid-columnHeaderTitle": {
               fontWeight: 600,
-              textTransform: 'uppercase',
-              fontSize: '0.875rem',
+              textTransform: "uppercase",
+              fontSize: "0.875rem",
             },
-            '& .MuiDataGrid-sortIcon': {
-              color: '#0c7b3f',
+            "& .MuiDataGrid-sortIcon": {
+              color: "#0c7b3f",
             },
-            '& .MuiDataGrid-columnHeader--sorted': {
-              backgroundColor: '#e8f5e9 !important',
+            "& .MuiDataGrid-columnHeader--sorted": {
+              backgroundColor: "#e8f5e9 !important",
             },
-            '& .MuiDataGrid-filler': {
-              backgroundColor: '#f5f5f5 !important',
+            "& .MuiDataGrid-filler": {
+              display: "none",
             },
-            '& .MuiDataGrid-cell': {
-              borderBottom: '1px solid #f0f0f0',
+            "& .MuiDataGrid-scrollbarFiller": {
+              display: "none",
             },
-            '& .MuiDataGrid-cell:focus': {
-              outline: 'none',
+            "& .MuiDataGrid-cell": {
+              borderBottom: "1px solid #f0f0f0",
             },
-            '& .MuiDataGrid-row:hover': {
-              backgroundColor: 'action.hover',
+            "& .MuiDataGrid-cell:focus": {
+              outline: "none",
+            },
+            "& .MuiDataGrid-row:hover": {
+              backgroundColor: "action.hover",
             },
           }}
         />
+        </Box>
       </Box>
+
+      {/* Mobile View */}
+      <ClientsViewMovil
+        clients={clients}
+        handleEdit={handleEdit}
+        handleDeactivate={handleDeactivate}
+        formatDate={formatDate}
+        onAddClick={() => setShowCreateDialog(true)}
+      />
 
       {/* Create/Edit Dialog */}
       <Dialog
@@ -335,9 +370,15 @@ export const ClientsView = () => {
         fullWidth
       >
         <DialogTitle>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
             <Typography variant="h6">
-              {editingClient ? 'Edit Client' : 'Add New Client'}
+              {editingClient ? "Edit Client" : "Add New Client"}
             </Typography>
             <IconButton onClick={handleCloseDialog} size="small">
               <CloseIcon />
@@ -350,40 +391,49 @@ export const ClientsView = () => {
             required
             fullWidth
             value={clientForm.name}
-            onChange={(e) => setClientForm({ ...clientForm, name: e.target.value })}
+            onChange={(e) =>
+              setClientForm({ ...clientForm, name: e.target.value })
+            }
             sx={{ mb: 3 }}
           />
           <FormControlLabel
             control={
               <Checkbox
                 checked={clientForm.isProspect}
-                onChange={(e) => setClientForm({ ...clientForm, isProspect: e.target.checked })}
+                onChange={(e) =>
+                  setClientForm({ ...clientForm, isProspect: e.target.checked })
+                }
               />
             }
             label="Is Prospect"
-            sx={{ mb: 2, display: 'block' }}
+            sx={{ mb: 2, display: "block" }}
           />
           {editingClient && (
             <FormControlLabel
               control={
                 <Checkbox
                   checked={clientForm.isActive}
-                  onChange={(e) => setClientForm({ ...clientForm, isActive: e.target.checked })}
+                  onChange={(e) =>
+                    setClientForm({ ...clientForm, isActive: e.target.checked })
+                  }
                 />
               }
               label="Active"
-              sx={{ display: 'block' }}
+              sx={{ display: "block" }}
             />
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
+          <Button onClick={handleCloseDialog} sx={outlinedButton}>
+            Cancel
+          </Button>
           <Button
             variant="contained"
             onClick={handleSave}
             disabled={isSaving || !isFormValid()}
+            sx={primaryButton}
           >
-            {isSaving ? 'Saving...' : 'Save'}
+            {isSaving ? "Saving..." : "Save"}
           </Button>
         </DialogActions>
       </Dialog>
@@ -403,11 +453,17 @@ export const ClientsView = () => {
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setShowConfirmDialog(false)}>Cancel</Button>
+          <Button
+            onClick={() => setShowConfirmDialog(false)}
+            sx={outlinedButton}
+          >
+            Cancel
+          </Button>
           <Button
             variant="contained"
             color="error"
             onClick={confirmDeactivation}
+            sx={primaryButton}
           >
             Deactivate
           </Button>
@@ -419,13 +475,16 @@ export const ClientsView = () => {
         open={snackbar.open}
         autoHideDuration={6000}
         onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
-        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
           {snackbar.message}
         </Alert>
       </Snackbar>
     </Box>
   );
 };
-

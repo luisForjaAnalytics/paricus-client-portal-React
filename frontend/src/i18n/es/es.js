@@ -13,6 +13,9 @@ export default {
     financial: "Financiero",
     reportsManagement: "Gestión de Reportes",
     userManagement: "Gestión de Usuarios",
+    clientManagement: "Administrador de Clientes",
+    usersManagement: "Administrador de Usuarios",
+    roleManagement: "Administrador de Roles",
     myProfile: "My Profile",
   },
 

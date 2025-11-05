@@ -327,9 +327,21 @@ export const QuickFiltersMovil = ({
       component={Paper}
       sx={{
         display: { md: "none" },
-        mt: 3,
-        maxHeight: "700px",
-        overflow: "auto",
+        mt: 1,
+        maxHeight: "90vh", // limits table height to 75% of viewport
+        overflowY: "auto", // enables vertical scrolling
+        overflowX: "hidden",
+        scrollbarWidth: "thin", // Firefox scrollbar
+        "&::-webkit-scrollbar": {
+          width: "6px", // Chrome/Edge scrollbar width
+        },
+        "&::-webkit-scrollbar-thumb": {
+          backgroundColor: "#c5c5c5", // scrollbar color
+          borderRadius: "8px",
+        },
+        "&::-webkit-scrollbar-thumb:hover": {
+          backgroundColor: "#9e9e9e",
+        },
       }}
     >
       <Table aria-label="collapsible table" stickyHeader>
@@ -337,7 +349,7 @@ export const QuickFiltersMovil = ({
           <TableRow>
             <TableCell sx={{ backgroundColor: "#f5f5f5" }} />
             <TableCell sx={{ backgroundColor: "#f5f5f5" }}>
-              <Typography variant="subtitle2" fontWeight="600">
+              <Typography variant="subtitle2" fontWeight="600"  >
                 {t("audioRecordings.table.company")}
               </Typography>
             </TableCell>
@@ -348,7 +360,9 @@ export const QuickFiltersMovil = ({
               colSpan={2}
               sx={{
                 backgroundColor: "#f5f5f5",
-                borderBottom: filtersOpen ? "none" : "1px solid rgba(224, 224, 224, 1)",
+                borderBottom: filtersOpen
+                  ? "none"
+                  : "1px solid rgba(224, 224, 224, 1)",
               }}
             >
               <Box
@@ -358,6 +372,7 @@ export const QuickFiltersMovil = ({
                   gap: 1,
                   cursor: "pointer",
                   py: 0.5,
+                  height:10
                 }}
                 onClick={() => setFiltersOpen(!filtersOpen)}
               >
@@ -366,7 +381,11 @@ export const QuickFiltersMovil = ({
                   Filters
                 </Typography>
                 <IconButton size="small" sx={{ ml: "auto" }}>
-                  {filtersOpen ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                  {filtersOpen ? (
+                    <KeyboardArrowUpIcon />
+                  ) : (
+                    <KeyboardArrowDownIcon />
+                  )}
                 </IconButton>
               </Box>
             </TableCell>
@@ -385,8 +404,12 @@ export const QuickFiltersMovil = ({
                       <TextField
                         fullWidth
                         size="small"
-                        label={t("audioRecordings.advancedFilters.interactionId")}
-                        placeholder={t("audioRecordings.advancedFilters.interactionIdPlaceholder")}
+                        label={t(
+                          "audioRecordings.advancedFilters.interactionId"
+                        )}
+                        placeholder={t(
+                          "audioRecordings.advancedFilters.interactionIdPlaceholder"
+                        )}
                         value={filters.interactionId}
                         onChange={(e) =>
                           setFilters((prev) => ({
@@ -401,8 +424,12 @@ export const QuickFiltersMovil = ({
                       <TextField
                         fullWidth
                         size="small"
-                        label={t("audioRecordings.advancedFilters.customerPhone")}
-                        placeholder={t("audioRecordings.advancedFilters.customerPhonePlaceholder")}
+                        label={t(
+                          "audioRecordings.advancedFilters.customerPhone"
+                        )}
+                        placeholder={t(
+                          "audioRecordings.advancedFilters.customerPhonePlaceholder"
+                        )}
                         value={filters.customerPhone}
                         onChange={(e) =>
                           setFilters((prev) => ({
@@ -418,7 +445,9 @@ export const QuickFiltersMovil = ({
                         fullWidth
                         size="small"
                         label={t("audioRecordings.advancedFilters.agentName")}
-                        placeholder={t("audioRecordings.advancedFilters.agentNamePlaceholder")}
+                        placeholder={t(
+                          "audioRecordings.advancedFilters.agentNamePlaceholder"
+                        )}
                         value={filters.agentName}
                         onChange={(e) =>
                           setFilters((prev) => ({
@@ -486,7 +515,10 @@ export const QuickFiltersMovil = ({
                           InputLabelProps={{ shrink: true }}
                           value={filters.endDate}
                           onChange={(e) =>
-                            setFilters((prev) => ({ ...prev, endDate: e.target.value }))
+                            setFilters((prev) => ({
+                              ...prev,
+                              endDate: e.target.value,
+                            }))
                           }
                           sx={{ flex: 1, ...greenFieldStyles }}
                         />
@@ -580,6 +612,9 @@ export const QuickFiltersMovil = ({
         sx={{
           borderTop: "1px solid rgba(224, 224, 224, 1)",
           backgroundColor: "#f5f5f5",
+          position: "sticky",
+          bottom: 0, // keeps pagination visible even when scrolling
+          zIndex: 10,
         }}
       />
     </TableContainer>

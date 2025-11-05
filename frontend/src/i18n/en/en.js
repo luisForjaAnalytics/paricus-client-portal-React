@@ -13,6 +13,9 @@ export default {
     financial: "Financial",
     reportsManagement: "Reports Management",
     userManagement: "Management",
+    clientManagement: "Client Management",
+    usersManagement: "User Management",
+    roleManagement: "Role Management",
     myProfile: "My Profile",
   },
 

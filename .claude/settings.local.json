@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(del \"C:\\FORJA\\paricus-React\\paricus-client-portal\\frontend\\src\\views\\financials\\components\\ClientSummaryMovil.jsx\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

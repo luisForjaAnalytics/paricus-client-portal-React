@@ -56,6 +56,12 @@ import {
   useGrantFolderAccessMutation,
   useRevokeFolderAccessMutation,
 } from '../../store/api/reportsApi'
+import {
+  primaryButton,
+  primaryIconButton,
+  outlinedButton,
+  outlinedIconButton,
+} from '../../layouts/style/styles'
 
 export const ReportsManagementView = () => {
   // RTK Query hooks
@@ -257,14 +263,16 @@ export const ReportsManagementView = () => {
               color="success"
               startIcon={<LockIcon />}
               onClick={openFolderAccessModal}
+              sx={primaryIconButton}
             >
               Manage Access
             </Button>
             <Button
-              variant="contained"
-              startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <RefreshIcon />}
+              variant="outlined"
+              startIcon={loading ? <CircularProgress size={20} /> : <RefreshIcon />}
               onClick={() => refetchFolders()}
               disabled={loading}
+              sx={outlinedIconButton}
             >
               {loading ? 'Loading...' : 'Refresh Folders'}
             </Button>
@@ -328,6 +336,7 @@ export const ReportsManagementView = () => {
                 color="primary"
                 startIcon={<UploadIcon />}
                 onClick={() => setShowUploadModal(true)}
+                sx={primaryIconButton}
               >
                 Upload Report
               </Button>
@@ -336,6 +345,7 @@ export const ReportsManagementView = () => {
                 startIcon={<RefreshIcon />}
                 onClick={() => refetchReports()}
                 disabled={loadingReports}
+                sx={outlinedIconButton}
               >
                 Refresh
               </Button>
@@ -469,6 +479,7 @@ export const ReportsManagementView = () => {
                   component="span"
                   startIcon={<UploadIcon />}
                   fullWidth
+                  sx={outlinedIconButton}
                 >
                   {uploadForm.file ? uploadForm.file.name : 'Choose PDF File'}
                 </Button>
@@ -480,7 +491,7 @@ export const ReportsManagementView = () => {
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setShowUploadModal(false)}>
+          <Button onClick={() => setShowUploadModal(false)} sx={outlinedButton}>
             Cancel
           </Button>
           <Button
@@ -488,6 +499,7 @@ export const ReportsManagementView = () => {
             onClick={handleUploadReport}
             disabled={uploading || !uploadForm.file}
             startIcon={uploading ? <CircularProgress size={20} /> : <UploadIcon />}
+            sx={primaryIconButton}
           >
             {uploading ? 'Uploading...' : 'Upload Report'}
           </Button>
@@ -557,6 +569,7 @@ export const ReportsManagementView = () => {
                   disabled={!accessForm.clientId || !accessForm.folderName || grantingAccess}
                   fullWidth
                   startIcon={grantingAccess ? <CircularProgress size={20} /> : <AddIcon />}
+                  sx={primaryIconButton}
                 >
                   {grantingAccess ? 'Granting...' : 'Grant'}
                 </Button>
@@ -602,6 +615,7 @@ export const ReportsManagementView = () => {
                       color="error"
                       size="small"
                       onClick={() => handleRevokeFolderAccess(access.clientId, access.folderName)}
+                      sx={outlinedButton}
                     >
                       Revoke
                     </Button>

@@ -42,8 +42,15 @@ import {
   useLazyGetRolePermissionsQuery,
   useUpdateRolePermissionsMutation
 } from '../../../../../store/api/adminApi';
+import {
+  primaryButton,
+  primaryIconButton,
+  outlinedButton
+} from '../../../../../layouts/style/styles';
+import { RolesViewMovil } from './RolesViewMovil';
 
 export const RolesView = () => {
+
   // RTK Query hooks
   const { data: roles = [], isLoading, error } = useGetRolesQuery();
   const { data: clients = [] } = useGetClientsQuery();
@@ -377,12 +384,9 @@ export const RolesView = () => {
 
   return (
     <Box>
-      {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
+      {/* Header - Desktop Only */}
+      <Box sx={{ display: { xs: 'none', md: 'flex' }, justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
         <Box>
-          {/* <Typography variant="h4" component="h2" fontWeight="bold" gutterBottom>
-            Role Management
-          </Typography> */}
           <Typography variant="body1" color="text.secondary">
             Manage roles and permissions
           </Typography>
@@ -391,14 +395,14 @@ export const RolesView = () => {
           variant="contained"
           startIcon={<AddIcon />}
           onClick={openAddDialog}
-          sx={{ mt: 1 }}
+          sx={{ ...primaryIconButton, mt: 1 }}
         >
           Add New Role
         </Button>
       </Box>
 
-      {/* Filter Section */}
-      <Card sx={{ mb: 3 }}>
+      {/* Filter Section - Desktop Only */}
+      <Card sx={{ display: { xs: 'none', md: 'block' }, mb: 3 }}>
         <CardContent>
           <Grid container spacing={2}>
             <Grid item xs={12} md={4}>
@@ -422,8 +426,8 @@ export const RolesView = () => {
         </CardContent>
       </Card>
 
-      {/* Roles Table */}
-      <Box sx={{ height: 600, width: '100%' }}>
+      {/* Roles Table - Desktop Only */}
+      <Box sx={{ display: { xs: 'none', md: 'block' }, height: 600, width: '100%' }}>
         <DataGrid
           rows={rows}
           columns={columns}
@@ -472,6 +476,19 @@ export const RolesView = () => {
         />
       </Box>
 
+      {/* Mobile View */}
+      <RolesViewMovil
+        roles={filteredRoles.map(role => ({
+          ...role,
+          permissionsCount: role.permissions_count || 0
+        }))}
+        clients={clients}
+        openAddDialog={openAddDialog}
+        openEditDialog={openEditDialog}
+        openPermissionsDialog={openPermissionsDialog}
+        openDeleteDialog={confirmDelete}
+      />
+
       {/* Add/Edit Role Dialog */}
       <Dialog open={dialog} onClose={closeDialog} maxWidth="sm" fullWidth>
         <DialogTitle>
@@ -514,11 +531,17 @@ export const RolesView = () => {
           </FormControl>
         </DialogContent>
         <DialogActions>
-          <Button onClick={closeDialog}>Cancel</Button>
+          <Button
+            onClick={closeDialog}
+            sx={outlinedButton}
+          >
+            Cancel
+          </Button>
           <Button
             variant="contained"
             onClick={saveRole}
             disabled={isSaving || !isFormValid()}
+            sx={primaryButton}
           >
             {isSaving ? 'Saving...' : 'Save'}
           </Button>
@@ -551,11 +574,17 @@ export const RolesView = () => {
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button onClick={closePermissionsDialog}>Cancel</Button>
+          <Button
+            onClick={closePermissionsDialog}
+            sx={outlinedButton}
+          >
+            Cancel
+          </Button>
           <Button
             variant="contained"
             onClick={savePermissions}
             disabled={isUpdatingPermissions}
+            sx={primaryButton}
           >
             {isUpdatingPermissions ? 'Saving...' : 'Save Permissions'}
           </Button>
@@ -572,12 +601,18 @@ export const RolesView = () => {
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteDialog(false)}>Cancel</Button>
+          <Button
+            onClick={() => setDeleteDialog(false)}
+            sx={outlinedButton}
+          >
+            Cancel
+          </Button>
           <Button
             variant="contained"
             color="error"
             onClick={handleDeleteRole}
             disabled={isDeleting}
+            sx={primaryButton}
           >
             {isDeleting ? 'Deleting...' : 'Delete'}
           </Button>

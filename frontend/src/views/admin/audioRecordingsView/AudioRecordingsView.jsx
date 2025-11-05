@@ -92,7 +92,8 @@ export const AudioRecordingsView = () => {
     };
 
     // Only show debouncing indicator for text input changes
-    const hasTextInput = filters.interactionId || filters.customerPhone || filters.agentName;
+    const hasTextInput =
+      filters.interactionId || filters.customerPhone || filters.agentName;
     if (hasTextInput) {
       setIsDebouncing(true);
     }
@@ -460,7 +461,7 @@ export const AudioRecordingsView = () => {
   return (
     <Box sx={{ p: 3, pb: currentlyPlaying ? 15 : 3 }}>
       {/* Page Header */}
-      <Box sx={{ mb: 3 }}>
+      <Box sx={{ display: { xs: "none", md: "flex" }, mb: 3 }}>
         <Typography variant="body1" color="text.secondary">
           {t("audioRecordings.pageDescription")}
         </Typography>
@@ -489,7 +490,7 @@ export const AudioRecordingsView = () => {
           {error}
         </Alert>
       )}
-{/* 
+      {/* 
       <AdvancedFilters
         filters={filters}
         refetch={refetch}

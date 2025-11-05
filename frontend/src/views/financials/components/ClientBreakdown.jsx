@@ -20,7 +20,7 @@ export const ClientBreakdown = ({
   selectClient,
 }) => {
   return (
-    <Box sx={{ mb: 4 }}>
+    <Box sx={{ display: { xs: "none", md: "block" }, mb: 4 }}>
       <Typography variant="h6" fontWeight="semibold" sx={{ mb: 2 }}>
         Client Breakdown
       </Typography>
@@ -80,7 +80,7 @@ export const ClientBreakdown = ({
                 </Box>
 
                 <Grid container spacing={2}>
-                  <Grid item xs={4}>
+                  <Grid >
                     <Typography variant="caption" color="text.secondary">
                       Revenue
                     </Typography>
@@ -92,7 +92,7 @@ export const ClientBreakdown = ({
                       {formatCurrency(client.totalRevenue)}
                     </Typography>
                   </Grid>
-                  <Grid item xs={4}>
+                  <Grid >
                     <Typography variant="caption" color="text.secondary">
                       Outstanding
                     </Typography>
@@ -104,7 +104,7 @@ export const ClientBreakdown = ({
                       {formatCurrency(client.outstandingBalance)}
                     </Typography>
                   </Grid>
-                  <Grid item xs={4}>
+                  <Grid >
                     <Typography variant="caption" color="text.secondary">
                       Overdue
                     </Typography>
@@ -124,7 +124,7 @@ export const ClientBreakdown = ({
 
         {/* Empty State */}
         {clientBreakdowns.length === 0 && (
-          <Grid item xs={12}>
+          <Grid >
             <Box sx={{ textAlign: "center", py: 8 }}>
               <BusinessIcon
                 sx={{ fontSize: 64, color: "text.disabled", mb: 2 }}

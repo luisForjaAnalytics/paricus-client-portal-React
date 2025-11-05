@@ -45,9 +45,17 @@ import {
 } from "../../store/api/invoicesApi";
 import { useSelector } from "react-redux";
 import { ClientSummary } from "./components/ClientSummary";
+import { ClientSummaryMovil } from "./components/ClientSummaryMovil";
 import { ClientBreakdown } from "./components/ClientBreakdown";
+import { ClientBreakdownMovil } from "./components/ClientBreakdownMovil";
 import { InvoicesTableView } from "./components/InvoicesTableView/InvoicesTableView";
 import { InvoicesTableViewMovil } from "./components/InvoicesTableView/InvoicesTableViewMovil";
+import {
+  primaryButton,
+  primaryIconButton,
+  outlinedButton,
+  outlinedIconButton,
+} from "../../layouts/style/styles";
 
 export const FinancialsView = () => {
   // Auth store
@@ -478,7 +486,7 @@ export const FinancialsView = () => {
         </Typography>
       </Box>
 
-      {/* BPO Admin: Overall Statistics */}
+      {/* BPO Admin: Overall Statistics - Desktop */}
       {isAdmin && overallStats && (
         <ClientSummary
           loading={loading}
@@ -489,13 +497,45 @@ export const FinancialsView = () => {
         />
       )}
 
-      {/* BPO Admin: Client Breakdown */}
+      {/* BPO Admin: Overall Statistics - Mobile */}
+      {isAdmin && overallStats && (
+        <ClientSummaryMovil
+          loading={loading}
+          refetchAllClients={refetchAllClients}
+          formatCurrency={formatCurrency}
+          payload={ClientSummaryCardInfo}
+        />
+      )}
+
+      {/* BPO Admin: Client Breakdown - Desktop */}
       {isAdmin && (
         <ClientBreakdown
           clientBreakdowns={clientBreakdowns}
           selectedFolder={selectedFolder}
           formatCurrency={formatCurrency}
           selectClient={selectClient}
+        />
+      )}
+
+      {/* BPO Admin: Client Breakdown - Mobile */}
+      {isAdmin && (
+        <ClientBreakdownMovil
+          clientBreakdowns={clientBreakdowns}
+          selectedFolder={selectedFolder}
+          formatCurrency={formatCurrency}
+          selectClient={selectClient}
+          invoices={invoices}
+          isAdmin={isAdmin}
+          formatDate={formatDate}
+          getStatusColor={getStatusColor}
+          downloadInvoice={downloadInvoice}
+          openEditInvoiceModal={openEditInvoiceModal}
+          handleDeleteInvoice={handleDeleteInvoice}
+          openPaymentLink={openPaymentLink}
+          onPaymentLinkSuccess={(message) =>
+            showNotification("success", message)
+          }
+          onPaymentLinkError={(message) => showNotification("error", message)}
         />
       )}
 
@@ -643,6 +683,7 @@ export const FinancialsView = () => {
                     variant="contained"
                     startIcon={<UploadIcon />}
                     onClick={() => setShowUploadModal(true)}
+                    sx={primaryIconButton}
                   >
                     Upload Invoice
                   </Button>
@@ -653,6 +694,7 @@ export const FinancialsView = () => {
                       // RTK Query refetches automatically via invalidateTags
                     }}
                     disabled={loadingInvoices}
+                    sx={outlinedIconButton}
                   >
                     Refresh
                   </Button>
@@ -665,6 +707,7 @@ export const FinancialsView = () => {
                   }
                   onClick={refetchMyInvoices}
                   disabled={loading}
+                  sx={outlinedIconButton}
                 >
                   {loading ? "Loading..." : "Refresh"}
                 </Button>
@@ -700,6 +743,7 @@ export const FinancialsView = () => {
                   onClick={() =>
                     isAdmin ? refetchAllClients() : refetchMyInvoices()
                   }
+                  sx={primaryButton}
                 >
                   Try Again
                 </Button>
@@ -749,8 +793,8 @@ export const FinancialsView = () => {
               </Box>
             )}
 
-            {/* Invoice Table (Mobile) */}
-            {!loadingInvoices && !loading && !error && invoices.length > 0 && (
+            {/* Invoice Table (Mobile) - Only for non-admin users */}
+            {!loadingInvoices && !loading && !error && invoices.length > 0 && !isAdmin && (
               <InvoicesTableViewMovil
                 invoices={invoices}
                 isAdmin={isAdmin}
@@ -946,14 +990,19 @@ export const FinancialsView = () => {
           </DialogContent>
           <DialogActions sx={{ justifyContent: "space-between", px: 3, pb: 2 }}>
             {editInvoiceForm.status !== "paid" && (
-              <Button variant="contained" color="success" onClick={markAsPaid}>
+              <Button
+                variant="contained"
+                color="success"
+                onClick={markAsPaid}
+                sx={primaryButton}
+              >
                 Mark as Paid
               </Button>
             )}
             <Box sx={{ ml: "auto" }}>
               <Button
                 onClick={() => setShowEditInvoiceModal(false)}
-                sx={{ mr: 1 }}
+                sx={{ ...outlinedButton, mr: 1 }}
               >
                 Cancel
               </Button>
@@ -961,6 +1010,7 @@ export const FinancialsView = () => {
                 type="submit"
                 variant="contained"
                 disabled={savingInvoiceEdit}
+                sx={primaryButton}
               >
                 {savingInvoiceEdit ? "Saving..." : "Save Changes"}
               </Button>
@@ -1000,7 +1050,7 @@ export const FinancialsView = () => {
                   variant="outlined"
                   component="label"
                   fullWidth
-                  sx={{ height: "56px" }}
+                  sx={{ ...outlinedButton, height: "56px" }}
                 >
                   {uploadForm.file ? uploadForm.file.name : "Choose PDF File *"}
                   <input
@@ -1160,11 +1210,14 @@ export const FinancialsView = () => {
             </Grid>
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setShowUploadModal(false)}>Cancel</Button>
+            <Button onClick={() => setShowUploadModal(false)} sx={outlinedButton}>
+              Cancel
+            </Button>
             <Button
               type="submit"
               variant="contained"
               disabled={uploading || !uploadForm.file}
+              sx={primaryButton}
             >
               {uploading ? "Uploading..." : "Upload Invoice"}
             </Button>

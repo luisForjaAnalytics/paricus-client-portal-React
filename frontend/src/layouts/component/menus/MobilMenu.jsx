@@ -5,6 +5,7 @@ import Button from "@mui/material/Button";
 import List from "@mui/material/List";
 import MenuOpenIcon from "@mui/icons-material/MenuOpen";
 import { MenuSections } from "./MenuSection.jsx";
+import { colors } from "../../style/styles";
 
 export const MobilMenu = () => {
   const [open, setOpen] = useState(false);
@@ -15,7 +16,7 @@ export const MobilMenu = () => {
   };
 
   const DrawerList = (
-    <Box sx={{ width: 250, }} role="presentation" onClick={toggleDrawer(false)} >
+    <Box sx={{ width: 250}} role="presentation" onClick={toggleDrawer(false)} >
       <List>
         <MenuSections setTitleState={setTitleState} titleState={titleState} />
       </List>
@@ -25,12 +26,11 @@ export const MobilMenu = () => {
   return (
     <>
       <Button onClick={toggleDrawer(true)} sx={{ display: { md: "none" } }}>
-        <MenuOpenIcon />
+        <MenuOpenIcon sx={{color:"white"}}/>
       </Button>
-      <Drawer open={open} onClose={toggleDrawer(false)}  sx={{
+      <Drawer open={open} onClose={toggleDrawer(false)} sx={{
           "& .MuiDrawer-paper": {
-            background:
-              "linear-gradient(to bottom, #0c7b3f 0%, #339137ff 100%)",
+            backgroundColor: colors.primario,
             color: "white",
             borderRight: "none",
           },

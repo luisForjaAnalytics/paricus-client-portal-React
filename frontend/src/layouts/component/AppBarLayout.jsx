@@ -41,11 +41,11 @@ const SearchIconWrapper = styled("div")(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  color: "black", 
+  color: "black",
 }));
 
 const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: "black", 
+  color: "black",
   "& .MuiInputBase-input": {
     padding: theme.spacing(1, 1, 1, 0),
     paddingLeft: `calc(1em + ${theme.spacing(4)})`,
@@ -53,7 +53,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-export const AppBarLayout = ({titleState, setTitleState}) => {
+export const AppBarLayout = ({ titleState, setTitleState }) => {
   const { t } = useTranslation();
   const [anchorEl, setAnchorEl] = useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
@@ -131,7 +131,7 @@ export const AppBarLayout = ({titleState, setTitleState}) => {
       <AppBar
         position="static"
         sx={{
-          backgroundColor: "white", // barra blanca
+          backgroundColor: { xs: "#0c7b3f", md: "white" }, // barra blanca
           color: "black", // texto negro
           boxShadow: 2,
         }}
@@ -192,11 +192,11 @@ export const AppBarLayout = ({titleState, setTitleState}) => {
                 <NotificationsIcon sx={{ color: "black" }} />
               </Badge>
             </IconButton>
-            <AvatarButton setTitleState={setTitleState}/>
+            <AvatarButton setTitleState={setTitleState} />
           </Box>
 
           {/* 🔹 MENÚ MÓVIL */}
-          <Box sx={{ display: { xs: "flex", md: "none" } }}>
+          <Box sx={{ display: { xs: "flex", md: "none" }, padding: "0 0 0 0" }}>
             <IconButton
               size="large"
               aria-label="show more"

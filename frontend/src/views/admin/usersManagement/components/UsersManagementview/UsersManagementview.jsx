@@ -38,6 +38,12 @@ import {
   useGetClientsQuery,
   useGetRolesQuery,
 } from "../../../../../store/api/adminApi";
+import {
+  primaryButton,
+  primaryIconButton,
+  outlinedButton,
+} from "../../../../../layouts/style/styles";
+import { UsersManagementviewMovil } from "./UsersManagementviewMovil";
 
 export const UsersManagementView = () => {
   // RTK Query hooks
@@ -366,8 +372,8 @@ export const UsersManagementView = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      {/* Header */}
-      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
+      {/* Header - Desktop Only */}
+      <Box sx={{ display: { xs: "none", md: "flex" }, justifyContent: "space-between", mb: 3 }}>
         <Box>
           <Typography variant="body1" color="text.secondary">
             Manage user accounts and permissions
@@ -378,14 +384,14 @@ export const UsersManagementView = () => {
           color="primary"
           startIcon={<AddIcon />}
           onClick={openAddDialog}
-          sx={{ height: "fit-content" }}
+          sx={primaryIconButton}
         >
           Add New User
         </Button>
       </Box>
 
-      {/* Filter Section */}
-      <Card sx={{ mb: 3 }}>
+      {/* Filter Section - Desktop Only */}
+      <Card sx={{ display: { xs: "none", md: "block" }, mb: 3 }}>
         <CardContent>
           <Grid container spacing={2}>
             <Grid item xs={12} md={6} lg={4}>
@@ -425,8 +431,8 @@ export const UsersManagementView = () => {
         </CardContent>
       </Card>
 
-      {/* Users Data Table */}
-      <Box sx={{ height: 600, width: '100%' }}>
+      {/* Users Data Table - Desktop Only */}
+      <Box sx={{ display: { xs: "none", md: "block" }, height: 600, width: '100%' }}>
         <DataGrid
           rows={rows}
           columns={columns}
@@ -474,6 +480,15 @@ export const UsersManagementView = () => {
           }}
         />
       </Box>
+
+      {/* Mobile View */}
+      <UsersManagementviewMovil
+        users={filteredUsers}
+        clients={clients}
+        roles={roles}
+        handleEdit={openEditDialog}
+        openDialog={openAddDialog}
+      />
 
       {/* Add/Edit User Dialog */}
       <Dialog open={dialog} onClose={closeDialog} maxWidth="md" fullWidth>
@@ -593,13 +608,14 @@ export const UsersManagementView = () => {
           </Box>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={closeDialog} color="inherit">
+          <Button onClick={closeDialog} sx={outlinedButton}>
             Cancel
           </Button>
           <Button
             onClick={saveUser}
             variant="contained"
             disabled={saving || !isFormValid}
+            sx={primaryButton}
           >
             {saving ? "Saving..." : "Save"}
           </Button>

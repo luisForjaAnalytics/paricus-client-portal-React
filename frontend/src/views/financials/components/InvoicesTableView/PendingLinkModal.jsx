@@ -15,6 +15,7 @@ import {
 import { Warning as WarningIcon, Edit as EditIcon } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import { useUpdatePaymentLinkMutation } from "../../../../store/api/invoicesApi";
+import { primaryButton, outlinedButton } from "../../../../layouts/style/styles";
 
 export const PendingLinkModal = ({ invoice, onSuccess, onError }) => {
   const { t } = useTranslation();
@@ -106,11 +107,14 @@ export const PendingLinkModal = ({ invoice, onSuccess, onError }) => {
             />
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleClose}>{t("invoices.paymentLink.cancel")}</Button>
+            <Button onClick={handleClose} sx={outlinedButton}>
+              {t("invoices.paymentLink.cancel")}
+            </Button>
             <Button
               type="submit"
               variant="contained"
               disabled={savingPaymentLink}
+              sx={primaryButton}
             >
               {savingPaymentLink ? t("invoices.paymentLink.saving") : t("invoices.paymentLink.saveButton")}
             </Button>

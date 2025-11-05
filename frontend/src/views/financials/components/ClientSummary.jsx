@@ -11,12 +11,15 @@ import {
   Typography,
 } from "@mui/material";
 import {
-
   Refresh as RefreshIcon,
   OpenInNew as OpenIcon,
   People as PeopleIcon,
 } from "@mui/icons-material";
 import { ClientSummaryCard } from "./ClientSummaryCard";
+import {
+  primaryIconButton,
+  outlinedIconButton,
+} from "../../../layouts/style/styles";
 
 export const ClientSummary = ({
   loading,
@@ -25,15 +28,13 @@ export const ClientSummary = ({
   payload
 }) => {
   return (
-    <Box sx={{ mb: 4 }}>
+    <Box sx={{ display: { xs: "none", md: "block" }, mb: 4 }}>
       <Box
         sx={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
           mb: 2,
-          flexDirection: { xs: "column", sm: "row" },
-          gap: 2,
         }}
       >
         <Typography variant="h6" fontWeight="semibold">
@@ -43,22 +44,22 @@ export const ClientSummary = ({
           <Button
             variant="contained"
             color="secondary"
-            startIcon={<OpenIcon sx={{ display: { xs: "none", sm: "block" } }} />}
+            startIcon={<OpenIcon />}
             href="https://my.waveapps.com/login_external/"
             target="_blank"
             rel="noopener noreferrer"
-            sx={{ borderRadius: "0.5rem", fontSize: { xs: "0.75rem", sm: "0.875rem" } }}
+            sx={primaryIconButton}
           >
             Wave Apps
           </Button>
           <Button
             variant="outlined"
             startIcon={
-              loading ? <CircularProgress size={16} /> : <RefreshIcon sx={{ display: { xs: "none", sm: "block" } }} />
+              loading ? <CircularProgress size={16} /> : <RefreshIcon />
             }
             onClick={refetchAllClients}
             disabled={loading}
-            sx={{ borderRadius: "0.5rem", fontSize: { xs: "0.75rem", sm: "0.875rem" } }}
+            sx={outlinedIconButton}
           >
             {loading ? "Loading..." : "Refresh All"}
           </Button>

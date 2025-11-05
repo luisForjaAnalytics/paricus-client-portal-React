@@ -284,6 +284,7 @@ export const InvoicesTableViewMovil = ({
   onUploadClick,
   onRefreshClick,
   loadingInvoices,
+  hideHeader = false,
 }) => {
   const { t } = useTranslation();
 
@@ -292,31 +293,44 @@ export const InvoicesTableViewMovil = ({
     : "Your Invoices";
 
   return (
-    <Box sx={{ display: { xs: "block", md: "none" }, mt: 3 }}>
+    <Box sx={{ display: { xs: "block", md: "none" }, mt: hideHeader ? 0 : 3 }}>
       {/* Header with Title and Action Buttons */}
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 2,
-          px: 1,
-        }}
-      >
-        <Typography variant="h6" fontWeight="semibold">
-          {title}
-        </Typography>
-        {isAdmin ? (
-          <Stack direction="row" spacing={1}>
-            <Tooltip title="Upload Invoice">
-              <IconButton
-                color="primary"
-                size="small"
-                onClick={onUploadClick}
-              >
-                <UploadIcon />
-              </IconButton>
-            </Tooltip>
+      {!hideHeader && (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 2,
+            px: 1,
+          }}
+        >
+          <Typography variant="h6" fontWeight="semibold">
+            {title}
+          </Typography>
+          {isAdmin ? (
+            <Stack direction="row" spacing={1}>
+              <Tooltip title="Upload Invoice">
+                <IconButton
+                  color="primary"
+                  size="small"
+                  onClick={onUploadClick}
+                >
+                  <UploadIcon />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Refresh">
+                <IconButton
+                  color="default"
+                  size="small"
+                  onClick={onRefreshClick}
+                  disabled={loadingInvoices}
+                >
+                  <RefreshIcon />
+                </IconButton>
+              </Tooltip>
+            </Stack>
+          ) : (
             <Tooltip title="Refresh">
               <IconButton
                 color="default"
@@ -327,20 +341,9 @@ export const InvoicesTableViewMovil = ({
                 <RefreshIcon />
               </IconButton>
             </Tooltip>
-          </Stack>
-        ) : (
-          <Tooltip title="Refresh">
-            <IconButton
-              color="default"
-              size="small"
-              onClick={onRefreshClick}
-              disabled={loadingInvoices}
-            >
-              <RefreshIcon />
-            </IconButton>
-          </Tooltip>
-        )}
-      </Box>
+          )}
+        </Box>
+      )}
 
       {/* Collapsible Table */}
       <TableContainer component={Paper}>
