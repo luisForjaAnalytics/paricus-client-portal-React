@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import {
   Box,
   Button,
@@ -29,7 +29,7 @@ import {
   Collapse,
   LinearProgress,
   Divider,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Search as SearchIcon,
   Clear as ClearIcon,
@@ -45,47 +45,111 @@ import {
   Mic as MicIcon,
   Warning as WarningIcon,
   Error as ErrorIcon,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 import {
   useGetAudioRecordingsQuery,
   useGetCallTypesQuery,
   useLazyGetAudioUrlQuery,
-} from '../../../store/api/audioRecordingsApi';
+  usePrefetch,
+} from "../../../store/api/audioRecordingsApi";
+import { QuickFilters } from "./components/QuickFilters.jsx";
+import { useTranslation } from "react-i18next"; // ADDED: i18n support
+import { AdvancedFilters } from "./components/AdvancedFilters.jsx";
+import { TableView } from "./components/TableView.jsx";
+import { QuickFiltersMovil } from "./components/QuickFiltersMovil.jsx";
 
 export const AudioRecordingsView = () => {
-  // Filters
+  const { t } = useTranslation(); // ADDED: Translation hook
+  // Filters - Internal state for immediate UI updates
   const [filters, setFilters] = useState({
-    interactionId: '',
-    customerPhone: '',
-    agentName: '',
-    callType: '',
-    startDate: '',
-    endDate: '',
+    interactionId: "",
+    customerPhone: "",
+    agentName: "",
+    callType: "",
+    startDate: "",
+    endDate: "",
     company: null,
-    hasAudio: null,
+    hasAudio: "true", // MODIFIED: Default filter to show only recordings with audio on component mount. Change to null to show all recordings by default, or "false" to show only recordings without audio.
   });
+
+  // Debounced filters - Used for API calls (500ms delay)
+  const [debouncedFilters, setDebouncedFilters] = useState(filters);
+  const [isDebouncing, setIsDebouncing] = useState(false);
 
   const [page, setPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  // Debounce filter changes to reduce API calls while typing
+  // Apply debounce only to text fields (not company/hasAudio for instant response)
+  useEffect(() => {
+    const textFields = {
+      interactionId: filters.interactionId,
+      customerPhone: filters.customerPhone,
+      agentName: filters.agentName,
+      callType: filters.callType,
+      startDate: filters.startDate,
+      endDate: filters.endDate,
+    };
+
+    // Only show debouncing indicator for text input changes
+    const hasTextInput =
+      filters.interactionId || filters.customerPhone || filters.agentName;
+    if (hasTextInput) {
+      setIsDebouncing(true);
+    }
+
+    const timer = setTimeout(() => {
+      setDebouncedFilters((prev) => ({
+        ...prev,
+        ...textFields,
+      }));
+      setIsDebouncing(false);
+    }, 500); // Wait 500ms after user stops typing
+
+    return () => {
+      clearTimeout(timer);
+      setIsDebouncing(false);
+    };
+  }, [
+    filters.interactionId,
+    filters.customerPhone,
+    filters.agentName,
+    filters.callType,
+    filters.startDate,
+    filters.endDate,
+  ]);
 
   // RTK Query hooks
   const {
     data: recordingsData,
     isLoading: loading,
     error: apiError,
-    refetch
-  } = useGetAudioRecordingsQuery({
-    page,
-    limit: itemsPerPage,
-    ...filters,
-  });
+    refetch,
+  } = useGetAudioRecordingsQuery(
+    {
+      page,
+      limit: itemsPerPage,
+      ...debouncedFilters, // Use debounced filters instead of immediate filters
+    },
+    {
+      // Use cache for 10 minutes - much faster for repeated queries (data updates hourly)
+      refetchOnMountOrArgChange: 600,
+      // Refetch when window regains focus (detects changes while user was away)
+      refetchOnFocus: true,
+      // Don't refetch when reconnecting
+      refetchOnReconnect: false,
+    }
+  );
 
+  // Lazy load call types only when dropdown is opened
+  const [loadCallTypes, setLoadCallTypes] = useState(false);
   const { data: callTypes = [] } = useGetCallTypesQuery(undefined, {
     // Don't fail the component if call types can't be loaded
     refetchOnMountOrArgChange: false,
-    skip: true, // Temporarily skip this query until MSSQL is configured
+    skip: !loadCallTypes, // Only load when dropdown is opened
   });
   const [getAudioUrl] = useLazyGetAudioUrlQuery();
+  const prefetchAudioRecordings = usePrefetch("getAudioRecordings");
 
   // Extract data from query
   const recordings = recordingsData?.data || [];
@@ -122,27 +186,59 @@ export const AudioRecordingsView = () => {
     return recordings.find((r) => r.interaction_id === currentlyPlaying);
   }, [recordings, currentlyPlaying]);
 
+  // Prefetch next page automatically when current page loads
+  useEffect(() => {
+    if (!loading && page < totalPages) {
+      // Prefetch next page in background
+      const nextPageParams = {
+        page: page + 1,
+        limit: itemsPerPage,
+        ...debouncedFilters,
+      };
+      prefetchAudioRecordings(nextPageParams);
+    }
+  }, [
+    page,
+    totalPages,
+    itemsPerPage,
+    debouncedFilters,
+    loading,
+    prefetchAudioRecordings,
+  ]);
+
+  // Handler to prefetch page on hover
+  const handlePrefetchPage = (targetPage) => {
+    if (targetPage !== page && targetPage >= 1 && targetPage <= totalPages) {
+      const prefetchParams = {
+        page: targetPage,
+        limit: itemsPerPage,
+        ...debouncedFilters,
+      };
+      prefetchAudioRecordings(prefetchParams);
+    }
+  };
+
   // Methods
   // Check for API errors
   React.useEffect(() => {
     if (apiError) {
       if (apiError.status === 503) {
         setDbConfigured(false);
-        setError('Database not configured. Please contact your administrator.');
+        setError("Database not configured. Please contact your administrator.");
       } else {
-        setError(apiError.data?.message || 'Failed to load recordings');
+        setError(apiError.data?.message || "Failed to load recordings");
       }
     }
   }, [apiError]);
 
   const clearFilters = () => {
     setFilters({
-      interactionId: '',
-      customerPhone: '',
-      agentName: '',
-      callType: '',
-      startDate: '',
-      endDate: '',
+      interactionId: "",
+      customerPhone: "",
+      agentName: "",
+      callType: "",
+      startDate: "",
+      endDate: "",
       company: null,
       hasAudio: null,
     });
@@ -151,11 +247,13 @@ export const AudioRecordingsView = () => {
 
   const setCompanyFilter = (company) => {
     setFilters((prev) => ({ ...prev, company }));
+    setDebouncedFilters((prev) => ({ ...prev, company })); // Apply immediately without debounce
     setPage(1);
   };
 
   const setAudioFilter = (hasAudio) => {
     setFilters((prev) => ({ ...prev, hasAudio }));
+    setDebouncedFilters((prev) => ({ ...prev, hasAudio })); // Apply immediately without debounce
     setPage(1);
   };
 
@@ -183,8 +281,8 @@ export const AudioRecordingsView = () => {
           setIsPlaying(true);
         }
       } catch (err) {
-        console.error('Error loading audio:', err);
-        setError('Failed to load audio file. Please try again.');
+        console.error("Error loading audio:", err);
+        setError("Failed to load audio file. Please try again.");
       } finally {
         setLoadingAudioUrl(null);
       }
@@ -234,7 +332,10 @@ export const AudioRecordingsView = () => {
 
   const rewind = () => {
     if (!audioPlayer.current) return;
-    audioPlayer.current.currentTime = Math.max(0, audioPlayer.current.currentTime - 10);
+    audioPlayer.current.currentTime = Math.max(
+      0,
+      audioPlayer.current.currentTime - 10
+    );
   };
 
   const forward = () => {
@@ -280,10 +381,10 @@ export const AudioRecordingsView = () => {
   };
 
   const formatTime = (seconds) => {
-    if (isNaN(seconds)) return '0:00';
+    if (isNaN(seconds)) return "0:00";
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   const handleAudioEnded = () => {
@@ -293,7 +394,7 @@ export const AudioRecordingsView = () => {
   };
 
   const handleAudioError = () => {
-    setError('Failed to play audio file');
+    setError("Failed to play audio file");
     setCurrentlyPlaying(null);
     setIsPlaying(false);
   };
@@ -310,35 +411,49 @@ export const AudioRecordingsView = () => {
         audioUrlCache.current.set(item.interaction_id, audioUrl);
       }
 
-      window.open(audioUrl, '_blank');
+      window.open(audioUrl, "_blank");
     } catch (err) {
-      console.error('Error downloading audio:', err);
-      setError('Failed to download audio file. Please try again.');
+      console.error("Error downloading audio:", err);
+      setError("Failed to download audio file. Please try again.");
     } finally {
       setLoadingAudioUrl(null);
     }
   };
 
+  // Prefetch audio URL on hover over play button
+  const handlePrefetchAudio = async (interactionId) => {
+    // Only prefetch if not already cached
+    if (!audioUrlCache.current.has(interactionId)) {
+      try {
+        const result = await getAudioUrl(interactionId).unwrap();
+        audioUrlCache.current.set(interactionId, result);
+      } catch (err) {
+        // Silently fail - user can try again on click
+        console.debug("Prefetch failed for audio:", interactionId);
+      }
+    }
+  };
+
   const formatDateTime = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return "N/A";
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    return new Intl.DateTimeFormat("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     }).format(date);
   };
 
   const getCallTypeColor = (callType) => {
     const types = {
-      inbound: 'info',
-      outbound: 'success',
-      internal: 'warning',
-      missed: 'error',
+      inbound: "info",
+      outbound: "success",
+      internal: "warning",
+      missed: "error",
     };
-    return types[callType?.toLowerCase()] || 'default';
+    return types[callType?.toLowerCase()] || "default";
   };
 
   // Note: No useEffect needed - RTK Query automatically fetches data when params change
@@ -346,12 +461,9 @@ export const AudioRecordingsView = () => {
   return (
     <Box sx={{ p: 3, pb: currentlyPlaying ? 15 : 3 }}>
       {/* Page Header */}
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h4" fontWeight="bold" gutterBottom>
-          Audio Recordings
-        </Typography>
+      <Box sx={{ display: { xs: "none", md: "flex" }, mb: 3 }}>
         <Typography variant="body1" color="text.secondary">
-          View and listen to call recordings from the Workforce Management database
+          {t("audioRecordings.pageDescription")}
         </Typography>
       </Box>
 
@@ -359,11 +471,10 @@ export const AudioRecordingsView = () => {
       {!dbConfigured && (
         <Alert severity="warning" sx={{ mb: 3 }} icon={<WarningIcon />}>
           <Typography variant="subtitle2" fontWeight="bold">
-            Database Not Configured
+            {t("audioRecordings.databaseNotConfigured")}
           </Typography>
           <Typography variant="body2">
-            SQL Server credentials are not set. Please configure MSSQL settings in the
-            .env file.
+            {t("audioRecordings.databaseNotConfiguredMessage")}
           </Typography>
         </Alert>
       )}
@@ -379,401 +490,116 @@ export const AudioRecordingsView = () => {
           {error}
         </Alert>
       )}
+      {/* 
+      <AdvancedFilters
+        filters={filters}
+        refetch={refetch}
+        setFilters={setFilters}
+        setLoadCallTypes={setLoadCallTypes}
+        isDebouncing={isDebouncing}
+        loading={loading}
+        clearFilters={clearFilters}
+        callTypes={callTypes}
+        setCompanyFilter={setCompanyFilter}
+        setAudioFilter={setAudioFilter}
+      /> */}
 
-      {/* Quick Company Filters */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} md={8}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
-                <Typography variant="body2" fontWeight="medium">
-                  Quick Filter:
-                </Typography>
-                <ButtonGroup variant="outlined" size="small">
-                  <Button
-                    variant={filters.company === 'Flex Mobile' ? 'contained' : 'outlined'}
-                    onClick={() => setCompanyFilter('Flex Mobile')}
-                  >
-                    Flex Mobile
-                  </Button>
-                  <Button
-                    variant={filters.company === 'IM Telecom' ? 'contained' : 'outlined'}
-                    onClick={() => setCompanyFilter('IM Telecom')}
-                  >
-                    IM Telecom
-                  </Button>
-                  <Button
-                    variant={filters.company === 'Tempo Wireless' ? 'contained' : 'outlined'}
-                    onClick={() => setCompanyFilter('Tempo Wireless')}
-                  >
-                    Tempo Wireless
-                  </Button>
-                </ButtonGroup>
-                {filters.company && (
-                  <Button size="small" onClick={() => setCompanyFilter(null)}>
-                    Clear Company Filter
-                  </Button>
-                )}
-              </Box>
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'flex-end' }}>
-                <Typography variant="body2" fontWeight="medium">
-                  Audio:
-                </Typography>
-                <ButtonGroup variant="outlined" size="small">
-                  <Button
-                    variant={filters.hasAudio === 'true' ? 'contained' : 'outlined'}
-                    color="success"
-                    onClick={() => setAudioFilter('true')}
-                  >
-                    With Audio
-                  </Button>
-                  <Button
-                    variant={filters.hasAudio === 'false' ? 'contained' : 'outlined'}
-                    color="error"
-                    onClick={() => setAudioFilter('false')}
-                  >
-                    Without Audio
-                  </Button>
-                </ButtonGroup>
-                {filters.hasAudio && (
-                  <Button size="small" onClick={() => setAudioFilter(null)}>
-                    All
-                  </Button>
-                )}
-              </Box>
-            </Grid>
-          </Grid>
-        </CardContent>
-      </Card>
+      {/* Audio Recordings Table */}
+      <TableView
+        dataViewInfo={recordings}
+        formatDateTime={formatDateTime}
+        loading={loading}
+        toggleAudio={toggleAudio}
+        downloadAudio={downloadAudio}
+        currentlyPlaying={currentlyPlaying}
+        loadingAudioUrl={loadingAudioUrl}
+        handlePrefetchAudio={handlePrefetchAudio}
+        page={page}
+        itemsPerPage={itemsPerPage}
+        totalCount={totalCount}
+        onPageChange={setPage}
+        onPageSizeChange={setItemsPerPage}
+        filters={filters}
+        refetch={refetch}
+        setFilters={setFilters}
+        setLoadCallTypes={setLoadCallTypes}
+        isDebouncing={isDebouncing}
+        clearFilters={clearFilters}
+        callTypes={callTypes}
+        setCompanyFilter={setCompanyFilter}
+        setAudioFilter={setAudioFilter}
+      />
 
-      {/* Advanced Filters Card */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography variant="h6">Advanced Filters</Typography>
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <Button
-                variant="contained"
-                onClick={() => refetch()}
-                disabled={loading}
-                startIcon={loading ? <CircularProgress size={16} /> : <SearchIcon />}
-              >
-                {loading ? 'Loading...' : 'Search'}
-              </Button>
-              <Button variant="outlined" onClick={clearFilters} startIcon={<ClearIcon />}>
-                Clear All Filters
-              </Button>
-            </Box>
-          </Box>
-
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={4}>
-              <TextField
-                fullWidth
-                label="Interaction ID"
-                placeholder="Search by interaction ID"
-                value={filters.interactionId}
-                onChange={(e) =>
-                  setFilters((prev) => ({ ...prev, interactionId: e.target.value }))
-                }
-              />
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <TextField
-                fullWidth
-                label="Customer Phone"
-                placeholder="Search by phone number"
-                value={filters.customerPhone}
-                onChange={(e) =>
-                  setFilters((prev) => ({ ...prev, customerPhone: e.target.value }))
-                }
-              />
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <TextField
-                fullWidth
-                label="Agent Name"
-                placeholder="Search by agent name"
-                value={filters.agentName}
-                onChange={(e) =>
-                  setFilters((prev) => ({ ...prev, agentName: e.target.value }))
-                }
-              />
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <FormControl fullWidth>
-                <InputLabel>Call Type</InputLabel>
-                <Select
-                  value={filters.callType}
-                  onChange={(e) =>
-                    setFilters((prev) => ({ ...prev, callType: e.target.value }))
-                  }
-                  label="Call Type"
-                >
-                  <MenuItem value="">All Types</MenuItem>
-                  {callTypes.map((type) => (
-                    <MenuItem key={type} value={type}>
-                      {type}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <TextField
-                fullWidth
-                label="Start Date"
-                type="date"
-                InputLabelProps={{ shrink: true }}
-                value={filters.startDate}
-                onChange={(e) =>
-                  setFilters((prev) => ({ ...prev, startDate: e.target.value }))
-                }
-              />
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <TextField
-                fullWidth
-                label="End Date"
-                type="date"
-                InputLabelProps={{ shrink: true }}
-                value={filters.endDate}
-                onChange={(e) =>
-                  setFilters((prev) => ({ ...prev, endDate: e.target.value }))
-                }
-              />
-            </Grid>
-          </Grid>
-        </CardContent>
-      </Card>
-
-      {/* Results Card */}
-      <Card>
-        <CardContent>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 2 }}>
-            <Box>
-              <Typography variant="h6">Call Recordings</Typography>
-              <Typography variant="body2" color="text.secondary">
-                {totalCount} total recordings found • Showing {recordings.length} per page
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              {currentlyPlaying && (
-                <Chip
-                  icon={<MicIcon />}
-                  label="Playing Audio"
-                  color="success"
-                  variant="outlined"
-                />
-              )}
-              <FormControl size="small" sx={{ minWidth: 120 }}>
-                <InputLabel>Per Page</InputLabel>
-                <Select
-                  value={itemsPerPage}
-                  onChange={(e) => {
-                    setItemsPerPage(e.target.value);
-                    setPage(1); // Reset to first page when changing items per page
-                  }}
-                  label="Per Page"
-                >
-                  <MenuItem value={10}>10 items</MenuItem>
-                  <MenuItem value={15}>15 items</MenuItem>
-                  <MenuItem value={25}>25 items</MenuItem>
-                  <MenuItem value={50}>50 items</MenuItem>
-                  <MenuItem value={100}>100 items</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-          </Box>
-
-          {/* Loading State */}
-          {loading ? (
-            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 8 }}>
-              <CircularProgress size={48} sx={{ mb: 2 }} />
-              <Typography variant="body1" color="text.secondary">
-                Loading recordings...
-              </Typography>
-            </Box>
-          ) : recordings.length === 0 ? (
-            <Box sx={{ textAlign: 'center', py: 8 }}>
-              <MicIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
-              <Typography variant="h6" gutterBottom>
-                No recordings found
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Try adjusting your search filters
-              </Typography>
-            </Box>
-          ) : (
-            <>
-              {/* Data Table */}
-              <TableContainer>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Interaction ID</TableCell>
-                      <TableCell>Company</TableCell>
-                      <TableCell>Call Type</TableCell>
-                      <TableCell>Start Time</TableCell>
-                      <TableCell>End Time</TableCell>
-                      <TableCell>Customer Phone</TableCell>
-                      <TableCell>Agent Name</TableCell>
-                      <TableCell>Actions</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {recordings.map((item) => (
-                      <TableRow key={item.interaction_id} hover>
-                        <TableCell>
-                          <Typography variant="body2" fontWeight="medium">
-                            {item.interaction_id}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={item.company_name || 'Unknown'}
-                            color="primary"
-                            size="small"
-                            variant="outlined"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={item.call_type || 'N/A'}
-                            color={getCallTypeColor(item.call_type)}
-                            size="small"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="body2" color="text.secondary">
-                            {formatDateTime(item.start_time)}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="body2" color="text.secondary">
-                            {formatDateTime(item.end_time)}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>{item.customer_phone || 'N/A'}</TableCell>
-                        <TableCell>{item.agent_name || 'N/A'}</TableCell>
-                        <TableCell>
-                          <Box sx={{ display: 'flex', gap: 1 }}>
-                            {item.audiofilename ? (
-                              <>
-                                <Tooltip
-                                  title={
-                                    currentlyPlaying === item.interaction_id
-                                      ? 'Stop'
-                                      : 'Play'
-                                  }
-                                >
-                                  <IconButton
-                                    size="small"
-                                    onClick={() => toggleAudio(item)}
-                                    disabled={loadingAudioUrl === item.interaction_id}
-                                    color={
-                                      currentlyPlaying === item.interaction_id
-                                        ? 'error'
-                                        : 'success'
-                                    }
-                                  >
-                                    {loadingAudioUrl === item.interaction_id ? (
-                                      <CircularProgress size={20} />
-                                    ) : currentlyPlaying === item.interaction_id ? (
-                                      <StopIcon />
-                                    ) : (
-                                      <PlayArrowIcon />
-                                    )}
-                                  </IconButton>
-                                </Tooltip>
-                                <Tooltip title="Download">
-                                  <IconButton
-                                    size="small"
-                                    onClick={() => downloadAudio(item)}
-                                    disabled={loadingAudioUrl === item.interaction_id}
-                                    color="primary"
-                                  >
-                                    <DownloadIcon />
-                                  </IconButton>
-                                </Tooltip>
-                              </>
-                            ) : (
-                              <Chip label="No Audio" size="small" variant="outlined" />
-                            )}
-                          </Box>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-
-              {/* Pagination */}
-              <Box sx={{ mt: 3 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1, flexWrap: 'wrap', gap: 1 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Showing {((page - 1) * itemsPerPage) + 1} to {Math.min(page * itemsPerPage, totalCount)} of {totalCount} recordings
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Page {page} of {totalPages}
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                  <Pagination
-                    count={totalPages}
-                    page={page}
-                    onChange={(e, value) => setPage(value)}
-                    color="primary"
-                    showFirstButton
-                    showLastButton
-                    size="large"
-                  />
-                </Box>
-              </Box>
-            </>
-          )}
-        </CardContent>
-      </Card>
+      {/* Mobile-Friendly Collapsible Table */}
+      <QuickFiltersMovil
+        dataViewInfo={recordings}
+        formatDateTime={formatDateTime}
+        toggleAudio={toggleAudio}
+        downloadAudio={downloadAudio}
+        currentlyPlaying={currentlyPlaying}
+        loadingAudioUrl={loadingAudioUrl}
+        handlePrefetchAudio={handlePrefetchAudio}
+        filters={filters}
+        setFilters={setFilters}
+        refetch={refetch}
+        setLoadCallTypes={setLoadCallTypes}
+        isDebouncing={isDebouncing}
+        loading={loading}
+        clearFilters={clearFilters}
+        callTypes={callTypes}
+        page={page}
+        itemsPerPage={itemsPerPage}
+        totalCount={totalCount}
+        onPageChange={setPage}
+        onPageSizeChange={setItemsPerPage}
+      />
 
       {/* Audio Player Control Bar (Fixed Bottom) */}
       <Collapse in={!!currentlyPlaying}>
         <Paper
           elevation={8}
           sx={{
-            position: 'fixed',
+            position: "fixed",
             bottom: 0,
             left: 0,
             right: 0,
             zIndex: 1200,
             borderTop: 2,
-            borderColor: 'divider',
+            borderColor: "divider",
           }}
         >
           <Box sx={{ p: 2 }}>
             {/* Recording Info */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 2,
+              }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                 <Box
                   sx={{
                     width: 48,
                     height: 48,
                     borderRadius: 2,
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    background:
+                      "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                   }}
                 >
-                  <MicIcon sx={{ color: 'white' }} />
+                  <MicIcon sx={{ color: "white" }} />
                 </Box>
                 <Box>
                   <Typography variant="body2" fontWeight="bold">
                     {currentRecording?.interaction_id}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    {currentRecording?.agent_name || 'Unknown Agent'}
+                    {currentRecording?.agent_name ||
+                      t("audioRecordings.audioPlayer.unknownAgent")}
                   </Typography>
                 </Box>
               </Box>
@@ -784,9 +610,19 @@ export const AudioRecordingsView = () => {
 
             {/* Progress Bar */}
             <Box sx={{ mb: 2 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                <Typography variant="caption">{formatTime(currentTime)}</Typography>
-                <Typography variant="caption">{formatTime(duration)}</Typography>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  mb: 0.5,
+                }}
+              >
+                <Typography variant="caption">
+                  {formatTime(currentTime)}
+                </Typography>
+                <Typography variant="caption">
+                  {formatTime(duration)}
+                </Typography>
               </Box>
               <Slider
                 value={progressPercentage}
@@ -796,8 +632,15 @@ export const AudioRecordingsView = () => {
             </Box>
 
             {/* Controls */}
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
-              <Tooltip title="Rewind 10s">
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 2,
+              }}
+            >
+              <Tooltip title={t("audioRecordings.tooltips.rewind10s")}>
                 <IconButton onClick={rewind} size="large">
                   <FastRewindIcon />
                 </IconButton>
@@ -807,17 +650,19 @@ export const AudioRecordingsView = () => {
                 onClick={togglePlayPause}
                 size="large"
                 sx={{
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  color: 'white',
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #5568d3 0%, #63408b 100%)',
+                  background:
+                    "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                  color: "white",
+                  "&:hover": {
+                    background:
+                      "linear-gradient(135deg, #5568d3 0%, #63408b 100%)",
                   },
                 }}
               >
                 {isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
               </IconButton>
 
-              <Tooltip title="Forward 10s">
+              <Tooltip title={t("audioRecordings.tooltips.forward10s")}>
                 <IconButton onClick={forward} size="large">
                   <FastForwardIcon />
                 </IconButton>
@@ -825,9 +670,19 @@ export const AudioRecordingsView = () => {
 
               <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
 
-              <Tooltip title={isMuted ? 'Unmute' : 'Mute'}>
+              <Tooltip
+                title={
+                  isMuted
+                    ? t("audioRecordings.tooltips.unmute")
+                    : t("audioRecordings.tooltips.mute")
+                }
+              >
                 <IconButton onClick={toggleMute} size="small">
-                  {isMuted || volume === 0 ? <VolumeOffIcon /> : <VolumeUpIcon />}
+                  {isMuted || volume === 0 ? (
+                    <VolumeOffIcon />
+                  ) : (
+                    <VolumeUpIcon />
+                  )}
                 </IconButton>
               </Tooltip>
 
@@ -858,10 +713,8 @@ export const AudioRecordingsView = () => {
         onError={handleAudioError}
         onTimeUpdate={updateProgress}
         onLoadedMetadata={handleMetadataLoaded}
-        style={{ display: 'none' }}
+        style={{ display: "none" }}
       />
     </Box>
   );
 };
-
-

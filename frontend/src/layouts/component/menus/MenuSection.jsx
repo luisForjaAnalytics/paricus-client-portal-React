@@ -21,41 +21,41 @@ import { SingOutButton } from "./SingOutButton";
 const menuItems = [
   {
     label: "dashboard",
-    icon: <LeaderboardIcon sx={{ color: "white" }} fontSize="large" />,
+    icon: <LeaderboardIcon sx={{ color: "white" }} fontSize="medium" />,
     route: "dashboard",
   },
 
   {
     label: "reporting",
-    icon: <DescriptionIcon sx={{ color: "white" }} fontSize="large" />,
+    icon: <DescriptionIcon sx={{ color: "white" }} fontSize="medium" />,
     route: "reporting",
   },
 
   {
     label: "audioRetrieval",
-    icon: <VolumeUpIcon sx={{ color: "white" }} fontSize="large" />,
+    icon: <VolumeUpIcon sx={{ color: "white" }} fontSize="medium" />,
     route: "audio-recordings",
   },
 
   {
     label: "knowledgeBase",
-    icon: <AutoStoriesIcon sx={{ color: "white" }} fontSize="large" />,
+    icon: <AutoStoriesIcon sx={{ color: "white" }} fontSize="medium" />,
     route: "knowledge-base",
   },
   {
     label: "financial",
-    icon: <LocalAtmSharpIcon sx={{ color: "white" }} fontSize="large" />,
+    icon: <LocalAtmSharpIcon sx={{ color: "white" }} fontSize="medium" />,
     route: "financial",
   },
   {
     label: "reportsManagement",
-    icon: <DescriptionIcon sx={{ color: "white" }} fontSize="large" />,
+    icon: <DescriptionIcon sx={{ color: "white" }} fontSize="medium" />,
     route: "reports-management",
   },
   {
     label: "userManagement",
-    icon: <SettingsIcon sx={{ color: "white" }} fontSize="large" />,
-    route: "users-management",
+    icon: <SettingsIcon sx={{ color: "white" }} fontSize="medium" />,
+    route: "users-management/clients",
   },
 ];
 
@@ -73,19 +73,29 @@ const menuItemsAvatar = [
   },
 ];
 
-export const MenuSections = () => {
+export const MenuSections = ({ setTitleState, titleState }) => {
   return (
     <>
       {menuItems.map((item, index) => (
         <ListItem key={index} disablePadding sx={{ display: "block" }}>
-          <ItemMenu label={item.label} icon={item.icon} route={item.route} />
+          <ItemMenu
+            label={item.label}
+            icon={item.icon}
+            route={item.route}
+            setTitleState={setTitleState}
+            titleState={titleState}
+          />
         </ListItem>
       ))}
     </>
   );
 };
 
-export const MenuSectionsAvatar = ({ handleCloseUserMenu, userAuth }) => {
+export const MenuSectionsAvatar = ({
+  handleCloseUserMenu,
+  userAuth,
+  setTitleState,
+}) => {
   const navigate = useNavigate();
   const handleMenuOption = (route) => {
     navigate(`/app/${route}`);
@@ -119,8 +129,9 @@ export const MenuSectionsAvatar = ({ handleCloseUserMenu, userAuth }) => {
         <MenuItem
           key={index}
           onClick={() => {
-            handleCloseUserMenu();
+            setTitleState(setting.label);
             handleMenuOption(setting.route);
+            handleCloseUserMenu();
           }}
         >
           <ListItemIcon>{setting.icon}</ListItemIcon>

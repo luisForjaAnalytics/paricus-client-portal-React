@@ -17,6 +17,7 @@ import { Language as LanguageIcon } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
 import { useLoginMutation } from "../store/api/authApi";
 import { setCredentials } from "../store/auth/authSlice";
+import { primaryButton } from "../layouts/style/styles";
 
 const LoginView = () => {
   const navigate = useNavigate();
@@ -161,8 +162,8 @@ const LoginView = () => {
               size="large"
               disabled={isLoading}
               sx={{
+                ...primaryButton,
                 py: 1.5,
-                textTransform: "none",
                 fontSize: "1rem",
                 fontWeight: 600,
               }}

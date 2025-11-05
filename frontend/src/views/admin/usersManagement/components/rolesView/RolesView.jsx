@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Box,
   Button,
@@ -10,15 +10,8 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   TextField,
   Typography,
-  CircularProgress,
   Snackbar,
   Alert,
   FormControl,
@@ -31,6 +24,7 @@ import {
   Badge,
   Tooltip
 } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
 import {
   Add as AddIcon,
   Edit as EditIcon,
@@ -38,17 +32,34 @@ import {
   Delete as DeleteIcon,
   Shield as ShieldIcon
 } from '@mui/icons-material';
-import axios from 'axios';
+import {
+  useGetRolesQuery,
+  useCreateRoleMutation,
+  useUpdateRoleMutation,
+  useDeleteRoleMutation,
+  useGetClientsQuery,
+  useGetPermissionsQuery,
+  useLazyGetRolePermissionsQuery,
+  useUpdateRolePermissionsMutation
+} from '../../../../../store/api/adminApi';
+import {
+  primaryButton,
+  primaryIconButton,
+  outlinedButton
+} from '../../../../../layouts/style/styles';
+import { RolesViewMovil } from './RolesViewMovil';
 
 export const RolesView = () => {
-  // State management
-  const [roles, setRoles] = useState([]);
-  const [clients, setClients] = useState([]);
-  const [permissions, setPermissions] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [savingPermissions, setSavingPermissions] = useState(false);
-  const [deleting, setDeleting] = useState(false);
+
+  // RTK Query hooks
+  const { data: roles = [], isLoading, error } = useGetRolesQuery();
+  const { data: clients = [] } = useGetClientsQuery();
+  const { data: permissions = [] } = useGetPermissionsQuery();
+  const [createRole, { isLoading: isCreating }] = useCreateRoleMutation();
+  const [updateRole, { isLoading: isUpdating }] = useUpdateRoleMutation();
+  const [deleteRole, { isLoading: isDeleting }] = useDeleteRoleMutation();
+  const [getRolePermissions] = useLazyGetRolePermissionsQuery();
+  const [updateRolePermissions, { isLoading: isUpdatingPermissions }] = useUpdateRolePermissionsMutation();
 
   // Dialog states
   const [dialog, setDialog] = useState(false);
@@ -76,51 +87,8 @@ export const RolesView = () => {
     severity: 'success'
   });
 
-  // Fetch data on mount
-  useEffect(() => {
-    fetchRoles();
-    fetchClients();
-    fetchPermissions();
-  }, []);
-
-  const fetchRoles = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get('/api/admin/roles');
-      const mappedRoles = response.data.roles.map(role => ({
-        id: role.id,
-        client_id: role.clientId,
-        client_name: role.clientName,
-        role_name: role.roleName,
-        description: role.description,
-        permissions_count: role.permissions?.length || 0,
-        created_at: role.createdAt
-      }));
-      setRoles(mappedRoles);
-    } catch (error) {
-      showNotification('Failed to load roles', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchClients = async () => {
-    try {
-      const response = await axios.get('/api/admin/clients');
-      setClients(response.data.clients);
-    } catch (error) {
-      console.error('Error fetching clients:', error);
-    }
-  };
-
-  const fetchPermissions = async () => {
-    try {
-      const response = await axios.get('/api/admin/permissions');
-      setPermissions(response.data.permissions);
-    } catch (error) {
-      console.error('Error fetching permissions:', error);
-    }
-  };
+  // Computed values
+  const isSaving = isCreating || isUpdating;
 
   const openAddDialog = () => {
     setEditingRole(null);
@@ -161,8 +129,8 @@ export const RolesView = () => {
     }
 
     try {
-      const response = await axios.get(`/api/admin/roles/${role.id}/permissions`);
-      setSelectedPermissions(response.data.permissions.map(p => p.permissionId));
+      const result = await getRolePermissions(role.id).unwrap();
+      setSelectedPermissions(result);
     } catch (error) {
       console.error('Error fetching role permissions:', error);
       setSelectedPermissions([]);
@@ -180,15 +148,15 @@ export const RolesView = () => {
   const saveRole = async () => {
     if (!isFormValid()) return;
 
-    setSaving(true);
     try {
       if (editingRole) {
         const updateData = {
+          id: editingRole.id,
           role_name: roleForm.role_name,
           description: roleForm.description,
           client_id: roleForm.client_id
         };
-        await axios.put(`/api/admin/roles/${editingRole.id}`, updateData);
+        await updateRole(updateData).unwrap();
         showNotification('Role updated successfully', 'success');
       } else {
         const roleData = {
@@ -200,21 +168,17 @@ export const RolesView = () => {
 
         if (!roleData.clientId) {
           showNotification('Please select a client for this role', 'error');
-          setSaving(false);
           return;
         }
 
-        await axios.post('/api/admin/roles', roleData);
+        await createRole(roleData).unwrap();
         showNotification('Role created successfully', 'success');
       }
 
-      await fetchRoles();
       closeDialog();
     } catch (error) {
-      const errorMessage = error.response?.data?.error || error.response?.data?.message || 'Failed to save role';
+      const errorMessage = error.data?.error || error.data?.message || 'Failed to save role';
       showNotification(errorMessage, 'error');
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -224,26 +188,17 @@ export const RolesView = () => {
       return;
     }
 
-    setSavingPermissions(true);
     try {
-      await axios.put(`/api/admin/roles/${selectedRole.id}/permissions`, {
+      await updateRolePermissions({
+        roleId: selectedRole.id,
         permissions: selectedPermissions
-      });
-
-      const index = roles.findIndex(r => r.id === selectedRole.id);
-      if (index !== -1) {
-        const updatedRoles = [...roles];
-        updatedRoles[index].permissions_count = selectedPermissions.length;
-        setRoles(updatedRoles);
-      }
+      }).unwrap();
 
       showNotification('Permissions updated successfully', 'success');
       closePermissionsDialog();
     } catch (error) {
-      const errorMessage = error.response?.data?.error || 'Failed to save permissions';
+      const errorMessage = error.data?.error || 'Failed to save permissions';
       showNotification(errorMessage, 'error');
-    } finally {
-      setSavingPermissions(false);
     }
   };
 
@@ -252,19 +207,15 @@ export const RolesView = () => {
     setDeleteDialog(true);
   };
 
-  const deleteRole = async () => {
-    setDeleting(true);
+  const handleDeleteRole = async () => {
     try {
-      await axios.delete(`/api/admin/roles/${roleToDelete.id}`);
-      setRoles(roles.filter(r => r.id !== roleToDelete.id));
+      await deleteRole(roleToDelete.id).unwrap();
       showNotification('Role deleted successfully', 'success');
       setDeleteDialog(false);
       setRoleToDelete(null);
     } catch (error) {
-      const errorMessage = error.response?.data?.error || 'Failed to delete role';
+      const errorMessage = error.data?.error || 'Failed to delete role';
       showNotification(errorMessage, 'error');
-    } finally {
-      setDeleting(false);
     }
   };
 
@@ -304,14 +255,138 @@ export const RolesView = () => {
     return roleName === 'BPO Admin' || roleName === 'Client Admin';
   };
 
+  // DataGrid columns
+  const columns = useMemo(
+    () => [
+      {
+        field: 'id',
+        headerName: 'ID',
+        width: 80,
+        align: 'center',
+        headerAlign: 'center',
+      },
+      {
+        field: 'role_name',
+        headerName: 'Role Name',
+        width: 200,
+        align: 'left',
+        headerAlign: 'left',
+        renderCell: (params) => (
+          <Typography variant="body2" fontWeight={500}>
+            {params.value}
+          </Typography>
+        ),
+      },
+      {
+        field: 'description',
+        headerName: 'Description',
+        width: 250,
+        flex: 1,
+        align: 'left',
+        headerAlign: 'left',
+      },
+      {
+        field: 'client_name',
+        headerName: 'Client',
+        width: 180,
+        align: 'left',
+        headerAlign: 'left',
+        renderCell: (params) => (
+          <Chip
+            label={params.value}
+            color="primary"
+            variant="outlined"
+            size="small"
+          />
+        ),
+      },
+      {
+        field: 'permissions_count',
+        headerName: 'Permissions',
+        width: 150,
+        align: 'center',
+        headerAlign: 'center',
+        renderCell: (params) => (
+          <Badge badgeContent={params.value || 0} color="info">
+            <ShieldIcon color="action" />
+          </Badge>
+        ),
+      },
+      {
+        field: 'created_at',
+        headerName: 'Created',
+        width: 150,
+        align: 'center',
+        headerAlign: 'center',
+        valueFormatter: (value) => formatDate(value),
+      },
+      {
+        field: 'actions',
+        headerName: 'Actions',
+        width: 150,
+        align: 'center',
+        headerAlign: 'center',
+        sortable: false,
+        filterable: false,
+        disableColumnMenu: true,
+        renderCell: (params) => (
+          <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
+            <Tooltip title="Edit role">
+              <IconButton
+                size="small"
+                onClick={() => openEditDialog(params.row.original)}
+              >
+                <EditIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Configure permissions">
+              <IconButton
+                size="small"
+                color="success"
+                onClick={() => openPermissionsDialog(params.row.original)}
+              >
+                <SecurityIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Delete role">
+              <span>
+                <IconButton
+                  size="small"
+                  color="error"
+                  onClick={() => confirmDelete(params.row.original)}
+                  disabled={isProtectedRole(params.row.role_name)}
+                >
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </span>
+            </Tooltip>
+          </Box>
+        ),
+      },
+    ],
+    [openEditDialog, openPermissionsDialog, confirmDelete]
+  );
+
+  // Transform roles data for DataGrid
+  const rows = useMemo(
+    () =>
+      filteredRoles.map((role) => ({
+        id: role.id,
+        role_name: role.role_name,
+        description: role.description,
+        client_name: role.client_name,
+        permissions_count: role.permissions_count || 0,
+        created_at: role.created_at,
+        original: role, // Keep original object for actions
+      })),
+    [filteredRoles]
+  );
+
   return (
     <Box>
-      {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
+      {/* Header - Desktop Only */}
+      <Box sx={{ display: { xs: 'none', md: 'flex' }, justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
         <Box>
-          <Typography variant="h4" component="h2" fontWeight="bold" gutterBottom>
-            Role Management
-          </Typography>
           <Typography variant="body1" color="text.secondary">
             Manage roles and permissions
           </Typography>
@@ -320,14 +395,14 @@ export const RolesView = () => {
           variant="contained"
           startIcon={<AddIcon />}
           onClick={openAddDialog}
-          sx={{ mt: 1 }}
+          sx={{ ...primaryIconButton, mt: 1 }}
         >
           Add New Role
         </Button>
       </Box>
 
-      {/* Filter Section */}
-      <Card sx={{ mb: 3 }}>
+      {/* Filter Section - Desktop Only */}
+      <Card sx={{ display: { xs: 'none', md: 'block' }, mb: 3 }}>
         <CardContent>
           <Grid container spacing={2}>
             <Grid item xs={12} md={4}>
@@ -351,88 +426,68 @@ export const RolesView = () => {
         </CardContent>
       </Card>
 
-      {/* Roles Table */}
-      <Card>
-        {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', p: 8 }}>
-            <CircularProgress />
-          </Box>
-        ) : (
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>ID</TableCell>
-                  <TableCell>Role Name</TableCell>
-                  <TableCell>Description</TableCell>
-                  <TableCell>Client</TableCell>
-                  <TableCell>Permissions</TableCell>
-                  <TableCell>Created</TableCell>
-                  <TableCell align="right">Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {filteredRoles.map((role) => (
-                  <TableRow key={role.id} hover>
-                    <TableCell>{role.id}</TableCell>
-                    <TableCell>
-                      <Typography variant="body2" fontWeight={500}>
-                        {role.role_name}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>{role.description}</TableCell>
-                    <TableCell>
-                      <Chip
-                        label={role.client_name}
-                        color="primary"
-                        variant="outlined"
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Badge badgeContent={role.permissions_count || 0} color="info">
-                        <ShieldIcon color="action" />
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{formatDate(role.created_at)}</TableCell>
-                    <TableCell align="right">
-                      <Tooltip title="Edit role">
-                        <IconButton
-                          size="small"
-                          onClick={() => openEditDialog(role)}
-                        >
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Configure permissions">
-                        <IconButton
-                          size="small"
-                          color="success"
-                          onClick={() => openPermissionsDialog(role)}
-                        >
-                          <SecurityIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Delete role">
-                        <span>
-                          <IconButton
-                            size="small"
-                            color="error"
-                            onClick={() => confirmDelete(role)}
-                            disabled={isProtectedRole(role.role_name)}
-                          >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                        </span>
-                      </Tooltip>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        )}
-      </Card>
+      {/* Roles Table - Desktop Only */}
+      <Box sx={{ display: { xs: 'none', md: 'block' }, height: 600, width: '100%' }}>
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          loading={isLoading}
+          pageSizeOptions={[10, 25, 50]}
+          initialState={{
+            pagination: {
+              paginationModel: { pageSize: 10, page: 0 },
+            },
+          }}
+          disableRowSelectionOnClick
+          sx={{
+            borderRadius: '0.7rem',
+            padding: '1rem 0 0 0',
+            '& .MuiDataGrid-columnHeaders': {
+              backgroundColor: '#f5f5f5 !important',
+              borderBottom: '2px solid #e0e0e0',
+            },
+            '& .MuiDataGrid-columnHeader': {
+              backgroundColor: '#f5f5f5 !important',
+            },
+            '& .MuiDataGrid-columnHeaderTitle': {
+              fontWeight: 600,
+              textTransform: 'uppercase',
+              fontSize: '0.875rem',
+            },
+            '& .MuiDataGrid-sortIcon': {
+              color: '#0c7b3f',
+            },
+            '& .MuiDataGrid-columnHeader--sorted': {
+              backgroundColor: '#e8f5e9 !important',
+            },
+            '& .MuiDataGrid-filler': {
+              backgroundColor: '#f5f5f5 !important',
+            },
+            '& .MuiDataGrid-cell': {
+              borderBottom: '1px solid #f0f0f0',
+            },
+            '& .MuiDataGrid-cell:focus': {
+              outline: 'none',
+            },
+            '& .MuiDataGrid-row:hover': {
+              backgroundColor: 'action.hover',
+            },
+          }}
+        />
+      </Box>
+
+      {/* Mobile View */}
+      <RolesViewMovil
+        roles={filteredRoles.map(role => ({
+          ...role,
+          permissionsCount: role.permissions_count || 0
+        }))}
+        clients={clients}
+        openAddDialog={openAddDialog}
+        openEditDialog={openEditDialog}
+        openPermissionsDialog={openPermissionsDialog}
+        openDeleteDialog={confirmDelete}
+      />
 
       {/* Add/Edit Role Dialog */}
       <Dialog open={dialog} onClose={closeDialog} maxWidth="sm" fullWidth>
@@ -476,13 +531,19 @@ export const RolesView = () => {
           </FormControl>
         </DialogContent>
         <DialogActions>
-          <Button onClick={closeDialog}>Cancel</Button>
+          <Button
+            onClick={closeDialog}
+            sx={outlinedButton}
+          >
+            Cancel
+          </Button>
           <Button
             variant="contained"
             onClick={saveRole}
-            disabled={saving || !isFormValid()}
+            disabled={isSaving || !isFormValid()}
+            sx={primaryButton}
           >
-            {saving ? 'Saving...' : 'Save'}
+            {isSaving ? 'Saving...' : 'Save'}
           </Button>
         </DialogActions>
       </Dialog>
@@ -513,13 +574,19 @@ export const RolesView = () => {
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button onClick={closePermissionsDialog}>Cancel</Button>
+          <Button
+            onClick={closePermissionsDialog}
+            sx={outlinedButton}
+          >
+            Cancel
+          </Button>
           <Button
             variant="contained"
             onClick={savePermissions}
-            disabled={savingPermissions}
+            disabled={isUpdatingPermissions}
+            sx={primaryButton}
           >
-            {savingPermissions ? 'Saving...' : 'Save Permissions'}
+            {isUpdatingPermissions ? 'Saving...' : 'Save Permissions'}
           </Button>
         </DialogActions>
       </Dialog>
@@ -534,14 +601,20 @@ export const RolesView = () => {
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteDialog(false)}>Cancel</Button>
+          <Button
+            onClick={() => setDeleteDialog(false)}
+            sx={outlinedButton}
+          >
+            Cancel
+          </Button>
           <Button
             variant="contained"
             color="error"
-            onClick={deleteRole}
-            disabled={deleting}
+            onClick={handleDeleteRole}
+            disabled={isDeleting}
+            sx={primaryButton}
           >
-            {deleting ? 'Deleting...' : 'Delete'}
+            {isDeleting ? 'Deleting...' : 'Delete'}
           </Button>
         </DialogActions>
       </Dialog>
@@ -560,4 +633,3 @@ export const RolesView = () => {
     </Box>
   );
 };
-

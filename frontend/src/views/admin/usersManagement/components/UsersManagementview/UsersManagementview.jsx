@@ -14,22 +14,15 @@ import {
   IconButton,
   InputLabel,
   MenuItem,
-  Paper,
   Select,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   TextField,
   Typography,
-  CircularProgress,
   Alert,
   Snackbar,
   InputAdornment,
   Tooltip,
 } from "@mui/material";
+import { DataGrid } from "@mui/x-data-grid";
 import {
   Add as AddIcon,
   Edit as EditIcon,
@@ -44,9 +37,15 @@ import {
   useUpdateUserMutation,
   useGetClientsQuery,
   useGetRolesQuery,
-} from "../../../store/api/adminApi";
+} from "../../../../../store/api/adminApi";
+import {
+  primaryButton,
+  primaryIconButton,
+  outlinedButton,
+} from "../../../../../layouts/style/styles";
+import { UsersManagementviewMovil } from "./UsersManagementviewMovil";
 
-export const UsersManagement = () => {
+export const UsersManagementView = () => {
   // RTK Query hooks
   const { data: users = [], isLoading: loading } = useGetUsersQuery();
   const { data: clients = [] } = useGetClientsQuery();
@@ -190,10 +189,7 @@ export const UsersManagement = () => {
       closeDialog();
     } catch (error) {
       console.error("Error saving user:", error);
-      showNotification(
-        error.data?.error || "Failed to save user",
-        "error"
-      );
+      showNotification(error.data?.error || "Failed to save user", "error");
     }
   };
 
@@ -238,19 +234,147 @@ export const UsersManagement = () => {
     setUserForm((prev) => ({ ...prev, client_id: clientId, role_id: null }));
   };
 
+  // DataGrid columns
+  const columns = useMemo(
+    () => [
+      {
+        field: 'id',
+        headerName: 'ID',
+        width: 80,
+        align: 'center',
+        headerAlign: 'center',
+      },
+      {
+        field: 'name',
+        headerName: 'Name',
+        width: 200,
+        align: 'left',
+        headerAlign: 'left',
+        renderCell: (params) => (
+          <Typography variant="body2" fontWeight="medium">
+            {params.value || "N/A"}
+          </Typography>
+        ),
+      },
+      {
+        field: 'email',
+        headerName: 'Email',
+        width: 250,
+        align: 'left',
+        headerAlign: 'left',
+      },
+      {
+        field: 'client_name',
+        headerName: 'Client',
+        width: 200,
+        align: 'left',
+        headerAlign: 'left',
+      },
+      {
+        field: 'role_name',
+        headerName: 'Role',
+        width: 180,
+        align: 'left',
+        headerAlign: 'left',
+        renderCell: (params) =>
+          params.value ? (
+            <Chip
+              label={params.value}
+              color="primary"
+              size="small"
+              variant="outlined"
+            />
+          ) : (
+            <Typography variant="body2" color="text.secondary">
+              No role assigned
+            </Typography>
+          ),
+      },
+      {
+        field: 'is_active',
+        headerName: 'Status',
+        width: 120,
+        align: 'center',
+        headerAlign: 'center',
+        renderCell: (params) => (
+          <Chip
+            label={params.value ? 'Active' : 'Inactive'}
+            color={params.value ? 'success' : 'error'}
+            size="small"
+          />
+        ),
+      },
+      {
+        field: 'created_at',
+        headerName: 'Created',
+        width: 150,
+        align: 'center',
+        headerAlign: 'center',
+        valueFormatter: (value) => formatDate(value),
+      },
+      {
+        field: 'actions',
+        headerName: 'Actions',
+        width: 120,
+        align: 'center',
+        headerAlign: 'center',
+        sortable: false,
+        filterable: false,
+        disableColumnMenu: true,
+        renderCell: (params) => (
+          <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
+            <Tooltip title="Edit user">
+              <IconButton
+                size="small"
+                onClick={() => openEditDialog(params.row.original)}
+              >
+                <EditIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip
+              title={
+                params.row.is_active ? "Deactivate user" : "Activate user"
+              }
+            >
+              <IconButton
+                size="small"
+                onClick={() => toggleUserStatus(params.row.original)}
+              >
+                {params.row.is_active ? (
+                  <BlockIcon fontSize="small" />
+                ) : (
+                  <CheckCircleIcon fontSize="small" />
+                )}
+              </IconButton>
+            </Tooltip>
+          </Box>
+        ),
+      },
+    ],
+    []
+  );
+
+  // Transform users data for DataGrid
+  const rows = useMemo(
+    () =>
+      filteredUsers.map((user) => ({
+        id: user.id,
+        name: `${user.first_name || ""} ${user.last_name || ""}`.trim() || "N/A",
+        email: user.email,
+        client_name: user.client_name || "N/A",
+        role_name: user.role_name,
+        is_active: user.is_active,
+        created_at: user.created_at,
+        original: user, // Keep original object for actions
+      })),
+    [filteredUsers]
+  );
+
   return (
     <Box sx={{ p: 3 }}>
-      {/* Header */}
-      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
+      {/* Header - Desktop Only */}
+      <Box sx={{ display: { xs: "none", md: "flex" }, justifyContent: "space-between", mb: 3 }}>
         <Box>
-          <Typography
-            variant="h4"
-            component="h2"
-            fontWeight="bold"
-            gutterBottom
-          >
-            User Management
-          </Typography>
           <Typography variant="body1" color="text.secondary">
             Manage user accounts and permissions
           </Typography>
@@ -260,14 +384,14 @@ export const UsersManagement = () => {
           color="primary"
           startIcon={<AddIcon />}
           onClick={openAddDialog}
-          sx={{ height: "fit-content" }}
+          sx={primaryIconButton}
         >
           Add New User
         </Button>
       </Box>
 
-      {/* Filter Section */}
-      <Card sx={{ mb: 3 }}>
+      {/* Filter Section - Desktop Only */}
+      <Card sx={{ display: { xs: "none", md: "block" }, mb: 3 }}>
         <CardContent>
           <Grid container spacing={2}>
             <Grid item xs={12} md={6} lg={4}>
@@ -307,99 +431,64 @@ export const UsersManagement = () => {
         </CardContent>
       </Card>
 
-      {/* Users Data Table */}
-      <Paper>
-        {loading ? (
-          <Box sx={{ display: "flex", justifyContent: "center", p: 8 }}>
-            <CircularProgress />
-          </Box>
-        ) : filteredUsers.length === 0 ? (
-          <Box sx={{ textAlign: "center", p: 8, color: "text.secondary" }}>
-            No users found
-          </Box>
-        ) : (
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>ID</TableCell>
-                  <TableCell>Name</TableCell>
-                  <TableCell>Email</TableCell>
-                  <TableCell>Client</TableCell>
-                  <TableCell>Role</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Created</TableCell>
-                  <TableCell align="right">Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {filteredUsers.map((user) => (
-                  <TableRow key={user.id} hover>
-                    <TableCell>{user.id}</TableCell>
-                    <TableCell>
-                      <Typography variant="body2" fontWeight="medium">
-                        {`${user.first_name || ""} ${
-                          user.last_name || ""
-                        }`.trim() || "N/A"}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>{user.client_name || "N/A"}</TableCell>
-                    <TableCell>
-                      {user.role_name ? (
-                        <Chip
-                          label={user.role_name}
-                          color="primary"
-                          size="small"
-                          variant="outlined"
-                        />
-                      ) : (
-                        <Typography variant="body2" color="text.secondary">
-                          No role assigned
-                        </Typography>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={user.is_active ? "Active" : "Inactive"}
-                        color={user.is_active ? "success" : "error"}
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>{formatDate(user.created_at)}</TableCell>
-                    <TableCell align="right">
-                      <Tooltip title="Edit user">
-                        <IconButton
-                          size="small"
-                          onClick={() => openEditDialog(user)}
-                        >
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip
-                        title={
-                          user.is_active ? "Deactivate user" : "Activate user"
-                        }
-                      >
-                        <IconButton
-                          size="small"
-                          onClick={() => toggleUserStatus(user)}
-                        >
-                          {user.is_active ? (
-                            <BlockIcon fontSize="small" />
-                          ) : (
-                            <CheckCircleIcon fontSize="small" />
-                          )}
-                        </IconButton>
-                      </Tooltip>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        )}
-      </Paper>
+      {/* Users Data Table - Desktop Only */}
+      <Box sx={{ display: { xs: "none", md: "block" }, height: 600, width: '100%' }}>
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          loading={loading}
+          pageSizeOptions={[10, 25, 50, 100]}
+          initialState={{
+            pagination: {
+              paginationModel: { pageSize: 10, page: 0 },
+            },
+          }}
+          disableRowSelectionOnClick
+          sx={{
+            borderRadius: '0.7rem',
+            padding: '1rem 0 0 0',
+            '& .MuiDataGrid-columnHeaders': {
+              backgroundColor: '#f5f5f5 !important',
+              borderBottom: '2px solid #e0e0e0',
+            },
+            '& .MuiDataGrid-columnHeader': {
+              backgroundColor: '#f5f5f5 !important',
+            },
+            '& .MuiDataGrid-columnHeaderTitle': {
+              fontWeight: 600,
+              textTransform: 'uppercase',
+              fontSize: '0.875rem',
+            },
+            '& .MuiDataGrid-sortIcon': {
+              color: '#0c7b3f',
+            },
+            '& .MuiDataGrid-columnHeader--sorted': {
+              backgroundColor: '#e8f5e9 !important',
+            },
+            '& .MuiDataGrid-filler': {
+              backgroundColor: '#f5f5f5 !important',
+            },
+            '& .MuiDataGrid-cell': {
+              borderBottom: '1px solid #f0f0f0',
+            },
+            '& .MuiDataGrid-cell:focus': {
+              outline: 'none',
+            },
+            '& .MuiDataGrid-row:hover': {
+              backgroundColor: 'action.hover',
+            },
+          }}
+        />
+      </Box>
+
+      {/* Mobile View */}
+      <UsersManagementviewMovil
+        users={filteredUsers}
+        clients={clients}
+        roles={roles}
+        handleEdit={openEditDialog}
+        openDialog={openAddDialog}
+      />
 
       {/* Add/Edit User Dialog */}
       <Dialog open={dialog} onClose={closeDialog} maxWidth="md" fullWidth>
@@ -519,13 +608,14 @@ export const UsersManagement = () => {
           </Box>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={closeDialog} color="inherit">
+          <Button onClick={closeDialog} sx={outlinedButton}>
             Cancel
           </Button>
           <Button
             onClick={saveUser}
             variant="contained"
             disabled={saving || !isFormValid}
+            sx={primaryButton}
           >
             {saving ? "Saving..." : "Save"}
           </Button>
@@ -550,4 +640,3 @@ export const UsersManagement = () => {
     </Box>
   );
 };
-

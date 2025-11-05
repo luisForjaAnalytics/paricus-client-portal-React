@@ -6,15 +6,7 @@ import {
   Typography,
   Button,
   Grid,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
   Chip,
-  IconButton,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -29,9 +21,7 @@ import {
   Snackbar,
   Container,
   Avatar,
-  Divider,
   Stack,
-  Tooltip,
 } from "@mui/material";
 import {
   AttachMoney as MoneyIcon,
@@ -40,15 +30,8 @@ import {
   People as PeopleIcon,
   Upload as UploadIcon,
   Refresh as RefreshIcon,
-  Download as DownloadIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Link as LinkIcon,
-  Payment as PaymentIcon,
   PictureAsPdf as PdfIcon,
-  Business as BusinessIcon,
   CheckCircle as CheckIcon,
-  OpenInNew as OpenIcon,
   CalendarToday as CalendarIcon,
 } from "@mui/icons-material";
 import {
@@ -58,10 +41,21 @@ import {
   useUploadInvoiceMutation,
   useUpdateInvoiceMutation,
   useDeleteInvoiceMutation,
-  useUpdatePaymentLinkMutation,
   useLazyGetDownloadUrlQuery,
 } from "../../store/api/invoicesApi";
 import { useSelector } from "react-redux";
+import { ClientSummary } from "./components/ClientSummary";
+import { ClientSummaryMovil } from "./components/ClientSummaryMovil";
+import { ClientBreakdown } from "./components/ClientBreakdown";
+import { ClientBreakdownMovil } from "./components/ClientBreakdownMovil";
+import { InvoicesTableView } from "./components/InvoicesTableView/InvoicesTableView";
+import { InvoicesTableViewMovil } from "./components/InvoicesTableView/InvoicesTableViewMovil";
+import {
+  primaryButton,
+  primaryIconButton,
+  outlinedButton,
+  outlinedIconButton,
+} from "../../layouts/style/styles";
 
 export const FinancialsView = () => {
   // Auth store
@@ -104,10 +98,11 @@ export const FinancialsView = () => {
   });
 
   // RTK Query mutations
-  const [uploadInvoiceMutation, { isLoading: uploading }] = useUploadInvoiceMutation();
-  const [updateInvoiceMutation, { isLoading: savingInvoiceEdit }] = useUpdateInvoiceMutation();
+  const [uploadInvoiceMutation, { isLoading: uploading }] =
+    useUploadInvoiceMutation();
+  const [updateInvoiceMutation, { isLoading: savingInvoiceEdit }] =
+    useUpdateInvoiceMutation();
   const [deleteInvoiceMutation] = useDeleteInvoiceMutation();
-  const [updatePaymentLinkMutation, { isLoading: savingPaymentLink }] = useUpdatePaymentLinkMutation();
   const [getDownloadUrl] = useLazyGetDownloadUrlQuery();
 
   // Derived state from RTK Query
@@ -121,17 +116,23 @@ export const FinancialsView = () => {
   const loading = loadingAllClients || loadingMyInvoices;
 
   // Error handling for permissions
-  const permissionError = !isAdmin && !hasViewAccess ? "You do not have permission to view invoices" : null;
-  const error = permissionError || allClientsError?.data?.message || invoicesError?.data?.message || myInvoicesError?.data?.message || null;
+  const permissionError =
+    !isAdmin && !hasViewAccess
+      ? "You do not have permission to view invoices"
+      : null;
+  const error =
+    permissionError ||
+    allClientsError?.data?.message ||
+    invoicesError?.data?.message ||
+    myInvoicesError?.data?.message ||
+    null;
 
   // Local state
   const [notification, setNotification] = useState(null);
 
   // Modal states
   const [showUploadModal, setShowUploadModal] = useState(false);
-  const [showPaymentLinkModal, setShowPaymentLinkModal] = useState(false);
   const [showEditInvoiceModal, setShowEditInvoiceModal] = useState(false);
-  const [selectedInvoice, setSelectedInvoice] = useState(null);
 
   // Form states
   const [uploadForm, setUploadForm] = useState({
@@ -143,11 +144,8 @@ export const FinancialsView = () => {
     dueDate: "",
     issuedDate: "",
     paymentMethod: "",
-    file: null,
-  });
-
-  const [paymentLinkForm, setPaymentLinkForm] = useState({
     paymentLink: "",
+    file: null,
   });
 
   const [editInvoiceForm, setEditInvoiceForm] = useState({
@@ -238,8 +236,14 @@ export const FinancialsView = () => {
       if (uploadForm.paymentMethod) {
         formData.append("paymentMethod", uploadForm.paymentMethod);
       }
+      if (uploadForm.paymentLink) {
+        formData.append("paymentLink", uploadForm.paymentLink);
+      }
 
-      await uploadInvoiceMutation({ clientFolder: selectedFolder, formData }).unwrap();
+      await uploadInvoiceMutation({
+        clientFolder: selectedFolder,
+        formData,
+      }).unwrap();
 
       showNotification("success", "Invoice uploaded successfully");
       setShowUploadModal(false);
@@ -252,6 +256,7 @@ export const FinancialsView = () => {
         dueDate: "",
         issuedDate: "",
         paymentMethod: "",
+        paymentLink: "",
         file: null,
       });
     } catch (err) {
@@ -271,7 +276,10 @@ export const FinancialsView = () => {
         showNotification("success", "Download started");
       } else {
         const clientFolder = invoice.folder || selectedFolder;
-        const result = await getDownloadUrl({ clientFolder, fileName: invoice.fileName }).unwrap();
+        const result = await getDownloadUrl({
+          clientFolder,
+          fileName: invoice.fileName,
+        }).unwrap();
         if (result.downloadUrl) {
           window.open(result.downloadUrl, "_blank");
           showNotification("success", "Download started");
@@ -298,35 +306,6 @@ export const FinancialsView = () => {
       showNotification(
         "error",
         err.data?.message || "Failed to delete invoice"
-      );
-    }
-  };
-
-  const openPaymentLinkModal = (invoice) => {
-    setSelectedInvoice(invoice);
-    setPaymentLinkForm({ paymentLink: invoice.paymentLink || "" });
-    setShowPaymentLinkModal(true);
-  };
-
-  const handleSavePaymentLink = async (e) => {
-    e.preventDefault();
-    if (!selectedInvoice || !paymentLinkForm.paymentLink) return;
-
-    try {
-      await updatePaymentLinkMutation({
-        id: selectedInvoice.id,
-        paymentLink: paymentLinkForm.paymentLink,
-      }).unwrap();
-
-      showNotification("success", "Payment link saved successfully");
-      setShowPaymentLinkModal(false);
-      setSelectedInvoice(null);
-      setPaymentLinkForm({ paymentLink: "" });
-    } catch (err) {
-      console.error("Error saving payment link:", err);
-      showNotification(
-        "error",
-        err.data?.message || "Failed to save payment link"
       );
     }
   };
@@ -440,13 +419,66 @@ export const FinancialsView = () => {
     return statusColors[status] || "default";
   };
 
+  // este arreglo es temporal mientras se tiene la data real///
+  const ClientSummaryCardInfo = overallStats
+    ? [
+        {
+          borderCol: "success.main",
+          cardColor: "#00eb0c1f",
+          label: "Total Revenue",
+          invoiceState: "paid invoices",
+          overallStatsInfo: {
+            tp1: overallStats.totalRevenue,
+            tp2: overallStats.totalPaidInvoices,
+          },
+          icon: { icon: <MoneyIcon color="success" />, color: "success.light" },
+        },
+        {
+          borderCol: "warning.main",
+          cardColor: "#eb7d001f",
+          label: "Outstanding Balance",
+          invoiceState: "unpaid invoices",
+          overallStatsInfo: {
+            tp1: overallStats.outstandingBalance,
+            tp2: overallStats.totalUnpaidInvoices,
+          },
+          icon: { icon: <ClockIcon color="warning" />, color: "warning.light" },
+        },
+        {
+          borderCol: "error.main",
+          cardColor: "#eb00001f",
+          label: "Overdue Amount",
+          invoiceState: "overdue invoices",
+          overallStatsInfo: {
+            tp1: overallStats.overdueAmount,
+            tp2: overallStats.totalOverdueInvoices,
+          },
+          icon: { icon: <WarningIcon color="error" />, color: "error.light" },
+        },
+        {
+          borderCol: "primary.main",
+          cardColor: "#004aeb1f",
+          label: "Active Clients",
+          invoiceState: "total invoices",
+          overallStatsInfo: {
+            tp1: overallStats.totalClients,
+            tp2: overallStats.totalInvoices,
+          },
+          icon: {
+            icon: <PeopleIcon color="primary" />,
+            color: "primary.light",
+          },
+        },
+      ]
+    : [];
+
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
+    <Container maxWidth="xl" sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 3 } }}>
       {/* Page Header */}
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" component="h1" fontWeight="bold" gutterBottom>
+        {/* <Typography variant="h4" component="h1" fontWeight="bold" gutterBottom>
           {isAdmin ? "Financial Overview" : "Your Invoices"}
-        </Typography>
+        </Typography> */}
         <Typography variant="body1" color="text.secondary">
           {isAdmin
             ? "Manage all client invoices and track accounts receivable"
@@ -454,316 +486,57 @@ export const FinancialsView = () => {
         </Typography>
       </Box>
 
-      {/* BPO Admin: Overall Statistics */}
+      {/* BPO Admin: Overall Statistics - Desktop */}
       {isAdmin && overallStats && (
-        <Box sx={{ mb: 4 }}>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              mb: 2,
-            }}
-          >
-            <Typography variant="h6" fontWeight="semibold">
-              All Clients Summary
-            </Typography>
-            <Stack direction="row" spacing={2}>
-              <Button
-                variant="contained"
-                color="secondary"
-                startIcon={<OpenIcon />}
-                href="https://my.waveapps.com/login_external/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Wave Apps
-              </Button>
-              <Button
-                variant="outlined"
-                startIcon={
-                  loading ? <CircularProgress size={16} /> : <RefreshIcon />
-                }
-                onClick={refetchAllClients}
-                disabled={loading}
-              >
-                {loading ? "Loading..." : "Refresh All"}
-              </Button>
-            </Stack>
-          </Box>
-
-          <Grid container spacing={3} sx={{ mb: 3 }}>
-            {/* Total Revenue */}
-            <Grid item xs={12} sm={6} md={3}>
-              <Card
-                sx={{
-                  height: "100%",
-                  borderLeft: 4,
-                  borderColor: "success.main",
-                }}
-              >
-                <CardContent>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                      mb: 1,
-                    }}
-                  >
-                    <Typography variant="subtitle2" color="text.secondary">
-                      Total Revenue
-                    </Typography>
-                    <Avatar sx={{ bgcolor: "success.light" }}>
-                      <MoneyIcon color="success" />
-                    </Avatar>
-                  </Box>
-                  <Typography
-                    variant="h4"
-                    fontWeight="bold"
-                    color="success.main"
-                  >
-                    {formatCurrency(overallStats.totalRevenue)}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {overallStats.totalPaidInvoices} paid invoices
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-
-            {/* Outstanding Balance */}
-            <Grid item xs={12} sm={6} md={3}>
-              <Card
-                sx={{
-                  height: "100%",
-                  borderLeft: 4,
-                  borderColor: "warning.main",
-                }}
-              >
-                <CardContent>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                      mb: 1,
-                    }}
-                  >
-                    <Typography variant="subtitle2" color="text.secondary">
-                      Outstanding Balance
-                    </Typography>
-                    <Avatar sx={{ bgcolor: "warning.light" }}>
-                      <ClockIcon color="warning" />
-                    </Avatar>
-                  </Box>
-                  <Typography
-                    variant="h4"
-                    fontWeight="bold"
-                    color="warning.main"
-                  >
-                    {formatCurrency(overallStats.outstandingBalance)}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {overallStats.totalUnpaidInvoices} unpaid invoices
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-
-            {/* Overdue Amount */}
-            <Grid item xs={12} sm={6} md={3}>
-              <Card
-                sx={{
-                  height: "100%",
-                  borderLeft: 4,
-                  borderColor: "error.main",
-                }}
-              >
-                <CardContent>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                      mb: 1,
-                    }}
-                  >
-                    <Typography variant="subtitle2" color="text.secondary">
-                      Overdue Amount
-                    </Typography>
-                    <Avatar sx={{ bgcolor: "error.light" }}>
-                      <WarningIcon color="error" />
-                    </Avatar>
-                  </Box>
-                  <Typography variant="h4" fontWeight="bold" color="error.main">
-                    {formatCurrency(overallStats.overdueAmount)}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {overallStats.totalOverdueInvoices} overdue invoices
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-
-            {/* Active Clients */}
-            <Grid item xs={12} sm={6} md={3}>
-              <Card
-                sx={{
-                  height: "100%",
-                  borderLeft: 4,
-                  borderColor: "primary.main",
-                }}
-              >
-                <CardContent>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                      mb: 1,
-                    }}
-                  >
-                    <Typography variant="subtitle2" color="text.secondary">
-                      Active Clients
-                    </Typography>
-                    <Avatar sx={{ bgcolor: "primary.light" }}>
-                      <PeopleIcon color="primary" />
-                    </Avatar>
-                  </Box>
-                  <Typography
-                    variant="h4"
-                    fontWeight="bold"
-                    color="primary.main"
-                  >
-                    {overallStats.totalClients}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {overallStats.totalInvoices} total invoices
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
-        </Box>
+        <ClientSummary
+          loading={loading}
+          refetchAllClients={refetchAllClients}
+          formatCurrency={formatCurrency}
+          overallStats={overallStats}
+          payload={ClientSummaryCardInfo}
+        />
       )}
 
-      {/* BPO Admin: Client Breakdown */}
+      {/* BPO Admin: Overall Statistics - Mobile */}
+      {isAdmin && overallStats && (
+        <ClientSummaryMovil
+          loading={loading}
+          refetchAllClients={refetchAllClients}
+          formatCurrency={formatCurrency}
+          payload={ClientSummaryCardInfo}
+        />
+      )}
+
+      {/* BPO Admin: Client Breakdown - Desktop */}
       {isAdmin && (
-        <Box sx={{ mb: 4 }}>
-          <Typography variant="h6" fontWeight="semibold" sx={{ mb: 2 }}>
-            Client Breakdown
-          </Typography>
+        <ClientBreakdown
+          clientBreakdowns={clientBreakdowns}
+          selectedFolder={selectedFolder}
+          formatCurrency={formatCurrency}
+          selectClient={selectClient}
+        />
+      )}
 
-          <Grid container spacing={2}>
-            {clientBreakdowns.map((client) => (
-              <Grid item xs={12} md={6} lg={4} key={client.folder}>
-                <Card
-                  sx={{
-                    cursor: "pointer",
-                    transition: "all 0.3s",
-                    border: selectedFolder === client.folder ? 2 : 0,
-                    borderColor: "primary.main",
-                    bgcolor:
-                      selectedFolder === client.folder
-                        ? "action.selected"
-                        : "background.paper",
-                    "&:hover": {
-                      boxShadow: 6,
-                    },
-                  }}
-                  onClick={() => selectClient(client.folder)}
-                >
-                  <CardContent>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        mb: 2,
-                      }}
-                    >
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 2 }}
-                      >
-                        <Avatar sx={{ bgcolor: "primary.light" }}>
-                          <BusinessIcon color="primary" />
-                        </Avatar>
-                        <Box>
-                          <Typography variant="h6" fontWeight="semibold">
-                            {client.folderDisplay}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {client.totalInvoices} invoices
-                          </Typography>
-                        </Box>
-                      </Box>
-                      <IconButton size="small" color="primary">
-                        <OpenIcon />
-                      </IconButton>
-                    </Box>
-
-                    <Grid container spacing={2}>
-                      <Grid item xs={4}>
-                        <Typography variant="caption" color="text.secondary">
-                          Revenue
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          fontWeight="bold"
-                          color="success.main"
-                        >
-                          {formatCurrency(client.totalRevenue)}
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={4}>
-                        <Typography variant="caption" color="text.secondary">
-                          Outstanding
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          fontWeight="bold"
-                          color="warning.main"
-                        >
-                          {formatCurrency(client.outstandingBalance)}
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={4}>
-                        <Typography variant="caption" color="text.secondary">
-                          Overdue
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          fontWeight="bold"
-                          color="error.main"
-                        >
-                          {formatCurrency(client.overdueAmount)}
-                        </Typography>
-                      </Grid>
-                    </Grid>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-
-            {/* Empty State */}
-            {clientBreakdowns.length === 0 && (
-              <Grid item xs={12}>
-                <Box sx={{ textAlign: "center", py: 8 }}>
-                  <BusinessIcon
-                    sx={{ fontSize: 64, color: "text.disabled", mb: 2 }}
-                  />
-                  <Typography variant="h6" fontWeight="medium" gutterBottom>
-                    No clients found
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Upload invoices to see client data
-                  </Typography>
-                </Box>
-              </Grid>
-            )}
-          </Grid>
-        </Box>
+      {/* BPO Admin: Client Breakdown - Mobile */}
+      {isAdmin && (
+        <ClientBreakdownMovil
+          clientBreakdowns={clientBreakdowns}
+          selectedFolder={selectedFolder}
+          formatCurrency={formatCurrency}
+          selectClient={selectClient}
+          invoices={invoices}
+          isAdmin={isAdmin}
+          formatDate={formatDate}
+          getStatusColor={getStatusColor}
+          downloadInvoice={downloadInvoice}
+          openEditInvoiceModal={openEditInvoiceModal}
+          handleDeleteInvoice={handleDeleteInvoice}
+          openPaymentLink={openPaymentLink}
+          onPaymentLinkSuccess={(message) =>
+            showNotification("success", message)
+          }
+          onPaymentLinkError={(message) => showNotification("error", message)}
+        />
       )}
 
       {/* AR Statistics Dashboard (Client) */}
@@ -890,9 +663,10 @@ export const FinancialsView = () => {
       {(selectedFolder || !isAdmin) && (
         <Card ref={invoicesSection}>
           <CardContent>
+            {/* Header - Desktop Only */}
             <Box
               sx={{
-                display: "flex",
+                display: { xs: "none", md: "flex" },
                 justifyContent: "space-between",
                 alignItems: "center",
                 mb: 3,
@@ -909,6 +683,7 @@ export const FinancialsView = () => {
                     variant="contained"
                     startIcon={<UploadIcon />}
                     onClick={() => setShowUploadModal(true)}
+                    sx={primaryIconButton}
                   >
                     Upload Invoice
                   </Button>
@@ -919,6 +694,7 @@ export const FinancialsView = () => {
                       // RTK Query refetches automatically via invalidateTags
                     }}
                     disabled={loadingInvoices}
+                    sx={outlinedIconButton}
                   >
                     Refresh
                   </Button>
@@ -931,6 +707,7 @@ export const FinancialsView = () => {
                   }
                   onClick={refetchMyInvoices}
                   disabled={loading}
+                  sx={outlinedIconButton}
                 >
                   {loading ? "Loading..." : "Refresh"}
                 </Button>
@@ -964,10 +741,9 @@ export const FinancialsView = () => {
                 <Button
                   variant="contained"
                   onClick={() =>
-                    isAdmin
-                      ? refetchAllClients()
-                      : refetchMyInvoices()
+                    isAdmin ? refetchAllClients() : refetchMyInvoices()
                   }
+                  sx={primaryButton}
                 >
                   Try Again
                 </Button>
@@ -994,216 +770,58 @@ export const FinancialsView = () => {
                 </Box>
               )}
 
-            {/* Invoice Table */}
+            {/* Invoice Table (Desktop) */}
             {!loadingInvoices && !loading && !error && invoices.length > 0 && (
-              <TableContainer>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Invoice #</TableCell>
-                      <TableCell>File Name</TableCell>
-                      <TableCell>Amount</TableCell>
-                      <TableCell>Status</TableCell>
-                      <TableCell>Due Date</TableCell>
-                      <TableCell>Payment Date</TableCell>
-                      {isAdmin && <TableCell>Payment Link</TableCell>}
-                      <TableCell align="right">Actions</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {invoices.map((invoice) => (
-                      <TableRow key={invoice.id} hover>
-                        <TableCell>
-                          <Typography variant="body2" fontWeight="medium">
-                            {invoice.invoiceNumber}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {formatDate(invoice.issuedDate)}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 1,
-                            }}
-                          >
-                            <PdfIcon color="error" fontSize="small" />
-                            <Typography variant="body2">
-                              {invoice.title}
-                            </Typography>
-                          </Box>
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="body2" fontWeight="bold">
-                            {formatCurrency(invoice.amount, invoice.currency)}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={invoice.status.toUpperCase()}
-                            color={getStatusColor(invoice.status)}
-                            size="small"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="body2" color="text.secondary">
-                            {formatDate(invoice.dueDate)}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          {invoice.paidDate && invoice.status === "paid" ? (
-                            <Typography variant="body2" color="success.main">
-                              {formatDate(invoice.paidDate)}
-                            </Typography>
-                          ) : (
-                            <Typography variant="body2" color="text.disabled">
-                              —
-                            </Typography>
-                          )}
-                        </TableCell>
-                        {isAdmin && (
-                          <TableCell>
-                            {!invoice.paymentLink ? (
-                              <Chip
-                                label="PENDING LINK"
-                                color="warning"
-                                size="small"
-                                icon={<WarningIcon />}
-                                onClick={() => openPaymentLinkModal(invoice)}
-                              />
-                            ) : (
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: 1,
-                                }}
-                              >
-                                <Chip
-                                  label="✓ Link Set"
-                                  color="success"
-                                  size="small"
-                                />
-                                <Tooltip title="Update link">
-                                  <IconButton
-                                    size="small"
-                                    color="primary"
-                                    onClick={() =>
-                                      openPaymentLinkModal(invoice)
-                                    }
-                                  >
-                                    <EditIcon fontSize="small" />
-                                  </IconButton>
-                                </Tooltip>
-                              </Box>
-                            )}
-                          </TableCell>
-                        )}
-                        <TableCell align="right">
-                          <Stack
-                            direction="row"
-                            spacing={1}
-                            justifyContent="flex-end"
-                          >
-                            {!isAdmin && invoice.paymentLink && (
-                              <Button
-                                variant="contained"
-                                color="success"
-                                size="small"
-                                startIcon={<PaymentIcon />}
-                                onClick={() =>
-                                  openPaymentLink(invoice.paymentLink)
-                                }
-                              >
-                                Pay Now
-                              </Button>
-                            )}
-                            {isAdmin && (
-                              <Tooltip title="Edit Invoice">
-                                <IconButton
-                                  color="primary"
-                                  size="small"
-                                  onClick={() => openEditInvoiceModal(invoice)}
-                                >
-                                  <EditIcon fontSize="small" />
-                                </IconButton>
-                              </Tooltip>
-                            )}
-                            <Tooltip title="Download">
-                              <IconButton
-                                color="info"
-                                size="small"
-                                onClick={() => downloadInvoice(invoice)}
-                              >
-                                <DownloadIcon fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                            {isAdmin && (
-                              <Tooltip title="Delete">
-                                <IconButton
-                                  color="error"
-                                  size="small"
-                                  onClick={() => handleDeleteInvoice(invoice)}
-                                >
-                                  <DeleteIcon fontSize="small" />
-                                </IconButton>
-                              </Tooltip>
-                            )}
-                          </Stack>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+              <Box sx={{ display: { xs: "none", md: "block" } }}>
+                <InvoicesTableView
+                  invoices={invoices}
+                  isAdmin={isAdmin}
+                  formatDate={formatDate}
+                  formatCurrency={formatCurrency}
+                  getStatusColor={getStatusColor}
+                  downloadInvoice={downloadInvoice}
+                  openEditInvoiceModal={openEditInvoiceModal}
+                  handleDeleteInvoice={handleDeleteInvoice}
+                  openPaymentLink={openPaymentLink}
+                  onPaymentLinkSuccess={(message) =>
+                    showNotification("success", message)
+                  }
+                  onPaymentLinkError={(message) =>
+                    showNotification("error", message)
+                  }
+                />
+              </Box>
+            )}
+
+            {/* Invoice Table (Mobile) - Only for non-admin users */}
+            {!loadingInvoices && !loading && !error && invoices.length > 0 && !isAdmin && (
+              <InvoicesTableViewMovil
+                invoices={invoices}
+                isAdmin={isAdmin}
+                formatDate={formatDate}
+                formatCurrency={formatCurrency}
+                getStatusColor={getStatusColor}
+                downloadInvoice={downloadInvoice}
+                openEditInvoiceModal={openEditInvoiceModal}
+                handleDeleteInvoice={handleDeleteInvoice}
+                openPaymentLink={openPaymentLink}
+                onPaymentLinkSuccess={(message) =>
+                  showNotification("success", message)
+                }
+                onPaymentLinkError={(message) =>
+                  showNotification("error", message)
+                }
+                selectedFolderDisplay={selectedFolderDisplay}
+                onUploadClick={() => setShowUploadModal(true)}
+                onRefreshClick={() => {
+                  isAdmin ? refetchAllClients() : refetchMyInvoices();
+                }}
+                loadingInvoices={loadingInvoices || loading}
+              />
             )}
           </CardContent>
         </Card>
       )}
-
-      {/* Payment Link Modal */}
-      <Dialog
-        open={showPaymentLinkModal}
-        onClose={() => setShowPaymentLinkModal(false)}
-        maxWidth="sm"
-        fullWidth
-      >
-        <form onSubmit={handleSavePaymentLink}>
-          <DialogTitle>Set Payment Link</DialogTitle>
-          <DialogContent>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Invoice: {selectedInvoice?.fileName}
-            </Typography>
-            <TextField
-              fullWidth
-              label="Payment Link URL"
-              type="url"
-              value={paymentLinkForm.paymentLink}
-              onChange={(e) =>
-                setPaymentLinkForm({ paymentLink: e.target.value })
-              }
-              placeholder="https://example.com/payment/invoice-123"
-              helperText="Enter a valid payment URL (Stripe, PayPal, etc.)"
-              required
-              sx={{ mt: 1 }}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setShowPaymentLinkModal(false)}>
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={savingPaymentLink}
-            >
-              {savingPaymentLink ? "Saving..." : "Save Link"}
-            </Button>
-          </DialogActions>
-        </form>
-      </Dialog>
 
       {/* Edit Invoice Modal */}
       <Dialog
@@ -1372,14 +990,19 @@ export const FinancialsView = () => {
           </DialogContent>
           <DialogActions sx={{ justifyContent: "space-between", px: 3, pb: 2 }}>
             {editInvoiceForm.status !== "paid" && (
-              <Button variant="contained" color="success" onClick={markAsPaid}>
+              <Button
+                variant="contained"
+                color="success"
+                onClick={markAsPaid}
+                sx={primaryButton}
+              >
                 Mark as Paid
               </Button>
             )}
             <Box sx={{ ml: "auto" }}>
               <Button
                 onClick={() => setShowEditInvoiceModal(false)}
-                sx={{ mr: 1 }}
+                sx={{ ...outlinedButton, mr: 1 }}
               >
                 Cancel
               </Button>
@@ -1387,6 +1010,7 @@ export const FinancialsView = () => {
                 type="submit"
                 variant="contained"
                 disabled={savingInvoiceEdit}
+                sx={primaryButton}
               >
                 {savingInvoiceEdit ? "Saving..." : "Save Changes"}
               </Button>
@@ -1426,7 +1050,7 @@ export const FinancialsView = () => {
                   variant="outlined"
                   component="label"
                   fullWidth
-                  sx={{ height: "56px" }}
+                  sx={{ ...outlinedButton, height: "56px" }}
                 >
                   {uploadForm.file ? uploadForm.file.name : "Choose PDF File *"}
                   <input
@@ -1572,9 +1196,12 @@ export const FinancialsView = () => {
                   fullWidth
                   label="Payment Link URL (Optional)"
                   type="url"
-                  value={paymentLinkForm.paymentLink}
+                  value={uploadForm.paymentLink}
                   onChange={(e) =>
-                    setPaymentLinkForm({ paymentLink: e.target.value })
+                    setUploadForm((prev) => ({
+                      ...prev,
+                      paymentLink: e.target.value,
+                    }))
                   }
                   placeholder="https://example.com/payment/invoice-123"
                   helperText="Enter a valid payment URL (Stripe, PayPal, etc.)"
@@ -1583,11 +1210,14 @@ export const FinancialsView = () => {
             </Grid>
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setShowUploadModal(false)}>Cancel</Button>
+            <Button onClick={() => setShowUploadModal(false)} sx={outlinedButton}>
+              Cancel
+            </Button>
             <Button
               type="submit"
               variant="contained"
               disabled={uploading || !uploadForm.file}
+              sx={primaryButton}
             >
               {uploading ? "Uploading..." : "Upload Invoice"}
             </Button>
@@ -1615,4 +1245,3 @@ export const FinancialsView = () => {
     </Container>
   );
 };
-

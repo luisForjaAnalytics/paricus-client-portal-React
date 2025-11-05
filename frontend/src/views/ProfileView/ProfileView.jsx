@@ -17,6 +17,10 @@ import {
   useUpdateProfileMutation,
   useUpdatePasswordMutation
 } from '../../store/api/profileApi';
+import {
+  primaryButton,
+  outlinedButton,
+} from '../../layouts/style/styles';
 
 export const ProfileView = ({ authStore }) => {
   // RTK Query hooks
@@ -265,6 +269,7 @@ export const ProfileView = ({ authStore }) => {
               variant="contained"
               onClick={saveProfile}
               disabled={isUpdatingProfile}
+              sx={primaryButton}
             >
               {isUpdatingProfile ? 'Saving...' : 'Save Profile'}
             </Button>
@@ -273,6 +278,7 @@ export const ProfileView = ({ authStore }) => {
               variant="outlined"
               onClick={savePassword}
               disabled={isUpdatingPassword || !canSavePassword()}
+              sx={outlinedButton}
             >
               {isUpdatingPassword ? 'Updating...' : 'Update Password'}
             </Button>
