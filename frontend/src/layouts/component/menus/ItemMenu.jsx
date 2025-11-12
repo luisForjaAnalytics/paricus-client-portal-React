@@ -1,4 +1,3 @@
-import * as React from "react";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
@@ -7,8 +6,16 @@ import ListItemText from "@mui/material/ListItemText";
 import { Box } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { colors } from "../../style/styles";
 
-export const ItemMenu = ({ label, icon, route, setTitleState, titleState }) => {
+export const ItemMenu = ({
+  label,
+  icon,
+  route,
+  setTitleState,
+  titleState,
+  open,
+}) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const isSelected = titleState === label;
@@ -19,20 +26,23 @@ export const ItemMenu = ({ label, icon, route, setTitleState, titleState }) => {
   };
 
   return (
-    <List sx={{ width: "100%", maxWidth: 360 }} aria-label="contacts">
+    <List sx={{ width: "100%" }} aria-label="contacts">
       <ListItem disablePadding>
         <ListItemButton
           onClick={handleRedirect}
           disableRipple
           sx={{
-            opacity: isSelected ? 1 : 0.5,
             backgroundColor: "transparent",
+            justifyContent: open ? "initial" : "center",
+            px: 2.5,
+            paddingTop: "0%",
+            paddingBottom: "0%",
             "&:hover": {
-              opacity: 1,
-              backgroundColor: "transparent",
-              boxShadow: "none",
+              backgroundColor: "rgba(0, 0, 0, 0.04)",
               "& .icon-circle": {
-                backgroundColor: isSelected ? "rgba(255, 255, 255, 0.95)" : "rgba(255, 255, 255, 0.2)",
+                backgroundColor: isSelected
+                  ? colors.primaryLight
+                  : "rgba(0, 0, 0, 0.06)",
               },
             },
             "&:active": {
@@ -40,20 +50,28 @@ export const ItemMenu = ({ label, icon, route, setTitleState, titleState }) => {
             },
           }}
         >
-          <ListItemIcon>
+          <ListItemIcon
+            sx={{
+              minWidth: 0,
+              mr: open ? 2 : "auto",
+              justifyContent: "center",
+            }}
+          >
             <Box
               className="icon-circle"
               sx={{
-                width: 40,
-                height: 40,
-                borderRadius: "50%",
+                width: 28,
+                height: 28,
+                borderRadius: "15%",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                backgroundColor: isSelected ? "#ffffff" : "transparent",
+                backgroundColor: isSelected
+                  ? colors.drowerIcons
+                  : "transparent",
                 transition: "all 0.3s ease",
                 "& svg": {
-                  color: isSelected ? "#0c7b3f" : "white",
+                  color: isSelected ? "white" : "grey.500",
                 },
               }}
             >
@@ -63,7 +81,8 @@ export const ItemMenu = ({ label, icon, route, setTitleState, titleState }) => {
           <ListItemText
             primary={t(`navigation.${label}`)}
             sx={{
-              color: "white",
+              opacity: open ? 1 : 0,
+              color: isSelected ? colors.textPrimary : colors.textSecondary,
               fontWeight: isSelected ? "bold" : "normal",
             }}
           />

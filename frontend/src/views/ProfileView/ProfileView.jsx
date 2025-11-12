@@ -13,6 +13,7 @@ import {
   Snackbar,
   Alert
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import {
   useUpdateProfileMutation,
   useUpdatePasswordMutation
@@ -23,6 +24,8 @@ import {
 } from '../../layouts/style/styles';
 
 export const ProfileView = ({ authStore }) => {
+  const { t } = useTranslation();
+
   // RTK Query hooks
   const [updateProfile, { isLoading: isUpdatingProfile }] = useUpdateProfileMutation();
   const [updatePassword, { isLoading: isUpdatingPassword }] = useUpdatePasswordMutation();
@@ -104,9 +107,9 @@ export const ProfileView = ({ authStore }) => {
         authStore.user = { ...authStore.user, ...response };
       }
 
-      showMessage('Profile updated successfully', 'success');
+      showMessage(t('profile.profileUpdated'), 'success');
     } catch (error) {
-      showMessage(error.data?.error || 'Failed to update profile', 'error');
+      showMessage(error.data?.error || t('profile.profileUpdateFailed'), 'error');
     }
   };
 
@@ -126,9 +129,9 @@ export const ProfileView = ({ authStore }) => {
         confirmPassword: ''
       });
 
-      showMessage('Password updated successfully', 'success');
+      showMessage(t('profile.passwordUpdated'), 'success');
     } catch (error) {
-      showMessage(error.data?.error || 'Failed to update password', 'error');
+      showMessage(error.data?.error || t('profile.passwordUpdateFailed'), 'error');
     }
   };
 
@@ -136,8 +139,8 @@ export const ProfileView = ({ authStore }) => {
     <Box>
       <Card>
         <CardHeader
-          title="My Profile"
-          subheader="Manage your account settings and preferences"
+          title={t('profile.title')}
+          subheader={t('profile.description')}
           sx={{ borderBottom: 1, borderColor: 'divider' }}
         />
 
@@ -146,7 +149,7 @@ export const ProfileView = ({ authStore }) => {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 4 }}>
             <Avatar
               src="https://i.pravatar.cc/150?u=a042581f4e29026704d"
-              alt="Profile photo"
+              alt={t('profile.photoLabel')}
               sx={{ width: 80, height: 80 }}
             />
             <Box>
@@ -166,7 +169,7 @@ export const ProfileView = ({ authStore }) => {
           <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
               <TextField
-                label="First Name"
+                label={t('profile.firstName')}
                 fullWidth
                 value={profileForm.firstName}
                 onChange={(e) => setProfileForm({ ...profileForm, firstName: e.target.value })}
@@ -175,7 +178,7 @@ export const ProfileView = ({ authStore }) => {
 
             <Grid item xs={12} md={6}>
               <TextField
-                label="Last Name"
+                label={t('profile.lastName')}
                 fullWidth
                 value={profileForm.lastName}
                 onChange={(e) => setProfileForm({ ...profileForm, lastName: e.target.value })}
@@ -184,18 +187,18 @@ export const ProfileView = ({ authStore }) => {
 
             <Grid item xs={12} md={6}>
               <TextField
-                label="Email"
+                label={t('profile.email')}
                 type="email"
                 fullWidth
                 value={profileForm.email}
                 disabled
-                helperText="Email cannot be changed"
+                helperText={t('profile.emailCannotChange')}
               />
             </Grid>
 
             <Grid item xs={12} md={6}>
               <TextField
-                label="Phone (Optional)"
+                label={t('profile.phoneOptional')}
                 type="tel"
                 fullWidth
                 value={profileForm.phone}
@@ -207,13 +210,13 @@ export const ProfileView = ({ authStore }) => {
           {/* Change Password Section */}
           <Box sx={{ mt: 4, pt: 3, borderTop: 1, borderColor: 'divider' }}>
             <Typography variant="h6" fontWeight={600} gutterBottom sx={{ mb: 3 }}>
-              Change Password
+              {t('profile.changePassword')}
             </Typography>
 
             <Grid container spacing={3}>
               <Grid item xs={12} md={6}>
                 <TextField
-                  label="Current Password"
+                  label={t('profile.currentPassword')}
                   type="password"
                   fullWidth
                   value={passwordForm.currentPassword}
@@ -225,7 +228,7 @@ export const ProfileView = ({ authStore }) => {
 
               <Grid item xs={12} md={6}>
                 <TextField
-                  label="New Password"
+                  label={t('profile.newPassword')}
                   type="password"
                   fullWidth
                   value={passwordForm.newPassword}
@@ -233,7 +236,7 @@ export const ProfileView = ({ authStore }) => {
                   error={passwordForm.newPassword.length > 0 && passwordForm.newPassword.length < 8}
                   helperText={
                     passwordForm.newPassword.length > 0 && passwordForm.newPassword.length < 8
-                      ? 'Password must be at least 8 characters'
+                      ? t('profile.passwordMinLength')
                       : ''
                   }
                 />
@@ -241,7 +244,7 @@ export const ProfileView = ({ authStore }) => {
 
               <Grid item xs={12} md={6}>
                 <TextField
-                  label="Confirm New Password"
+                  label={t('profile.confirmPassword')}
                   type="password"
                   fullWidth
                   value={passwordForm.confirmPassword}
@@ -255,7 +258,7 @@ export const ProfileView = ({ authStore }) => {
                   helperText={
                     passwordForm.confirmPassword.length > 0 &&
                     passwordForm.newPassword !== passwordForm.confirmPassword
-                      ? 'Passwords do not match'
+                      ? t('profile.passwordsNotMatch')
                       : ''
                   }
                 />
@@ -271,7 +274,7 @@ export const ProfileView = ({ authStore }) => {
               disabled={isUpdatingProfile}
               sx={primaryButton}
             >
-              {isUpdatingProfile ? 'Saving...' : 'Save Profile'}
+              {isUpdatingProfile ? t('common.saving') : t('profile.saveProfile')}
             </Button>
 
             <Button
@@ -280,7 +283,7 @@ export const ProfileView = ({ authStore }) => {
               disabled={isUpdatingPassword || !canSavePassword()}
               sx={outlinedButton}
             >
-              {isUpdatingPassword ? 'Updating...' : 'Update Password'}
+              {isUpdatingPassword ? t('common.updating') : t('profile.updatePassword')}
             </Button>
           </Box>
         </CardContent>

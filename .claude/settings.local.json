@@ -1,7 +1,17 @@
 {
   "permissions": {
     "allow": [
-      "Bash(del \"C:\\FORJA\\paricus-React\\paricus-client-portal\\frontend\\src\\views\\financials\\components\\ClientSummaryMovil.jsx\")"
+      "Bash(del \"C:\\FORJA\\paricus-React\\paricus-client-portal\\frontend\\src\\views\\financials\\components\\ClientSummaryMovil.jsx\")",
+      "Bash(git diff:*)",
+      "Bash(npm run dev:*)",
+      "Bash(git checkout:*)",
+      "Bash(del \"C:\\FORJA\\paricus-React\\paricus-client-portal\\frontend\\src\\layouts\\style\\stylesLayout.js\")",
+      "Bash(find:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(curl:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []

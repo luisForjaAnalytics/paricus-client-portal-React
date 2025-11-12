@@ -17,7 +17,7 @@ import { Language as LanguageIcon } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
 import { useLoginMutation } from "../store/api/authApi";
 import { setCredentials } from "../store/auth/authSlice";
-import { primaryButton } from "../layouts/style/styles";
+import { primaryButton, colors } from "../layouts/style/styles";
 
 const LoginView = () => {
   const navigate = useNavigate();
@@ -63,7 +63,7 @@ const LoginView = () => {
         alignItems: "center",
         justifyContent: "center",
         minHeight: "100vh",
-        bgcolor: "grey.50",
+        bgcolor: colors.background,
       }}
     >
       <Container maxWidth="sm">
@@ -72,8 +72,9 @@ const LoginView = () => {
           sx={{
             p: 4,
             border: 1,
-            borderColor: "grey.200",
+            borderColor: colors.border,
             borderRadius: 2,
+            bgcolor: colors.surface,
           }}
         >
           {/* Header */}
@@ -82,12 +83,12 @@ const LoginView = () => {
               sx={{
                 width: 64,
                 height: 64,
-                bgcolor: "success.light",
+                bgcolor: colors.neutral,
                 margin: "0 auto",
                 mb: 2,
               }}
             >
-              <LanguageIcon sx={{ fontSize: 32, color: "success.main" }} />
+              <LanguageIcon sx={{ fontSize: 32, color: colors.primary }} />
             </Avatar>
 
             <Typography
@@ -141,11 +142,11 @@ const LoginView = () => {
                 to="/forgot-password"
                 variant="body2"
                 sx={{
-                  color: "success.main",
+                  color: colors.primary,
                   fontWeight: 500,
                   textDecoration: "none",
                   "&:hover": {
-                    color: "success.dark",
+                    color: colors.primaryHover,
                     textDecoration: "underline",
                   },
                 }}

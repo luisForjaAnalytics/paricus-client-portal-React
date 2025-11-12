@@ -4,30 +4,37 @@ import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
 import InputBase from "@mui/material/InputBase";
 import Badge from "@mui/material/Badge";
 import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
-import AccountCircle from "@mui/icons-material/AccountCircle";
-import MailIcon from "@mui/icons-material/Mail";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import MoreIcon from "@mui/icons-material/MoreVert";
 import { AvatarButton } from "./AvatarButton";
 import { useTranslation } from "react-i18next";
 import LanguageMenu from "./LanguageMenu";
 import { MobilMenu } from "./menus/MobilMenu";
+import { MenuSectionsAvatar } from "./menus/MenuSection";
+import { colors, layout, typography } from "../style/styles";
+import { useSelector } from "react-redux";
 
-// 🔹 Estilo de la barra de búsqueda
+// 🔹 Estilo de la barra de búsqueda (basado en STYLE_GUIDE.md)
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
-  borderRadius: "1.5rem",
-  backgroundColor: alpha(theme.palette.grey[300], 0.7), // fondo gris claro
+  borderRadius: layout.borderRadius.sm, // rounded-lg from style guide
+  backgroundColor: colors.background, // bg-gray-50
+  border: `1px solid ${colors.borderInput}`, // border-gray-300
   "&:hover": {
-    backgroundColor: alpha(theme.palette.grey[400], 0.9),
+    backgroundColor: colors.surfaceHighest, // bg-gray-100
   },
-  width: "80%",
+  "&:focus-within": {
+    borderColor: colors.focusRing, // focus:border-green-500
+    boxShadow: `0 0 0 1px ${colors.focusRing}`, // focus:ring-green-500
+  },
+  width: "350px",
+  maxWidth: "100%",
+  transition: "all 250ms ease-in-out",
   [theme.breakpoints.down("sm")]: {
     width: "180px",
   },
@@ -41,20 +48,28 @@ const SearchIconWrapper = styled("div")(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  color: "black",
+  color: colors.textMuted, // text-gray-500
 }));
 
 const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: "black",
+  color: colors.textPrimary, // text-gray-900
+  fontSize: typography.fontSize.body, // text-sm (14px)
+  fontFamily: typography.fontFamily,
+  width: "100%",
   "& .MuiInputBase-input": {
     padding: theme.spacing(1, 1, 1, 0),
     paddingLeft: `calc(1em + ${theme.spacing(4)})`,
     width: "100%",
+    "&::placeholder": {
+      color: colors.textMuted, // text-gray-500
+      opacity: 1,
+    },
   },
 }));
 
 export const AppBarLayout = ({ titleState, setTitleState }) => {
   const { t } = useTranslation();
+  const userAuth = useSelector((item) => (item?.auth || {}).user);
   const [anchorEl, setAnchorEl] = useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
 
@@ -93,6 +108,7 @@ export const AppBarLayout = ({ titleState, setTitleState }) => {
   ///  Menu Mobil ///
   const renderMobileMenu = (
     <Menu
+      sx={{ mt: "45px" }}
       anchorEl={mobileMoreAnchorEl}
       anchorOrigin={{ vertical: "top", horizontal: "right" }}
       id={mobileMenuId}
@@ -101,28 +117,11 @@ export const AppBarLayout = ({ titleState, setTitleState }) => {
       open={isMobileMenuOpen}
       onClose={handleMobileMenuClose}
     >
-      <MenuItem>
-        <IconButton size="large" color="inherit">
-          <Badge badgeContent={4} color="error">
-            <MailIcon sx={{ color: "black" }} />
-          </Badge>
-        </IconButton>
-        <p style={{ color: "black" }}>Messages</p>
-      </MenuItem>
-      <MenuItem>
-        <IconButton size="large" color="inherit">
-          <Badge badgeContent={17} color="error">
-            <NotificationsIcon sx={{ color: "black" }} />
-          </Badge>
-        </IconButton>
-        <p style={{ color: "black" }}>Notifications</p>
-      </MenuItem>
-      <MenuItem onClick={handleProfileMenuOpen}>
-        <IconButton size="large" color="inherit">
-          <AccountCircle sx={{ color: "black" }} />
-        </IconButton>
-        <p style={{ color: "black" }}>Profile</p>
-      </MenuItem>
+      <MenuSectionsAvatar
+        handleCloseUserMenu={handleMobileMenuClose}
+        userAuth={userAuth}
+        setTitleState={setTitleState}
+      />
     </Menu>
   );
 
@@ -131,9 +130,10 @@ export const AppBarLayout = ({ titleState, setTitleState }) => {
       <AppBar
         position="static"
         sx={{
-          backgroundColor: { xs: "#0c7b3f", md: "white" }, // barra blanca
-          color: "black", // texto negro
-          boxShadow: 2,
+          backgroundColor: { xs: colors.primary, md: colors.surface },
+          color: colors.textPrimary,
+          boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)", // shadow-sm from Tailwind
+          borderBottom: `1px solid ${colors.border}`,
         }}
       >
         <Toolbar
@@ -142,28 +142,17 @@ export const AppBarLayout = ({ titleState, setTitleState }) => {
             alignItems: "center",
             justifyContent: "space-between",
             gap: 2,
+            py: 1.1,
           }}
         >
           <MobilMenu />
-          <Typography
-            variant="h4"
-            component="h2"
-            fontWeight="bold"
-            sx={{
-              flexGrow: 0,
-              ml: { xs: 1, sm: 4 },
-              display: { xs: "none", sm: "block" },
-            }}
-          >
-            {t(`navigation.${titleState}`)}
-          </Typography>
 
           {/* Barra de búsqueda */}
           <Box
             sx={{
               flexGrow: 1,
               display: "flex",
-              justifyContent: "center",
+              justifyContent: "flex-start",
             }}
           >
             <Search>
@@ -183,29 +172,44 @@ export const AppBarLayout = ({ titleState, setTitleState }) => {
               display: { xs: "none", md: "flex" },
               marginRight: "2.5rem",
               alignItems: "center",
+              gap: 1,
             }}
           >
             {/* /// LanguageMenu /// */}
-            <LanguageMenu />
-            <IconButton size="large" color="inherit">
+            <Box
+            sx={{
+              margin:'0 -0.5rem 0 0'
+            }}
+            >
+              <LanguageMenu />
+            </Box>
+            <IconButton
+              size="large"
+              sx={{
+                color: colors.textSecondary,
+                "&:hover": {
+                  backgroundColor: colors.background,
+                },
+              }}
+            >
               <Badge badgeContent={17} color="error">
-                <NotificationsIcon sx={{ color: "black" }} />
+                <NotificationsIcon />
               </Badge>
             </IconButton>
             <AvatarButton setTitleState={setTitleState} />
           </Box>
 
           {/* 🔹 MENÚ MÓVIL */}
-          <Box sx={{ display: { xs: "flex", md: "none" }, padding: "0 0 0 0" }}>
+          <Box sx={{ display: { xs: "flex", md: "none" }, padding: 0 }}>
             <IconButton
               size="large"
               aria-label="show more"
               aria-controls={mobileMenuId}
               aria-haspopup="true"
               onClick={handleMobileMenuOpen}
-              color="inherit"
+              sx={{ color: colors.textWhite }}
             >
-              <MoreIcon sx={{ color: "black" }} />
+              <MoreIcon />
             </IconButton>
           </Box>
         </Toolbar>

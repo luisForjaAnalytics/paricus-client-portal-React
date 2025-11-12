@@ -7,7 +7,6 @@ import {
   TableHead,
   TableRow,
   Typography,
-  Chip,
   IconButton,
   Tooltip,
   Stack,
@@ -23,13 +22,18 @@ import {
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import { PendingLinkModal } from "./PendingLinkModal";
+import {
+  table,
+  colors,
+  typography,
+  statusBadges,
+} from "../../../../layouts/style/styles";
 
 export const InvoicesTableView = ({
   invoices,
   isAdmin,
   formatDate,
   formatCurrency,
-  getStatusColor,
   downloadInvoice,
   openEditInvoiceModal,
   handleDeleteInvoice,
@@ -39,33 +43,84 @@ export const InvoicesTableView = ({
 }) => {
   const { t } = useTranslation();
 
+  // Función para obtener el estilo del badge según el status
+  const getStatusBadgeStyle = (status) => {
+    const statusMap = {
+      paid: statusBadges.paid,
+      sent: statusBadges.sent,
+      pending: statusBadges.pending,
+      overdue: statusBadges.error,
+    };
+    return statusMap[status?.toLowerCase()] || statusBadges.info;
+  };
+
   return (
-    <TableContainer>
+    <TableContainer
+      sx={{
+        backgroundColor: "transparent",
+         borderRadius: '1rem',
+        // border: `1px solid ${colors.border}`,
+        boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+        overflow: "hidden",
+        width:'100%'
+      }}
+    >
       <Table>
-        <TableHead>
+        <TableHead sx={table.header}>
           <TableRow>
-            <TableCell>{t("invoices.table.invoiceNumber")}</TableCell>
-            <TableCell>{t("invoices.table.fileName")}</TableCell>
-            <TableCell>{t("invoices.table.amount")}</TableCell>
-            <TableCell>{t("invoices.table.status")}</TableCell>
-            <TableCell>{t("invoices.table.dueDate")}</TableCell>
-            <TableCell>{t("invoices.table.paymentDate")}</TableCell>
-            {isAdmin && <TableCell>{t("invoices.table.paymentLink")}</TableCell>}
-            <TableCell align="right">{t("invoices.table.actions")}</TableCell>
+            <TableCell sx={table.headerCell}>
+              {t("invoices.table.invoiceNumber")}
+            </TableCell>
+            <TableCell sx={table.headerCell}>
+              {t("invoices.table.fileName")}
+            </TableCell>
+            <TableCell sx={table.headerCell}>
+              {t("invoices.table.amount")}
+            </TableCell>
+            <TableCell sx={table.headerCell}>
+              {t("invoices.table.status")}
+            </TableCell>
+            <TableCell sx={table.headerCell}>
+              {t("invoices.table.dueDate")}
+            </TableCell>
+            <TableCell sx={table.headerCell}>
+              {t("invoices.table.paymentDate")}
+            </TableCell>
+            {isAdmin && (
+              <TableCell sx={table.headerCell}>
+                {t("invoices.table.paymentLink")}
+              </TableCell>
+            )}
+            <TableCell sx={{ ...table.headerCell, textAlign: "right" }}>
+              {t("invoices.table.actions")}
+            </TableCell>
           </TableRow>
         </TableHead>
-        <TableBody>
+        <TableBody sx={table.body}>
           {invoices.map((invoice) => (
-            <TableRow key={invoice.id} hover>
-              <TableCell>
-                <Typography variant="body2" fontWeight="medium">
+            <TableRow key={invoice.id} sx={table.row}>
+              <TableCell sx={table.cell}>
+                <Typography
+                  sx={{
+                    fontSize: typography.fontSize.body, // text-sm (14px)
+                    fontWeight: typography.fontWeight.bold,
+                    fontFamily: typography.fontFamily,
+                    color: colors.textPrimary,
+                  }}
+                >
                   {invoice.invoiceNumber}
                 </Typography>
-                <Typography variant="caption" color="text.secondary">
+                <Typography
+                  sx={{
+                    fontSize: typography.fontSize.small, // text-xs (12px)
+                    color: colors.textMuted,
+                    fontFamily: typography.fontFamily,
+                  }}
+                >
                   {formatDate(invoice.issuedDate)}
                 </Typography>
               </TableCell>
-              <TableCell>
+              <TableCell sx={table.cell}>
                 <Box
                   sx={{
                     display: "flex",
@@ -73,40 +128,71 @@ export const InvoicesTableView = ({
                     gap: 1,
                   }}
                 >
-                  <PdfIcon color="error" fontSize="small" />
-                  <Typography variant="body2">{invoice.title}</Typography>
+                  <PdfIcon sx={{ color: colors.error, fontSize: 20 }} />
+                  <Typography
+                    sx={{
+                      fontSize: typography.fontSize.body,
+                      fontFamily: typography.fontFamily,
+                      color: colors.textPrimary,
+                    }}
+                  >
+                    {invoice.title}
+                  </Typography>
                 </Box>
               </TableCell>
-              <TableCell>
-                <Typography variant="body2" fontWeight="bold">
+              <TableCell sx={table.cell}>
+                <Typography
+                  sx={{
+                    fontSize: typography.fontSize.body,
+                    fontWeight: typography.fontWeight.bold,
+                    fontFamily: typography.fontFamily,
+                    color: colors.textPrimary,
+                  }}
+                >
                   {formatCurrency(invoice.amount, invoice.currency)}
                 </Typography>
               </TableCell>
-              <TableCell>
-                <Chip
-                  label={invoice.status.toUpperCase()}
-                  color={getStatusColor(invoice.status)}
-                  size="small"
-                />
+              <TableCell sx={table.cell}>
+                <Box component="span" sx={getStatusBadgeStyle(invoice.status)}>
+                  {invoice.status.toUpperCase()}
+                </Box>
               </TableCell>
-              <TableCell>
-                <Typography variant="body2" color="text.secondary">
+              <TableCell sx={table.cell}>
+                <Typography
+                  sx={{
+                    fontSize: typography.fontSize.body,
+                    color: colors.textSecondary,
+                    fontFamily: typography.fontFamily,
+                  }}
+                >
                   {formatDate(invoice.dueDate)}
                 </Typography>
               </TableCell>
-              <TableCell>
+              <TableCell sx={table.cell}>
                 {invoice.paidDate && invoice.status === "paid" ? (
-                  <Typography variant="body2" color="success.main">
+                  <Typography
+                    sx={{
+                      fontSize: typography.fontSize.body,
+                      color: colors.success,
+                      fontFamily: typography.fontFamily,
+                    }}
+                  >
                     {formatDate(invoice.paidDate)}
                   </Typography>
                 ) : (
-                  <Typography variant="body2" color="text.disabled">
+                  <Typography
+                    sx={{
+                      fontSize: typography.fontSize.body,
+                      color: colors.textMuted,
+                      fontFamily: typography.fontFamily,
+                    }}
+                  >
                     —
                   </Typography>
                 )}
               </TableCell>
               {isAdmin && (
-                <TableCell>
+                <TableCell sx={table.cell}>
                   <PendingLinkModal
                     invoice={invoice}
                     onSuccess={onPaymentLinkSuccess}
@@ -114,7 +200,7 @@ export const InvoicesTableView = ({
                   />
                 </TableCell>
               )}
-              <TableCell align="right">
+              <TableCell sx={{ ...table.cell, textAlign: "right" }}>
                 <Stack direction="row" spacing={1} justifyContent="flex-end">
                   {!isAdmin && invoice.paymentLink && (
                     <Button

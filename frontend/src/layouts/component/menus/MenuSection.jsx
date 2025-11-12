@@ -1,10 +1,10 @@
-import DescriptionIcon from "@mui/icons-material/Description";
-import LeaderboardIcon from "@mui/icons-material/Leaderboard";
-import AutoStoriesIcon from "@mui/icons-material/AutoStories";
-import LocalAtmSharpIcon from "@mui/icons-material/LocalAtmSharp";
-import VolumeUpIcon from "@mui/icons-material/VolumeUp";
-import SettingsIcon from "@mui/icons-material/Settings";
-import PersonIcon from "@mui/icons-material/Person";
+import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
+import LeaderboardOutlinedIcon from "@mui/icons-material/LeaderboardOutlined";
+import AutoStoriesOutlinedIcon from "@mui/icons-material/AutoStoriesOutlined";
+import LocalAtmOutlinedIcon from "@mui/icons-material/LocalAtmOutlined";
+import VolumeUpOutlinedIcon from "@mui/icons-material/VolumeUpOutlined";
+import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import { ItemMenu } from "./ItemMenu";
 import {
   Divider,
@@ -21,40 +21,40 @@ import { SingOutButton } from "./SingOutButton";
 const menuItems = [
   {
     label: "dashboard",
-    icon: <LeaderboardIcon sx={{ color: "white" }} fontSize="medium" />,
+    icon: <LeaderboardOutlinedIcon fontSize="small" />,
     route: "dashboard",
   },
 
   {
     label: "reporting",
-    icon: <DescriptionIcon sx={{ color: "white" }} fontSize="medium" />,
+    icon: <DescriptionOutlinedIcon fontSize="small" />,
     route: "reporting",
   },
 
   {
     label: "audioRetrieval",
-    icon: <VolumeUpIcon sx={{ color: "white" }} fontSize="medium" />,
+    icon: <VolumeUpOutlinedIcon fontSize="small" />,
     route: "audio-recordings",
   },
 
   {
     label: "knowledgeBase",
-    icon: <AutoStoriesIcon sx={{ color: "white" }} fontSize="medium" />,
+    icon: <AutoStoriesOutlinedIcon fontSize="small" />,
     route: "knowledge-base",
   },
   {
     label: "financial",
-    icon: <LocalAtmSharpIcon sx={{ color: "white" }} fontSize="medium" />,
+    icon: <LocalAtmOutlinedIcon fontSize="small" />,
     route: "financial",
   },
   {
     label: "reportsManagement",
-    icon: <DescriptionIcon sx={{ color: "white" }} fontSize="medium" />,
+    icon: <DescriptionOutlinedIcon fontSize="small" />,
     route: "reports-management",
   },
   {
     label: "userManagement",
-    icon: <SettingsIcon sx={{ color: "white" }} fontSize="medium" />,
+    icon: <SettingsOutlinedIcon fontSize="small" />,
     route: "users-management/clients",
   },
 ];
@@ -63,17 +63,17 @@ const menuItems = [
 const menuItemsAvatar = [
   {
     label: "myProfile",
-    icon: <PersonIcon fontSize="small" />,
+    icon: <PersonOutlineIcon fontSize="small" />,
     route: "users-profile",
   },
   {
     label: "userManagement",
-    icon: <SettingsIcon fontSize="small" />,
+    icon: <SettingsOutlinedIcon fontSize="small" />,
     route: "users-management",
   },
 ];
 
-export const MenuSections = ({ setTitleState, titleState }) => {
+export const MenuSections = ({ setTitleState, titleState, open }) => {
   return (
     <>
       {menuItems.map((item, index) => (
@@ -84,6 +84,7 @@ export const MenuSections = ({ setTitleState, titleState }) => {
             route={item.route}
             setTitleState={setTitleState}
             titleState={titleState}
+            open={open}
           />
         </ListItem>
       ))}

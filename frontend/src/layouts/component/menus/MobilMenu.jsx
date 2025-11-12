@@ -16,7 +16,7 @@ export const MobilMenu = () => {
   };
 
   const DrawerList = (
-    <Box sx={{ width: 250}} role="presentation" onClick={toggleDrawer(false)} >
+    <Box sx={{ width: 250 }} role="presentation" onClick={toggleDrawer(false)}>
       <List>
         <MenuSections setTitleState={setTitleState} titleState={titleState} />
       </List>
@@ -25,16 +25,23 @@ export const MobilMenu = () => {
 
   return (
     <>
-      <Button onClick={toggleDrawer(true)} sx={{ display: { md: "none" } }}>
-        <MenuOpenIcon sx={{color:"white"}}/>
+      <Button
+        onClick={toggleDrawer(true)}
+        sx={{ display: { md: "none" }, marginLeft: "-0.5rem" }}
+      >
+        <MenuOpenIcon sx={{ color: "white" }} fontSize={"large"} />
       </Button>
-      <Drawer open={open} onClose={toggleDrawer(false)} sx={{
+      <Drawer
+        open={open}
+        onClose={toggleDrawer(false)}
+        sx={{
           "& .MuiDrawer-paper": {
-            backgroundColor: colors.primario,
+            backgroundColor: colors.primary,
             color: "white",
             borderRight: "none",
           },
-        }}>
+        }}
+      >
         {DrawerList}
       </Drawer>
     </>

@@ -33,6 +33,7 @@ import {
   primaryButton,
   primaryIconButton,
   outlinedButton,
+  colors,
 } from "../../../../../layouts/style/styles";
 import { ClientsViewMovil } from "./ClientsViewMovil";
 
@@ -328,7 +329,7 @@ export const ClientsView = () => {
               fontSize: "0.875rem",
             },
             "& .MuiDataGrid-sortIcon": {
-              color: "#0c7b3f",
+              color: colors.primary,
             },
             "& .MuiDataGrid-columnHeader--sorted": {
               backgroundColor: "#e8f5e9 !important",

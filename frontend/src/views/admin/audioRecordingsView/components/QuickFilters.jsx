@@ -3,6 +3,7 @@ import { Box, Button, Typography } from "@mui/material";
 import FilterListOffIcon from "@mui/icons-material/FilterListOff";
 import { companies } from "./company.js";
 import { useTranslation } from "react-i18next";
+import { colors } from "../../../../layouts/style/styles";
 
 export const QuickFilters = ({ setCompanyFilter, setAudioFilter, filters }) => {
   const { t } = useTranslation();
@@ -41,7 +42,7 @@ export const QuickFilters = ({ setCompanyFilter, setAudioFilter, filters }) => {
             onClick={() => setCompanyFilter(item.name)}
             sx={{
               backgroundColor:
-                filters.company === item.name ? "#0c7b3f" : "#0c7b4018",
+                filters.company === item.name ? "${colors.primary}" : "#0c7b4018",
               color: filters.company === item.name ? "#fff" : "#00000075",
               "&:hover": {
                 backgroundColor:
@@ -65,7 +66,7 @@ export const QuickFilters = ({ setCompanyFilter, setAudioFilter, filters }) => {
         variant="contained"
         startIcon={<FilterListOffIcon />}
         sx={{
-          backgroundColor: Boolean(!filters.company) ? "#0c7b4018" : "#0c7b3f",
+          backgroundColor: Boolean(!filters.company) ? "#0c7b4018" : "${colors.primary}",
           color: Boolean(!filters.company) ? "#00000075" : "#fff",
           "&:hover": {
             backgroundColor: Boolean(!filters.company)

@@ -24,6 +24,12 @@ import SupportAgentIcon from "@mui/icons-material/SupportAgent";
 import { useTranslation } from "react-i18next";
 import { AdvancedFilters } from "./AdvancedFilters";
 import { companies } from "./company.js";
+import {
+  colors,
+  typography,
+  statusBadges,
+  card,
+} from "../../../../layouts/style/styles";
 
 // Function to create columns with audio playback handlers
 const createColumns = (
@@ -61,11 +67,17 @@ const createColumns = (
     headerAlign: "center",
     sortable: true,
     renderCell: (params) => (
-      <Chip
-        label={params.value || t("audioRecordings.table.unknown")}
-        size="small"
-        color={params.value ? "primary" : "default"}
-      />
+      <Box
+        component="span"
+        sx={{
+          ...statusBadges.info,
+          border: `1px solid ${colors.primary}`,
+          backgroundColor: colors.primaryLight,
+          color: colors.primary,
+        }}
+      >
+        {params.value || t("audioRecordings.table.unknown")}
+      </Box>
     ),
   },
   {
@@ -288,13 +300,13 @@ export const TableView = ({
                 label="Company"
                 sx={{
                   "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#0c7b3f",
+                    borderColor: colors.primary,
                   },
                   "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#0c7b3f",
+                    borderColor: colors.primary,
                   },
                   "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#0c7b3f",
+                    borderColor: colors.primary,
                   },
                 }}
               >
@@ -413,36 +425,40 @@ export const TableView = ({
         }}
         //disableRowSelectionOnClick
         sx={{
+          ...card,
           padding: "1rem 0 0 0",
-          borderRadius: "1rem",
-          // Header styles - Fondo gris
+          border: `1px solid ${colors.border}`, // border-gray-200
+          // Header styles - bg-gray-50
           "& .MuiDataGrid-columnHeaders": {
-            backgroundColor: "#f5f5f5 !important",
-            borderBottom: "2px solid #e0e0e0",
+            backgroundColor: `${colors.background} !important`, // bg-gray-50
+            borderBottom: `2px solid ${colors.border}`,
           },
           "& .MuiDataGrid-columnHeader": {
-            backgroundColor: "#f5f5f5 !important", // color de la celda del
+            backgroundColor: `${colors.background} !important`, // bg-gray-50
           },
           "& .MuiDataGrid-columnHeaderTitle": {
-            fontWeight: 600,
+            fontWeight: typography.fontWeight.bold, // font-bold
             textTransform: "uppercase",
-            fontSize: "0.875rem",
+            fontSize: typography.fontSize.tableHeader, // text-xs (12px)
+            fontFamily: typography.fontFamily,
+            color: colors.textMuted, // text-gray-500
+            letterSpacing: '0.05em', // tracking-wider
           },
           // Sorting icons
           "& .MuiDataGrid-sortIcon": {
-            color: "#0c7b3f",
+            color: colors.primary,
           },
           "& .MuiDataGrid-columnHeader--sorted": {
-            backgroundColor: "#e8f5e9 !important",
+            backgroundColor: `${colors.primaryLight} !important`, // bg-green-100 when sorted
           },
-          // Filler column también en gris
+          // Filler column also gray
           "& .MuiDataGrid-filler": {
-            backgroundColor: "#f5f5f5 !important",
+            backgroundColor: `${colors.background} !important`,
             width: "0 !important",
             minWidth: "0 !important",
             maxWidth: "0 !important",
           },
-          // Ajustar el scrollbar area
+          // Adjust scrollbar area
           "& .MuiDataGrid-scrollbarFiller": {
             display: "none !important",
           },
@@ -452,14 +468,17 @@ export const TableView = ({
           },
           // Cell styles
           "& .MuiDataGrid-cell": {
-            borderBottom: "1px solid #f0f0f0",
+            borderBottom: `1px solid ${colors.border}`, // border-gray-200
+            fontSize: typography.fontSize.body, // text-sm (14px)
+            fontFamily: typography.fontFamily,
+            color: colors.textPrimary, // text-gray-900
           },
           "& .MuiDataGrid-cell:focus": {
             outline: "none",
           },
           // Row hover effect
           "& .MuiDataGrid-row:hover": {
-            backgroundColor: "action.hover",
+            backgroundColor: colors.background, // hover:bg-gray-50
           },
         }}
       />

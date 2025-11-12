@@ -4,6 +4,7 @@ import {
   Box,
   Card,
   CardContent,
+  Divider,
   Grid,
   IconButton,
   Typography,
@@ -12,6 +13,14 @@ import {
   Business as BusinessIcon,
   OpenInNew as OpenIcon,
 } from "@mui/icons-material";
+import {
+  clientCard,
+  clientCardSelected,
+  colors,
+  typography,
+  spacing,
+  titlesTypography,
+} from "../../../layouts/style/styles";
 
 export const ClientBreakdown = ({
   clientBreakdowns,
@@ -19,9 +28,25 @@ export const ClientBreakdown = ({
   formatCurrency,
   selectClient,
 }) => {
+  const getInitials = (folderDisplay = "") => {
+    try {
+      const companyName = folderDisplay.trim().split(" ");
+      const firstInitial = companyName[0]?.[0] || "";
+      const lastInitial = companyName[companyName.length - 1]?.[0] || "";
+      return `${firstInitial}${lastInitial}`.toUpperCase();
+    } catch (err) {
+      console.warn(`ERROR: ${err}`);
+    }
+  };
+
   return (
     <Box sx={{ display: { xs: "none", md: "block" }, mb: 4 }}>
-      <Typography variant="h6" fontWeight="semibold" sx={{ mb: 2 }}>
+      <Typography
+        sx={{
+          ...titlesTypography.primaryTitle,
+          mb: 2,
+        }}
+      >
         Client Breakdown
       </Typography>
 
@@ -29,7 +54,7 @@ export const ClientBreakdown = ({
         sx={{
           display: "flex",
           flexDirection: { xs: "column", md: "row" },
-          gap: 3,
+          gap: spacing.md / 8, // gap-6 (24px converted to MUI units)
           width: "100%",
         }}
       >
@@ -37,22 +62,13 @@ export const ClientBreakdown = ({
           <Box flex={1} key={client.folder}>
             <Card
               sx={{
-                cursor: "pointer",
-                transition: "all 0.3s",
-                border: selectedFolder === client.folder ? 2 : 0,
-                borderRadius: "1rem",
-                borderColor: "primary.main",
-                bgcolor:
-                  selectedFolder === client.folder
-                    ? "action.selected"
-                    : "background.paper",
-                "&:hover": {
-                  boxShadow: 6,
-                },
+                ...(selectedFolder === client.folder
+                  ? clientCardSelected
+                  : clientCard),
               }}
               onClick={() => selectClient(client.folder)}
             >
-              <CardContent>
+              <CardContent sx={{ p: spacing.gap5 / 8 }}>
                 <Box
                   sx={{
                     display: "flex",
@@ -61,62 +77,134 @@ export const ClientBreakdown = ({
                     mb: 2,
                   }}
                 >
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                    <Avatar sx={{ bgcolor: "primary.light" }}>
-                      <BusinessIcon color="primary" />
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                    <Avatar
+                      sx={{
+                        width: 40,
+                        height: 40,
+                        color: colors.primary,
+                        bgcolor: colors.financialClientAvatar,
+                        fontSize: "1rem",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {getInitials(client?.folderDisplay)}
                     </Avatar>
                     <Box>
-                      <Typography variant="h6" fontWeight="semibold">
+                      <Typography
+                        sx={{
+                          ...titlesTypography.sectionTitle,
+                          marginTop: "0.5rem",
+                        }}
+                      >
                         {client.folderDisplay}
                       </Typography>
-                      <Typography variant="caption" color="text.secondary">
+                      <Typography
+                        sx={{
+                          fontSize: typography.fontSize.small, // text-xs (12px)
+                          color: colors.textMuted,
+                          fontFamily: typography.fontFamily,
+                        }}
+                      >
                         {client.totalInvoices} invoices
                       </Typography>
                     </Box>
                   </Box>
-                  <IconButton size="small" color="primary">
+                  <IconButton
+                    size="small"
+                    sx={{
+                      color: colors.primary,
+                      "&:hover": {
+                        backgroundColor: colors.primaryLight,
+                      },
+                    }}
+                  >
                     <OpenIcon />
                   </IconButton>
                 </Box>
 
-                <Grid container spacing={2}>
-                  <Grid >
-                    <Typography variant="caption" color="text.secondary">
+                <Divider
+                  sx={{
+                    width: selectedFolder === client.folder ? "100%" : "30%",
+                    backgroundColor: "#ffffffff",
+                    borderBottomWidth: 2,
+                    borderRadius: "2rem",
+                    transition: " 0.4s ease",
+                    mx: "auto",
+                  }}
+                />
+
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    margin: "0.5rem 1rem 0 1rem",
+                  }}
+                >
+                  <Box>
+                    <Typography
+                      sx={{
+                        fontSize: typography.fontSize.small, // text-xs (12px)
+                        color: colors.textMuted,
+                        fontFamily: typography.fontFamily,
+                      }}
+                    >
                       Revenue
                     </Typography>
                     <Typography
-                      variant="body2"
-                      fontWeight="bold"
-                      color="success.main"
+                      sx={{
+                        fontSize: typography.fontSize.body, // text-sm (14px)
+                        fontWeight: typography.fontWeight.bold,
+                        color: colors.textPrimary,
+                        fontFamily: typography.fontFamily,
+                      }}
                     >
                       {formatCurrency(client.totalRevenue)}
                     </Typography>
-                  </Grid>
-                  <Grid >
-                    <Typography variant="caption" color="text.secondary">
+                  </Box>
+                  <Grid>
+                    <Typography
+                      sx={{
+                        fontSize: typography.fontSize.small,
+                        color: colors.textMuted,
+                        fontFamily: typography.fontFamily,
+                      }}
+                    >
                       Outstanding
                     </Typography>
                     <Typography
-                      variant="body2"
-                      fontWeight="bold"
-                      color="warning.main"
+                      sx={{
+                        fontSize: typography.fontSize.body,
+                        fontWeight: typography.fontWeight.bold,
+                        color: colors.textPrimary,
+                        fontFamily: typography.fontFamily,
+                      }}
                     >
                       {formatCurrency(client.outstandingBalance)}
                     </Typography>
                   </Grid>
-                  <Grid >
-                    <Typography variant="caption" color="text.secondary">
+                  <Grid>
+                    <Typography
+                      sx={{
+                        fontSize: typography.fontSize.small,
+                        color: colors.error,
+                        fontFamily: typography.fontFamily,
+                      }}
+                    >
                       Overdue
                     </Typography>
                     <Typography
-                      variant="body2"
-                      fontWeight="bold"
-                      color="error.main"
+                      sx={{
+                        fontSize: typography.fontSize.body,
+                        fontWeight: typography.fontWeight.bold,
+                        color: colors.error,
+                        fontFamily: typography.fontFamily,
+                      }}
                     >
                       {formatCurrency(client.overdueAmount)}
                     </Typography>
                   </Grid>
-                </Grid>
+                </Box>
               </CardContent>
             </Card>
           </Box>
@@ -124,7 +212,7 @@ export const ClientBreakdown = ({
 
         {/* Empty State */}
         {clientBreakdowns.length === 0 && (
-          <Grid >
+          <Grid>
             <Box sx={{ textAlign: "center", py: 8 }}>
               <BusinessIcon
                 sx={{ fontSize: 64, color: "text.disabled", mb: 2 }}

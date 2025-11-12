@@ -1,34 +1,30 @@
 import React from "react";
 import {
-  Avatar,
   Box,
   Button,
-  Card,
-  CardContent,
   CircularProgress,
-  Grid,
   Stack,
   Typography,
 } from "@mui/material";
 import {
   Refresh as RefreshIcon,
   OpenInNew as OpenIcon,
-  People as PeopleIcon,
 } from "@mui/icons-material";
 import { ClientSummaryCard } from "./ClientSummaryCard";
 import {
   primaryIconButton,
   outlinedIconButton,
+  titlesTypography,
 } from "../../../layouts/style/styles";
 
 export const ClientSummary = ({
   loading,
   refetchAllClients,
   formatCurrency,
-  payload
+  payload,
 }) => {
   return (
-    <Box sx={{ display: { xs: "none", md: "block" }, mb: 4 }}>
+    <Box sx={{ display: { xs: "none", md: "block" }, mb: 3 }}>
       <Box
         sx={{
           display: "flex",
@@ -37,7 +33,11 @@ export const ClientSummary = ({
           mb: 2,
         }}
       >
-        <Typography variant="h6" fontWeight="semibold">
+        <Typography
+          sx={{
+            ...titlesTypography.primaryTitle,
+          }}
+        >
           All Clients Summary
         </Typography>
         <Stack direction="row" spacing={1}>
@@ -65,10 +65,7 @@ export const ClientSummary = ({
           </Button>
         </Stack>
       </Box>
-      <ClientSummaryCard
-        formatCurrency={formatCurrency}
-        payload={payload}
-      />
+      <ClientSummaryCard formatCurrency={formatCurrency} payload={payload} />
     </Box>
   );
 };

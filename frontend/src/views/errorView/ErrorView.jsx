@@ -6,9 +6,11 @@ import {
   Container,
   Typography
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 
 export const ErrorView = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const handleGoHome = () => {
@@ -50,7 +52,7 @@ export const ErrorView = () => {
           fontWeight="bold"
           gutterBottom
         >
-          404
+          {t('errors.notFound.code')}
         </Typography>
 
         <Typography
@@ -59,7 +61,7 @@ export const ErrorView = () => {
           gutterBottom
           sx={{ mb: 2 }}
         >
-          Page Not Found
+          {t('errors.notFound.title')}
         </Typography>
 
         <Typography
@@ -67,7 +69,7 @@ export const ErrorView = () => {
           color="text.secondary"
           sx={{ mb: 4, maxWidth: 500 }}
         >
-          The page you're looking for doesn't exist or has been moved.
+          {t('errors.notFound.description')}
         </Typography>
 
         <Button
@@ -75,7 +77,7 @@ export const ErrorView = () => {
           size="large"
           onClick={handleGoHome}
         >
-          Go Home
+          {t('errors.notFound.goHome')}
         </Button>
       </Container>
     </Box>

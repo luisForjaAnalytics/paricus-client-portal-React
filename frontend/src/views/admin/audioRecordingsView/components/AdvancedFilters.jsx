@@ -25,6 +25,7 @@ import {
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import { QuickFilters } from "./QuickFilters";
+import { colors } from "../../../../layouts/style/styles";
 
 export const AdvancedFilters = ({
   filters,
@@ -45,12 +46,12 @@ export const AdvancedFilters = ({
   const greenFieldStyles = {
     "& .MuiOutlinedInput-root": {
       "&.Mui-focused fieldset": {
-        borderColor: "#0c7b3f",
+        borderColor: "${colors.primary}",
       },
     },
     "& .MuiInputLabel-root": {
       "&.Mui-focused": {
-        color: "#0c7b3f",
+        color: "${colors.primary}",
       },
     },
   };
@@ -80,7 +81,7 @@ export const AdvancedFilters = ({
               sx={{
                 width: "95%",
                 margin: "1.5rem auto",
-                backgroundColor: "#0c7b3f",
+                backgroundColor: "${colors.primary}",
                 height: "2px",
               }}
             /> */}
@@ -154,7 +155,7 @@ export const AdvancedFilters = ({
                 sx={{
                   flex: { xs: "1 1 auto", sm: "0 1 auto" },
                   borderRadius:'1rem',
-                  backgroundColor: "#0c7b3f",
+                  backgroundColor: "${colors.primary}",
                   "&:hover": {
                     backgroundColor: "#0a6333",
                   },
@@ -173,7 +174,7 @@ export const AdvancedFilters = ({
                 startIcon={<FilterListOffIcon />}
                 sx={{
                   flex: { xs: "1 1 auto", sm: "0 1 auto" },
-                  backgroundColor: "#0c7b3f",
+                  backgroundColor: "${colors.primary}",
                   color: "#fff",
                   "&:hover": {
                     backgroundColor: "#0a6333",
@@ -326,7 +327,7 @@ export const AdvancedFilters = ({
             sx={{
               height: "40px",
               borderRadius: "0.8rem",
-              backgroundColor: "#0c7b3f",
+              backgroundColor: "${colors.primary}",
               "&:hover": {
                 backgroundColor: "#0a6333",
               },
@@ -351,7 +352,7 @@ export const AdvancedFilters = ({
             startIcon={<FilterListOffIcon fontSize="small" />}
             sx={{
               height: "40px",
-              backgroundColor: "#0c7b3f",
+              backgroundColor: "${colors.primary}",
               color: "#fff",
               "&:hover": {
                 backgroundColor: "#0a6333",

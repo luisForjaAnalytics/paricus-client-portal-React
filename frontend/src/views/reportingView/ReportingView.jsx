@@ -13,6 +13,7 @@ import {
   Typography,
   Divider
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import {
   Refresh as RefreshIcon,
   PictureAsPdf as PdfIcon,
@@ -34,6 +35,7 @@ import {
 
 // Component to display a single folder's reports using RTK Query
 const FolderReportsSection = ({ folder, downloadReport }) => {
+  const { t } = useTranslation();
   const {
     data: reports = [],
     isLoading,
@@ -80,7 +82,7 @@ const FolderReportsSection = ({ folder, downloadReport }) => {
           disabled={isLoading}
           sx={outlinedIconButton}
         >
-          {isLoading ? 'Loading...' : 'Refresh Reports'}
+          {isLoading ? t('common.loading') : t('reporting.refreshReports')}
         </Button>
       </Box>
 
@@ -134,7 +136,7 @@ const FolderReportsSection = ({ folder, downloadReport }) => {
       ) : !isLoading ? (
         <Box sx={{ textAlign: 'center', py: 4 }}>
           <Typography variant="body2" color="text.secondary">
-            No reports found in this folder
+            {t('reporting.noReportsInFolder')}
           </Typography>
         </Box>
       ) : null}
@@ -143,6 +145,8 @@ const FolderReportsSection = ({ folder, downloadReport }) => {
 };
 
 export const ReportingView = () => {
+  const { t } = useTranslation();
+
   // RTK Query hooks
   const {
     data: accessibleFolders = [],
@@ -166,19 +170,19 @@ export const ReportingView = () => {
   const downloadReport = async (report, folder) => {
     try {
       const fileName = report.name;
-      showNotification('Generating download link...', 'info');
+      showNotification(t('reporting.generatingLink'), 'info');
 
       const result = await getDownloadUrl({ folder, fileName }).unwrap();
 
       if (result.downloadUrl) {
         window.open(result.downloadUrl, '_blank');
-        showNotification('Download started', 'success');
+        showNotification(t('reporting.downloadStarted'), 'success');
       } else {
         throw new Error('No download URL received');
       }
     } catch (err) {
       console.error('Error downloading report:', err);
-      showNotification(err.data?.message || 'Failed to download report', 'error');
+      showNotification(err.data?.message || t('reporting.downloadFailed'), 'error');
     }
   };
 
@@ -200,7 +204,7 @@ export const ReportingView = () => {
       <Card>
         <CardContent sx={{ p: 3 }}>
           <Typography variant="h6" component="h2" fontWeight={600} gutterBottom>
-            Operations Dashboard
+            {t('reporting.title')}
           </Typography>
           <Box
             sx={{
@@ -229,7 +233,7 @@ export const ReportingView = () => {
         <CardContent sx={{ p: 3 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
             <Typography variant="h6" component="h2" fontWeight={600}>
-              Your Reports
+              {t('reporting.clientTitle')}
             </Typography>
             <Button
               variant="contained"
@@ -238,7 +242,7 @@ export const ReportingView = () => {
               disabled={loading}
               sx={primaryIconButton}
             >
-              {loading ? 'Loading...' : 'Refresh Reports'}
+              {loading ? t('common.loading') : t('reporting.refreshReports')}
             </Button>
           </Box>
 
@@ -246,7 +250,7 @@ export const ReportingView = () => {
           {loading && (
             <Box sx={{ textAlign: 'center', py: 8 }}>
               <CircularProgress size={40} sx={{ mb: 2 }} />
-              <Typography color="text.secondary">Loading your reports...</Typography>
+              <Typography color="text.secondary">{t('reporting.loadingReports')}</Typography>
             </Box>
           )}
 
@@ -255,13 +259,13 @@ export const ReportingView = () => {
             <Box sx={{ textAlign: 'center', py: 8 }}>
               <ErrorIcon sx={{ fontSize: 48, color: 'error.main', mb: 2 }} />
               <Typography variant="h6" gutterBottom>
-                Error loading reports
+                {t('reporting.errorLoading')}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                 {error}
               </Typography>
               <Button variant="contained" onClick={() => refetch()} sx={primaryButton}>
-                Try Again
+                {t('common.tryAgain')}
               </Button>
             </Box>
           )}
@@ -284,10 +288,10 @@ export const ReportingView = () => {
             <Box sx={{ textAlign: 'center', py: 8 }}>
               <DescriptionIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 2 }} />
               <Typography variant="h6" gutterBottom>
-                No reports available
+                {t('reporting.noReports')}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Reports will appear here when they are uploaded by our team
+                {t('reporting.noReportsMessage')}
               </Typography>
             </Box>
           )}

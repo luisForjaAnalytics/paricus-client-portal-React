@@ -7,7 +7,9 @@ import Menu from "@mui/material/Menu";
 import { useTranslation } from "react-i18next";
 import Box from "@mui/material/Box";
 import Avatar from "@mui/material/Avatar";
+import IconButton from "@mui/material/IconButton";
 import { Tooltip } from "@mui/material";
+import LanguageIcon from '@mui/icons-material/Language';
 
 export default function LanguageMenu() {
   const { i18n, t } = useTranslation();
@@ -43,28 +45,22 @@ export default function LanguageMenu() {
 
   return (
     <div>
-      <List component="nav" aria-label="Language selector">
-        <ListItemButton
-          id="language-button"
-          aria-haspopup="listbox"
-          aria-controls="language-menu"
-          aria-expanded={open ? "true" : undefined}
-          onClick={handleClickListItem}
-          sx={{ bgcolor: "background.paper", borderRadius: 2 }}
-        >
-          <Box display="flex" alignItems="center" gap={1}>
-            <Avatar
-              src={current.flag}
-              alt={current.label}
-              sx={{ width: 24, height: 24 }}
-            />
-            <ListItemText
-              //primary={current.label}
-              primaryTypographyProps={{ fontWeight: "bold" }}
-            />
-          </Box>
-        </ListItemButton>
-      </List>
+      <IconButton
+        id="language-button"
+        aria-haspopup="listbox"
+        aria-controls="language-menu"
+        aria-expanded={open ? "true" : undefined}
+        onClick={handleClickListItem}
+        size="large"
+        sx={{
+          color: "text.secondary",
+          "&:hover": {
+            backgroundColor: "action.hover",
+          },
+        }}
+      >
+        <LanguageIcon />
+      </IconButton>
 
       <Menu
         id="language-menu"
@@ -93,10 +89,16 @@ export default function LanguageMenu() {
             >
               <Box display="flex" alignItems="center" gap={1}>
                 <Avatar
-                  src={option.flag}
-                  alt={option.label}
-                  sx={{ width: 24, height: 24 }}
-                />
+                  sx={{
+                    width: 32,
+                    height: 32,
+                    bgcolor: index === selectedIndex ? "primary.main" : "grey.400",
+                    fontSize: "0.875rem",
+                    fontWeight: "bold"
+                  }}
+                >
+                  {option.code.toUpperCase()}
+                </Avatar>
               </Box>
             </MenuItem>
           </Tooltip>

@@ -31,9 +31,9 @@ const closedMixin = (theme) => ({
     duration: theme.transitions.duration.leavingScreen,
   }),
   overflowX: "hidden",
-  width: `calc(${theme.spacing(7)} + 1px)`,
+  width: `calc(${theme.spacing(6)} + 1px)`,
   [theme.breakpoints.up("sm")]: {
-    width: `calc(${theme.spacing(8)} + 1px)`,
+    width: `calc(${theme.spacing(6.5)} + 1px)`,
   },
 });
 
@@ -57,18 +57,18 @@ const Drawer = styled(MuiDrawer, {
         ...openedMixin(theme),
         "& .MuiDrawer-paper": {
           ...openedMixin(theme),
-          backgroundColor: colors.primario,
-          color: "white",
-          borderRight: "none",
+          backgroundColor: "white",
+          color: colors.textPrimary,
+          borderRight: `1px solid ${colors.border}`,
         },
       }
     : {
         ...closedMixin(theme),
         "& .MuiDrawer-paper": {
           ...closedMixin(theme),
-          backgroundColor: colors.primario,
-          color: "white",
-          borderRight: "none",
+          backgroundColor: "white",
+          color: colors.textPrimary,
+          borderRight: `1px solid ${colors.border}`,
         },
       }),
 }));
@@ -96,38 +96,42 @@ export const LayoutAccount = () => {
           display: { xs: "none", md: "flex" },
         }}
       >
-        <DrawerHeader sx={{ justifyContent: "center" }}>
-          {/* <Typography
-            variant="subtitle1"
-            sx={{ color: "white", fontWeight: "bold" }}
-          >
-            {t("brand.name")}
-          </Typography> */}
-          <LanguageIcon sx={{ fontSize: 32, color: "white" }} />
+        <DrawerHeader sx={{ justifyContent: "center", py: 0 }}>
+          <Box
+            component="img"
+            src="/paricus_logo.jpeg"
+            alt="Paricus Logo"
+            sx={{
+              width: open ? 120 : 40,
+              height: "auto",
+              transition: "all 0.3s ease",
+              objectFit: "contain",
+            }}
+          />
         </DrawerHeader>
         <Divider
           sx={{
-            width: "80%",
+            width: "70%",
             height: 2.5,
-            bgcolor: "rgba(255, 255, 255, 0.3)",
+            bgcolor: colors.border,
             alignSelf: "center",
             borderRadius: 2,
           }}
         />
         <List
           sx={{
-            marginTop: { sx: "none", md: 4 },
-            marginBottom: { sx: "none", md: 4 },
+            marginTop: { sx: "none", md: 2 },
+            marginBottom: { sx: "none", md: 10 },
           }}
         >
-          <MenuSections setTitleState={setTitleState} titleState={titleState} />
+          <MenuSections setTitleState={setTitleState} titleState={titleState} open={open} />
         </List>
 
         <Divider
           sx={{
-            width: "80%",
+            width: "70%",
             height: 3.5,
-            bgcolor: "rgba(255, 255, 255, 0.3)",
+            bgcolor: colors.border,
             alignSelf: "center",
             borderRadius: 2,
           }}
@@ -140,7 +144,7 @@ export const LayoutAccount = () => {
                 onClick={handleDrawerOpen}
                 sx={[
                   {
-                    color: "white",
+                    color: colors.textPrimary,
                     marginRight: 0.3,
                   },
                   open && { display: "none" },
@@ -149,7 +153,7 @@ export const LayoutAccount = () => {
             ) : (
               <ChevronLeftIcon
                 onClick={handleDrawerClose}
-                sx={{ color: "white" }}
+                sx={{ color: colors.textPrimary }}
               />
             )}
           </IconButton>
@@ -167,7 +171,7 @@ export const LayoutAccount = () => {
         <AppBarLayout titleState={titleState} setTitleState={setTitleState} />
         <Box
           sx={{
-            margin: { xs: "0 1.2rem 0 1.2rem", md: "1.5rem 1rem 0 1rem" },
+            margin: { xs: "0 1.2rem 0 1.2rem", md: "0 1rem 0 1rem" },
           }}
         >
           <Outlet context={{ setTitleState }} />

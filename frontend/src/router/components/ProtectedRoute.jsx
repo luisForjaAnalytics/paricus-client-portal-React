@@ -1,6 +1,6 @@
 import { Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { usePermissions } from '../hooks/usePermissions';
+import { usePermissions } from '../../hooks/usePermissions';
 import { Box, Typography, Button } from '@mui/material';
 import { Lock as LockIcon } from '@mui/icons-material';
 

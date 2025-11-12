@@ -37,6 +37,7 @@ import {
 import PhoneIcon from "@mui/icons-material/Phone";
 import SupportAgentIcon from "@mui/icons-material/SupportAgent";
 import { useTranslation } from "react-i18next";
+import { colors } from "../../../../layouts/style/styles";
 
 function Row(props) {
   const {
@@ -312,12 +313,12 @@ export const QuickFiltersMovil = ({
   const greenFieldStyles = {
     "& .MuiOutlinedInput-root": {
       "&.Mui-focused fieldset": {
-        borderColor: "#0c7b3f",
+        borderColor: "${colors.primary}",
       },
     },
     "& .MuiInputLabel-root": {
       "&.Mui-focused": {
-        color: "#0c7b3f",
+        color: "${colors.primary}",
       },
     },
   };
@@ -547,7 +548,7 @@ export const QuickFiltersMovil = ({
                           sx={{
                             flex: 1,
                             borderRadius: "0.8rem",
-                            backgroundColor: "#0c7b3f",
+                            backgroundColor: "${colors.primary}",
                             "&:hover": {
                               backgroundColor: "#0a6333",
                             },
@@ -567,7 +568,7 @@ export const QuickFiltersMovil = ({
                           startIcon={<FilterListOffIcon fontSize="small" />}
                           sx={{
                             flex: 1,
-                            backgroundColor: "#0c7b3f",
+                            backgroundColor: "${colors.primary}",
                             color: "#fff",
                             "&:hover": {
                               backgroundColor: "#0a6333",

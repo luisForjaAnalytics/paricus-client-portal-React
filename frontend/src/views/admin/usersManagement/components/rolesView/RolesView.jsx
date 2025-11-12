@@ -45,7 +45,8 @@ import {
 import {
   primaryButton,
   primaryIconButton,
-  outlinedButton
+  outlinedButton,
+  colors
 } from '../../../../../layouts/style/styles';
 import { RolesViewMovil } from './RolesViewMovil';
 
@@ -455,7 +456,7 @@ export const RolesView = () => {
               fontSize: '0.875rem',
             },
             '& .MuiDataGrid-sortIcon': {
-              color: '#0c7b3f',
+              color: colors.primary,
             },
             '& .MuiDataGrid-columnHeader--sorted': {
               backgroundColor: '#e8f5e9 !important',
