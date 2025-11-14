@@ -31,6 +31,7 @@ import {
   primaryButton,
   primaryIconButton,
   outlinedIconButton,
+  typography,
 } from '../../layouts/style/styles';
 
 // Component to display a single folder's reports using RTK Query
@@ -200,6 +201,19 @@ export const ReportingView = () => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+      {/* Page Header */}
+      <Box sx={{ mb: 2 }}>
+        <Typography
+          variant="h5"
+          sx={{
+            fontWeight: typography.fontWeight.semibold,
+            fontFamily: typography.fontFamily,
+          }}
+        >
+          {t('reporting.title')}
+        </Typography>
+      </Box>
+
       {/* Power BI Dashboard */}
       <Card>
         <CardContent sx={{ p: 3 }}>

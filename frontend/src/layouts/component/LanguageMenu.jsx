@@ -1,7 +1,4 @@
 import { useState } from "react";
-import List from "@mui/material/List";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemText from "@mui/material/ListItemText";
 import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
 import { useTranslation } from "react-i18next";
@@ -9,7 +6,8 @@ import Box from "@mui/material/Box";
 import Avatar from "@mui/material/Avatar";
 import IconButton from "@mui/material/IconButton";
 import { Tooltip } from "@mui/material";
-import LanguageIcon from '@mui/icons-material/Language';
+import LanguageIcon from "@mui/icons-material/Language";
+import { colors } from "../style/styles";
 
 export default function LanguageMenu() {
   const { i18n, t } = useTranslation();
@@ -44,7 +42,7 @@ export default function LanguageMenu() {
   const current = options[selectedIndex];
 
   return (
-    <div>
+    <Box>
       <IconButton
         id="language-button"
         aria-haspopup="listbox"
@@ -59,7 +57,7 @@ export default function LanguageMenu() {
           },
         }}
       >
-        <LanguageIcon />
+        <LanguageIcon  />
       </IconButton>
 
       <Menu
@@ -68,6 +66,11 @@ export default function LanguageMenu() {
         open={open}
         onClose={handleClose}
         slotProps={{
+          paper: {
+            sx: {
+              borderRadius: '0.7rem',
+            },
+          },
           list: {
             "aria-labelledby": "language-button",
             role: "listbox",
@@ -86,15 +89,29 @@ export default function LanguageMenu() {
               selected={index === selectedIndex}
               label={option.label}
               onClick={(event) => handleMenuItemClick(event, index)}
+              disableRipple
+              sx={{
+                "&:hover": {
+                  backgroundColor: "transparent",
+                },
+                "&.Mui-selected": {
+                  backgroundColor: "transparent",
+                  "&:hover": {
+                    backgroundColor: "transparent",
+                  },
+                },
+              }}
             >
               <Box display="flex" alignItems="center" gap={1}>
                 <Avatar
                   sx={{
-                    width: 32,
-                    height: 32,
-                    bgcolor: index === selectedIndex ? "primary.main" : "grey.400",
-                    fontSize: "0.875rem",
-                    fontWeight: "bold"
+                    width: 26,
+                    height: 26,
+                    bgcolor:
+                      index === selectedIndex ? colors.drowerIcons : "grey.300",
+                    color: index === selectedIndex ? "black" : "grey.500",
+                    fontSize: "0.7rem",
+                    fontWeight: "bold",
                   }}
                 >
                   {option.code.toUpperCase()}
@@ -104,6 +121,6 @@ export default function LanguageMenu() {
           </Tooltip>
         ))}
       </Menu>
-    </div>
+    </Box>
   );
 }

@@ -7,7 +7,6 @@ import {
   IconButton,
   CircularProgress,
   Chip,
-  Button,
   Typography,
   FormControl,
   InputLabel,
@@ -27,8 +26,8 @@ import { companies } from "./company.js";
 import {
   colors,
   typography,
-  statusBadges,
   card,
+  titlesTypography,
 } from "../../../../layouts/style/styles";
 
 // Function to create columns with audio playback handlers
@@ -67,17 +66,11 @@ const createColumns = (
     headerAlign: "center",
     sortable: true,
     renderCell: (params) => (
-      <Box
-        component="span"
-        sx={{
-          ...statusBadges.info,
-          border: `1px solid ${colors.primary}`,
-          backgroundColor: colors.primaryLight,
-          color: colors.primary,
-        }}
-      >
-        {params.value || t("audioRecordings.table.unknown")}
-      </Box>
+      <Chip
+        label={params.value || t("audioRecordings.table.unknown")}
+        color="success"
+        size="small"
+      />
     ),
   },
   {
@@ -277,8 +270,15 @@ export const TableView = ({
             width: "100%",
           }}
         >
-          <Box>
-            <Typography variant="h6" fontWeight="bold" sx={{ lineHeight: 1.2 }}>
+          <Box
+            sx={{
+              marginLeft: 6,
+              marginBottom:2
+            }}
+          >
+            <Typography
+              sx={{ ...titlesTypography.primaryTitle, marginBottom: "-0.2rem" }}
+            >
               {t("audioRecordings.results.title")}
             </Typography>
             <Typography
@@ -290,7 +290,7 @@ export const TableView = ({
             </Typography>
           </Box>
 
-          <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+          <Box sx={{ display: "flex", gap: 2, alignItems: "center", marginBottom:1 }}>
             <FormControl size="small" sx={{ minWidth: 150 }}>
               <InputLabel id="company-filter-label">Company</InputLabel>
               <Select
@@ -412,16 +412,13 @@ export const TableView = ({
           pageSize: itemsPerPage,
         }}
         onPaginationModelChange={handlePaginationChange}
-        pageSizeOptions={[ 10, 25, 50, 100]}
+        pageSizeOptions={[10, 25, 50, 100]}
         // Sorting configuration
         sortingOrder={["asc", "desc"]}
         initialState={{
           columns: {
             columnVisibilityModel: { id: false },
           },
-          //   sorting: {
-          //     sortModel: [{ field: "agentName", sort: "asc" }],
-          //   },
         }}
         //disableRowSelectionOnClick
         sx={{
@@ -442,7 +439,7 @@ export const TableView = ({
             fontSize: typography.fontSize.tableHeader, // text-xs (12px)
             fontFamily: typography.fontFamily,
             color: colors.textMuted, // text-gray-500
-            letterSpacing: '0.05em', // tracking-wider
+            letterSpacing: "0.05em", // tracking-wider
           },
           // Sorting icons
           "& .MuiDataGrid-sortIcon": {

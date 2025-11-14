@@ -26,7 +26,7 @@ export const ItemMenu = ({
   };
 
   return (
-    <List sx={{ width: "100%" }} aria-label="contacts">
+    <List sx={{ width: "100%", py: 0.5 }} aria-label="contacts">
       <ListItem disablePadding>
         <ListItemButton
           onClick={handleRedirect}
@@ -38,12 +38,7 @@ export const ItemMenu = ({
             paddingTop: "0%",
             paddingBottom: "0%",
             "&:hover": {
-              backgroundColor: "rgba(0, 0, 0, 0.04)",
-              "& .icon-circle": {
-                backgroundColor: isSelected
-                  ? colors.primaryLight
-                  : "rgba(0, 0, 0, 0.06)",
-              },
+              backgroundColor: "transparent",
             },
             "&:active": {
               backgroundColor: "transparent",
@@ -60,8 +55,8 @@ export const ItemMenu = ({
             <Box
               className="icon-circle"
               sx={{
-                width: 28,
-                height: 28,
+                width: "48px",
+                height: "48px",
                 borderRadius: "15%",
                 display: "flex",
                 alignItems: "center",
@@ -71,7 +66,7 @@ export const ItemMenu = ({
                   : "transparent",
                 transition: "all 0.3s ease",
                 "& svg": {
-                  color: isSelected ? "white" : "grey.500",
+                  color: isSelected ? "grey.700" : "grey.500",
                 },
               }}
             >

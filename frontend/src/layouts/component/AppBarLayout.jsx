@@ -200,7 +200,14 @@ export const AppBarLayout = ({ titleState, setTitleState }) => {
           </Box>
 
           {/* 🔹 MENÚ MÓVIL */}
-          <Box sx={{ display: { xs: "flex", md: "none" }, padding: 0 }}>
+          <Box sx={{ display: { xs: "flex", md: "none" }, padding: 0, alignItems: "center", gap: 1 }}>
+            <Box sx={{
+              "& .MuiIconButton-root": {
+                color: colors.textWhite
+              }
+            }}>
+              <LanguageMenu />
+            </Box>
             <IconButton
               size="large"
               aria-label="show more"

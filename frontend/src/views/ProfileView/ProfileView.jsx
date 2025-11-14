@@ -21,6 +21,7 @@ import {
 import {
   primaryButton,
   outlinedButton,
+  typography,
 } from '../../layouts/style/styles';
 
 export const ProfileView = ({ authStore }) => {
@@ -137,6 +138,19 @@ export const ProfileView = ({ authStore }) => {
 
   return (
     <Box>
+      {/* Page Header */}
+      <Box sx={{ mb: 2 }}>
+        <Typography
+          variant="h5"
+          sx={{
+            fontWeight: typography.fontWeight.semibold,
+            fontFamily: typography.fontFamily,
+          }}
+        >
+          {t('profile.title')}
+        </Typography>
+      </Box>
+
       <Card>
         <CardHeader
           title={t('profile.title')}

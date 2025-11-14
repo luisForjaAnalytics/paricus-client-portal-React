@@ -75,11 +75,14 @@ export default {
   // Audio Recordings
   audioRecordings: {
     // Page header
-    pageDescription: "View and listen to call recordings from the Workforce Management database",
+    sectionTitle: "Audio Recordings",
+    pageDescription:
+      "View and listen to call recordings from the Workforce Management database",
 
     // Warnings and errors
     databaseNotConfigured: "Database Not Configured",
-    databaseNotConfiguredMessage: "SQL Server credentials are not set. Please configure MSSQL settings in the .env file.",
+    databaseNotConfiguredMessage:
+      "SQL Server credentials are not set. Please configure MSSQL settings in the .env file.",
 
     // Quick Filters
     quickFilter: {
@@ -339,7 +342,8 @@ export default {
     configurePermissions: "Configure Permissions",
     confirmDelete: "Confirm Delete",
     deleteWarning: "Are you sure you want to delete the role",
-    deleteWarningContinue: "This action cannot be undone and will affect all users with this role.",
+    deleteWarningContinue:
+      "This action cannot be undone and will affect all users with this role.",
     filterByClient: "Client",
     allClients: "All Clients",
     table: {
@@ -383,7 +387,8 @@ export default {
     editClient: "Edit Client",
     confirmDeactivation: "Confirm Deactivation",
     deactivationWarning: "Are you sure you want to deactivate",
-    deactivationWarningContinue: "This will also deactivate all users belonging to this client.",
+    deactivationWarningContinue:
+      "This will also deactivate all users belonging to this client.",
     table: {
       clientName: "Client Name",
       type: "Type",
@@ -516,7 +521,8 @@ export default {
     loadingReports: "Loading your reports...",
     errorLoading: "Error loading reports",
     noReports: "No reports available",
-    noReportsMessage: "Reports will appear here when they are uploaded by our team",
+    noReportsMessage:
+      "Reports will appear here when they are uploaded by our team",
     noReportsInFolder: "No reports found in this folder",
     downloadStarted: "Download started",
     downloadFailed: "Failed to download report",
@@ -528,7 +534,8 @@ export default {
     notFound: {
       code: "404",
       title: "Page Not Found",
-      description: "The page you're looking for doesn't exist or has been moved.",
+      description:
+        "The page you're looking for doesn't exist or has been moved.",
       goHome: "Go Home",
     },
   },
@@ -538,7 +545,8 @@ export default {
     title: "Knowledge Base",
     description: "Browse and manage knowledge base articles",
     comingSoon: "Knowledge Base Module",
-    comingSoonDescription: "This module will include article management, search functionality, and content creation tools.",
+    comingSoonDescription:
+      "This module will include article management, search functionality, and content creation tools.",
     phase: "Coming in Phase 5",
   },
 };

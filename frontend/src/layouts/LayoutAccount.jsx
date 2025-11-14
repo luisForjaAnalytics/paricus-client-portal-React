@@ -12,9 +12,8 @@ import { AppBarLayout } from "./component/AppBarLayout";
 import { useTranslation } from "react-i18next";
 import { MenuSections } from "./component/menus/MenuSection.jsx";
 import { Outlet } from "react-router-dom";
-import { Language as LanguageIcon } from "@mui/icons-material";
 import { colors } from "./style/styles";
-const drawerWidth = 240;
+const drawerWidth = 260;
 
 const openedMixin = (theme) => ({
   width: drawerWidth,
@@ -31,10 +30,7 @@ const closedMixin = (theme) => ({
     duration: theme.transitions.duration.leavingScreen,
   }),
   overflowX: "hidden",
-  width: `calc(${theme.spacing(6)} + 1px)`,
-  [theme.breakpoints.up("sm")]: {
-    width: `calc(${theme.spacing(6.5)} + 1px)`,
-  },
+  width: "80px",
 });
 
 const DrawerHeader = styled("div")(({ theme }) => ({
@@ -124,7 +120,11 @@ export const LayoutAccount = () => {
             marginBottom: { sx: "none", md: 10 },
           }}
         >
-          <MenuSections setTitleState={setTitleState} titleState={titleState} open={open} />
+          <MenuSections
+            setTitleState={setTitleState}
+            titleState={titleState}
+            open={open}
+          />
         </List>
 
         <Divider
@@ -138,14 +138,17 @@ export const LayoutAccount = () => {
         />
 
         <DrawerHeader>
-          <IconButton>
+          <IconButton
+          sx={{
+            marginRight: '0.9rem',
+          }}
+          >
             {open === false ? (
               <MenuIcon
                 onClick={handleDrawerOpen}
                 sx={[
                   {
-                    color: colors.textPrimary,
-                    marginRight: 0.3,
+                    color: "grey.500",
                   },
                   open && { display: "none" },
                 ]}

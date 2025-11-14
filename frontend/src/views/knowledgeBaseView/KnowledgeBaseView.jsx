@@ -7,17 +7,24 @@ import {
   Typography
 } from '@mui/material';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
+import { useTranslation } from 'react-i18next';
+import { typography } from '../../layouts/style/styles';
 
 export const KnowledgeBaseView = () => {
+  const { t } = useTranslation();
+
   return (
     <Box>
-      {/* Header */}
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" component="h1" fontWeight="bold" gutterBottom>
+      {/* Page Header */}
+      <Box sx={{ mb: 2 }}>
+        <Typography
+          variant="h5"
+          sx={{
+            fontWeight: typography.fontWeight.semibold,
+            fontFamily: typography.fontFamily,
+          }}
+        >
           Knowledge Base
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Browse and manage knowledge base articles
         </Typography>
       </Box>
 

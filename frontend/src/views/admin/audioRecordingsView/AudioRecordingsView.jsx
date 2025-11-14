@@ -57,6 +57,7 @@ import { useTranslation } from "react-i18next"; // ADDED: i18n support
 import { AdvancedFilters } from "./components/AdvancedFilters.jsx";
 import { TableView } from "./components/TableView.jsx";
 import { QuickFiltersMovil } from "./components/QuickFiltersMovil.jsx";
+import { typography } from "../../../layouts/style/styles.js";
 
 export const AudioRecordingsView = () => {
   const { t } = useTranslation(); // ADDED: Translation hook
@@ -461,9 +462,16 @@ export const AudioRecordingsView = () => {
   return (
     <Box sx={{ p: 3, pb: currentlyPlaying ? 15 : 3 }}>
       {/* Page Header */}
-      <Box sx={{ display: { xs: "none", md: "flex" }, mb: 3 }}>
-        <Typography variant="body1" color="text.secondary">
-          {t("audioRecordings.pageDescription")}
+      <Box sx={{ mb: 2 }}>
+        <Typography
+          variant="h5"
+          sx={{
+            //fontSize: typography.fontSize.h4, // text-xl (20px) - Section Title
+            fontWeight: typography.fontWeight.semibold,
+            fontFamily: typography.fontFamily,
+          }}
+        >
+          {t("audioRecordings.sectionTitle")}
         </Typography>
       </Box>
 
@@ -490,19 +498,6 @@ export const AudioRecordingsView = () => {
           {error}
         </Alert>
       )}
-      {/* 
-      <AdvancedFilters
-        filters={filters}
-        refetch={refetch}
-        setFilters={setFilters}
-        setLoadCallTypes={setLoadCallTypes}
-        isDebouncing={isDebouncing}
-        loading={loading}
-        clearFilters={clearFilters}
-        callTypes={callTypes}
-        setCompanyFilter={setCompanyFilter}
-        setAudioFilter={setAudioFilter}
-      /> */}
 
       {/* Audio Recordings Table */}
       <TableView

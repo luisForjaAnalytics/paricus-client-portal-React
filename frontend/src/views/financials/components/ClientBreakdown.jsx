@@ -28,6 +28,7 @@ export const ClientBreakdown = ({
   formatCurrency,
   selectClient,
 }) => {
+  
   const getInitials = (folderDisplay = "") => {
     try {
       const companyName = folderDisplay.trim().split(" ");
@@ -35,10 +36,16 @@ export const ClientBreakdown = ({
       const lastInitial = companyName[companyName.length - 1]?.[0] || "";
       return `${firstInitial}${lastInitial}`.toUpperCase();
     } catch (err) {
-      console.warn(`ERROR: ${err}`);
+      console.error(`ERROR: ${err}`);
     }
   };
 
+  // const getInitials = (folderDisplay = "") => {
+  //   const companyName = folderDisplay.trim().split(" ");
+  //   const firstInitial = companyName[0]?.[0] || "";
+  //   const lastInitial = companyName[companyName.length - 1]?.[0] || "";
+  //   return `${firstInitial}${lastInitial}`.toUpperCase();
+  // };
   return (
     <Box sx={{ display: { xs: "none", md: "block" }, mb: 4 }}>
       <Typography
@@ -126,7 +133,10 @@ export const ClientBreakdown = ({
                 <Divider
                   sx={{
                     width: selectedFolder === client.folder ? "100%" : "30%",
-                    backgroundColor: "#ffffffff",
+                    backgroundColor:
+                      selectedFolder === client.folder
+                        ? colors.primaryLight
+                        : "#ffffffff",
                     borderBottomWidth: 2,
                     borderRadius: "2rem",
                     transition: " 0.4s ease",

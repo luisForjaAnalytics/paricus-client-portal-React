@@ -6,7 +6,6 @@ import {
   Typography,
   Button,
   Grid,
-  Chip,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -58,6 +57,7 @@ import {
   colors,
   typography,
   titlesTypography,
+  boxWrapCards,
 } from "../../layouts/style/styles";
 
 export const FinancialsView = () => {
@@ -554,9 +554,9 @@ export const FinancialsView = () => {
       {/* CARDS CONTAINER */}
 
       <Box
-        sx={{
-          marginLeft: "1.5rem",
-        }}
+        sx={
+          boxWrapCards
+        }
       >
         {/* BPO Admin: Overall Statistics - Desktop */}
         {isAdmin && overallStats && (

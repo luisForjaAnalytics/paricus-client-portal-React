@@ -21,40 +21,40 @@ import { SingOutButton } from "./SingOutButton";
 const menuItems = [
   {
     label: "dashboard",
-    icon: <LeaderboardOutlinedIcon fontSize="small" />,
+    icon: <LeaderboardOutlinedIcon fontSize="medium" />,
     route: "dashboard",
   },
 
   {
     label: "reporting",
-    icon: <DescriptionOutlinedIcon fontSize="small" />,
+    icon: <DescriptionOutlinedIcon fontSize="medium" />,
     route: "reporting",
   },
 
   {
     label: "audioRetrieval",
-    icon: <VolumeUpOutlinedIcon fontSize="small" />,
+    icon: <VolumeUpOutlinedIcon fontSize="medium" />,
     route: "audio-recordings",
   },
 
   {
     label: "knowledgeBase",
-    icon: <AutoStoriesOutlinedIcon fontSize="small" />,
+    icon: <AutoStoriesOutlinedIcon fontSize="medium" />,
     route: "knowledge-base",
   },
   {
     label: "financial",
-    icon: <LocalAtmOutlinedIcon fontSize="small" />,
+    icon: <LocalAtmOutlinedIcon fontSize="medium" />,
     route: "financial",
   },
   {
     label: "reportsManagement",
-    icon: <DescriptionOutlinedIcon fontSize="small" />,
+    icon: <DescriptionOutlinedIcon fontSize="medium" />,
     route: "reports-management",
   },
   {
     label: "userManagement",
-    icon: <SettingsOutlinedIcon fontSize="small" />,
+    icon: <SettingsOutlinedIcon fontSize="medium" />,
     route: "users-management/clients",
   },
 ];

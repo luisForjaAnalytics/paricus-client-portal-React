@@ -24,7 +24,8 @@ export const colors = {
   focusRing: "#22C55E", // ring-green-500
   gradiantPrimaryColor: "linear-gradient(90deg, #1fb467c7, #0a6a38bb )", // Kept for button compatibility
   financialClientAvatar: "#11e7464d",
-  drowerIcons:'#11e747a2',
+  drowerIcons: "#D1FAE5",
+  folderCloseIcon: "#68686844",
 
   // Secondary colors
   secondary: "#4db66750", // Kept for backward compatibility
@@ -39,7 +40,7 @@ export const colors = {
   // Borders (from Tailwind)
   border: "#E5E7EB", // border-gray-200
   borderInput: "#D1D5DB", // border-gray-300
-  borderSelected: "#16A34A", //"#374151", // border-gray-700
+  borderSelected: "#374151", //"#16A34A", //"#374151", // border-gray-700
   borderVariant: "#D1D5DB", // border-gray-300
   borderSoft: "#E5E7EB", // Updated to match Tailwind
 
@@ -411,6 +412,18 @@ export const clientCardSelected = {
   boxShadow: `0 0 0 2px ${colors.border}`, // ring-2
 };
 
+// Reports Card Selected
+export const reportsCardSelected = {
+  display: { xs: "none", md: "block" },
+  backgroundColor: colors.surface,
+  borderRadius: layout.borderRadius.sm,
+  border: `1px solid ${colors.borderSoft}`,
+  boxShadow:
+    "0px 0.5px 0.5px 0px rgba(0, 0, 0, 0.32)",
+  padding: "1rem 1rem 0.2rem 1rem",
+  borderRadius: "1rem",
+};
+
 // ========================================
 // FORM STYLES
 // ========================================
@@ -645,4 +658,8 @@ export const titlesTypography = {
     fontWeight: typography.fontWeight.semibold,
     fontFamily: typography.fontFamily,
   },
+};
+
+export const boxWrapCards = {
+  marginLeft: "1.5rem",
 };

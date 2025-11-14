@@ -58,11 +58,11 @@ export const InvoicesTableView = ({
     <TableContainer
       sx={{
         backgroundColor: "transparent",
-         borderRadius: '1rem',
+        borderRadius: "1rem",
         // border: `1px solid ${colors.border}`,
         boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
         overflow: "hidden",
-        width:'100%'
+        width: "100%",
       }}
     >
       <Table>
@@ -230,7 +230,10 @@ export const InvoicesTableView = ({
                       size="small"
                       onClick={() => downloadInvoice(invoice)}
                     >
-                      <DownloadIcon fontSize="small" />
+                      <DownloadIcon
+                        fontSize="small"
+                        sx={{ color: colors.primary }}
+                      />
                     </IconButton>
                   </Tooltip>
                   {isAdmin && (

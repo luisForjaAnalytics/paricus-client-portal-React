@@ -74,6 +74,7 @@ export default {
   // Audio Recordings
   audioRecordings: {
     // Page header
+    sectionTitle: "Grabaciones",
     pageDescription: "Ver y escuchar grabaciones de llamadas de la base de datos de Workforce Management",
 
     // Warnings and errors
