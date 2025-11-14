@@ -48,8 +48,11 @@ import {
   card,
 } from "../../../../../layouts/style/styles";
 import { UsersManagementviewMovil } from "./UsersManagementviewMovil";
+import { useTranslation } from "react-i18next";
 
 export const UsersManagementView = () => {
+  const { t } = useTranslation();
+
   // RTK Query hooks
   const { data: users = [], isLoading: loading } = useGetUsersQuery();
   const { data: clients = [] } = useGetClientsQuery();
@@ -241,17 +244,17 @@ export const UsersManagementView = () => {
   // DataGrid columns
   const columns = useMemo(
     () => [
-      {
-        field: 'id',
-        headerName: 'ID',
-        width: 80,
-        align: 'center',
-        headerAlign: 'center',
-      },
+      // {
+      //   field: 'id',
+      //   headerName: 'ID',
+      //   flex: 1,
+      //   align: 'center',
+      //   headerAlign: 'center',
+      // },
       {
         field: 'name',
         headerName: 'Name',
-        width: 200,
+        flex: 1,
         align: 'left',
         headerAlign: 'left',
         renderCell: (params) => (
@@ -263,67 +266,57 @@ export const UsersManagementView = () => {
       {
         field: 'email',
         headerName: 'Email',
-        width: 250,
+        flex: 1,
         align: 'left',
         headerAlign: 'left',
       },
       {
         field: 'client_name',
         headerName: 'Client',
-        width: 200,
+        flex: 1,
         align: 'left',
         headerAlign: 'left',
       },
       {
         field: 'role_name',
         headerName: 'Role',
-        width: 180,
-        align: 'left',
-        headerAlign: 'left',
+        flex: 1,
+        align: 'center',
+        headerAlign: 'center',
         renderCell: (params) =>
           params.value ? (
-            <Box
-              component="span"
-              sx={{
-                ...statusBadges.info,
-                border: `1px solid ${colors.primary}`,
-                backgroundColor: colors.primaryLight,
-                color: colors.primary,
-              }}
-            >
-              {params.value}
-            </Box>
+            <Chip
+              label={params.value}
+              color="primary"
+              size="small"
+            />
           ) : (
-            <Typography
-              sx={{
-                fontSize: typography.fontSize.body,
-                color: colors.textMuted,
-                fontFamily: typography.fontFamily,
-              }}
-            >
-              No role assigned
-            </Typography>
+            <Chip
+              label="No role assigned"
+              color="default"
+              size="small"
+              variant="outlined"
+            />
           ),
       },
       {
         field: 'is_active',
         headerName: 'Status',
-        width: 120,
+        flex: 1,
         align: 'center',
         headerAlign: 'center',
         renderCell: (params) => (
-          <Box
-            component="span"
-            sx={params.value ? statusBadges.success : statusBadges.error}
-          >
-            {params.value ? 'Active' : 'Inactive'}
-          </Box>
+          <Chip
+            label={params.value ? 'Active' : 'Inactive'}
+            color={params.value ? 'success' : 'error'}
+            size="small"
+          />
         ),
       },
       {
         field: 'created_at',
         headerName: 'Created',
-        width: 150,
+        flex: 1,
         align: 'center',
         headerAlign: 'center',
         valueFormatter: (value) => formatDate(value),
@@ -331,7 +324,7 @@ export const UsersManagementView = () => {
       {
         field: 'actions',
         headerName: 'Actions',
-        width: 120,
+        flex: 1,
         align: 'center',
         headerAlign: 'center',
         sortable: false,
@@ -388,30 +381,25 @@ export const UsersManagementView = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      {/* Header - Desktop Only */}
-      <Box sx={{ display: { xs: "none", md: "flex" }, justifyContent: "space-between", mb: 3 }}>
-        <Box>
-          <Typography variant="body1" color="text.secondary">
-            Manage user accounts and permissions
-          </Typography>
-        </Box>
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<AddIcon />}
-          onClick={openAddDialog}
-          sx={primaryIconButton}
+      {/* Page Header 
+      <Box sx={{ mb: 2 }}>
+        <Typography
+          variant="h5"
+          sx={{
+            fontWeight: typography.fontWeight.semibold,
+            fontFamily: typography.fontFamily,
+          }}
         >
-          Add New User
-        </Button>
+          User Management
+        </Typography>
       </Box>
 
       {/* Filter Section - Desktop Only */}
-      <Card sx={{ display: { xs: "none", md: "block" }, mb: 3 }}>
+      <Card sx={{ display: { xs: "none", md: "block" }, mb: 3,  padding:'0 2rem 0 2rem'  }}>
         <CardContent>
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={6} lg={4}>
-              <FormControl fullWidth>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
+            <Box sx={{ display: 'flex', gap: 2, flex: 1 }}>
+              <FormControl sx={{ minWidth: 250 }}>
                 <InputLabel>Filter by Client</InputLabel>
                 <Select
                   value={selectedClient}
@@ -426,10 +414,8 @@ export const UsersManagementView = () => {
                   ))}
                 </Select>
               </FormControl>
-            </Grid>
-            <Grid item xs={12} md={6} lg={4}>
               <TextField
-                fullWidth
+                sx={{ minWidth: 300 }}
                 label="Search Users"
                 placeholder="Search by name or email..."
                 value={searchQuery}
@@ -442,8 +428,17 @@ export const UsersManagementView = () => {
                   ),
                 }}
               />
-            </Grid>
-          </Grid>
+            </Box>
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<AddIcon />}
+              onClick={openAddDialog}
+              sx={primaryIconButton}
+            >
+              Add New User
+            </Button>
+          </Box>
         </CardContent>
       </Card>
 

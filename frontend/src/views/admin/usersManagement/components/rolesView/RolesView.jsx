@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from "react";
 import {
   Box,
   Button,
@@ -22,16 +22,16 @@ import {
   Checkbox,
   FormControlLabel,
   Badge,
-  Tooltip
-} from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
+  Tooltip,
+} from "@mui/material";
+import { DataGrid } from "@mui/x-data-grid";
 import {
   Add as AddIcon,
   Edit as EditIcon,
   Security as SecurityIcon,
   Delete as DeleteIcon,
-  Shield as ShieldIcon
-} from '@mui/icons-material';
+  Shield as ShieldIcon,
+} from "@mui/icons-material";
 import {
   useGetRolesQuery,
   useCreateRoleMutation,
@@ -40,17 +40,20 @@ import {
   useGetClientsQuery,
   useGetPermissionsQuery,
   useLazyGetRolePermissionsQuery,
-  useUpdateRolePermissionsMutation
-} from '../../../../../store/api/adminApi';
+  useUpdateRolePermissionsMutation,
+} from "../../../../../store/api/adminApi";
 import {
   primaryButton,
   primaryIconButton,
   outlinedButton,
-  colors
-} from '../../../../../layouts/style/styles';
-import { RolesViewMovil } from './RolesViewMovil';
+  colors,
+  typography,
+} from "../../../../../layouts/style/styles";
+import { RolesViewMovil } from "./RolesViewMovil";
+import { useTranslation } from "react-i18next";
 
 export const RolesView = () => {
+  const { t } = useTranslation();
 
   // RTK Query hooks
   const { data: roles = [], isLoading, error } = useGetRolesQuery();
@@ -60,7 +63,8 @@ export const RolesView = () => {
   const [updateRole, { isLoading: isUpdating }] = useUpdateRoleMutation();
   const [deleteRole, { isLoading: isDeleting }] = useDeleteRoleMutation();
   const [getRolePermissions] = useLazyGetRolePermissionsQuery();
-  const [updateRolePermissions, { isLoading: isUpdatingPermissions }] = useUpdateRolePermissionsMutation();
+  const [updateRolePermissions, { isLoading: isUpdatingPermissions }] =
+    useUpdateRolePermissionsMutation();
 
   // Dialog states
   const [dialog, setDialog] = useState(false);
@@ -71,21 +75,21 @@ export const RolesView = () => {
   const [editingRole, setEditingRole] = useState(null);
   const [selectedRole, setSelectedRole] = useState(null);
   const [roleToDelete, setRoleToDelete] = useState(null);
-  const [selectedClient, setSelectedClient] = useState('');
+  const [selectedClient, setSelectedClient] = useState("");
   const [selectedPermissions, setSelectedPermissions] = useState([]);
 
   // Form state
   const [roleForm, setRoleForm] = useState({
-    role_name: '',
-    description: '',
-    client_id: null
+    role_name: "",
+    description: "",
+    client_id: null,
   });
 
   // Snackbar state
   const [snackbar, setSnackbar] = useState({
     open: false,
-    message: '',
-    severity: 'success'
+    message: "",
+    severity: "success",
   });
 
   // Computed values
@@ -94,9 +98,9 @@ export const RolesView = () => {
   const openAddDialog = () => {
     setEditingRole(null);
     setRoleForm({
-      role_name: '',
-      description: '',
-      client_id: null
+      role_name: "",
+      description: "",
+      client_id: null,
     });
     setDialog(true);
   };
@@ -105,8 +109,8 @@ export const RolesView = () => {
     setEditingRole(role);
     setRoleForm({
       role_name: role.role_name,
-      description: role.description || '',
-      client_id: role.client_id
+      description: role.description || "",
+      client_id: role.client_id,
     });
     setDialog(true);
   };
@@ -115,9 +119,9 @@ export const RolesView = () => {
     setDialog(false);
     setEditingRole(null);
     setRoleForm({
-      role_name: '',
-      description: '',
-      client_id: null
+      role_name: "",
+      description: "",
+      client_id: null,
     });
   };
 
@@ -125,7 +129,7 @@ export const RolesView = () => {
     setSelectedRole(role);
 
     if (!role.id) {
-      showNotification('Invalid role selected', 'error');
+      showNotification("Invalid role selected", "error");
       return;
     }
 
@@ -133,7 +137,7 @@ export const RolesView = () => {
       const result = await getRolePermissions(role.id).unwrap();
       setSelectedPermissions(result);
     } catch (error) {
-      console.error('Error fetching role permissions:', error);
+      console.error("Error fetching role permissions:", error);
       setSelectedPermissions([]);
     }
 
@@ -155,51 +159,52 @@ export const RolesView = () => {
           id: editingRole.id,
           role_name: roleForm.role_name,
           description: roleForm.description,
-          client_id: roleForm.client_id
+          client_id: roleForm.client_id,
         };
         await updateRole(updateData).unwrap();
-        showNotification('Role updated successfully', 'success');
+        showNotification("Role updated successfully", "success");
       } else {
         const roleData = {
           clientId: roleForm.client_id,
           roleName: roleForm.role_name,
           description: roleForm.description,
-          permissionIds: []
+          permissionIds: [],
         };
 
         if (!roleData.clientId) {
-          showNotification('Please select a client for this role', 'error');
+          showNotification("Please select a client for this role", "error");
           return;
         }
 
         await createRole(roleData).unwrap();
-        showNotification('Role created successfully', 'success');
+        showNotification("Role created successfully", "success");
       }
 
       closeDialog();
     } catch (error) {
-      const errorMessage = error.data?.error || error.data?.message || 'Failed to save role';
-      showNotification(errorMessage, 'error');
+      const errorMessage =
+        error.data?.error || error.data?.message || "Failed to save role";
+      showNotification(errorMessage, "error");
     }
   };
 
   const savePermissions = async () => {
     if (!selectedRole?.id) {
-      showNotification('Invalid role selected', 'error');
+      showNotification("Invalid role selected", "error");
       return;
     }
 
     try {
       await updateRolePermissions({
         roleId: selectedRole.id,
-        permissions: selectedPermissions
+        permissions: selectedPermissions,
       }).unwrap();
 
-      showNotification('Permissions updated successfully', 'success');
+      showNotification("Permissions updated successfully", "success");
       closePermissionsDialog();
     } catch (error) {
-      const errorMessage = error.data?.error || 'Failed to save permissions';
-      showNotification(errorMessage, 'error');
+      const errorMessage = error.data?.error || "Failed to save permissions";
+      showNotification(errorMessage, "error");
     }
   };
 
@@ -211,36 +216,38 @@ export const RolesView = () => {
   const handleDeleteRole = async () => {
     try {
       await deleteRole(roleToDelete.id).unwrap();
-      showNotification('Role deleted successfully', 'success');
+      showNotification("Role deleted successfully", "success");
       setDeleteDialog(false);
       setRoleToDelete(null);
     } catch (error) {
-      const errorMessage = error.data?.error || 'Failed to delete role';
-      showNotification(errorMessage, 'error');
+      const errorMessage = error.data?.error || "Failed to delete role";
+      showNotification(errorMessage, "error");
     }
   };
 
   const handlePermissionToggle = (permissionId) => {
-    setSelectedPermissions(prev =>
+    setSelectedPermissions((prev) =>
       prev.includes(permissionId)
-        ? prev.filter(id => id !== permissionId)
+        ? prev.filter((id) => id !== permissionId)
         : [...prev, permissionId]
     );
   };
 
   const isFormValid = () => {
-    return roleForm.role_name && roleForm.role_name.length >= 2 && roleForm.client_id;
+    return (
+      roleForm.role_name && roleForm.role_name.length >= 2 && roleForm.client_id
+    );
   };
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString();
   };
 
-  const showNotification = (message, severity = 'success') => {
+  const showNotification = (message, severity = "success") => {
     setSnackbar({
       open: true,
       message,
-      severity
+      severity,
     });
   };
 
@@ -249,29 +256,29 @@ export const RolesView = () => {
   };
 
   const filteredRoles = selectedClient
-    ? roles.filter(role => role.client_id === selectedClient)
+    ? roles.filter((role) => role.client_id === selectedClient)
     : roles;
 
   const isProtectedRole = (roleName) => {
-    return roleName === 'BPO Admin' || roleName === 'Client Admin';
+    return roleName === "BPO Admin" || roleName === "Client Admin";
   };
 
   // DataGrid columns
   const columns = useMemo(
     () => [
+      // {
+      //   field: "id",
+      //   headerName: "ID",
+      //   flex: 1,
+      //   align: "center",
+      //   headerAlign: "center",
+      // },
       {
-        field: 'id',
-        headerName: 'ID',
-        width: 80,
-        align: 'center',
-        headerAlign: 'center',
-      },
-      {
-        field: 'role_name',
-        headerName: 'Role Name',
-        width: 200,
-        align: 'left',
-        headerAlign: 'left',
+        field: "role_name",
+        headerName: "Role Name",
+        flex: 1,
+        align: "left",
+        headerAlign: "left",
         renderCell: (params) => (
           <Typography variant="body2" fontWeight={500}>
             {params.value}
@@ -279,19 +286,18 @@ export const RolesView = () => {
         ),
       },
       {
-        field: 'description',
-        headerName: 'Description',
-        width: 250,
+        field: "description",
+        headerName: "Description",
         flex: 1,
-        align: 'left',
-        headerAlign: 'left',
+        align: "left",
+        headerAlign: "left",
       },
       {
-        field: 'client_name',
-        headerName: 'Client',
-        width: 180,
-        align: 'left',
-        headerAlign: 'left',
+        field: "client_name",
+        headerName: "Client",
+        flex: 1,
+        align: "left",
+        headerAlign: "left",
         renderCell: (params) => (
           <Chip
             label={params.value}
@@ -302,11 +308,11 @@ export const RolesView = () => {
         ),
       },
       {
-        field: 'permissions_count',
-        headerName: 'Permissions',
-        width: 150,
-        align: 'center',
-        headerAlign: 'center',
+        field: "permissions_count",
+        headerName: "Permissions",
+        flex: 1,
+        align: "center",
+        headerAlign: "center",
         renderCell: (params) => (
           <Badge badgeContent={params.value || 0} color="info">
             <ShieldIcon color="action" />
@@ -314,24 +320,24 @@ export const RolesView = () => {
         ),
       },
       {
-        field: 'created_at',
-        headerName: 'Created',
-        width: 150,
-        align: 'center',
-        headerAlign: 'center',
+        field: "created_at",
+        headerName: "Created",
+        flex: 1,
+        align: "center",
+        headerAlign: "center",
         valueFormatter: (value) => formatDate(value),
       },
       {
-        field: 'actions',
-        headerName: 'Actions',
-        width: 150,
-        align: 'center',
-        headerAlign: 'center',
+        field: "actions",
+        headerName: "Actions",
+        flex: 1,
+        align: "center",
+        headerAlign: "center",
         sortable: false,
         filterable: false,
         disableColumnMenu: true,
         renderCell: (params) => (
-          <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
+          <Box sx={{ display: "flex", gap: 0.5, justifyContent: "center" }}>
             <Tooltip title="Edit role">
               <IconButton
                 size="small"
@@ -384,51 +390,78 @@ export const RolesView = () => {
   );
 
   return (
-    <Box>
-      {/* Header - Desktop Only */}
-      <Box sx={{ display: { xs: 'none', md: 'flex' }, justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
-        <Box>
-          <Typography variant="body1" color="text.secondary">
-            Manage roles and permissions
-          </Typography>
-        </Box>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={openAddDialog}
-          sx={{ ...primaryIconButton, mt: 1 }}
+    <Box
+      sx={{
+        display: { xs: "none", md: "block" },
+        alignItems: "center",
+        padding: "0 1.5rem 0 1.5rem",
+      }}
+    >
+      {/* Page Header 
+      <Box sx={{ mb: 2 }}>
+        <Typography
+          variant="h5"
+          sx={{
+            fontWeight: typography.fontWeight.semibold,
+            fontFamily: typography.fontFamily,
+          }}
         >
-          Add New Role
-        </Button>
+          Roles Management
+        </Typography>
       </Box>
 
       {/* Filter Section - Desktop Only */}
-      <Card sx={{ display: { xs: 'none', md: 'block' }, mb: 3 }}>
+      <Card
+        sx={{
+          display: { xs: "none", md: "block" },
+          padding: "0 2rem 0 2rem",
+          mb: 3,
+        }}
+      >
         <CardContent>
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={4}>
-              <FormControl fullWidth>
-                <InputLabel>Client</InputLabel>
-                <Select
-                  value={selectedClient}
-                  label="Client"
-                  onChange={(e) => setSelectedClient(e.target.value)}
-                >
-                  <MenuItem value="">All Clients</MenuItem>
-                  {clients.map(client => (
-                    <MenuItem key={client.id} value={client.id}>
-                      {client.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-          </Grid>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 2,
+            }}
+          >
+            <FormControl sx={{ minWidth: 250 }}>
+              <InputLabel>Client</InputLabel>
+              <Select
+                value={selectedClient}
+                label="Client"
+                onChange={(e) => setSelectedClient(e.target.value)}
+              >
+                <MenuItem value="">All Clients</MenuItem>
+                {clients.map((client) => (
+                  <MenuItem key={client.id} value={client.id}>
+                    {client.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={openAddDialog}
+              sx={primaryIconButton}
+            >
+              Add New Role
+            </Button>
+          </Box>
         </CardContent>
       </Card>
 
       {/* Roles Table - Desktop Only */}
-      <Box sx={{ display: { xs: 'none', md: 'block' }, height: 600, width: '100%' }}>
+      <Box
+        sx={{
+          display: { xs: "none", md: "block" },
+          height: 600,
+          width: "100%",
+        }}
+      >
         <DataGrid
           rows={rows}
           columns={columns}
@@ -441,37 +474,37 @@ export const RolesView = () => {
           }}
           disableRowSelectionOnClick
           sx={{
-            borderRadius: '0.7rem',
-            padding: '1rem 0 0 0',
-            '& .MuiDataGrid-columnHeaders': {
-              backgroundColor: '#f5f5f5 !important',
-              borderBottom: '2px solid #e0e0e0',
+            borderRadius: "0.7rem",
+            padding: "1rem 0 0 0",
+            "& .MuiDataGrid-columnHeaders": {
+              backgroundColor: "#f5f5f5 !important",
+              borderBottom: "2px solid #e0e0e0",
             },
-            '& .MuiDataGrid-columnHeader': {
-              backgroundColor: '#f5f5f5 !important',
+            "& .MuiDataGrid-columnHeader": {
+              backgroundColor: "#f5f5f5 !important",
             },
-            '& .MuiDataGrid-columnHeaderTitle': {
+            "& .MuiDataGrid-columnHeaderTitle": {
               fontWeight: 600,
-              textTransform: 'uppercase',
-              fontSize: '0.875rem',
+              textTransform: "uppercase",
+              fontSize: "0.875rem",
             },
-            '& .MuiDataGrid-sortIcon': {
+            "& .MuiDataGrid-sortIcon": {
               color: colors.primary,
             },
-            '& .MuiDataGrid-columnHeader--sorted': {
-              backgroundColor: '#e8f5e9 !important',
+            "& .MuiDataGrid-columnHeader--sorted": {
+              backgroundColor: "#e8f5e9 !important",
             },
-            '& .MuiDataGrid-filler': {
-              backgroundColor: '#f5f5f5 !important',
+            "& .MuiDataGrid-filler": {
+              backgroundColor: "#f5f5f5 !important",
             },
-            '& .MuiDataGrid-cell': {
-              borderBottom: '1px solid #f0f0f0',
+            "& .MuiDataGrid-cell": {
+              borderBottom: "1px solid #f0f0f0",
             },
-            '& .MuiDataGrid-cell:focus': {
-              outline: 'none',
+            "& .MuiDataGrid-cell:focus": {
+              outline: "none",
             },
-            '& .MuiDataGrid-row:hover': {
-              backgroundColor: 'action.hover',
+            "& .MuiDataGrid-row:hover": {
+              backgroundColor: "action.hover",
             },
           }}
         />
@@ -479,9 +512,9 @@ export const RolesView = () => {
 
       {/* Mobile View */}
       <RolesViewMovil
-        roles={filteredRoles.map(role => ({
+        roles={filteredRoles.map((role) => ({
           ...role,
-          permissionsCount: role.permissions_count || 0
+          permissionsCount: role.permissions_count || 0,
         }))}
         clients={clients}
         openAddDialog={openAddDialog}
@@ -492,19 +525,25 @@ export const RolesView = () => {
 
       {/* Add/Edit Role Dialog */}
       <Dialog open={dialog} onClose={closeDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          {editingRole ? 'Edit Role' : 'Add New Role'}
-        </DialogTitle>
+        <DialogTitle>{editingRole ? "Edit Role" : "Add New Role"}</DialogTitle>
         <DialogContent dividers>
           <TextField
             label="Role Name"
             required
             fullWidth
             value={roleForm.role_name}
-            onChange={(e) => setRoleForm({ ...roleForm, role_name: e.target.value })}
+            onChange={(e) =>
+              setRoleForm({ ...roleForm, role_name: e.target.value })
+            }
             sx={{ mb: 3 }}
-            error={roleForm.role_name.length > 0 && roleForm.role_name.length < 2}
-            helperText={roleForm.role_name.length > 0 && roleForm.role_name.length < 2 ? 'Role name must be at least 2 characters' : ''}
+            error={
+              roleForm.role_name.length > 0 && roleForm.role_name.length < 2
+            }
+            helperText={
+              roleForm.role_name.length > 0 && roleForm.role_name.length < 2
+                ? "Role name must be at least 2 characters"
+                : ""
+            }
           />
           <TextField
             label="Description"
@@ -512,18 +551,22 @@ export const RolesView = () => {
             multiline
             rows={3}
             value={roleForm.description}
-            onChange={(e) => setRoleForm({ ...roleForm, description: e.target.value })}
+            onChange={(e) =>
+              setRoleForm({ ...roleForm, description: e.target.value })
+            }
             sx={{ mb: 3 }}
           />
           <FormControl fullWidth required>
             <InputLabel>Client</InputLabel>
             <Select
-              value={roleForm.client_id || ''}
+              value={roleForm.client_id || ""}
               label="Client"
-              onChange={(e) => setRoleForm({ ...roleForm, client_id: e.target.value })}
+              onChange={(e) =>
+                setRoleForm({ ...roleForm, client_id: e.target.value })
+              }
               disabled={editingRole && isProtectedRole(editingRole.role_name)}
             >
-              {clients.map(client => (
+              {clients.map((client) => (
                 <MenuItem key={client.id} value={client.id}>
                   {client.name}
                 </MenuItem>
@@ -532,10 +575,7 @@ export const RolesView = () => {
           </FormControl>
         </DialogContent>
         <DialogActions>
-          <Button
-            onClick={closeDialog}
-            sx={outlinedButton}
-          >
+          <Button onClick={closeDialog} sx={outlinedButton}>
             Cancel
           </Button>
           <Button
@@ -544,13 +584,18 @@ export const RolesView = () => {
             disabled={isSaving || !isFormValid()}
             sx={primaryButton}
           >
-            {isSaving ? 'Saving...' : 'Save'}
+            {isSaving ? "Saving..." : "Save"}
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Permissions Dialog */}
-      <Dialog open={permissionsDialog} onClose={closePermissionsDialog} maxWidth="md" fullWidth>
+      <Dialog
+        open={permissionsDialog}
+        onClose={closePermissionsDialog}
+        maxWidth="md"
+        fullWidth
+      >
         <DialogTitle>
           Configure Permissions - {selectedRole?.role_name}
         </DialogTitle>
@@ -568,17 +613,16 @@ export const RolesView = () => {
                       onChange={() => handlePermissionToggle(permission.id)}
                     />
                   }
-                  label={permission.permissionName || permission.permission_name}
+                  label={
+                    permission.permissionName || permission.permission_name
+                  }
                 />
               </Grid>
             ))}
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button
-            onClick={closePermissionsDialog}
-            sx={outlinedButton}
-          >
+          <Button onClick={closePermissionsDialog} sx={outlinedButton}>
             Cancel
           </Button>
           <Button
@@ -587,25 +631,28 @@ export const RolesView = () => {
             disabled={isUpdatingPermissions}
             sx={primaryButton}
           >
-            {isUpdatingPermissions ? 'Saving...' : 'Save Permissions'}
+            {isUpdatingPermissions ? "Saving..." : "Save Permissions"}
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialog} onClose={() => setDeleteDialog(false)} maxWidth="xs" fullWidth>
+      <Dialog
+        open={deleteDialog}
+        onClose={() => setDeleteDialog(false)}
+        maxWidth="xs"
+        fullWidth
+      >
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
           <Typography>
-            Are you sure you want to delete the role "{roleToDelete?.role_name}"?
-            This action cannot be undone and will affect any users assigned to this role.
+            Are you sure you want to delete the role "{roleToDelete?.role_name}
+            "? This action cannot be undone and will affect any users assigned
+            to this role.
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button
-            onClick={() => setDeleteDialog(false)}
-            sx={outlinedButton}
-          >
+          <Button onClick={() => setDeleteDialog(false)} sx={outlinedButton}>
             Cancel
           </Button>
           <Button
@@ -615,7 +662,7 @@ export const RolesView = () => {
             disabled={isDeleting}
             sx={primaryButton}
           >
-            {isDeleting ? 'Deleting...' : 'Delete'}
+            {isDeleting ? "Deleting..." : "Delete"}
           </Button>
         </DialogActions>
       </Dialog>
@@ -623,11 +670,15 @@ export const RolesView = () => {
       {/* Snackbar Notifications */}
       <Snackbar
         open={snackbar.open}
-        autoHideDuration={snackbar.severity === 'success' ? 3000 : 5000}
+        autoHideDuration={snackbar.severity === "success" ? 3000 : 5000}
         onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
-        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
           {snackbar.message}
         </Alert>
       </Snackbar>

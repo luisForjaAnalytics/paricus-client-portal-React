@@ -34,10 +34,14 @@ import {
   primaryIconButton,
   outlinedButton,
   colors,
+  typography,
 } from "../../../../../layouts/style/styles";
 import { ClientsViewMovil } from "./ClientsViewMovil";
+import { useTranslation } from "react-i18next";
 
 export const ClientsView = () => {
+  const { t } = useTranslation();
+
   // RTK Query hooks
   const { data: clients = [], isLoading, error } = useGetClientsQuery();
   const [createClient, { isLoading: isCreating }] = useCreateClientMutation();
@@ -148,8 +152,7 @@ export const ClientsView = () => {
       {
         field: "name",
         headerName: "Client Name",
-        // flex: 1,
-        minWidth: 200,
+        flex: 1,
         align: "left",
         headerAlign: "left",
         renderCell: (params) => (
@@ -161,7 +164,7 @@ export const ClientsView = () => {
       {
         field: "type",
         headerName: "Type",
-        width: 130,
+        flex: 1,
         align: "center",
         headerAlign: "center",
         renderCell: (params) => (
@@ -175,7 +178,7 @@ export const ClientsView = () => {
       {
         field: "isActive",
         headerName: "Status",
-        width: 110,
+        flex: 1,
         align: "center",
         headerAlign: "center",
         renderCell: (params) => (
@@ -189,21 +192,21 @@ export const ClientsView = () => {
       {
         field: "userCount",
         headerName: "Users",
-        width: 90,
+        flex: 1,
         align: "center",
         headerAlign: "center",
       },
       {
         field: "roleCount",
         headerName: "Roles",
-        width: 90,
+        flex: 1,
         align: "center",
         headerAlign: "center",
       },
       {
         field: "createdAt",
         headerName: "Created",
-        width: 130,
+        flex: 1,
         align: "center",
         headerAlign: "center",
         valueFormatter: (value) => formatDate(value),
@@ -211,7 +214,7 @@ export const ClientsView = () => {
       {
         field: "actions",
         headerName: "Actions",
-        width: 120,
+        flex: 1,
         align: "center",
         headerAlign: "center",
         sortable: false,
@@ -263,20 +266,29 @@ export const ClientsView = () => {
 
   return (
     <Box>
+      {/* Page Header
+      <Box sx={{ mb: 2 }}>
+        <Typography
+          variant="h5"
+          sx={{
+            fontWeight: typography.fontWeight.semibold,
+            fontFamily: typography.fontFamily,
+          }}
+        >
+          Client Management
+        </Typography>
+      </Box> */}
+
       {/* Header - Desktop Only */}
       <Box
         sx={{
           display: { xs: "none", md: "flex" },
-          justifyContent: "space-between",
-          alignItems: "flex-start",
+          justifyContent: "flex-end",
+          alignItems: "center",
+          padding:'0 5rem 0 1.5rem',
           mb: 3,
         }}
       >
-        <Box>
-          <Typography variant="body1" color="text.secondary">
-            Manage and configure client accounts
-          </Typography>
-        </Box>
         <Button
           variant="contained"
           startIcon={<AddIcon />}
@@ -290,17 +302,12 @@ export const ClientsView = () => {
       {/* Data Table - Desktop Only */}
       <Box
         sx={{
-          display: { xs: "none", md: "flex" },
-          justifyContent: "center",
-          alignItems: "center",
+          display: { xs: "none", md: "block" },
+          height: "40vh",
+          width: "100%",
+          padding:'0 1.5rem 0 1.5rem'
         }}
       >
-        <Box
-          sx={{
-            height: "40vh",
-            width: "100vh",
-          }}
-        >
         <DataGrid
           rows={rows}
           columns={columns}
@@ -351,7 +358,6 @@ export const ClientsView = () => {
             },
           }}
         />
-        </Box>
       </Box>
 
       {/* Mobile View */}
