@@ -6,6 +6,7 @@ import { reportsApi } from "./api/reportsApi";
 import { adminApi } from "./api/adminApi";
 import { audioRecordingsApi } from "./api/audioRecordingsApi";
 import { profileApi } from "./api/profileApi";
+import { articlesApi } from "./api/articlesApi";
 
 export const store = configureStore({
   reducer: {
@@ -16,6 +17,7 @@ export const store = configureStore({
     [adminApi.reducerPath]: adminApi.reducer,
     [audioRecordingsApi.reducerPath]: audioRecordingsApi.reducer,
     [profileApi.reducerPath]: profileApi.reducer,
+    [articlesApi.reducerPath]: articlesApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -24,6 +26,7 @@ export const store = configureStore({
       reportsApi.middleware,
       adminApi.middleware,
       audioRecordingsApi.middleware,
-      profileApi.middleware
+      profileApi.middleware,
+      articlesApi.middleware
     ),
 });
