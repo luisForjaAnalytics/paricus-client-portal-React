@@ -40,6 +40,12 @@ export const InvoicesTableDesktop = ({
   openPaymentLink,
   onPaymentLinkSuccess,
   onPaymentLinkError,
+  // Props adicionales para compatibilidad con Mobile (no usadas en Desktop)
+  selectedFolderDisplay,
+  onUploadClick,
+  onRefreshClick,
+  loadingInvoices,
+  getStatusColor,
 }) => {
   const { t } = useTranslation();
 

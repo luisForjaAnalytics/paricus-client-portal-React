@@ -1,20 +1,20 @@
-# Nueva Arquitectura del Frontend
+# New Frontend Architecture
 
-## 🎯 Estructura Implementada: Screaming Architecture
+## 🎯 Implemented Structure: Screaming Architecture
 
-La estructura del frontend ha sido reorganizada siguiendo el patrón **Screaming Architecture**, donde la organización grita el dominio de negocio de la aplicación.
+The frontend structure has been reorganized following the **Screaming Architecture** pattern, where the organization screams the business domain of the application.
 
 ---
 
-## 📁 Estructura de Carpetas
+## 📁 Folder Structure
 
 ```
 frontend/src/
-├── common/                      # Código compartido entre módulos
+├── common/                      # Shared code between modules
 │   ├── components/
-│   │   ├── ui/                 # Componentes UI reutilizables
+│   │   ├── ui/                 # Reusable UI components
 │   │   │   └── TableItems.jsx
-│   │   └── layout/             # Componentes de layout
+│   │   └── layout/             # Layout components
 │   │       ├── LayoutAccount.jsx
 │   │       ├── Login.jsx
 │   │       ├── AppBar/
@@ -27,31 +27,31 @@ frontend/src/
 │   │           ├── MobilMenu.jsx
 │   │           └── SingOutButton.jsx
 │   │
-│   ├── hooks/                  # Hooks compartidos
+│   ├── hooks/                  # Shared hooks
 │   │   ├── index.js            # Barrel export
-│   │   ├── useBreakpoint.js    # 🆕 Hook para responsive (elimina *Movil.jsx)
+│   │   ├── useBreakpoint.js    # 🆕 Hook for responsive (eliminates *Movil.jsx)
 │   │   ├── usePermissions.js
 │   │   └── useTesseractOCR.js
 │   │
-│   ├── styles/                 # Estilos globales
+│   ├── styles/                 # Global styles
 │   │   └── styles.js
 │   │
-│   └── utils/                  # Utilidades compartidas
+│   └── utils/                  # Shared utilities
 │
-├── modules/                    # Módulos de negocio (Feature-based)
+├── modules/                    # Business modules (Feature-based)
 │   ├── financials/
 │   │   ├── components/
 │   │   │   ├── ClientSummary/
-│   │   │   │   ├── index.jsx               # 🆕 Wrapper unificado
+│   │   │   │   ├── index.jsx               # 🆕 Unified wrapper
 │   │   │   │   ├── ClientSummaryDesktop.jsx
 │   │   │   │   ├── ClientSummaryMobile.jsx
 │   │   │   │   └── ClientSummaryCard.jsx
 │   │   │   ├── ClientBreakdown/
-│   │   │   │   ├── index.jsx               # 🆕 Wrapper unificado
+│   │   │   │   ├── index.jsx               # 🆕 Unified wrapper
 │   │   │   │   ├── ClientBreakdownDesktop.jsx
 │   │   │   │   └── ClientBreakdownMobile.jsx
 │   │   │   ├── InvoicesTable/
-│   │   │   │   ├── index.jsx               # 🆕 Wrapper unificado
+│   │   │   │   ├── index.jsx               # 🆕 Unified wrapper
 │   │   │   │   ├── InvoicesTableDesktop.jsx
 │   │   │   │   ├── InvoicesTableMobile.jsx
 │   │   │   │   └── PendingLinkModal.jsx
@@ -65,7 +65,7 @@ frontend/src/
 │   ├── audio-recordings/
 │   │   ├── components/
 │   │   │   ├── QuickFilters/
-│   │   │   │   ├── index.jsx               # 🆕 Wrapper unificado
+│   │   │   │   ├── index.jsx               # 🆕 Unified wrapper
 │   │   │   │   ├── QuickFiltersDesktop.jsx
 │   │   │   │   └── QuickFiltersMobile.jsx
 │   │   │   ├── AdvancedFilters/
@@ -80,15 +80,15 @@ frontend/src/
 │   ├── user-management/
 │   │   ├── components/
 │   │   │   ├── UsersTab/
-│   │   │   │   ├── index.jsx               # 🆕 Wrapper unificado
+│   │   │   │   ├── index.jsx               # 🆕 Unified wrapper
 │   │   │   │   ├── UsersTabDesktop.jsx
 │   │   │   │   └── UsersTabMobile.jsx
 │   │   │   ├── ClientsTab/
-│   │   │   │   ├── index.jsx               # 🆕 Wrapper unificado
+│   │   │   │   ├── index.jsx               # 🆕 Unified wrapper
 │   │   │   │   ├── ClientsTabDesktop.jsx
 │   │   │   │   └── ClientsTabMobile.jsx
 │   │   │   ├── RolesTab/
-│   │   │   │   ├── index.jsx               # 🆕 Wrapper unificado
+│   │   │   │   ├── index.jsx               # 🆕 Unified wrapper
 │   │   │   │   ├── RolesTabDesktop.jsx
 │   │   │   │   └── RolesTabMobile.jsx
 │   │   │   ├── Navigation/
@@ -133,7 +133,7 @@ frontend/src/
 │       └── index.js
 │
 ├── router/
-│   ├── AppRouter.jsx           # 🔄 Actualizado con nuevos imports
+│   ├── AppRouter.jsx           # 🔄 Updated with new imports
 │   └── components/
 │       └── ProtectedRoute.jsx
 │
@@ -151,26 +151,26 @@ frontend/src/
 
 ---
 
-## 🚀 Mejoras Implementadas
+## 🚀 Implemented Improvements
 
-### 1. **Eliminación de Duplicación Móvil**
-**Antes:**
+### 1. **Elimination of Mobile Duplication**
+**Before:**
 ```jsx
-// ❌ Dos archivos separados
+// ❌ Two separate files
 ClientSummary.jsx
 ClientSummaryMovil.jsx
 ```
 
-**Después:**
+**After:**
 ```jsx
-// ✅ Un solo wrapper + componentes específicos
+// ✅ Single wrapper + specific components
 ClientSummary/
-├── index.jsx                 // Wrapper que usa useBreakpoint
+├── index.jsx                 // Wrapper using useBreakpoint
 ├── ClientSummaryDesktop.jsx
 └── ClientSummaryMobile.jsx
 ```
 
-**Implementación:**
+**Implementation:**
 ```jsx
 // ClientSummary/index.jsx
 import { useBreakpoint } from "../../../../common/hooks/useBreakpoint";
@@ -184,7 +184,7 @@ export const ClientSummary = (props) => {
 };
 ```
 
-### 2. **Hook useBreakpoint Reutilizable**
+### 2. **Reusable useBreakpoint Hook**
 ```jsx
 // common/hooks/useBreakpoint.js
 export const useBreakpoint = () => {
@@ -194,58 +194,58 @@ export const useBreakpoint = () => {
   const isTablet = useMediaQuery(theme.breakpoints.between('md', 'lg'));
   const isDesktop = useMediaQuery(theme.breakpoints.up('lg'));
 
-  // También incluye: isXs, isSm, isMd, isLg, isXl, current
+  // Also includes: isXs, isSm, isMd, isLg, isXl, current
 
   return { isMobile, isTablet, isDesktop, ... };
 };
 ```
 
 ### 3. **Barrel Exports (Clean Imports)**
-**Antes:**
+**Before:**
 ```jsx
 import { FinancialsView } from "../views/financials/FinancialsView";
 import { ClientSummary } from "../views/financials/components/ClientSummary";
 ```
 
-**Después:**
+**After:**
 ```jsx
 import { FinancialsView, ClientSummary } from "../modules/financials";
 ```
 
-### 4. **Organización por Dominio de Negocio**
-- Cada módulo contiene TODO lo relacionado con esa funcionalidad
-- Fácil encontrar código relacionado
-- Facilita el trabajo en equipo (cada dev puede trabajar en un módulo)
+### 4. **Business Domain Organization**
+- Each module contains EVERYTHING related to that functionality
+- Easy to find related code
+- Facilitates team collaboration (each dev can work on a module)
 
 ---
 
-## 📖 Guía de Uso
+## 📖 Usage Guide
 
-### Importar Hooks Comunes
+### Importing Common Hooks
 ```jsx
-// ✅ Desde barrel export
+// ✅ From barrel export
 import { useBreakpoint, usePermissions } from "@/common/hooks";
 
-// ✅ Específico
+// ✅ Specific
 import { useBreakpoint } from "@/common/hooks/useBreakpoint";
 ```
 
-### Importar Componentes de Layout
+### Importing Layout Components
 ```jsx
 import { LayoutAccount, Login } from "@/common/components/layout";
 import { AppBarLayout } from "@/common/components/layout/AppBar";
 ```
 
-### Importar Módulos
+### Importing Modules
 ```jsx
-// Vista completa
+// Full view
 import { FinancialsView } from "@/modules/financials";
 
-// Componentes específicos
+// Specific components
 import { ClientSummary, InvoicesTable } from "@/modules/financials";
 ```
 
-### Crear Componente Responsivo
+### Creating a Responsive Component
 ```jsx
 import { useBreakpoint } from "@/common/hooks";
 
@@ -260,114 +260,114 @@ export const MyComponent = () => {
 
 ---
 
-## 🎯 Ventajas de la Nueva Estructura
+## 🎯 Advantages of the New Structure
 
 ### ✅ **DRY (Don't Repeat Yourself)**
-- Sin archivos `*Movil.jsx` duplicados
-- Hook `useBreakpoint` centralizado
-- Barrel exports evitan imports largos
+- No duplicate `*Movil.jsx` files
+- Centralized `useBreakpoint` hook
+- Barrel exports avoid long imports
 
 ### ✅ **Screaming Architecture**
-- Estructura grita el dominio: "financials", "user-management", "audio-recordings"
-- Fácil saber qué hace la app con solo ver carpetas
-- Nuevos devs entienden rápido el proyecto
+- Structure screams the domain: "financials", "user-management", "audio-recordings"
+- Easy to know what the app does just by looking at folders
+- New devs understand the project quickly
 
-### ✅ **Modularidad**
-- Cada módulo es independiente
-- Fácil mover o extraer módulos
-- Preparado para microfrontends futuro
+### ✅ **Modularity**
+- Each module is independent
+- Easy to move or extract modules
+- Ready for future microfrontends
 
-### ✅ **Mantenibilidad**
-- Código relacionado está junto
-- Cambios en un módulo no afectan otros
-- Fácil hacer refactoring
+### ✅ **Maintainability**
+- Related code stays together
+- Changes in one module don't affect others
+- Easy to refactor
 
-### ✅ **Escalabilidad**
-- Agregar nuevo módulo: copiar estructura existente
-- Sin límite de crecimiento
-- Patrones claros y consistentes
+### ✅ **Scalability**
+- Add new module: copy existing structure
+- No growth limit
+- Clear and consistent patterns
 
 ---
 
-## 🔄 Cómo Agregar un Nuevo Módulo
+## 🔄 How to Add a New Module
 
 ```bash
-# 1. Crear estructura
-mkdir -p src/modules/nuevo-modulo/components
+# 1. Create structure
+mkdir -p src/modules/new-module/components
 
-# 2. Crear vista principal
-touch src/modules/nuevo-modulo/NuevoModuloView.jsx
+# 2. Create main view
+touch src/modules/new-module/NewModuleView.jsx
 
-# 3. Crear barrel export
-cat > src/modules/nuevo-modulo/index.js << EOF
-export { default as NuevoModuloView } from "./NuevoModuloView";
+# 3. Create barrel export
+cat > src/modules/new-module/index.js << EOF
+export { default as NewModuleView } from "./NewModuleView";
 EOF
 
-# 4. Agregar ruta en router
+# 4. Add route in router
 # src/router/AppRouter.jsx
-import { NuevoModuloView } from "../modules/nuevo-modulo";
+import { NewModuleView } from "../modules/new-module";
 ```
 
 ---
 
-## 📚 Patrones de Código
+## 📚 Code Patterns
 
-### Componente Responsivo
+### Responsive Component
 ```jsx
-// modules/mi-modulo/components/MiComponente/index.jsx
+// modules/my-module/components/MyComponent/index.jsx
 import { useBreakpoint } from "@/common/hooks";
-import { MiComponenteDesktop } from "./MiComponenteDesktop";
-import { MiComponenteMobile } from "./MiComponenteMobile";
+import { MyComponentDesktop } from "./MyComponentDesktop";
+import { MyComponentMobile } from "./MyComponentMobile";
 
-export const MiComponente = (props) => {
+export const MyComponent = (props) => {
   const { isMobile } = useBreakpoint();
   return isMobile ?
-    <MiComponenteMobile {...props} /> :
-    <MiComponenteDesktop {...props} />;
+    <MyComponentMobile {...props} /> :
+    <MyComponentDesktop {...props} />;
 };
 ```
 
-### Barrel Export de Módulo
+### Module Barrel Export
 ```jsx
-// modules/mi-modulo/index.js
-export { default as MiModuloView } from "./MiModuloView";
-export { MiComponente } from "./components/MiComponente";
-export { OtroComponente } from "./components/OtroComponente";
+// modules/my-module/index.js
+export { default as MyModuleView } from "./MyModuleView";
+export { MyComponent } from "./components/MyComponent";
+export { OtherComponent } from "./components/OtherComponent";
 ```
 
 ---
 
-## 🛠️ Migración Completada
+## 🛠️ Migration Completed
 
-### ✅ Archivos Eliminados
-- `src/views/` (completo)
-- `src/layouts/` (completo)
-- `src/hooks/` (completo)
-- Todos los `*Movil.jsx` (reemplazados por wrappers)
+### ✅ Deleted Files
+- `src/views/` (complete)
+- `src/layouts/` (complete)
+- `src/hooks/` (complete)
+- All `*Movil.jsx` files (replaced by wrappers)
 
-### ✅ Archivos Migrados
-- ✅ Componentes comunes → `common/components/`
+### ✅ Migrated Files
+- ✅ Common components → `common/components/`
 - ✅ Hooks → `common/hooks/`
-- ✅ Estilos → `common/styles/`
-- ✅ Vistas → `modules/{nombre-modulo}/`
-- ✅ Componentes de módulos → `modules/{nombre}/components/`
+- ✅ Styles → `common/styles/`
+- ✅ Views → `modules/{module-name}/`
+- ✅ Module components → `modules/{name}/components/`
 
-### ✅ Imports Actualizados
+### ✅ Updated Imports
 - ✅ Router (`AppRouter.jsx`)
-- ✅ Todos los componentes migrados
-- ✅ Rutas de estilos
-- ✅ Rutas de hooks
+- ✅ All migrated components
+- ✅ Style paths
+- ✅ Hook paths
 
 ---
 
-## 📝 Notas Finales
+## 📝 Final Notes
 
-- **Sin librerías adicionales**: Todo con React + MUI existente
-- **Compatible con RTK Query**: No afecta el state management
-- **Backward compatible**: Los componentes internos siguen funcionando igual
-- **Preparado para alias**: Puedes configurar `@/` en vite.config.js
+- **No additional libraries**: Everything with existing React + MUI
+- **Compatible with RTK Query**: Doesn't affect state management
+- **Backward compatible**: Internal components still work the same
+- **Ready for aliases**: You can configure `@/` in vite.config.js
 
-### Configurar Alias (Opcional)
+### Configure Aliases (Optional)
 ```js
 // vite.config.js
 export default defineConfig({
@@ -381,7 +381,7 @@ export default defineConfig({
 });
 ```
 
-Luego:
+Then:
 ```jsx
 import { useBreakpoint } from '@common/hooks';
 import { FinancialsView } from '@modules/financials';
@@ -389,6 +389,6 @@ import { FinancialsView } from '@modules/financials';
 
 ---
 
-**Estructura implementada el:** 2025-11-17
-**Patrón:** Screaming Architecture
-**Estado:** ✅ Completado y funcional
+**Structure implemented on:** 2025-11-17
+**Pattern:** Screaming Architecture
+**Status:** ✅ Completed and functional

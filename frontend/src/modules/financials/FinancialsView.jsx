@@ -847,44 +847,12 @@ export const FinancialsView = () => {
                   </Box>
                 )}
 
-              {/* Invoice Table (Desktop) */}
+              {/* Invoice Table (Responsive - handles both Desktop and Mobile) */}
               {!loadingInvoices &&
                 !loading &&
                 !error &&
                 invoices.length > 0 && (
-                  <Box
-                    sx={{
-                      display: { xs: "none", md: "block" },
-                      borderColor: "transparent",
-                    }}
-                  >
-                    <InvoicesTable
-                      invoices={invoices}
-                      isAdmin={isAdmin}
-                      formatDate={formatDate}
-                      formatCurrency={formatCurrency}
-                      getStatusColor={getStatusColor}
-                      downloadInvoice={downloadInvoice}
-                      openEditInvoiceModal={openEditInvoiceModal}
-                      handleDeleteInvoice={handleDeleteInvoice}
-                      openPaymentLink={openPaymentLink}
-                      onPaymentLinkSuccess={(message) =>
-                        showNotification("success", message)
-                      }
-                      onPaymentLinkError={(message) =>
-                        showNotification("error", message)
-                      }
-                    />
-                  </Box>
-                )}
-
-              {/* Invoice Table (Mobile) - Only for non-admin users */}
-              {!loadingInvoices &&
-                !loading &&
-                !error &&
-                invoices.length > 0 &&
-                !isAdmin && (
-                  <InvoicesTableMobile
+                  <InvoicesTable
                     invoices={invoices}
                     isAdmin={isAdmin}
                     formatDate={formatDate}

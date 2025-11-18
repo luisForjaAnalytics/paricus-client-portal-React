@@ -20,6 +20,7 @@ import {
   KeyboardArrowUp as KeyboardArrowUpIcon,
   Business as BusinessIcon,
 } from "@mui/icons-material";
+import { InvoicesTableMobile } from "../InvoicesTable/InvoicesTableMobile";
 
 function Row({
   client,
@@ -187,7 +188,7 @@ function Row({
                     Invoices ({clientInvoices.length})
                   </Typography>
                   <Box sx={{ mt: 2, mx: -2 }}>
-                    <InvoicesTableViewMobile
+                    <InvoicesTableMobile
                       invoices={clientInvoices}
                       isAdmin={isAdmin}
                       formatDate={formatDate}

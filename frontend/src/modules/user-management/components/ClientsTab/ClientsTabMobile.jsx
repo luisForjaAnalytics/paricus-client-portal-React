@@ -171,7 +171,7 @@ Row.propTypes = {
 };
 
 export const ClientsTabMobile = ({
-  clients,
+  clients = [],
   handleEdit,
   handleDeactivate,
   formatDate,
@@ -274,9 +274,13 @@ ClientsTabMobile.propTypes = {
       isProspect: PropTypes.bool.isRequired,
       created_at: PropTypes.string.isRequired,
     })
-  ).isRequired,
+  ),
   handleEdit: PropTypes.func.isRequired,
   handleDeactivate: PropTypes.func.isRequired,
   formatDate: PropTypes.func.isRequired,
   onAddClick: PropTypes.func.isRequired,
+};
+
+ClientsTabMobile.defaultProps = {
+  clients: [],
 };

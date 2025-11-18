@@ -358,7 +358,7 @@ export default function CKEditorComponent({
                   editor={DecoupledEditor}
                   config={editorConfig}
                   data={articleContent}
-                  disabled={disabled}
+                  disabled={true}
                   onReady={(editor) => {
                     if (editorToolbarRef.current) {
                       editorToolbarRef.current.appendChild(

@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { UsersTabMobile } from "./UsersTabMobile";
 import {
   Box,
   Button,
@@ -244,19 +243,12 @@ export const UsersTabDesktop = () => {
   // DataGrid columns
   const columns = useMemo(
     () => [
-      // {
-      //   field: 'id',
-      //   headerName: 'ID',
-      //   flex: 1,
-      //   align: 'center',
-      //   headerAlign: 'center',
-      // },
       {
-        field: 'name',
-        headerName: 'Name',
+        field: "name",
+        headerName: "Name",
         flex: 1,
-        align: 'left',
-        headerAlign: 'left',
+        align: "left",
+        headerAlign: "left",
         renderCell: (params) => (
           <Typography variant="body2" fontWeight="medium">
             {params.value || "N/A"}
@@ -264,32 +256,28 @@ export const UsersTabDesktop = () => {
         ),
       },
       {
-        field: 'email',
-        headerName: 'Email',
+        field: "email",
+        headerName: "Email",
         flex: 1,
-        align: 'left',
-        headerAlign: 'left',
+        align: "left",
+        headerAlign: "left",
       },
       {
-        field: 'client_name',
-        headerName: 'Client',
+        field: "client_name",
+        headerName: "Client",
         flex: 1,
-        align: 'left',
-        headerAlign: 'left',
+        align: "left",
+        headerAlign: "left",
       },
       {
-        field: 'role_name',
-        headerName: 'Role',
+        field: "role_name",
+        headerName: "Role",
         flex: 1,
-        align: 'center',
-        headerAlign: 'center',
+        align: "center",
+        headerAlign: "center",
         renderCell: (params) =>
           params.value ? (
-            <Chip
-              label={params.value}
-              color="primary"
-              size="small"
-            />
+            <Chip label={params.value} color="primary" size="small" />
           ) : (
             <Chip
               label="No role assigned"
@@ -300,38 +288,38 @@ export const UsersTabDesktop = () => {
           ),
       },
       {
-        field: 'is_active',
-        headerName: 'Status',
+        field: "is_active",
+        headerName: "Status",
         flex: 1,
-        align: 'center',
-        headerAlign: 'center',
+        align: "center",
+        headerAlign: "center",
         renderCell: (params) => (
           <Chip
-            label={params.value ? 'Active' : 'Inactive'}
-            color={params.value ? 'success' : 'error'}
+            label={params.value ? "Active" : "Inactive"}
+            color={params.value ? "success" : "error"}
             size="small"
           />
         ),
       },
       {
-        field: 'created_at',
-        headerName: 'Created',
+        field: "created_at",
+        headerName: "Created",
         flex: 1,
-        align: 'center',
-        headerAlign: 'center',
+        align: "center",
+        headerAlign: "center",
         valueFormatter: (value) => formatDate(value),
       },
       {
-        field: 'actions',
-        headerName: 'Actions',
+        field: "actions",
+        headerName: "Actions",
         flex: 1,
-        align: 'center',
-        headerAlign: 'center',
+        align: "center",
+        headerAlign: "center",
         sortable: false,
         filterable: false,
         disableColumnMenu: true,
         renderCell: (params) => (
-          <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
+          <Box sx={{ display: "flex", gap: 0.5, justifyContent: "center" }}>
             <Tooltip title="Edit user">
               <IconButton
                 size="small"
@@ -341,9 +329,7 @@ export const UsersTabDesktop = () => {
               </IconButton>
             </Tooltip>
             <Tooltip
-              title={
-                params.row.is_active ? "Deactivate user" : "Activate user"
-              }
+              title={params.row.is_active ? "Deactivate user" : "Activate user"}
             >
               <IconButton
                 size="small"
@@ -368,7 +354,8 @@ export const UsersTabDesktop = () => {
     () =>
       filteredUsers.map((user) => ({
         id: user.id,
-        name: `${user.first_name || ""} ${user.last_name || ""}`.trim() || "N/A",
+        name:
+          `${user.first_name || ""} ${user.last_name || ""}`.trim() || "N/A",
         email: user.email,
         client_name: user.client_name || "N/A",
         role_name: user.role_name,
@@ -381,24 +368,25 @@ export const UsersTabDesktop = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      {/* Page Header 
-      <Box sx={{ mb: 2 }}>
-        <Typography
-          variant="h5"
-          sx={{
-            fontWeight: typography.fontWeight.semibold,
-            fontFamily: typography.fontFamily,
-          }}
-        >
-          User Management
-        </Typography>
-      </Box>
 
       {/* Filter Section - Desktop Only */}
-      <Card sx={{ display: { xs: "none", md: "block" }, mb: 3,  padding:'0 2rem 0 2rem'  }}>
+      <Card
+        sx={{
+          display: { xs: "none", md: "block" },
+          mb: 3,
+          padding: "0 2rem 0 2rem",
+        }}
+      >
         <CardContent>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
-            <Box sx={{ display: 'flex', gap: 2, flex: 1 }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 2,
+            }}
+          >
+            <Box sx={{ display: "flex", gap: 2, flex: 1 }}>
               <FormControl sx={{ minWidth: 250 }}>
                 <InputLabel>Filter by Client</InputLabel>
                 <Select
@@ -443,7 +431,13 @@ export const UsersTabDesktop = () => {
       </Card>
 
       {/* Users Data Table - Desktop Only */}
-      <Box sx={{ display: { xs: "none", md: "block" }, height: 600, width: '100%' }}>
+      <Box
+        sx={{
+          display: { xs: "none", md: "block" },
+          height: 'auto',
+          width: "100%",
+        }}
+      >
         <DataGrid
           rows={rows}
           columns={columns}
@@ -457,56 +451,47 @@ export const UsersTabDesktop = () => {
           disableRowSelectionOnClick
           sx={{
             ...card,
-            padding: '1rem 0 0 0',
+            padding: "1rem 0 0 0",
             border: `1px solid ${colors.border}`, // border-gray-200
-            '& .MuiDataGrid-columnHeaders': {
+            "& .MuiDataGrid-columnHeaders": {
               backgroundColor: `${colors.background} !important`, // bg-gray-50
               borderBottom: `2px solid ${colors.border}`,
             },
-            '& .MuiDataGrid-columnHeader': {
+            "& .MuiDataGrid-columnHeader": {
               backgroundColor: `${colors.background} !important`, // bg-gray-50
             },
-            '& .MuiDataGrid-columnHeaderTitle': {
+            "& .MuiDataGrid-columnHeaderTitle": {
               fontWeight: typography.fontWeight.bold, // font-bold
-              textTransform: 'uppercase',
+              textTransform: "uppercase",
               fontSize: typography.fontSize.tableHeader, // text-xs (12px)
               fontFamily: typography.fontFamily,
               color: colors.textMuted, // text-gray-500
-              letterSpacing: '0.05em', // tracking-wider
+              letterSpacing: "0.05em", // tracking-wider
             },
-            '& .MuiDataGrid-sortIcon': {
+            "& .MuiDataGrid-sortIcon": {
               color: colors.primary,
             },
-            '& .MuiDataGrid-columnHeader--sorted': {
+            "& .MuiDataGrid-columnHeader--sorted": {
               backgroundColor: `${colors.primaryLight} !important`, // bg-green-100 when sorted
             },
-            '& .MuiDataGrid-filler': {
+            "& .MuiDataGrid-filler": {
               backgroundColor: `${colors.background} !important`, // bg-gray-50
             },
-            '& .MuiDataGrid-cell': {
+            "& .MuiDataGrid-cell": {
               borderBottom: `1px solid ${colors.border}`, // border-gray-200
               fontSize: typography.fontSize.body, // text-sm (14px)
               fontFamily: typography.fontFamily,
               color: colors.textPrimary, // text-gray-900
             },
-            '& .MuiDataGrid-cell:focus': {
-              outline: 'none',
+            "& .MuiDataGrid-cell:focus": {
+              outline: "none",
             },
-            '& .MuiDataGrid-row:hover': {
+            "& .MuiDataGrid-row:hover": {
               backgroundColor: colors.background, // hover:bg-gray-50
             },
           }}
         />
       </Box>
-
-      {/* Mobile View */}
-      <UsersTabMobile
-        users={filteredUsers}
-        clients={clients}
-        roles={roles}
-        handleEdit={openEditDialog}
-        openDialog={openAddDialog}
-      />
 
       {/* Add/Edit User Dialog */}
       <Dialog open={dialog} onClose={closeDialog} maxWidth="md" fullWidth>

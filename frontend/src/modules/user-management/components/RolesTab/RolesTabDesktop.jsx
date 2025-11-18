@@ -1,5 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
-import { RolesTabMobile } from "./RolesTabMobile";
+import { useState, useMemo } from "react";
 import {
   Box,
   Button,
@@ -48,7 +47,6 @@ import {
   primaryIconButton,
   outlinedButton,
   colors,
-  typography,
 } from "../../../../common/styles/styles";
 import { useTranslation } from "react-i18next";
 
@@ -458,7 +456,7 @@ export const RolesTabDesktop = () => {
       <Box
         sx={{
           display: { xs: "none", md: "block" },
-          height: 600,
+          height: "auto",
           width: "100%",
         }}
       >
@@ -509,19 +507,6 @@ export const RolesTabDesktop = () => {
           }}
         />
       </Box>
-
-      {/* Mobile View */}
-      <RolesTabMobile
-        roles={filteredRoles.map((role) => ({
-          ...role,
-          permissionsCount: role.permissions_count || 0,
-        }))}
-        clients={clients}
-        openAddDialog={openAddDialog}
-        openEditDialog={openEditDialog}
-        openPermissionsDialog={openPermissionsDialog}
-        openDeleteDialog={confirmDelete}
-      />
 
       {/* Add/Edit Role Dialog */}
       <Dialog open={dialog} onClose={closeDialog} maxWidth="sm" fullWidth>

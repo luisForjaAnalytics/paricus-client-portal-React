@@ -1,13 +1,13 @@
 import { Box, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import { typography } from "../../common/styles/styles";
+import { boxWrapCards, typography } from "../../common/styles/styles";
 import { Outlet } from "react-router-dom";
 
 export const KnowledgeBaseView = () => {
   const { t } = useTranslation();
 
   return (
-    <Box>
+    <Box sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 3 } }}>
       {/* Page Header */}
       <Box sx={{ mb: 2 }}>
         <Typography
@@ -17,10 +17,10 @@ export const KnowledgeBaseView = () => {
             fontFamily: typography.fontFamily,
           }}
         >
-          Knowledge Base
+          {t("tooltips.knowledgeBase")}
         </Typography>
       </Box>
-      <Box>
+      <Box sx={boxWrapCards}>
         <Outlet />
       </Box>
     </Box>

@@ -168,7 +168,7 @@ export const LayoutAccount = () => {
           display: "flex",
           flexDirection: "column",
           flexGrow: 1,
-          backgroundColor: "#ececec60", // gris claro
+          //backgroundColor: "#ececec60", // gris claro
         }}
       >
         <AppBarLayout titleState={titleState} setTitleState={setTitleState} />

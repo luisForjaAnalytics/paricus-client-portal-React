@@ -1,7 +1,6 @@
 import Box from "@mui/material/Box";
 import { NavBarOptions } from "./components";
 import { Outlet, useOutletContext } from "react-router-dom";
-import { boxWrapCards } from "../../common/styles/styles";
 
 export const UserManagementView = () => {
   const { setTitleState } = useOutletContext();
