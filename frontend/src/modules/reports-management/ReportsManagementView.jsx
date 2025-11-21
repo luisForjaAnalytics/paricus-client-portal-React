@@ -9,11 +9,10 @@ import {
   DialogTitle,
   DialogContent,
   Grid,
-  TextField,
-  Select,
-  MenuItem,
   FormControl,
   InputLabel,
+  Select,
+  MenuItem,
   CircularProgress,
   Snackbar,
   Alert,
@@ -23,10 +22,10 @@ import {
 import { useTranslation } from "react-i18next";
 import { Add as AddIcon, Close as CloseIcon } from "@mui/icons-material";
 import { ClientFolders } from "./components/ClientFolders";
-import { ClientReports } from "./components/ClientReports";
 import {
   useGetClientFoldersQuery,
   useGetClientReportsQuery,
+  useLazyGetClientReportsQuery,
   useUploadReportMutation,
   useLazyDownloadReportQuery,
   useDeleteReportMutation,
@@ -41,7 +40,6 @@ import {
   outlinedButton,
   outlinedIconButton,
   typography,
-  boxWrapCards,
 } from "../../common/styles/styles";
 
 export const ReportsManagementView = () => {
@@ -54,17 +52,62 @@ export const ReportsManagementView = () => {
     refetch: refetchFolders,
   } = useGetClientFoldersQuery();
 
-  // State
-  const [selectedFolder, setSelectedFolder] = useState("");
+  // Use lazy query for reports - will be called when folders are expanded
+  const [getReports, { data: reportsData, isLoading: loadingReports }] =
+    useLazyGetClientReportsQuery();
 
-  // Get reports for selected folder
-  const {
-    data: reports = [],
-    isLoading: loadingReports,
-    refetch: refetchReports,
-  } = useGetClientReportsQuery(selectedFolder, {
-    skip: !selectedFolder,
-  });
+  // Store reports by folder
+  const [allReports, setAllReports] = useState({});
+  const [isLoadingInitial, setIsLoadingInitial] = useState(false);
+
+  // Fetch reports for all folders when component mounts
+  useEffect(() => {
+    const fetchAllReports = async () => {
+      if (clientFolders.length === 0) return;
+
+      setIsLoadingInitial(true);
+
+      try {
+        // Fetch reports for all folders in parallel
+        const promises = clientFolders.map(async (folder) => {
+          try {
+            const result = await getReports(folder).unwrap();
+            return { folder, reports: result };
+          } catch (error) {
+            console.error(`Failed to fetch reports for ${folder}:`, error);
+            return { folder, reports: [] };
+          }
+        });
+
+        const results = await Promise.all(promises);
+
+        // Update state with all results
+        const reportsMap = {};
+        results.forEach(({ folder, reports }) => {
+          reportsMap[folder] = reports;
+        });
+
+        setAllReports(reportsMap);
+      } finally {
+        setIsLoadingInitial(false);
+      }
+    };
+
+    fetchAllReports();
+  }, [clientFolders.length]); // Only re-run when number of folders changes
+
+  // Function to fetch reports for a folder (for refresh after upload/delete)
+  const fetchReportsForFolder = async (folder) => {
+    try {
+      const result = await getReports(folder).unwrap();
+      setAllReports((prev) => ({ ...prev, [folder]: result }));
+    } catch (error) {
+      console.error(`Failed to fetch reports for ${folder}:`, error);
+      setAllReports((prev) => ({ ...prev, [folder]: [] }));
+    }
+  };
+
+  const isLoadingAnyReports = loadingReports || isLoadingInitial;
 
   // Mutations
   const [uploadReport, { isLoading: uploading }] = useUploadReportMutation();
@@ -86,7 +129,7 @@ export const ReportsManagementView = () => {
   } = useGetFolderAccessQuery(undefined, { skip: !showFolderAccessModal });
 
   // State
-  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(null); // Changed to store folder name
   const [notification, setNotification] = useState(null);
   const [accessForm, setAccessForm] = useState({
     clientId: "",
@@ -102,17 +145,6 @@ export const ReportsManagementView = () => {
 
   const fileInputRef = useRef(null);
 
-  // Auto-select first folder when folders load
-  useEffect(() => {
-    if (clientFolders.length > 0 && !selectedFolder) {
-      setSelectedFolder(clientFolders[0]);
-    }
-  }, [clientFolders, selectedFolder]);
-
-  const handleFolderSelect = (folder) => {
-    setSelectedFolder(folder);
-  };
-
   const handleFileSelect = (event) => {
     if (event.target.files && event.target.files[0]) {
       setUploadForm({ ...uploadForm, file: event.target.files[0] });
@@ -120,7 +152,7 @@ export const ReportsManagementView = () => {
   };
 
   const handleUploadReport = async () => {
-    if (!uploadForm.file || !selectedFolder) return;
+    if (!uploadForm.file || !showUploadModal) return;
 
     try {
       const formData = new FormData();
@@ -132,11 +164,14 @@ export const ReportsManagementView = () => {
         formData.append("description", uploadForm.description);
       }
 
-      await uploadReport({ folder: selectedFolder, formData }).unwrap();
+      await uploadReport({ folder: showUploadModal, formData }).unwrap();
 
       showNotification("success", "Report uploaded successfully");
-      setShowUploadModal(false);
+      setShowUploadModal(null);
       resetUploadForm();
+
+      // Refetch reports for this folder
+      await fetchReportsForFolder(showUploadModal);
     } catch (error) {
       showNotification(
         "error",
@@ -145,11 +180,11 @@ export const ReportsManagementView = () => {
     }
   };
 
-  const handleDownloadReport = async (report) => {
+  const handleDownloadReport = async (folder, report) => {
     try {
       const fileName = report.name;
       const response = await downloadReportQuery({
-        folder: selectedFolder,
+        folder,
         fileName,
       }).unwrap();
 
@@ -164,15 +199,18 @@ export const ReportsManagementView = () => {
     }
   };
 
-  const handleDeleteReport = async (report) => {
+  const handleDeleteReport = async (folder, report) => {
     if (!window.confirm(`Are you sure you want to delete "${report.name}"?`))
       return;
 
     try {
       const fileName = report.name;
-      await deleteReportMutation({ folder: selectedFolder, fileName }).unwrap();
+      await deleteReportMutation({ folder, fileName }).unwrap();
 
       showNotification("success", "Report deleted successfully");
+
+      // Refetch reports for this folder
+      await fetchReportsForFolder(folder);
     } catch (error) {
       showNotification(
         "error",
@@ -262,7 +300,7 @@ export const ReportsManagementView = () => {
   };
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
+    <Container maxWidth="100%" sx={{ py: 4 }}>
       {/* Page Header */}
       <Box sx={{ mb: 2 }}>
         <Typography
@@ -275,27 +313,16 @@ export const ReportsManagementView = () => {
           Reports Management
         </Typography>
       </Box>
-      <Box
-      sx={
-        boxWrapCards
-      }
-      >
-        {/* Client Folders Section */}
+      <Box>
+        {/* Client Folders Section with Expandable Reports */}
         <ClientFolders
           clientFolders={clientFolders}
           loading={loading}
-          selectedFolder={selectedFolder}
-          handleFolderSelect={handleFolderSelect}
           refetchFolders={refetchFolders}
           openFolderAccessModal={openFolderAccessModal}
-        />
-
-        {/* Client Reports Section */}
-        <ClientReports
-          selectedFolder={selectedFolder}
-          reports={reports}
-          loadingReports={loadingReports}
-          refetchReports={refetchReports}
+          reports={allReports}
+          loadingReports={isLoadingAnyReports}
+          fetchReportsForFolder={fetchReportsForFolder}
           handleDownloadReport={handleDownloadReport}
           handleDeleteReport={handleDeleteReport}
           formatFileSize={formatFileSize}
@@ -307,6 +334,8 @@ export const ReportsManagementView = () => {
           handleFileSelect={handleFileSelect}
           handleUploadReport={handleUploadReport}
           uploading={uploading}
+          fileInputRef={fileInputRef}
+          selectedFolderForUpload={showUploadModal}
         />
       </Box>
 

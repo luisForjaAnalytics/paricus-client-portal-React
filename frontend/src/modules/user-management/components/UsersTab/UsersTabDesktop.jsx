@@ -367,8 +367,7 @@ export const UsersTabDesktop = () => {
   );
 
   return (
-    <Box sx={{ p: 3 }}>
-
+    <Box sx={{ px: 3 }}>
       {/* Filter Section - Desktop Only */}
       <Card
         sx={{
@@ -434,7 +433,7 @@ export const UsersTabDesktop = () => {
       <Box
         sx={{
           display: { xs: "none", md: "block" },
-          height: 'auto',
+          height: "auto",
           width: "100%",
         }}
       >

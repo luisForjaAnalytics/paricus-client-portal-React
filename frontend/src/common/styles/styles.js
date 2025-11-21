@@ -658,11 +658,13 @@ export const titlesTypography = {
     fontWeight: typography.fontWeight.semibold,
     fontFamily: typography.fontFamily,
   },
+  managementSection:{
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily,
+    textTransform: "none", fontSize:'1.5rem' 
+  }
 };
 
-export const boxWrapCards = {
-  marginLeft: "1.5rem",
-};
 
 // ========================================
 // Box Upload New Invoice Modal styles

@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Box,
   Button,
@@ -16,6 +15,7 @@ import {
   outlinedIconButton,
   titlesTypography,
 } from "../../../../common/styles/styles";
+import { useTranslation } from "react-i18next";
 
 export const ClientSummaryDesktop = ({
   loading,
@@ -23,6 +23,8 @@ export const ClientSummaryDesktop = ({
   formatCurrency,
   payload,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <Box sx={{ display: { xs: "none", md: "block" }, mb: 3 }}>
       <Box
@@ -38,7 +40,7 @@ export const ClientSummaryDesktop = ({
             ...titlesTypography.primaryTitle,
           }}
         >
-          All Clients Summary
+          {t("financials.clientSummary.title")}
         </Typography>
         <Stack direction="row" spacing={1}>
           <Button
@@ -50,7 +52,7 @@ export const ClientSummaryDesktop = ({
             rel="noopener noreferrer"
             sx={primaryIconButton}
           >
-            Wave Apps
+            {t("financials.clientSummary.waveAppsButton")}
           </Button>
           <Button
             variant="outlined"
@@ -61,7 +63,7 @@ export const ClientSummaryDesktop = ({
             disabled={loading}
             sx={outlinedIconButton}
           >
-            {loading ? "Loading..." : "Refresh All"}
+            {loading ? t("financials.clientSummary.loading") : t("financials.clientSummary.refreshButton")}
           </Button>
         </Stack>
       </Box>

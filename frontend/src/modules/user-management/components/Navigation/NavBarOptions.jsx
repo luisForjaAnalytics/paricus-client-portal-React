@@ -4,7 +4,7 @@ import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { colors, titlesTypography} from "../../../../common/styles/styles";
+import { colors, titlesTypography } from "../../../../common/styles/styles";
 import { Typography } from "@mui/material";
 
 function a11yProps(index) {
@@ -41,8 +41,8 @@ export const NavBarOptions = ({ setTitleState }) => {
   }, [value, navigate, setTitleState]);
 
   return (
-      <>
-      <Box sx={{ borderBottom: 0, display:{xs:'none', md:'contents'}}}>
+    <>
+      <Box sx={{ borderBottom: 0, display: { xs: "none", md: "contents" } }}>
         <Tabs
           value={value}
           onChange={handleChange}
@@ -62,11 +62,7 @@ export const NavBarOptions = ({ setTitleState }) => {
         >
           <Tab
             label={
-              <Typography
-                sx={
-                  titlesTypography.sectionTitle
-                }
-              >
+              <Typography sx={titlesTypography.managementSection}>
                 {t("userManagement.clients.title")}
               </Typography>
             }
@@ -74,11 +70,7 @@ export const NavBarOptions = ({ setTitleState }) => {
           />
           <Tab
             label={
-              <Typography
-                sx={
-                  titlesTypography.sectionTitle
-                }
-              >
+              <Typography sx={titlesTypography.managementSection}>
                 {t("userManagement.users.title")}
               </Typography>
             }
@@ -86,11 +78,7 @@ export const NavBarOptions = ({ setTitleState }) => {
           />
           <Tab
             label={
-              <Typography
-                sx={
-                  titlesTypography.sectionTitle
-                }
-              >
+              <Typography sx={titlesTypography.managementSection}>
                 {t("userManagement.rolesPermissions.title")}
               </Typography>
             }
