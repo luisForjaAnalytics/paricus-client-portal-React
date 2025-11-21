@@ -24,6 +24,8 @@ import {
   Block as BlockIcon,
   Add as AddIcon,
 } from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
+import { titlesTypography } from "../../../../common/styles/styles";
 
 function Row({ client, handleEdit, handleDeactivate, formatDate }) {
   const [open, setOpen] = React.useState(false);
@@ -117,7 +119,9 @@ function Row({ client, handleEdit, handleDeactivate, formatDate }) {
                 </Box>
 
                 {/* Actions */}
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}>
+                <Box
+                  sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}
+                >
                   <Typography
                     variant="body2"
                     fontWeight="600"
@@ -177,6 +181,7 @@ export const ClientsTabMobile = ({
   formatDate,
   onAddClick,
 }) => {
+  const { t } = useTranslation();
   return (
     <TableContainer
       component={Paper}
@@ -211,15 +216,11 @@ export const ClientsTabMobile = ({
                   alignItems: "center",
                 }}
               >
-                <Typography variant="subtitle2" fontWeight="600">
-                  Clients
+                <Typography sx={titlesTypography.sectionTitle}>
+                  {t("userManagement.clients.title")}
                 </Typography>
                 <Tooltip title="Add Client">
-                  <IconButton
-                    color="primary"
-                    size="small"
-                    onClick={onAddClick}
-                  >
+                  <IconButton color="primary" size="small" onClick={onAddClick}>
                     <AddIcon fontSize="small" />
                   </IconButton>
                 </Tooltip>

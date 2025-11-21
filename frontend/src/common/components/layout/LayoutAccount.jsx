@@ -114,53 +114,64 @@ export const LayoutAccount = () => {
             borderRadius: 2,
           }}
         />
-        <List
-          sx={{
-            marginTop: { sx: "none", md: 2 },
-            marginBottom: { sx: "none", md: 10 },
-          }}
-        >
-          <MenuSections
-            setTitleState={setTitleState}
-            titleState={titleState}
-            open={open}
-          />
-        </List>
-
-        <Divider
-          sx={{
-            width: "70%",
-            height: 3.5,
-            bgcolor: colors.border,
-            alignSelf: "center",
-            borderRadius: 2,
-          }}
-        />
-
-        <DrawerHeader>
-          <IconButton
-          sx={{
-            marginRight: '0.9rem',
-          }}
+        <Box sx={{
+          display: "flex",
+          flexDirection: "column",
+          height: "100%",
+          justifyContent: "space-between"
+        }}>
+          <List
+            sx={{
+              marginTop: { sx: "none", md: 2 },
+              marginBottom: { sx: "none", md: 10 },
+            }}
           >
-            {open === false ? (
-              <MenuIcon
-                onClick={handleDrawerOpen}
-                sx={[
-                  {
-                    color: "grey.500",
-                  },
-                  open && { display: "none" },
-                ]}
-              />
-            ) : (
-              <ChevronLeftIcon
-                onClick={handleDrawerClose}
-                sx={{ color: colors.textPrimary }}
-              />
-            )}
-          </IconButton>
-        </DrawerHeader>
+            <MenuSections
+              setTitleState={setTitleState}
+              titleState={titleState}
+              open={open}
+            />
+          </List>
+
+          <Box sx={{ marginTop: "auto" }}>
+            <Divider
+              sx={{
+                width: "70%",
+                height: 3.5,
+                bgcolor: colors.border,
+                alignSelf: "center",
+                borderRadius: 2,
+                mx: "auto",
+                mb: 0,
+              }}
+            />
+
+            <DrawerHeader>
+              <IconButton
+                sx={{
+                  marginRight: "0.8rem",
+                }}
+              >
+                {open === false ? (
+                  <MenuIcon
+                    onClick={handleDrawerOpen}
+                    sx={[
+                      {
+                        color: "grey.500",
+                      },
+                      open && { display: "none" },
+                    ]}
+                  />
+                ) : (
+                  <ChevronLeftIcon
+                    onClick={handleDrawerClose}
+                    sx={{ color: colors.textPrimary }}
+                  />
+                )}
+              </IconButton>
+            </DrawerHeader>
+          </Box>
+        </Box>
       </Drawer>
 
       <Box
@@ -168,7 +179,6 @@ export const LayoutAccount = () => {
           display: "flex",
           flexDirection: "column",
           flexGrow: 1,
-          //backgroundColor: "#ececec60", // gris claro
         }}
       >
         <AppBarLayout titleState={titleState} setTitleState={setTitleState} />

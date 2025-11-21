@@ -82,7 +82,7 @@ export const TableView = () => {
     <Box
       sx={{
         display: { xs: "none", md: "block" },
-        height: 700,
+        height: 'auto',
         width: { md: "95%", lg: "100%" },
       }}
     >

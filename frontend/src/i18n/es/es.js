@@ -505,6 +505,8 @@ export default {
       confirmDeleteInvoice: "¿Está seguro de que desea eliminar esta factura?",
       openingPaymentPage: "Abriendo página de pago...",
       saveChanges: "Guardar Cambios",
+      processingPdf: "Procesando PDF con OCR...",
+      processingFile: "Procesando...",
     },
   },
 

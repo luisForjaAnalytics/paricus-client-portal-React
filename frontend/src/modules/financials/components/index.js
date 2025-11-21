@@ -2,4 +2,4 @@
 export { ClientSummary } from "./ClientSummary";
 export { ClientBreakdown } from "./ClientBreakdown";
 export { InvoicesTable, PendingLinkModal } from "./InvoicesTable";
-export { OcrButton } from "./OcrButton";
+export { UploadInvoiceButton } from "./UploadInvoiceButton";

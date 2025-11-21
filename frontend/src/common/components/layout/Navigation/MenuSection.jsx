@@ -6,6 +6,7 @@ import VolumeUpOutlinedIcon from "@mui/icons-material/VolumeUpOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import { ItemMenu } from "./ItemMenu";
+import { AccordionMenuItem } from "./AccordionMenuItem";
 import {
   Divider,
   ListItem,
@@ -56,6 +57,23 @@ const menuItems = [
     label: "userManagement",
     icon: <SettingsOutlinedIcon fontSize="medium" />,
     route: "users-management/clients",
+    subItems: [
+      {
+        label: "clientManagement",
+        icon: <SettingsOutlinedIcon fontSize="medium" />,
+        route: "users-management/clients",
+      },
+      {
+        label: "usersManagement",
+        icon: <SettingsOutlinedIcon fontSize="medium" />,
+        route: "users-management/users",
+      },
+      {
+        label: "roleManagement",
+        icon: <SettingsOutlinedIcon fontSize="medium" />,
+        route: "users-management/rolesPermissions",
+      },
+    ],
   },
 ];
 
@@ -74,18 +92,30 @@ const menuItemsAvatar = [
 ];
 
 export const MenuSections = ({ setTitleState, titleState, open }) => {
+  const isMobileDrawer = open === undefined;
+
   return (
     <>
       {menuItems.map((item, index) => (
         <ListItem key={index} disablePadding sx={{ display: "block" }}>
-          <ItemMenu
-            label={item.label}
-            icon={item.icon}
-            route={item.route}
-            setTitleState={setTitleState}
-            titleState={titleState}
-            open={open}
-          />
+          {isMobileDrawer && item.subItems ? (
+            <AccordionMenuItem
+              label={item.label}
+              icon={item.icon}
+              subItems={item.subItems}
+              setTitleState={setTitleState}
+              titleState={titleState}
+            />
+          ) : (
+            <ItemMenu
+              label={item.label}
+              icon={item.icon}
+              route={item.route}
+              setTitleState={setTitleState}
+              titleState={titleState}
+              open={open}
+            />
+          )}
         </ListItem>
       ))}
     </>

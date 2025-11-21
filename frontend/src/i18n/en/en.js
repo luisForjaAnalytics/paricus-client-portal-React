@@ -510,6 +510,8 @@ export default {
       confirmDeleteInvoice: "Are you sure you want to delete this invoice?",
       openingPaymentPage: "Opening payment page...",
       saveChanges: "Save Changes",
+      processingPdf: "Processing PDF with OCR...",
+      processingFile: "Processing...",
     },
   },
 

@@ -23,6 +23,7 @@ export const colors = {
   secondaryHover: "#0a6a38bb", // Kept for button compatibility
   focusRing: "#22C55E", // ring-green-500
   gradiantPrimaryColor: "linear-gradient(90deg, #1fb467c7, #0a6a38bb )", // Kept for button compatibility
+  gradiantMobilPrimaryColor: "linear-gradient(15deg, #1fb467d0, #0a6a38ff )",
   financialClientAvatar: "#11e7464d",
   drowerIcons: "#D1FAE5",
   folderCloseIcon: "#68686844",
@@ -418,8 +419,7 @@ export const reportsCardSelected = {
   backgroundColor: colors.surface,
   borderRadius: layout.borderRadius.sm,
   border: `1px solid ${colors.borderSoft}`,
-  boxShadow:
-    "0px 0.5px 0.5px 0px rgba(0, 0, 0, 0.32)",
+  boxShadow: "0px 0.5px 0.5px 0px rgba(0, 0, 0, 0.32)",
   padding: "1rem 1rem 0.2rem 1rem",
   borderRadius: "1rem",
 };
@@ -662,4 +662,25 @@ export const titlesTypography = {
 
 export const boxWrapCards = {
   marginLeft: "1.5rem",
+};
+
+// ========================================
+// Box Upload New Invoice Modal styles
+// ========================================
+
+export const uploadInvoiceModalStyle = {
+boxUploadInvoiceModal:
+{  display: "flex",
+  flexDirection: "row",
+  gap: 3,
+  margin: "0 0 1rem 0",},
+textFielUploadInvoiceModal:{
+'& .MuiOutlinedInput-root': {
+      borderRadius: '1.5rem',
+      '&.Mui-focused fieldset': {
+        borderColor: colors.primary,
+      },
+    },
+}
+
 };

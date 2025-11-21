@@ -42,14 +42,14 @@ export const NavBarOptions = ({ setTitleState }) => {
 
   return (
       <>
-      <Box sx={{ borderBottom: 0, borderColor: "divider"}}>
+      <Box sx={{ borderBottom: 0, display:{xs:'none', md:'contents'}}}>
         <Tabs
           value={value}
           onChange={handleChange}
           //aria-label="basic tabs example"
           sx={{
             "& .MuiTab-root": {
-              textTransform: "none", // Desactiva mayúsculas
+              //textTransform: "none", // Desactiva mayúsculas
               color: "#1a7e22ff 0%", // Color del texto cuando no está seleccionado
             },
             "& .Mui-selected": {

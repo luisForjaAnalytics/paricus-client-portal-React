@@ -79,11 +79,19 @@ export const useTesseractOCR =()=> {
     }
   }, [extractImagesFromPDF]);
 
+  const reset = useCallback(() => {
+    setText("");
+    setProgress(0);
+    setLoading(false);
+    setError(null);
+  }, []);
+
   return {
     text,
     progress,
     loading,
     error,
     runOcr,
+    reset,
   };
 }

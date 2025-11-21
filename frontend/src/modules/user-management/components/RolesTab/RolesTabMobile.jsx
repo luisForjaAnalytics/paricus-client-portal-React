@@ -52,7 +52,9 @@ import {
 import {
   primaryButton,
   outlinedButton,
+  titlesTypography,
 } from "../../../../common/styles/styles";
+import { useTranslation } from "react-i18next";
 
 function Row({
   role,
@@ -217,6 +219,7 @@ function Row({
 }
 
 export const RolesTabMobile = () => {
+  const { t } = useTranslation();
   // RTK Query hooks
   const { data: roles = [], isLoading } = useGetRolesQuery();
   const { data: clients = [] } = useGetClientsQuery();
@@ -450,8 +453,8 @@ export const RolesTabMobile = () => {
                     alignItems: "center",
                   }}
                 >
-                  <Typography variant="subtitle2" fontWeight="600">
-                    Roles
+                  <Typography sx={titlesTypography.sectionTitle}>
+                    {t("userManagement.rolesPermissions.title")}
                   </Typography>
                   <Tooltip title="Add Role">
                     <IconButton

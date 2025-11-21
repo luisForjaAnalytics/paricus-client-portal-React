@@ -49,7 +49,9 @@ import {
 import {
   primaryButton,
   outlinedButton,
+  titlesTypography,
 } from "../../../../common/styles/styles";
+import { useTranslation } from "react-i18next";
 
 function Row({ user, clients, roles, handleEdit }) {
   const [open, setOpen] = React.useState(false);
@@ -71,7 +73,7 @@ function Row({ user, clients, roles, handleEdit }) {
   };
 
   return (
-    <React.Fragment>
+    <>
       <TableRow sx={{ "& > *": { borderBottom: "unset" } }}>
         <TableCell>
           <IconButton
@@ -225,11 +227,12 @@ function Row({ user, clients, roles, handleEdit }) {
           </Collapse>
         </TableCell>
       </TableRow>
-    </React.Fragment>
+    </>
   );
 }
 
 export const UsersTabMobile = () => {
+  const { t } = useTranslation();
   // RTK Query hooks
   const { data: users = [], isLoading: loading } = useGetUsersQuery();
   const { data: clients = [] } = useGetClientsQuery();
@@ -400,9 +403,10 @@ export const UsersTabMobile = () => {
                     alignItems: "center",
                   }}
                 >
-                  <Typography variant="subtitle2" fontWeight="600">
-                    Users
+                  <Typography sx={titlesTypography.sectionTitle}>
+                    {t("userManagement.users.title")}
                   </Typography>
+
                   <Tooltip title="Add User">
                     <IconButton
                       color="primary"

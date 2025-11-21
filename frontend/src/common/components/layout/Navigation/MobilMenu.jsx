@@ -15,10 +15,15 @@ export const MobilMenu = () => {
     setOpen(newOpen);
   };
 
+  const handleSetTitleState = (newTitle) => {
+    setTitleState(newTitle);
+    setOpen(false); // Close drawer only when navigating
+  };
+
   const DrawerList = (
-    <Box sx={{ width: 250 }} role="presentation" onClick={toggleDrawer(false)}>
+    <Box sx={{ width: 250 }} role="presentation">
       <List>
-        <MenuSections setTitleState={setTitleState} titleState={titleState} />
+        <MenuSections setTitleState={handleSetTitleState} titleState={titleState} />
       </List>
     </Box>
   );
@@ -36,7 +41,7 @@ export const MobilMenu = () => {
         onClose={toggleDrawer(false)}
         sx={{
           "& .MuiDrawer-paper": {
-            backgroundColor: colors.primary,
+            background: colors.gradiantMobilPrimaryColor,
             color: "white",
             borderRight: "none",
           },

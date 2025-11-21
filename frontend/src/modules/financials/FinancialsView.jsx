@@ -27,7 +27,6 @@ import {
   AccessTime as ClockIcon,
   Warning as WarningIcon,
   People as PeopleIcon,
-  Upload as UploadIcon,
   Refresh as RefreshIcon,
   PictureAsPdf as PdfIcon,
   CheckCircle as CheckIcon,
@@ -37,7 +36,6 @@ import {
   useGetAllClientsDataQuery,
   useGetClientInvoicesAndStatsQuery,
   useGetMyInvoicesQuery,
-  useUploadInvoiceMutation,
   useUpdateInvoiceMutation,
   useDeleteInvoiceMutation,
   useLazyGetDownloadUrlQuery,
@@ -46,6 +44,7 @@ import { useSelector } from "react-redux";
 import { ClientSummary } from "./components/ClientSummary";
 import { ClientBreakdown } from "./components/ClientBreakdown";
 import { InvoicesTable } from "./components/InvoicesTable";
+import { UploadInvoiceButton } from "./components/UploadInvoiceButton";
 import {
   primaryButton,
   primaryIconButton,
@@ -56,7 +55,6 @@ import {
   titlesTypography,
   boxWrapCards,
 } from "../../common/styles/styles";
-import { OcrButton } from "./components/OcrButton";
 
 export const FinancialsView = () => {
   // Auth store
@@ -99,8 +97,6 @@ export const FinancialsView = () => {
   });
 
   // RTK Query mutations
-  const [uploadInvoiceMutation, { isLoading: uploading }] =
-    useUploadInvoiceMutation();
   const [updateInvoiceMutation, { isLoading: savingInvoiceEdit }] =
     useUpdateInvoiceMutation();
   const [deleteInvoiceMutation] = useDeleteInvoiceMutation();
@@ -132,23 +128,9 @@ export const FinancialsView = () => {
   const [notification, setNotification] = useState(null);
 
   // Modal states
-  const [showUploadModal, setShowUploadModal] = useState(false);
   const [showEditInvoiceModal, setShowEditInvoiceModal] = useState(false);
 
   // Form states
-  const [uploadForm, setUploadForm] = useState({
-    invoiceName: "",
-    description: "",
-    amount: 0,
-    currency: "USD",
-    status: "sent",
-    dueDate: "",
-    issuedDate: "",
-    paymentMethod: "",
-    paymentLink: "",
-    file: null,
-  });
-
   const [editInvoiceForm, setEditInvoiceForm] = useState({
     id: 0,
     invoiceNumber: "",
@@ -200,85 +182,6 @@ export const FinancialsView = () => {
       }, 100);
     } catch (err) {
       console.warn(`ERROR: ${err}`);
-    }
-  };
-
-  const handleFileSelect = (event) => {
-    try {
-      const file = event.target.files?.[0] || null;
-      setUploadForm((prev) => ({ ...prev, file }));
-    } catch (err) {
-      console.warn(`ERROR: ${err}`);
-    }
-  };
-
-  const handleUploadInvoice = async (e) => {
-    e.preventDefault();
-    if (!uploadForm.file || !selectedFolder) return;
-
-    if (!uploadForm.invoiceName) {
-      showNotification("error", "Invoice name is required");
-      return;
-    }
-    if (!uploadForm.amount || uploadForm.amount <= 0) {
-      showNotification("error", "Amount must be greater than 0");
-      return;
-    }
-    if (!uploadForm.dueDate) {
-      showNotification("error", "Due date is required");
-      return;
-    }
-    if (!uploadForm.issuedDate) {
-      showNotification("error", "Issued date is required");
-      return;
-    }
-
-    try {
-      const formData = new FormData();
-      formData.append("file", uploadForm.file);
-      formData.append("invoiceName", uploadForm.invoiceName);
-      formData.append("amount", uploadForm.amount.toString());
-      formData.append("currency", uploadForm.currency);
-      formData.append("status", uploadForm.status);
-      formData.append("dueDate", uploadForm.dueDate);
-      formData.append("issuedDate", uploadForm.issuedDate);
-
-      if (uploadForm.description) {
-        formData.append("description", uploadForm.description);
-      }
-      if (uploadForm.paymentMethod) {
-        formData.append("paymentMethod", uploadForm.paymentMethod);
-      }
-      if (uploadForm.paymentLink) {
-        formData.append("paymentLink", uploadForm.paymentLink);
-      }
-
-      await uploadInvoiceMutation({
-        clientFolder: selectedFolder,
-        formData,
-      }).unwrap();
-
-      showNotification("success", "Invoice uploaded successfully");
-      setShowUploadModal(false);
-      setUploadForm({
-        invoiceName: "",
-        description: "",
-        amount: 0,
-        currency: "USD",
-        status: "sent",
-        dueDate: "",
-        issuedDate: "",
-        paymentMethod: "",
-        paymentLink: "",
-        file: null,
-      });
-    } catch (err) {
-      console.error("Error uploading invoice:", err);
-      const errorMessage =
-        err.data?.errors?.map((e) => e.msg).join(", ") ||
-        err.data?.error ||
-        "Failed to upload invoice";
-      showNotification("error", errorMessage);
     }
   };
 
@@ -535,7 +438,6 @@ export const FinancialsView = () => {
       maxWidth="xl"
       sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 3 } }}
     >
-
       {/* Page Header */}
       <Box sx={{ mb: 2 }}>
         <Typography
@@ -549,14 +451,10 @@ export const FinancialsView = () => {
           {isAdmin ? "Financials" : "Your Invoices"}
         </Typography>
       </Box>
-    <OcrButton />
+
       {/* CARDS CONTAINER */}
 
-      <Box
-        sx={
-          boxWrapCards
-        }
-      >
+      <Box sx={boxWrapCards}>
         {/* BPO Admin: Overall Statistics - Desktop */}
         {isAdmin && overallStats && (
           <ClientSummary
@@ -568,26 +466,6 @@ export const FinancialsView = () => {
           />
         )}
 
-        {/* BPO Admin: Overall Statistics - Mobile 
-        {isAdmin && overallStats && (
-          <ClientSummary
-            loading={loading}
-            refetchAllClients={refetchAllClients}
-            formatCurrency={formatCurrency}
-            payload={ClientSummaryCardInfo}
-          />
-        )}
-
-        {/* BPO Admin: Client Breakdown - Desktop
-        {isAdmin && (
-          <ClientBreakdown
-            clientBreakdowns={clientBreakdowns}
-            selectedFolder={selectedFolder}
-            formatCurrency={formatCurrency}
-            selectClient={selectClient}
-          />
-        )}
- */}
         {/* BPO Admin: Client Breakdown - Mobile */}
         {isAdmin && (
           <ClientBreakdown
@@ -731,154 +609,6 @@ export const FinancialsView = () => {
         )}
 
         {/* Selected Folder Invoices (Admin) or Client Invoices */}
-        {(selectedFolder || !isAdmin) && (
-          <Card ref={invoicesSection} sx={{ borderRadius: "1rem" }}>
-            <CardContent>
-              {/* Header - Desktop Only */}
-              <Box
-                sx={{
-                  display: { xs: "none", md: "flex" },
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  mb: 3,
-                }}
-              >
-                <Typography
-                  variant="h6"
-                  fontWeight="semibold"
-                  sx={{
-                    ...titlesTypography.sectionTitle,
-                  }}
-                >
-                  {isAdmin
-                    ? `${selectedFolderDisplay} Invoices`
-                    : "Your Invoices"}
-                </Typography>
-                {isAdmin ? (
-                  <Stack direction="row" spacing={1}>
-                    <Button
-                      variant="contained"
-                      startIcon={<UploadIcon />}
-                      onClick={() => setShowUploadModal(true)}
-                      sx={primaryIconButton}
-                    >
-                      Upload Invoice
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      startIcon={<RefreshIcon />}
-                      onClick={() => {
-                        // RTK Query refetches automatically via invalidateTags
-                      }}
-                      disabled={loadingInvoices}
-                      sx={outlinedIconButton}
-                    >
-                      Refresh
-                    </Button>
-                  </Stack>
-                ) : (
-                  <Button
-                    variant="outlined"
-                    startIcon={
-                      loading ? <CircularProgress size={16} /> : <RefreshIcon />
-                    }
-                    onClick={refetchMyInvoices}
-                    disabled={loading}
-                    sx={outlinedIconButton}
-                  >
-                    {loading ? "Loading..." : "Refresh"}
-                  </Button>
-                )}
-              </Box>
-
-              {/* Loading State */}
-              {(loadingInvoices || (!isAdmin && loading)) && (
-                <Box sx={{ textAlign: "center", py: 8 }}>
-                  <CircularProgress size={48} sx={{ mb: 2 }} />
-                  <Typography>Loading invoices...</Typography>
-                </Box>
-              )}
-
-              {/* Error State */}
-              {!loadingInvoices && !loading && error && (
-                <Box sx={{ textAlign: "center", py: 8 }}>
-                  <WarningIcon
-                    sx={{ fontSize: 48, color: "error.main", mb: 2 }}
-                  />
-                  <Typography variant="h6" fontWeight="medium" gutterBottom>
-                    Error loading invoices
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ mb: 2 }}
-                  >
-                    {error}
-                  </Typography>
-                  <Button
-                    variant="contained"
-                    onClick={() =>
-                      isAdmin ? refetchAllClients() : refetchMyInvoices()
-                    }
-                    sx={primaryButton}
-                  >
-                    Try Again
-                  </Button>
-                </Box>
-              )}
-
-              {/* No Invoices State */}
-              {!loadingInvoices &&
-                !loading &&
-                !error &&
-                invoices.length === 0 && (
-                  <Box sx={{ textAlign: "center", py: 8 }}>
-                    <PdfIcon
-                      sx={{ fontSize: 48, color: "text.disabled", mb: 2 }}
-                    />
-                    <Typography variant="h6" fontWeight="medium" gutterBottom>
-                      No invoices found
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {isAdmin
-                        ? "Upload some PDF invoices for this client"
-                        : "Invoices will appear here when available"}
-                    </Typography>
-                  </Box>
-                )}
-
-              {/* Invoice Table (Responsive - handles both Desktop and Mobile) */}
-              {!loadingInvoices &&
-                !loading &&
-                !error &&
-                invoices.length > 0 && (
-                  <InvoicesTable
-                    invoices={invoices}
-                    isAdmin={isAdmin}
-                    formatDate={formatDate}
-                    formatCurrency={formatCurrency}
-                    getStatusColor={getStatusColor}
-                    downloadInvoice={downloadInvoice}
-                    openEditInvoiceModal={openEditInvoiceModal}
-                    handleDeleteInvoice={handleDeleteInvoice}
-                    openPaymentLink={openPaymentLink}
-                    onPaymentLinkSuccess={(message) =>
-                      showNotification("success", message)
-                    }
-                    onPaymentLinkError={(message) =>
-                      showNotification("error", message)
-                    }
-                    selectedFolderDisplay={selectedFolderDisplay}
-                    onUploadClick={() => setShowUploadModal(true)}
-                    onRefreshClick={() => {
-                      isAdmin ? refetchAllClients() : refetchMyInvoices();
-                    }}
-                    loadingInvoices={loadingInvoices || loading}
-                  />
-                )}
-            </CardContent>
-          </Card>
-        )}
 
         {/* Edit Invoice Modal */}
         <Dialog
@@ -1074,217 +804,6 @@ export const FinancialsView = () => {
                   {savingInvoiceEdit ? "Saving..." : "Save Changes"}
                 </Button>
               </Box>
-            </DialogActions>
-          </form>
-        </Dialog>
-
-        {/* Upload Modal */}
-        <Dialog
-          open={showUploadModal}
-          onClose={() => setShowUploadModal(false)}
-          maxWidth="md"
-          fullWidth
-        >
-          <form onSubmit={handleUploadInvoice}>
-            <DialogTitle>Upload New Invoice</DialogTitle>
-            <DialogContent>
-              <Grid container spacing={2} sx={{ mt: 1 }}>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Invoice Name"
-                    value={uploadForm.invoiceName}
-                    onChange={(e) =>
-                      setUploadForm((prev) => ({
-                        ...prev,
-                        invoiceName: e.target.value,
-                      }))
-                    }
-                    placeholder="e.g., March_2024_Services"
-                    required
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Button
-                    variant="outlined"
-                    component="label"
-                    fullWidth
-                    sx={{ ...outlinedButton, height: "56px" }}
-                  >
-                    {uploadForm.file
-                      ? uploadForm.file.name
-                      : "Choose PDF File *"}
-                    <input
-                      type="file"
-                      accept=".pdf"
-                      hidden
-                      onChange={handleFileSelect}
-                      required
-                    />
-                  </Button>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Amount"
-                    type="number"
-                    inputProps={{ step: 0.01, min: 0 }}
-                    value={uploadForm.amount}
-                    onChange={(e) =>
-                      setUploadForm((prev) => ({
-                        ...prev,
-                        amount: parseFloat(e.target.value),
-                      }))
-                    }
-                    placeholder="0.00"
-                    required
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth>
-                    <InputLabel>Currency</InputLabel>
-                    <Select
-                      value={uploadForm.currency}
-                      onChange={(e) =>
-                        setUploadForm((prev) => ({
-                          ...prev,
-                          currency: e.target.value,
-                        }))
-                      }
-                      label="Currency"
-                    >
-                      <MenuItem value="USD">USD</MenuItem>
-                      <MenuItem value="EUR">EUR</MenuItem>
-                      <MenuItem value="GBP">GBP</MenuItem>
-                      <MenuItem value="MXN">MXN</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Issued Date"
-                    type="date"
-                    value={uploadForm.issuedDate}
-                    onChange={(e) =>
-                      setUploadForm((prev) => ({
-                        ...prev,
-                        issuedDate: e.target.value,
-                      }))
-                    }
-                    InputLabelProps={{ shrink: true }}
-                    required
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Due Date"
-                    type="date"
-                    value={uploadForm.dueDate}
-                    onChange={(e) =>
-                      setUploadForm((prev) => ({
-                        ...prev,
-                        dueDate: e.target.value,
-                      }))
-                    }
-                    InputLabelProps={{ shrink: true }}
-                    required
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth>
-                    <InputLabel>Status</InputLabel>
-                    <Select
-                      value={uploadForm.status}
-                      onChange={(e) =>
-                        setUploadForm((prev) => ({
-                          ...prev,
-                          status: e.target.value,
-                        }))
-                      }
-                      label="Status"
-                    >
-                      <MenuItem value="draft">Draft</MenuItem>
-                      <MenuItem value="sent">Sent</MenuItem>
-                      <MenuItem value="viewed">Viewed</MenuItem>
-                      <MenuItem value="paid">Paid</MenuItem>
-                      <MenuItem value="overdue">Overdue</MenuItem>
-                      <MenuItem value="cancelled">Cancelled</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth>
-                    <InputLabel>Payment Method (Optional)</InputLabel>
-                    <Select
-                      value={uploadForm.paymentMethod}
-                      onChange={(e) =>
-                        setUploadForm((prev) => ({
-                          ...prev,
-                          paymentMethod: e.target.value,
-                        }))
-                      }
-                      label="Payment Method (Optional)"
-                    >
-                      <MenuItem value="">Not Set</MenuItem>
-                      <MenuItem value="credit_card">Credit Card</MenuItem>
-                      <MenuItem value="bank_transfer">Bank Transfer</MenuItem>
-                      <MenuItem value="check">Check</MenuItem>
-                      <MenuItem value="cash">Cash</MenuItem>
-                      <MenuItem value="other">Other</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    label="Description (Optional)"
-                    multiline
-                    rows={3}
-                    value={uploadForm.description}
-                    onChange={(e) =>
-                      setUploadForm((prev) => ({
-                        ...prev,
-                        description: e.target.value,
-                      }))
-                    }
-                    placeholder="Add notes or description for this invoice"
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    label="Payment Link URL (Optional)"
-                    type="url"
-                    value={uploadForm.paymentLink}
-                    onChange={(e) =>
-                      setUploadForm((prev) => ({
-                        ...prev,
-                        paymentLink: e.target.value,
-                      }))
-                    }
-                    placeholder="https://example.com/payment/invoice-123"
-                    helperText="Enter a valid payment URL (Stripe, PayPal, etc.)"
-                  />
-                </Grid>
-              </Grid>
-            </DialogContent>
-            <DialogActions>
-              <Button
-                onClick={() => setShowUploadModal(false)}
-                sx={outlinedButton}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                variant="contained"
-                disabled={uploading || !uploadForm.file}
-                sx={primaryButton}
-              >
-                {uploading ? "Uploading..." : "Upload Invoice"}
-              </Button>
             </DialogActions>
           </form>
         </Dialog>

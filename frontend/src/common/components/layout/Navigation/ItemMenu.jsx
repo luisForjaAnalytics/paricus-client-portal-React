@@ -33,10 +33,13 @@ export const ItemMenu = ({
           disableRipple
           sx={{
             backgroundColor: "transparent",
+            border: (open === undefined && isSelected) ? `2px solid ${colors.drowerIcons}` : "2px solid transparent",
+            borderRadius: (open === undefined && isSelected) ? "10px" : "0",
             justifyContent: open ? "initial" : "center",
             px: 2.5,
             paddingTop: "0%",
             paddingBottom: "0%",
+            transition: "all 0.3s ease",
             "&:hover": {
               backgroundColor: "transparent",
             },
@@ -61,12 +64,12 @@ export const ItemMenu = ({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                backgroundColor: isSelected
+                backgroundColor: (open !== undefined && isSelected)
                   ? colors.drowerIcons
                   : "transparent",
                 transition: "all 0.3s ease",
                 "& svg": {
-                  color: isSelected ? "grey.700" : "grey.500",
+                  color: open === undefined ? "#D1FAE5" : (isSelected ? "grey.700" : "grey.500"),
                 },
               }}
             >
@@ -76,8 +79,8 @@ export const ItemMenu = ({
           <ListItemText
             primary={t(`navigation.${label}`)}
             sx={{
-              opacity: open ? 1 : 0,
-              color: isSelected ? colors.textPrimary : colors.textSecondary,
+              opacity: open === undefined ? 1 : (open ? 1 : 0),
+              color: open === undefined ? "#D1FAE5" : (isSelected ? colors.textPrimary : colors.textSecondary),
               fontWeight: isSelected ? "bold" : "normal",
             }}
           />
