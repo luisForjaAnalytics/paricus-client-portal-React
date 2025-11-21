@@ -1,6 +1,6 @@
 import { Box, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import { boxWrapCards, typography } from "../../common/styles/styles";
+import { typography } from "../../common/styles/styles";
 import { Outlet } from "react-router-dom";
 
 export const KnowledgeBaseView = () => {
@@ -20,7 +20,7 @@ export const KnowledgeBaseView = () => {
           {t("tooltips.knowledgeBase")}
         </Typography>
       </Box>
-      <Box sx={boxWrapCards}>
+      <Box >
         <Outlet />
       </Box>
     </Box>

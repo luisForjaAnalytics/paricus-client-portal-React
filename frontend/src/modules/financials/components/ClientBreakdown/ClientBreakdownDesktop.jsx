@@ -1,17 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Avatar,
   Box,
   Typography,
+  Collapse,
+  IconButton,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Collapse,
-  IconButton,
-  Paper,
+  TableSortLabel,
+  TablePagination,
 } from "@mui/material";
 import {
   Business as BusinessIcon,
@@ -26,12 +27,11 @@ import {
 } from "../../../../common/styles/styles";
 import { InvoicesTableDesktop } from "../InvoicesTable/InvoicesTableDesktop";
 import { UploadInvoiceButton } from "../UploadInvoiceButton/UploadInvoiceButton";
+import { useTranslation } from "react-i18next";
 
 export const ClientBreakdownDesktop = ({
   clientBreakdowns,
-  selectedFolder,
   formatCurrency,
-  selectClient,
   invoices = [],
   isAdmin,
   formatDate,
@@ -43,7 +43,34 @@ export const ClientBreakdownDesktop = ({
   onPaymentLinkSuccess,
   onPaymentLinkError,
 }) => {
-  const [expandedRow, setExpandedRow] = useState(null);
+  const { t } = useTranslation();
+  const [expandedRows, setExpandedRows] = useState({});
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [orderBy, setOrderBy] = useState("company");
+  const [order, setOrder] = useState("asc");
+
+  const toggleRow = (rowId) => {
+    setExpandedRows((prev) => ({
+      ...prev,
+      [rowId]: !prev[rowId],
+    }));
+  };
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const handleRequestSort = (property) => {
+    const isAsc = orderBy === property && order === "asc";
+    setOrder(isAsc ? "desc" : "asc");
+    setOrderBy(property);
+  };
 
   const getInitials = (folderDisplay = "") => {
     try {
@@ -54,16 +81,6 @@ export const ClientBreakdownDesktop = ({
     } catch (err) {
       console.error(`ERROR: ${err}`);
       return "";
-    }
-  };
-
-  const handleRowClick = (folder, index) => {
-    // Toggle expansion
-    if (expandedRow === index) {
-      setExpandedRow(null);
-    } else {
-      setExpandedRow(index);
-      selectClient(folder);
     }
   };
 
@@ -79,6 +96,52 @@ export const ClientBreakdownDesktop = ({
     });
   };
 
+  // Sort and paginate data
+  const sortedData = useMemo(() => {
+    const sorted = [...clientBreakdowns].sort((a, b) => {
+      let aValue, bValue;
+
+      switch (orderBy) {
+        case "company":
+          aValue = a.folderDisplay.toLowerCase();
+          bValue = b.folderDisplay.toLowerCase();
+          break;
+        case "invoices":
+          aValue = a.totalInvoices;
+          bValue = b.totalInvoices;
+          break;
+        case "revenue":
+          aValue = a.totalRevenue;
+          bValue = b.totalRevenue;
+          break;
+        case "outstanding":
+          aValue = a.outstandingBalance;
+          bValue = b.outstandingBalance;
+          break;
+        case "overdue":
+          aValue = a.overdueAmount;
+          bValue = b.overdueAmount;
+          break;
+        default:
+          return 0;
+      }
+
+      if (aValue < bValue) return order === "asc" ? -1 : 1;
+      if (aValue > bValue) return order === "asc" ? 1 : -1;
+      return 0;
+    });
+
+    return sorted;
+  }, [clientBreakdowns, orderBy, order]);
+
+  const paginatedData = useMemo(() => {
+    return sortedData.slice(
+      page * rowsPerPage,
+      page * rowsPerPage + rowsPerPage
+    );
+  }, [sortedData, page, rowsPerPage]);
+
+  // Early return if no data - after all hooks
   if (clientBreakdowns.length === 0) {
     return (
       <Box sx={{ display: { xs: "none", md: "block" }, mb: 4 }}>
@@ -88,15 +151,15 @@ export const ClientBreakdownDesktop = ({
             mb: 2,
           }}
         >
-          Client Breakdown
+          {t("financials.clientBreakdown.title")}
         </Typography>
         <Box sx={{ textAlign: "center", py: 8 }}>
           <BusinessIcon sx={{ fontSize: 64, color: "text.disabled", mb: 2 }} />
           <Typography variant="h6" fontWeight="medium" gutterBottom>
-            No clients found
+            {t("financials.clientBreakdown.noClientsFound")}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Upload invoices to see client data
+            {t("financials.clientBreakdown.uploadInvoicesMessage")}
           </Typography>
         </Box>
       </Box>
@@ -111,275 +174,320 @@ export const ClientBreakdownDesktop = ({
           mb: 2,
         }}
       >
-        Client Breakdown
+        {t("financials.clientBreakdown.title")}
       </Typography>
 
       <TableContainer
-        component={Paper}
         sx={{
           ...card,
           border: `1px solid ${colors.border}`,
         }}
       >
         <Table>
-          <TableHead>
-            <TableRow
-              sx={{
-                backgroundColor: `${colors.background} !important`,
-                borderBottom: `2px solid ${colors.border}`,
-              }}
-            >
-              <TableCell sx={{ width: 50 }} />
-              <TableCell
-                align="center"
-                sx={{
-                  fontWeight: typography.fontWeight.bold,
-                  textTransform: "uppercase",
-                  fontSize: typography.fontSize.tableHeader,
-                  fontFamily: typography.fontFamily,
-                  color: colors.textMuted,
-                  letterSpacing: "0.05em",
-                }}
-              >
-                Company
+          <TableHead
+            sx={{
+              backgroundColor: colors.background,
+              borderBottom: `2px solid ${colors.border}`,
+            }}
+          >
+            <TableRow>
+              <TableCell sx={{ width: 60 }} />
+              <TableCell>
+                <TableSortLabel
+                  active={orderBy === "company"}
+                  direction={orderBy === "company" ? order : "asc"}
+                  onClick={() => handleRequestSort("company")}
+                  sx={{
+                    fontWeight: typography.fontWeight.bold,
+                    textTransform: "uppercase",
+                    fontSize: typography.fontSize.tableHeader,
+                    fontFamily: typography.fontFamily,
+                    color: colors.textMuted,
+                    letterSpacing: "0.05em",
+                    "& .MuiTableSortLabel-icon": {
+                      color: `${colors.primary} !important`,
+                    },
+                  }}
+                >
+                  {t("financials.clientBreakdown.columns.company")}
+                </TableSortLabel>
               </TableCell>
-              <TableCell
-                align="center"
-                sx={{
-                  fontWeight: typography.fontWeight.bold,
-                  textTransform: "uppercase",
-                  fontSize: typography.fontSize.tableHeader,
-                  fontFamily: typography.fontFamily,
-                  color: colors.textMuted,
-                  letterSpacing: "0.05em",
-                  width: 120,
-                }}
-              >
-                Invoices
+              <TableCell align="center">
+                <TableSortLabel
+                  active={orderBy === "invoices"}
+                  direction={orderBy === "invoices" ? order : "asc"}
+                  onClick={() => handleRequestSort("invoices")}
+                  sx={{
+                    fontWeight: typography.fontWeight.bold,
+                    textTransform: "uppercase",
+                    fontSize: typography.fontSize.tableHeader,
+                    fontFamily: typography.fontFamily,
+                    color: colors.textMuted,
+                    letterSpacing: "0.05em",
+                    "& .MuiTableSortLabel-icon": {
+                      color: `${colors.primary} !important`,
+                    },
+                  }}
+                >
+                  {t("financials.clientBreakdown.columns.invoices")}
+                </TableSortLabel>
               </TableCell>
-              <TableCell
-                align="center"
-                sx={{
-                  fontWeight: typography.fontWeight.bold,
-                  textTransform: "uppercase",
-                  fontSize: typography.fontSize.tableHeader,
-                  fontFamily: typography.fontFamily,
-                  color: colors.textMuted,
-                  letterSpacing: "0.05em",
-                  width: 150,
-                }}
-              >
-                Revenue
+              <TableCell align="center">
+                <TableSortLabel
+                  active={orderBy === "revenue"}
+                  direction={orderBy === "revenue" ? order : "asc"}
+                  onClick={() => handleRequestSort("revenue")}
+                  sx={{
+                    fontWeight: typography.fontWeight.bold,
+                    textTransform: "uppercase",
+                    fontSize: typography.fontSize.tableHeader,
+                    fontFamily: typography.fontFamily,
+                    color: colors.textMuted,
+                    letterSpacing: "0.05em",
+                    "& .MuiTableSortLabel-icon": {
+                      color: `${colors.primary} !important`,
+                    },
+                  }}
+                >
+                  {t("financials.clientBreakdown.columns.revenue")}
+                </TableSortLabel>
               </TableCell>
-              <TableCell
-                align="center"
-                sx={{
-                  fontWeight: typography.fontWeight.bold,
-                  textTransform: "uppercase",
-                  fontSize: typography.fontSize.tableHeader,
-                  fontFamily: typography.fontFamily,
-                  color: colors.textMuted,
-                  letterSpacing: "0.05em",
-                  width: 150,
-                }}
-              >
-                Outstanding
+              <TableCell align="center">
+                <TableSortLabel
+                  active={orderBy === "outstanding"}
+                  direction={orderBy === "outstanding" ? order : "asc"}
+                  onClick={() => handleRequestSort("outstanding")}
+                  sx={{
+                    fontWeight: typography.fontWeight.bold,
+                    textTransform: "uppercase",
+                    fontSize: typography.fontSize.tableHeader,
+                    fontFamily: typography.fontFamily,
+                    color: colors.textMuted,
+                    letterSpacing: "0.05em",
+                    "& .MuiTableSortLabel-icon": {
+                      color: `${colors.primary} !important`,
+                    },
+                  }}
+                >
+                  {t("financials.clientBreakdown.columns.outstanding")}
+                </TableSortLabel>
               </TableCell>
-              <TableCell
-                align="center"
-                sx={{
-                  fontWeight: typography.fontWeight.bold,
-                  textTransform: "uppercase",
-                  fontSize: typography.fontSize.tableHeader,
-                  fontFamily: typography.fontFamily,
-                  color: colors.textMuted,
-                  letterSpacing: "0.05em",
-                  width: 150,
-                }}
-              >
-                Overdue
+              <TableCell align="center">
+                <TableSortLabel
+                  active={orderBy === "overdue"}
+                  direction={orderBy === "overdue" ? order : "asc"}
+                  onClick={() => handleRequestSort("overdue")}
+                  sx={{
+                    fontWeight: typography.fontWeight.bold,
+                    textTransform: "uppercase",
+                    fontSize: typography.fontSize.tableHeader,
+                    fontFamily: typography.fontFamily,
+                    color: colors.textMuted,
+                    letterSpacing: "0.05em",
+                    "& .MuiTableSortLabel-icon": {
+                      color: `${colors.primary} !important`,
+                    },
+                  }}
+                >
+                  {t("financials.clientBreakdown.columns.overdue")}
+                </TableSortLabel>
               </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {clientBreakdowns.map((client, index) => {
-              const isExpanded = expandedRow === index;
-              const clientInvoices = isExpanded ? getClientInvoices(client.folder) : [];
-
-              return (
-                <React.Fragment key={index}>
-                  <TableRow
-                    onClick={() => handleRowClick(client.folder, index)}
-                    sx={{
-                      cursor: "pointer",
-                      "&:hover": {
-                        backgroundColor: colors.primaryLight,
-                      },
-                      backgroundColor: isExpanded ? colors.primaryLight : "inherit",
-                    }}
+            {paginatedData.map((client, index) => (
+              <React.Fragment key={index}>
+                <TableRow
+                  sx={{
+                    cursor: "pointer",
+                    "&:hover": {
+                      backgroundColor: colors.primaryLight,
+                    },
+                  }}
+                >
+                  <TableCell>
+                    <IconButton
+                      size="small"
+                      onClick={() => toggleRow(index)}
+                      sx={{ color: colors.primary }}
+                    >
+                      {expandedRows[index] ? (
+                        <KeyboardArrowUpIcon />
+                      ) : (
+                        <KeyboardArrowDownIcon />
+                      )}
+                    </IconButton>
+                  </TableCell>
+                  <TableCell>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1.5,
+                      }}
+                    >
+                      <Avatar
+                        sx={{
+                          width: 36,
+                          height: 36,
+                          color: colors.primary,
+                          bgcolor: colors.financialClientAvatar,
+                          fontSize: "0.875rem",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        {getInitials(client.folderDisplay)}
+                      </Avatar>
+                      <Typography
+                        sx={{
+                          fontSize: typography.fontSize.body,
+                          fontWeight: typography.fontWeight.semibold,
+                          color: colors.textPrimary,
+                          fontFamily: typography.fontFamily,
+                        }}
+                      >
+                        {client.folderDisplay}
+                      </Typography>
+                    </Box>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Typography
+                      sx={{
+                        fontSize: typography.fontSize.body,
+                        fontWeight: typography.fontWeight.medium,
+                        color: colors.textPrimary,
+                        fontFamily: typography.fontFamily,
+                      }}
+                    >
+                      {client.totalInvoices}
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Typography
+                      sx={{
+                        fontSize: typography.fontSize.body,
+                        fontWeight: typography.fontWeight.bold,
+                        color: colors.textPrimary,
+                        fontFamily: typography.fontFamily,
+                      }}
+                    >
+                      {formatCurrency(client.totalRevenue)}
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Typography
+                      sx={{
+                        fontSize: typography.fontSize.body,
+                        fontWeight: typography.fontWeight.bold,
+                        color: colors.textPrimary,
+                        fontFamily: typography.fontFamily,
+                      }}
+                    >
+                      {formatCurrency(client.outstandingBalance)}
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Typography
+                      sx={{
+                        fontSize: typography.fontSize.body,
+                        fontWeight: typography.fontWeight.bold,
+                        color: colors.error,
+                        fontFamily: typography.fontFamily,
+                      }}
+                    >
+                      {formatCurrency(client.overdueAmount)}
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+                <TableRow key={`collapse-${index}`}>
+                  <TableCell
+                    style={{ paddingBottom: 0, paddingTop: 0 }}
+                    colSpan={6}
                   >
-                    <TableCell>
-                      <IconButton size="small">
-                        {isExpanded ? (
-                          <KeyboardArrowUpIcon />
-                        ) : (
-                          <KeyboardArrowDownIcon />
-                        )}
-                      </IconButton>
-                    </TableCell>
-                    <TableCell align="center">
+                    <Collapse
+                      in={expandedRows[index]}
+                      timeout="auto"
+                      unmountOnExit
+                    >
                       <Box
                         sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          gap: 1.5,
+                          py: 3,
+                          bgcolor: colors.surface,
                         }}
                       >
-                        <Avatar
+                        <Box
                           sx={{
-                            width: 36,
-                            height: 36,
-                            color: colors.primary,
-                            bgcolor: colors.financialClientAvatar,
-                            fontSize: "0.875rem",
-                            fontWeight: "bold",
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            mb: 2,
                           }}
                         >
-                          {getInitials(client.folderDisplay)}
-                        </Avatar>
-                        <Typography
-                          sx={{
-                            fontSize: typography.fontSize.body,
-                            fontWeight: typography.fontWeight.semibold,
-                            color: colors.textPrimary,
-                            fontFamily: typography.fontFamily,
-                          }}
-                        >
-                          {client.folderDisplay}
-                        </Typography>
-                      </Box>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Typography
-                        sx={{
-                          fontSize: typography.fontSize.body,
-                          fontWeight: typography.fontWeight.medium,
-                          color: colors.textPrimary,
-                          fontFamily: typography.fontFamily,
-                        }}
-                      >
-                        {client.totalInvoices}
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Typography
-                        sx={{
-                          fontSize: typography.fontSize.body,
-                          fontWeight: typography.fontWeight.bold,
-                          color: colors.textPrimary,
-                          fontFamily: typography.fontFamily,
-                        }}
-                      >
-                        {formatCurrency(client.totalRevenue)}
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Typography
-                        sx={{
-                          fontSize: typography.fontSize.body,
-                          fontWeight: typography.fontWeight.bold,
-                          color: colors.textPrimary,
-                          fontFamily: typography.fontFamily,
-                        }}
-                      >
-                        {formatCurrency(client.outstandingBalance)}
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Typography
-                        sx={{
-                          fontSize: typography.fontSize.body,
-                          fontWeight: typography.fontWeight.bold,
-                          color: colors.error,
-                          fontFamily: typography.fontFamily,
-                        }}
-                      >
-                        {formatCurrency(client.overdueAmount)}
-                      </Typography>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell
-                      sx={{
-                        paddingBottom: 0,
-                        paddingTop: 0,
-                        borderBottom: isExpanded
-                          ? `1px solid ${colors.border}`
-                          : "none",
-                      }}
-                      colSpan={6}
-                    >
-                      <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-                        <Box sx={{ margin: 2 }}>
-                          <Box
+                          <Typography
+                            variant="h6"
                             sx={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                              mb: 2,
+                              fontWeight: typography.fontWeight.semibold,
+                              fontFamily: typography.fontFamily,
                             }}
                           >
-                            <Typography
-                              variant="h6"
-                              sx={{
-                                fontWeight: typography.fontWeight.semibold,
-                                fontFamily: typography.fontFamily,
-                              }}
-                            >
-                              {client.folderDisplay} Invoices
-                            </Typography>
-                            {isAdmin && (
-                              <UploadInvoiceButton
-                                selectedFolder={client.folder}
-                                onSuccess={onPaymentLinkSuccess}
-                                onError={onPaymentLinkError}
-                              />
-                            )}
-                          </Box>
-                          {clientInvoices.length > 0 ? (
-                            <InvoicesTableDesktop
-                              invoices={clientInvoices}
-                              isAdmin={isAdmin}
-                              formatDate={formatDate}
-                              formatCurrency={formatCurrency}
-                              getStatusColor={getStatusColor}
-                              downloadInvoice={downloadInvoice}
-                              openEditInvoiceModal={openEditInvoiceModal}
-                              handleDeleteInvoice={handleDeleteInvoice}
-                              openPaymentLink={openPaymentLink}
-                              onPaymentLinkSuccess={onPaymentLinkSuccess}
-                              onPaymentLinkError={onPaymentLinkError}
+                            {client.folderDisplay}{" "}
+                            {t("financials.clientBreakdown.invoicesTitle")}
+                          </Typography>
+                          {isAdmin && (
+                            <UploadInvoiceButton
+                              selectedFolder={client.folder}
+                              onSuccess={onPaymentLinkSuccess}
+                              onError={onPaymentLinkError}
                             />
-                          ) : (
-                            <Typography
-                              variant="body2"
-                              color="text.secondary"
-                              sx={{ textAlign: "center", py: 4 }}
-                            >
-                              No invoices found for this client
-                            </Typography>
                           )}
                         </Box>
-                      </Collapse>
-                    </TableCell>
-                  </TableRow>
-                </React.Fragment>
-              );
-            })}
+                        {getClientInvoices(client.folder).length > 0 ? (
+                          <InvoicesTableDesktop
+                            invoices={getClientInvoices(client.folder)}
+                            isAdmin={isAdmin}
+                            formatDate={formatDate}
+                            formatCurrency={formatCurrency}
+                            getStatusColor={getStatusColor}
+                            downloadInvoice={downloadInvoice}
+                            openEditInvoiceModal={openEditInvoiceModal}
+                            handleDeleteInvoice={handleDeleteInvoice}
+                            openPaymentLink={openPaymentLink}
+                            onPaymentLinkSuccess={onPaymentLinkSuccess}
+                            onPaymentLinkError={onPaymentLinkError}
+                          />
+                        ) : (
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{ textAlign: "center", py: 4 }}
+                          >
+                            {t("financials.clientBreakdown.noInvoicesFound")}
+                          </Typography>
+                        )}
+                      </Box>
+                    </Collapse>
+                  </TableCell>
+                </TableRow>
+              </React.Fragment>
+            ))}
           </TableBody>
         </Table>
       </TableContainer>
+
+      <TablePagination
+        rowsPerPageOptions={[10, 25, 50, 100]}
+        component="div"
+        count={clientBreakdowns.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+        sx={{
+          ...card,
+          borderTop: `1px solid ${colors.border}`,
+          mt: 0,
+        }}
+      />
     </Box>
   );
 };

@@ -508,6 +508,26 @@ export default {
       processingPdf: "Procesando PDF con OCR...",
       processingFile: "Procesando...",
     },
+    clientBreakdown: {
+      title: "Desglose por Cliente",
+      noClientsFound: "No se encontraron clientes",
+      uploadInvoicesMessage: "Sube facturas para ver datos de clientes",
+      columns: {
+        company: "EMPRESA",
+        invoices: "FACTURAS",
+        revenue: "INGRESOS",
+        outstanding: "PENDIENTE",
+        overdue: "VENCIDO",
+      },
+      invoicesTitle: "Facturas",
+      noInvoicesFound: "No se encontraron facturas para este cliente",
+    },
+    clientSummary: {
+      title: "Resumen de Todos los Clientes",
+      waveAppsButton: "Wave Apps",
+      refreshButton: "Actualizar Todo",
+      loading: "Cargando...",
+    },
   },
 
   // Reportes

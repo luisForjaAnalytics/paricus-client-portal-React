@@ -98,6 +98,7 @@ export const {
   useGetClientFoldersQuery,
   useGetAccessibleFoldersQuery,
   useGetClientReportsQuery,
+  useLazyGetClientReportsQuery,
   useUploadReportMutation,
   useLazyDownloadReportQuery,
   useDeleteReportMutation,

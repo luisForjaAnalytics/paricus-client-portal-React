@@ -15,12 +15,10 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  CircularProgress,
   Alert,
   Snackbar,
   Container,
   Avatar,
-  Stack,
 } from "@mui/material";
 import {
   AttachMoney as MoneyIcon,
@@ -43,17 +41,11 @@ import {
 import { useSelector } from "react-redux";
 import { ClientSummary } from "./components/ClientSummary";
 import { ClientBreakdown } from "./components/ClientBreakdown";
-import { InvoicesTable } from "./components/InvoicesTable";
-import { UploadInvoiceButton } from "./components/UploadInvoiceButton";
 import {
   primaryButton,
-  primaryIconButton,
   outlinedButton,
-  outlinedIconButton,
   colors,
   typography,
-  titlesTypography,
-  boxWrapCards,
 } from "../../common/styles/styles";
 
 export const FinancialsView = () => {
@@ -375,8 +367,6 @@ export const FinancialsView = () => {
     }
   };
 
-  // este arreglo es temporal mientras se tiene la data real///
-  // Usando colores del STYLE_GUIDE.md (status colors)
   const ClientSummaryCardInfo = overallStats
     ? [
         {
@@ -434,399 +424,413 @@ export const FinancialsView = () => {
     : [];
 
   return (
-    <Container
-      maxWidth="xl"
-      sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 3 } }}
-    >
-      {/* Page Header */}
-      <Box sx={{ mb: 2 }}>
-        <Typography
-          variant="h5"
-          sx={{
-            //fontSize: typography.fontSize.h4, // text-xl (20px) - Section Title
-            fontWeight: typography.fontWeight.semibold,
-            fontFamily: typography.fontFamily,
-          }}
+    <Box>
+      <Container
+        maxWidth="100%"
+        // sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 1 } }}
+        sx={{  margin: "2rem 0 0 0" }}
+      >
+        {/* Page Header */}
+        <Box sx={{ mb: 2 }}>
+          <Typography
+            variant="h5"
+            sx={{
+              //fontSize: typography.fontSize.h4, // text-xl (20px) - Section Title
+              fontWeight: typography.fontWeight.semibold,
+              fontFamily: typography.fontFamily,
+            }}
+          >
+            {isAdmin ? "Financials" : "Your Invoices"}
+          </Typography>
+        </Box>
+
+        {/* CARDS CONTAINER */}
+
+        <Box
+        sx={{
+          marginLeft:'0rem'
+        }}
         >
-          {isAdmin ? "Financials" : "Your Invoices"}
-        </Typography>
-      </Box>
+          {/* BPO Admin: Overall Statistics - Desktop */}
+          {isAdmin && overallStats && (
+            <ClientSummary
+              loading={loading}
+              refetchAllClients={refetchAllClients}
+              formatCurrency={formatCurrency}
+              overallStats={overallStats}
+              payload={ClientSummaryCardInfo}
+            />
+          )}
 
-      {/* CARDS CONTAINER */}
+          {/* BPO Admin: Client Breakdown - Mobile */}
+          {isAdmin && (
+            <ClientBreakdown
+              clientBreakdowns={clientBreakdowns}
+              selectedFolder={selectedFolder}
+              formatCurrency={formatCurrency}
+              selectClient={selectClient}
+              invoices={invoices}
+              isAdmin={isAdmin}
+              formatDate={formatDate}
+              getStatusColor={getStatusColor}
+              downloadInvoice={downloadInvoice}
+              openEditInvoiceModal={openEditInvoiceModal}
+              handleDeleteInvoice={handleDeleteInvoice}
+              openPaymentLink={openPaymentLink}
+              onPaymentLinkSuccess={(message) =>
+                showNotification("success", message)
+              }
+              onPaymentLinkError={(message) =>
+                showNotification("error", message)
+              }
+            />
+          )}
 
-      <Box sx={boxWrapCards}>
-        {/* BPO Admin: Overall Statistics - Desktop */}
-        {isAdmin && overallStats && (
-          <ClientSummary
-            loading={loading}
-            refetchAllClients={refetchAllClients}
-            formatCurrency={formatCurrency}
-            overallStats={overallStats}
-            payload={ClientSummaryCardInfo}
-          />
-        )}
-
-        {/* BPO Admin: Client Breakdown - Mobile */}
-        {isAdmin && (
-          <ClientBreakdown
-            clientBreakdowns={clientBreakdowns}
-            selectedFolder={selectedFolder}
-            formatCurrency={formatCurrency}
-            selectClient={selectClient}
-            invoices={invoices}
-            isAdmin={isAdmin}
-            formatDate={formatDate}
-            getStatusColor={getStatusColor}
-            downloadInvoice={downloadInvoice}
-            openEditInvoiceModal={openEditInvoiceModal}
-            handleDeleteInvoice={handleDeleteInvoice}
-            openPaymentLink={openPaymentLink}
-            onPaymentLinkSuccess={(message) =>
-              showNotification("success", message)
-            }
-            onPaymentLinkError={(message) => showNotification("error", message)}
-          />
-        )}
-
-        {/* AR Statistics Dashboard (Client) */}
-        {!isAdmin && clientStats && (
-          <Grid container spacing={3} sx={{ mb: 4 }}>
-            <Grid item xs={12} md={4}>
-              <Card>
-                <CardContent>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                    }}
-                  >
-                    <Box>
-                      <Typography variant="subtitle2" color="text.secondary">
-                        Outstanding Balance
-                      </Typography>
-                      <Typography
-                        variant="h4"
-                        fontWeight="bold"
-                        color="warning.main"
-                        sx={{ my: 1 }}
-                      >
-                        {formatCurrency(clientStats.outstandingBalance)}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {clientStats.unpaidCount} unpaid
-                      </Typography>
+          {/* AR Statistics Dashboard (Client) */}
+          {!isAdmin && clientStats && (
+            <Grid container spacing={3} sx={{ mb: 4 }}>
+              <Grid item xs={12} md={4}>
+                <Card>
+                  <CardContent>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "flex-start",
+                      }}
+                    >
+                      <Box>
+                        <Typography variant="subtitle2" color="text.secondary">
+                          Outstanding Balance
+                        </Typography>
+                        <Typography
+                          variant="h4"
+                          fontWeight="bold"
+                          color="warning.main"
+                          sx={{ my: 1 }}
+                        >
+                          {formatCurrency(clientStats.outstandingBalance)}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {clientStats.unpaidCount} unpaid
+                        </Typography>
+                      </Box>
+                      <Avatar sx={{ bgcolor: "warning.light" }}>
+                        <MoneyIcon color="warning" />
+                      </Avatar>
                     </Box>
-                    <Avatar sx={{ bgcolor: "warning.light" }}>
-                      <MoneyIcon color="warning" />
-                    </Avatar>
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
+                  </CardContent>
+                </Card>
+              </Grid>
 
-            <Grid item xs={12} md={4}>
-              <Card>
-                <CardContent>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                    }}
-                  >
-                    <Box>
-                      <Typography variant="subtitle2" color="text.secondary">
-                        Total Paid
-                      </Typography>
-                      <Typography
-                        variant="h4"
-                        fontWeight="bold"
-                        color="success.main"
-                        sx={{ my: 1 }}
-                      >
-                        {formatCurrency(clientStats.totalPaid)}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {clientStats.paidCount} invoices
-                      </Typography>
+              <Grid item xs={12} md={4}>
+                <Card>
+                  <CardContent>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "flex-start",
+                      }}
+                    >
+                      <Box>
+                        <Typography variant="subtitle2" color="text.secondary">
+                          Total Paid
+                        </Typography>
+                        <Typography
+                          variant="h4"
+                          fontWeight="bold"
+                          color="success.main"
+                          sx={{ my: 1 }}
+                        >
+                          {formatCurrency(clientStats.totalPaid)}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {clientStats.paidCount} invoices
+                        </Typography>
+                      </Box>
+                      <Avatar sx={{ bgcolor: "success.light" }}>
+                        <CheckIcon color="success" />
+                      </Avatar>
                     </Box>
-                    <Avatar sx={{ bgcolor: "success.light" }}>
-                      <CheckIcon color="success" />
-                    </Avatar>
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
+                  </CardContent>
+                </Card>
+              </Grid>
 
-            <Grid item xs={12} md={4}>
-              <Card>
-                <CardContent>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                    }}
-                  >
-                    <Box>
-                      <Typography variant="subtitle2" color="text.secondary">
-                        Next Payment Due
-                      </Typography>
-                      {clientStats.nextPaymentDue ? (
-                        <>
+              <Grid item xs={12} md={4}>
+                <Card>
+                  <CardContent>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "flex-start",
+                      }}
+                    >
+                      <Box>
+                        <Typography variant="subtitle2" color="text.secondary">
+                          Next Payment Due
+                        </Typography>
+                        {clientStats.nextPaymentDue ? (
+                          <>
+                            <Typography
+                              variant="h5"
+                              fontWeight="bold"
+                              color="primary.main"
+                              sx={{ my: 1 }}
+                            >
+                              {formatCurrency(
+                                clientStats.nextPaymentDue.amount
+                              )}
+                            </Typography>
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                            >
+                              {formatDate(clientStats.nextPaymentDue.dueDate)}
+                            </Typography>
+                          </>
+                        ) : (
                           <Typography
                             variant="h5"
                             fontWeight="bold"
-                            color="primary.main"
+                            color="text.disabled"
                             sx={{ my: 1 }}
                           >
-                            {formatCurrency(clientStats.nextPaymentDue.amount)}
+                            None
                           </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {formatDate(clientStats.nextPaymentDue.dueDate)}
-                          </Typography>
-                        </>
-                      ) : (
-                        <Typography
-                          variant="h5"
-                          fontWeight="bold"
-                          color="text.disabled"
-                          sx={{ my: 1 }}
-                        >
-                          None
-                        </Typography>
-                      )}
+                        )}
+                      </Box>
+                      <Avatar sx={{ bgcolor: "primary.light" }}>
+                        <CalendarIcon color="primary" />
+                      </Avatar>
                     </Box>
-                    <Avatar sx={{ bgcolor: "primary.light" }}>
-                      <CalendarIcon color="primary" />
-                    </Avatar>
-                  </Box>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </Grid>
             </Grid>
-          </Grid>
-        )}
+          )}
 
-        {/* Selected Folder Invoices (Admin) or Client Invoices */}
+          {/* Selected Folder Invoices (Admin) or Client Invoices */}
 
-        {/* Edit Invoice Modal */}
-        <Dialog
-          open={showEditInvoiceModal}
-          onClose={() => setShowEditInvoiceModal(false)}
-          maxWidth="md"
-          fullWidth
-        >
-          <form onSubmit={handleSaveInvoiceEdit}>
-            <DialogTitle>Edit Invoice</DialogTitle>
-            <DialogContent>
-              <Grid container spacing={2} sx={{ mt: 1 }}>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Invoice Number"
-                    value={editInvoiceForm.invoiceNumber}
-                    disabled
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Title"
-                    value={editInvoiceForm.title}
-                    onChange={(e) =>
-                      setEditInvoiceForm((prev) => ({
-                        ...prev,
-                        title: e.target.value,
-                      }))
-                    }
-                    required
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Amount"
-                    type="number"
-                    inputProps={{ step: 0.01, min: 0 }}
-                    value={editInvoiceForm.amount}
-                    onChange={(e) =>
-                      setEditInvoiceForm((prev) => ({
-                        ...prev,
-                        amount: parseFloat(e.target.value),
-                      }))
-                    }
-                    required
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth>
-                    <InputLabel>Currency</InputLabel>
-                    <Select
-                      value={editInvoiceForm.currency}
-                      onChange={(e) =>
-                        setEditInvoiceForm((prev) => ({
-                          ...prev,
-                          currency: e.target.value,
-                        }))
-                      }
-                      label="Currency"
-                    >
-                      <MenuItem value="USD">USD</MenuItem>
-                      <MenuItem value="EUR">EUR</MenuItem>
-                      <MenuItem value="GBP">GBP</MenuItem>
-                      <MenuItem value="MXN">MXN</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth>
-                    <InputLabel>Status</InputLabel>
-                    <Select
-                      value={editInvoiceForm.status}
-                      onChange={(e) =>
-                        setEditInvoiceForm((prev) => ({
-                          ...prev,
-                          status: e.target.value,
-                        }))
-                      }
-                      label="Status"
-                    >
-                      <MenuItem value="draft">Draft</MenuItem>
-                      <MenuItem value="sent">Sent</MenuItem>
-                      <MenuItem value="viewed">Viewed</MenuItem>
-                      <MenuItem value="paid">Paid</MenuItem>
-                      <MenuItem value="overdue">Overdue</MenuItem>
-                      <MenuItem value="cancelled">Cancelled</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth>
-                    <InputLabel>Payment Method</InputLabel>
-                    <Select
-                      value={editInvoiceForm.paymentMethod}
-                      onChange={(e) =>
-                        setEditInvoiceForm((prev) => ({
-                          ...prev,
-                          paymentMethod: e.target.value,
-                        }))
-                      }
-                      label="Payment Method"
-                    >
-                      <MenuItem value="">Not Set</MenuItem>
-                      <MenuItem value="credit_card">Credit Card</MenuItem>
-                      <MenuItem value="bank_transfer">Bank Transfer</MenuItem>
-                      <MenuItem value="check">Check</MenuItem>
-                      <MenuItem value="cash">Cash</MenuItem>
-                      <MenuItem value="other">Other</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Issued Date"
-                    type="date"
-                    value={editInvoiceForm.issuedDate}
-                    onChange={(e) =>
-                      setEditInvoiceForm((prev) => ({
-                        ...prev,
-                        issuedDate: e.target.value,
-                      }))
-                    }
-                    InputLabelProps={{ shrink: true }}
-                    required
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    label="Due Date"
-                    type="date"
-                    value={editInvoiceForm.dueDate}
-                    onChange={(e) =>
-                      setEditInvoiceForm((prev) => ({
-                        ...prev,
-                        dueDate: e.target.value,
-                      }))
-                    }
-                    InputLabelProps={{ shrink: true }}
-                    required
-                  />
-                </Grid>
-                {editInvoiceForm.status === "paid" && (
-                  <Grid item xs={12}>
+          {/* Edit Invoice Modal */}
+          <Dialog
+            open={showEditInvoiceModal}
+            onClose={() => setShowEditInvoiceModal(false)}
+            maxWidth="md"
+            fullWidth
+          >
+            <form onSubmit={handleSaveInvoiceEdit}>
+              <DialogTitle>Edit Invoice</DialogTitle>
+              <DialogContent>
+                <Grid container spacing={2} sx={{ mt: 1 }}>
+                  <Grid item xs={12} sm={6}>
                     <TextField
                       fullWidth
-                      label="Paid Date"
-                      type="date"
-                      value={editInvoiceForm.paidDate}
+                      label="Invoice Number"
+                      value={editInvoiceForm.invoiceNumber}
+                      disabled
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label="Title"
+                      value={editInvoiceForm.title}
                       onChange={(e) =>
                         setEditInvoiceForm((prev) => ({
                           ...prev,
-                          paidDate: e.target.value,
+                          title: e.target.value,
+                        }))
+                      }
+                      required
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label="Amount"
+                      type="number"
+                      inputProps={{ step: 0.01, min: 0 }}
+                      value={editInvoiceForm.amount}
+                      onChange={(e) =>
+                        setEditInvoiceForm((prev) => ({
+                          ...prev,
+                          amount: parseFloat(e.target.value),
+                        }))
+                      }
+                      required
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <FormControl fullWidth>
+                      <InputLabel>Currency</InputLabel>
+                      <Select
+                        value={editInvoiceForm.currency}
+                        onChange={(e) =>
+                          setEditInvoiceForm((prev) => ({
+                            ...prev,
+                            currency: e.target.value,
+                          }))
+                        }
+                        label="Currency"
+                      >
+                        <MenuItem value="USD">USD</MenuItem>
+                        <MenuItem value="EUR">EUR</MenuItem>
+                        <MenuItem value="GBP">GBP</MenuItem>
+                        <MenuItem value="MXN">MXN</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <FormControl fullWidth>
+                      <InputLabel>Status</InputLabel>
+                      <Select
+                        value={editInvoiceForm.status}
+                        onChange={(e) =>
+                          setEditInvoiceForm((prev) => ({
+                            ...prev,
+                            status: e.target.value,
+                          }))
+                        }
+                        label="Status"
+                      >
+                        <MenuItem value="draft">Draft</MenuItem>
+                        <MenuItem value="sent">Sent</MenuItem>
+                        <MenuItem value="viewed">Viewed</MenuItem>
+                        <MenuItem value="paid">Paid</MenuItem>
+                        <MenuItem value="overdue">Overdue</MenuItem>
+                        <MenuItem value="cancelled">Cancelled</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <FormControl fullWidth>
+                      <InputLabel>Payment Method</InputLabel>
+                      <Select
+                        value={editInvoiceForm.paymentMethod}
+                        onChange={(e) =>
+                          setEditInvoiceForm((prev) => ({
+                            ...prev,
+                            paymentMethod: e.target.value,
+                          }))
+                        }
+                        label="Payment Method"
+                      >
+                        <MenuItem value="">Not Set</MenuItem>
+                        <MenuItem value="credit_card">Credit Card</MenuItem>
+                        <MenuItem value="bank_transfer">Bank Transfer</MenuItem>
+                        <MenuItem value="check">Check</MenuItem>
+                        <MenuItem value="cash">Cash</MenuItem>
+                        <MenuItem value="other">Other</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label="Issued Date"
+                      type="date"
+                      value={editInvoiceForm.issuedDate}
+                      onChange={(e) =>
+                        setEditInvoiceForm((prev) => ({
+                          ...prev,
+                          issuedDate: e.target.value,
                         }))
                       }
                       InputLabelProps={{ shrink: true }}
-                      helperText="Leave empty to auto-set to today"
+                      required
                     />
                   </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label="Due Date"
+                      type="date"
+                      value={editInvoiceForm.dueDate}
+                      onChange={(e) =>
+                        setEditInvoiceForm((prev) => ({
+                          ...prev,
+                          dueDate: e.target.value,
+                        }))
+                      }
+                      InputLabelProps={{ shrink: true }}
+                      required
+                    />
+                  </Grid>
+                  {editInvoiceForm.status === "paid" && (
+                    <Grid item xs={12}>
+                      <TextField
+                        fullWidth
+                        label="Paid Date"
+                        type="date"
+                        value={editInvoiceForm.paidDate}
+                        onChange={(e) =>
+                          setEditInvoiceForm((prev) => ({
+                            ...prev,
+                            paidDate: e.target.value,
+                          }))
+                        }
+                        InputLabelProps={{ shrink: true }}
+                        helperText="Leave empty to auto-set to today"
+                      />
+                    </Grid>
+                  )}
+                </Grid>
+              </DialogContent>
+              <DialogActions
+                sx={{ justifyContent: "space-between", px: 3, pb: 2 }}
+              >
+                {editInvoiceForm.status !== "paid" && (
+                  <Button
+                    variant="contained"
+                    color="success"
+                    onClick={markAsPaid}
+                    sx={primaryButton}
+                  >
+                    Mark as Paid
+                  </Button>
                 )}
-              </Grid>
-            </DialogContent>
-            <DialogActions
-              sx={{ justifyContent: "space-between", px: 3, pb: 2 }}
-            >
-              {editInvoiceForm.status !== "paid" && (
-                <Button
-                  variant="contained"
-                  color="success"
-                  onClick={markAsPaid}
-                  sx={primaryButton}
-                >
-                  Mark as Paid
-                </Button>
-              )}
-              <Box sx={{ ml: "auto" }}>
-                <Button
-                  onClick={() => setShowEditInvoiceModal(false)}
-                  sx={{ ...outlinedButton, mr: 1 }}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  disabled={savingInvoiceEdit}
-                  sx={primaryButton}
-                >
-                  {savingInvoiceEdit ? "Saving..." : "Save Changes"}
-                </Button>
-              </Box>
-            </DialogActions>
-          </form>
-        </Dialog>
+                <Box sx={{ ml: "auto" }}>
+                  <Button
+                    onClick={() => setShowEditInvoiceModal(false)}
+                    sx={{ ...outlinedButton, mr: 1 }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    disabled={savingInvoiceEdit}
+                    sx={primaryButton}
+                  >
+                    {savingInvoiceEdit ? "Saving..." : "Save Changes"}
+                  </Button>
+                </Box>
+              </DialogActions>
+            </form>
+          </Dialog>
 
-        {/* Notification Snackbar */}
-        <Snackbar
-          open={!!notification}
-          autoHideDuration={5000}
-          onClose={handleCloseNotification}
-          anchorOrigin={{ vertical: "top", horizontal: "right" }}
-        >
-          {notification && (
-            <Alert
-              onClose={handleCloseNotification}
-              severity={notification.type === "success" ? "success" : "error"}
-              sx={{ width: "100%" }}
-            >
-              {notification.message}
-            </Alert>
-          )}
-        </Snackbar>
-      </Box>
-    </Container>
+          {/* Notification Snackbar */}
+          <Snackbar
+            open={!!notification}
+            autoHideDuration={5000}
+            onClose={handleCloseNotification}
+            anchorOrigin={{ vertical: "top", horizontal: "right" }}
+          >
+            {notification && (
+              <Alert
+                onClose={handleCloseNotification}
+                severity={notification.type === "success" ? "success" : "error"}
+                sx={{ width: "100%" }}
+              >
+                {notification.message}
+              </Alert>
+            )}
+          </Snackbar>
+        </Box>
+      </Container>
+    </Box>
   );
 };
 

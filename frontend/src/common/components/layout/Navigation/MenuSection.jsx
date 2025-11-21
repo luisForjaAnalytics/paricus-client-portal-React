@@ -17,9 +17,10 @@ import {
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { SingOutButton } from "./SingOutButton";
+import { colors } from "../../../styles/styles";
 
 // Drawer menu //
-const menuItems = [
+const menuItemsCommon = [
   {
     label: "dashboard",
     icon: <LeaderboardOutlinedIcon fontSize="medium" />,
@@ -43,6 +44,32 @@ const menuItems = [
     icon: <AutoStoriesOutlinedIcon fontSize="medium" />,
     route: "knowledge-base/articles",
   },
+];
+
+const menuItemsAdmin = [
+  // {
+  //   label: "dashboard",
+  //   icon: <LeaderboardOutlinedIcon fontSize="medium" />,
+  //   route: "dashboard",
+  // },
+
+  // {
+  //   label: "reporting",
+  //   icon: <DescriptionOutlinedIcon fontSize="medium" />,
+  //   route: "reporting",
+  // },
+
+  // {
+  //   label: "audioRetrieval",
+  //   icon: <VolumeUpOutlinedIcon fontSize="medium" />,
+  //   route: "audio-recordings",
+  // },
+
+  // {
+  //   label: "knowledgeBase",
+  //   icon: <AutoStoriesOutlinedIcon fontSize="medium" />,
+  //   route: "knowledge-base/articles",
+  // },
   {
     label: "financial",
     icon: <LocalAtmOutlinedIcon fontSize="medium" />,
@@ -96,7 +123,40 @@ export const MenuSections = ({ setTitleState, titleState, open }) => {
 
   return (
     <>
-      {menuItems.map((item, index) => (
+      {menuItemsCommon.map((item, index) => (
+        <ListItem key={index} disablePadding sx={{ display: "block" }}>
+          {isMobileDrawer && item.subItems ? (
+            <AccordionMenuItem
+              label={item.label}
+              icon={item.icon}
+              subItems={item.subItems}
+              setTitleState={setTitleState}
+              titleState={titleState}
+            />
+          ) : (
+            <ItemMenu
+              label={item.label}
+              icon={item.icon}
+              route={item.route}
+              setTitleState={setTitleState}
+              titleState={titleState}
+              open={open}
+            />
+          )}
+        </ListItem>
+      ))}
+      <Divider
+        sx={{
+          width: "60%",
+          height: 3.5,
+          bgcolor: colors.border,
+          alignSelf: "center",
+          borderRadius: 2,
+          mx: "auto",
+          mb: 0,
+        }}
+      />
+      {menuItemsAdmin.map((item, index) => (
         <ListItem key={index} disablePadding sx={{ display: "block" }}>
           {isMobileDrawer && item.subItems ? (
             <AccordionMenuItem

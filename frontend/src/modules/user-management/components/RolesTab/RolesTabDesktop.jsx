@@ -23,6 +23,7 @@ import {
   FormControlLabel,
   Badge,
   Tooltip,
+  InputAdornment,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import {
@@ -31,6 +32,7 @@ import {
   Security as SecurityIcon,
   Delete as DeleteIcon,
   Shield as ShieldIcon,
+  Search as SearchIcon,
 } from "@mui/icons-material";
 import {
   useGetRolesQuery,
@@ -47,6 +49,8 @@ import {
   primaryIconButton,
   outlinedButton,
   colors,
+  typography,
+  card,
 } from "../../../../common/styles/styles";
 import { useTranslation } from "react-i18next";
 
@@ -74,6 +78,7 @@ export const RolesTabDesktop = () => {
   const [selectedRole, setSelectedRole] = useState(null);
   const [roleToDelete, setRoleToDelete] = useState(null);
   const [selectedClient, setSelectedClient] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedPermissions, setSelectedPermissions] = useState([]);
 
   // Form state
@@ -253,9 +258,26 @@ export const RolesTabDesktop = () => {
     setSnackbar({ ...snackbar, open: false });
   };
 
-  const filteredRoles = selectedClient
-    ? roles.filter((role) => role.client_id === selectedClient)
-    : roles;
+  const filteredRoles = useMemo(() => {
+    let filtered = roles;
+
+    // Filter by client
+    if (selectedClient) {
+      filtered = filtered.filter((role) => role.client_id === selectedClient);
+    }
+
+    // Filter by search query (role name or description)
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (role) =>
+          role.role_name?.toLowerCase().includes(query) ||
+          role.description?.toLowerCase().includes(query)
+      );
+    }
+
+    return filtered;
+  }, [roles, selectedClient, searchQuery]);
 
   const isProtectedRole = (roleName) => {
     return roleName === "BPO Admin" || roleName === "Client Admin";
@@ -388,13 +410,7 @@ export const RolesTabDesktop = () => {
   );
 
   return (
-    <Box
-      sx={{
-        display: { xs: "none", md: "block" },
-        alignItems: "center",
-        padding: "0 1.5rem 0 1.5rem",
-      }}
-    >
+    <Box sx={{ px: 3 }}>
       {/* Page Header 
       <Box sx={{ mb: 2 }}>
         <Typography
@@ -425,23 +441,40 @@ export const RolesTabDesktop = () => {
               gap: 2,
             }}
           >
-            <FormControl sx={{ minWidth: 250 }}>
-              <InputLabel>Client</InputLabel>
-              <Select
-                value={selectedClient}
-                label="Client"
-                onChange={(e) => setSelectedClient(e.target.value)}
-              >
-                <MenuItem value="">All Clients</MenuItem>
-                {clients.map((client) => (
-                  <MenuItem key={client.id} value={client.id}>
-                    {client.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <Box sx={{ display: "flex", gap: 2, flex: 1 }}>
+              <FormControl sx={{ minWidth: 250 }}>
+                <InputLabel>Filter by Client</InputLabel>
+                <Select
+                  value={selectedClient}
+                  label="Filter by Client"
+                  onChange={(e) => setSelectedClient(e.target.value)}
+                >
+                  <MenuItem value="">All Clients</MenuItem>
+                  {clients.map((client) => (
+                    <MenuItem key={client.id} value={client.id}>
+                      {client.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <TextField
+                sx={{ minWidth: 300 }}
+                label="Search Roles"
+                placeholder="Search by name or description..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Box>
             <Button
               variant="contained"
+              color="primary"
               startIcon={<AddIcon />}
               onClick={openAddDialog}
               sx={primaryIconButton}
@@ -464,7 +497,7 @@ export const RolesTabDesktop = () => {
           rows={rows}
           columns={columns}
           loading={isLoading}
-          pageSizeOptions={[10, 25, 50]}
+          pageSizeOptions={[10, 25, 50, 100]}
           initialState={{
             pagination: {
               paginationModel: { pageSize: 10, page: 0 },
@@ -472,37 +505,44 @@ export const RolesTabDesktop = () => {
           }}
           disableRowSelectionOnClick
           sx={{
-            borderRadius: "0.7rem",
+            ...card,
             padding: "1rem 0 0 0",
+            border: `1px solid ${colors.border}`,
             "& .MuiDataGrid-columnHeaders": {
-              backgroundColor: "#f5f5f5 !important",
-              borderBottom: "2px solid #e0e0e0",
+              backgroundColor: `${colors.background} !important`,
+              borderBottom: `2px solid ${colors.border}`,
             },
             "& .MuiDataGrid-columnHeader": {
-              backgroundColor: "#f5f5f5 !important",
+              backgroundColor: `${colors.background} !important`,
             },
             "& .MuiDataGrid-columnHeaderTitle": {
-              fontWeight: 600,
+              fontWeight: typography.fontWeight.bold,
               textTransform: "uppercase",
-              fontSize: "0.875rem",
+              fontSize: typography.fontSize.tableHeader,
+              fontFamily: typography.fontFamily,
+              color: colors.textMuted,
+              letterSpacing: "0.05em",
             },
             "& .MuiDataGrid-sortIcon": {
               color: colors.primary,
             },
             "& .MuiDataGrid-columnHeader--sorted": {
-              backgroundColor: "#e8f5e9 !important",
+              backgroundColor: `${colors.primaryLight} !important`,
             },
             "& .MuiDataGrid-filler": {
-              backgroundColor: "#f5f5f5 !important",
+              backgroundColor: `${colors.background} !important`,
             },
             "& .MuiDataGrid-cell": {
-              borderBottom: "1px solid #f0f0f0",
+              borderBottom: `1px solid ${colors.border}`,
+              fontSize: typography.fontSize.body,
+              fontFamily: typography.fontFamily,
+              color: colors.textPrimary,
             },
             "& .MuiDataGrid-cell:focus": {
               outline: "none",
             },
             "& .MuiDataGrid-row:hover": {
-              backgroundColor: "action.hover",
+              backgroundColor: colors.background,
             },
           }}
         />
@@ -545,7 +585,7 @@ export const RolesTabDesktop = () => {
             <InputLabel>Client</InputLabel>
             <Select
               value={roleForm.client_id || ""}
-              label="Client"
+              label="Clien"
               onChange={(e) =>
                 setRoleForm({ ...roleForm, client_id: e.target.value })
               }

@@ -462,7 +462,7 @@ export const AudioRecordingsView = () => {
   return (
     <Box sx={{ p: 3, pb: currentlyPlaying ? 15 : 3 }}>
       {/* Page Header */}
-      <Box sx={{ mb: 2 }}>
+      <Box sx={{ mb: 2, mt:1 }}>
         <Typography
           variant="h5"
           sx={{

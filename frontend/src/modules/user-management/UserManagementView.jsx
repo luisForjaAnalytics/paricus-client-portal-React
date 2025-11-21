@@ -7,7 +7,7 @@ export const UserManagementView = () => {
 
   return (
     <Box sx={{ width: "100%" }}>
-      <Box sx={{ px: { xs: 2, md: 3, lg: 14 }, py: { xs: 2, md: 4 } }}>
+      <Box sx={{ px: { xs: 2, md: 1,  }, py: { xs: 2, md: 3 } }}>
         <NavBarOptions setTitleState={setTitleState} />
       </Box>
       <Box>
