@@ -5,20 +5,20 @@ import {
   RouterProvider,
   // createHashRouter, // para el despliegue ya que rgithub no reconoce rutas dinamicas
 } from "react-router-dom";
-import { LayoutAccount } from "../layouts/LayoutAccount";
-import LoginView from "../layouts/Login";
-import { ReportsManagementView } from "../views/reportsManagementView/ReportsManagementView";
-import { FinancialsView } from "../views/financials/FinancialsView";
-import { AudioRecordingsView } from "../views/admin/audioRecordingsView/AudioRecordingsView";
-import { Dashboard } from "../views/dashboard/dashboard.jsx";
-import { KnowledgeBaseView } from "../views/knowledgeBaseView/KnowledgeBaseView.jsx";
-import { ReportingView } from "../views/reportingView/ReportingView.jsx";
-import { ProfileView } from "../views/ProfileView/ProfileView.jsx";
-import { ErrorView } from "../views/errorView/ErrorView.jsx";
-import { UserManagementlayout } from "../views/admin/usersManagement/UserManagementlayout.jsx";
-import { ClientsView } from "../views/admin/usersManagement/components/clientsView/ClientsView.jsx";
-import { UsersManagementView } from "../views/admin/usersManagement/components/UsersManagementview/UsersManagementview.jsx";
-import { RolesView } from "../views/admin/usersManagement/components/rolesView/RolesView.jsx";
+
+// Layout components
+import { LayoutAccount, Login } from "../common/components/layout";
+
+// Module views
+import { DashboardView } from "../modules/dashboard";
+import { FinancialsView } from "../modules/financials";
+import { AudioRecordingsView } from "../modules/audio-recordings";
+import { KnowledgeBaseView, CKEditor, TableView } from "../modules/knowledge-base";
+import { ReportingView } from "../modules/reporting";
+import { ProfileView } from "../modules/profile";
+import { ReportsManagementView } from "../modules/reports-management";
+import { UserManagementView, UsersTab, ClientsTab, RolesTab } from "../modules/user-management";
+import { ErrorView } from "../modules/error";
 
 const router = createBrowserRouter(
   [
@@ -29,7 +29,7 @@ const router = createBrowserRouter(
       children: [
         {
           path: "dashboard",
-          element: <Dashboard />,
+          element: <DashboardView />,
         },
         {
           path: "reporting",
@@ -42,6 +42,16 @@ const router = createBrowserRouter(
         {
           path: "knowledge-base",
           element: <KnowledgeBaseView />,
+          children: [
+            {
+              path: "articles",
+              element: <TableView />,
+            },
+            {
+              path: "editorView/:articleId",
+              element: <CKEditor />,
+            },
+          ],
         },
         {
           path: "financial",
@@ -53,19 +63,19 @@ const router = createBrowserRouter(
         },
         {
           path: "users-management",
-          element: <UserManagementlayout />,
+          element: <UserManagementView />,
           children: [
             {
               path: "clients",
-              element: <ClientsView />,
+              element: <ClientsTab />,
             },
             {
               path: "users",
-              element: <UsersManagementView />,
+              element: <UsersTab />,
             },
             {
               path: "rolesPermissions",
-              element: <RolesView />,
+              element: <RolesTab />,
             },
           ],
         },
@@ -77,7 +87,7 @@ const router = createBrowserRouter(
     },
     {
       path: "/login",
-      element: <LoginView />,
+      element: <Login />,
     },
     {
       path: "*",

@@ -1,7 +1,32 @@
 {
   "permissions": {
     "allow": [
-      "Bash(del \"C:\\FORJA\\paricus-React\\paricus-client-portal\\frontend\\src\\views\\financials\\components\\ClientSummaryMovil.jsx\")"
+      "Bash(del \"C:\\FORJA\\paricus-React\\paricus-client-portal\\frontend\\src\\views\\financials\\components\\ClientSummaryMovil.jsx\")",
+      "Bash(git diff:*)",
+      "Bash(npm run dev:*)",
+      "Bash(git checkout:*)",
+      "Bash(del \"C:\\FORJA\\paricus-React\\paricus-client-portal\\frontend\\src\\layouts\\style\\stylesLayout.js\")",
+      "Bash(find:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(curl:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(test:*)",
+      "Bash(npm run build:*)",
+      "Bash(timeout 40 npm run build:*)",
+      "Bash(timeout 45 npm run build:*)",
+      "Bash(timeout 50 npm run build)",
+      "Bash(timeout 60 npm run build:*)",
+      "Bash(bash:*)",
+      "Bash(LayoutAccount.jsx)",
+      "Bash(taskkill /F /PID 23136)",
+      "Bash(cat:*)",
+      "Bash(xargs -I {} sh -c 'sed -i \"\"\"\"s/ClientsView\\.propTypes/ClientsTabDesktop.propTypes/g; s/ClientsViewMobile\\.propTypes/ClientsTabMobile.propTypes/g; s/RolesView\\.propTypes/RolesTabDesktop.propTypes/g; s/RolesViewMobile\\.propTypes/RolesTabMobile.propTypes/g; s/UsersManagementView\\.propTypes/UsersTabDesktop.propTypes/g; s/UsersManagementviewMobile\\.propTypes/UsersTabMobile.propTypes/g\"\"\"\" {}')",
+      "Bash(AdvancedFilters.jsx)",
+      "Bash(fi)",
+      "Bash(done)"
     ],
     "deny": [],
     "ask": []

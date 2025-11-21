@@ -17,6 +17,7 @@ export const adminApi = createApi({
       query: () => "/users",
       transformResponse: (response) => response.users || [],
       providesTags: ['Users'],
+      keepUnusedDataFor: 300, // 5 minutes cache
     }),
 
     // Create user
@@ -44,6 +45,7 @@ export const adminApi = createApi({
       query: () => "/clients",
       transformResponse: (response) => response.clients || [],
       providesTags: ['Clients'],
+      keepUnusedDataFor: 300, // 5 minutes cache
     }),
 
     // Create client
@@ -91,6 +93,7 @@ export const adminApi = createApi({
         }));
       },
       providesTags: ['Roles'],
+      keepUnusedDataFor: 300, // 5 minutes cache
     }),
 
     // Create role
