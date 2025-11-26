@@ -10,12 +10,36 @@ import {
   testConnection
 } from '../services/mssql.js';
 import { generateAudioDownloadUrl } from '../services/s3.js';
+import { prisma } from '../database/prisma.js';
 import NodeCache from 'node-cache';
 
 const router = express.Router();
 
 // Cache for audio URLs (TTL: 50 minutes, slightly less than S3 URL expiration)
 const audioUrlCache = new NodeCache({ stdTTL: 3000, checkperiod: 600 });
+
+/**
+ * Map clientId to company name for filtering audio recordings
+ * This matches the client names in the database with the company tags in MSSQL
+ */
+async function getCompanyNameByClientId(clientId) {
+  const client = await prisma.client.findUnique({
+    where: { id: clientId },
+    select: { name: true }
+  });
+
+  if (!client) return null;
+
+  // Map client names to company filter names
+  const clientNameMap = {
+    'Flex Mobile': 'Flex Mobile',
+    'IM Telecom': 'IM Telecom',
+    'North American Local': 'Tempo Wireless',
+    'BPO Administration': null // BPO Admin sees all
+  };
+
+  return clientNameMap[client.name] || null;
+}
 
 /**
  * Test SQL Server connection
@@ -47,7 +71,14 @@ router.get('/test', authenticateToken, requirePermission('admin_audio_recordings
  * GET /api/audio-recordings
  * Query params: page, limit, startDate, endDate, agentName, callType, customerPhone, interactionId
  */
-router.get('/', authenticateToken, requirePermission('admin_audio_recordings'), async (req, res) => {
+router.get('/', authenticateToken, async (req, res) => {
+  // Check if user has either admin_audio_recordings OR view_interactions permission
+  const hasAdminAccess = req.user.permissions?.includes('admin_audio_recordings');
+  const hasViewAccess = req.user.permissions?.includes('view_interactions');
+
+  if (!hasAdminAccess && !hasViewAccess) {
+    return res.status(403).json({ error: 'Permission denied. You need admin_audio_recordings or view_interactions permission.' });
+  }
   const startTime = Date.now();
   console.log('[AUDIO-RECORDINGS] Request received');
 
@@ -79,8 +110,26 @@ router.get('/', authenticateToken, requirePermission('admin_audio_recordings'), 
     if (callType) filters.callType = callType;
     if (customerPhone) filters.customerPhone = customerPhone;
     if (interactionId) filters.interactionId = interactionId;
-    if (company) filters.company = company;
     if (hasAudio !== undefined) filters.hasAudio = hasAudio;
+
+    // SECURITY: If user is NOT BPO Admin, automatically filter by their company
+    // BPO Admin has full access and can see all companies
+    const isBPOAdmin = req.user.clientId === 1;
+
+    if (!isBPOAdmin) {
+      // Client Admin: automatically filter by their company
+      const userCompany = await getCompanyNameByClientId(req.user.clientId);
+      if (userCompany) {
+        filters.company = userCompany;
+        console.log(`[AUDIO-RECORDINGS] Auto-filtering by client company: ${userCompany} (clientId: ${req.user.clientId})`);
+      } else {
+        console.warn(`[AUDIO-RECORDINGS] No company mapping found for clientId: ${req.user.clientId}`);
+      }
+    } else if (company) {
+      // BPO Admin can manually filter by company
+      filters.company = company;
+      console.log(`[AUDIO-RECORDINGS] BPO Admin manually filtering by company: ${company}`);
+    }
 
     console.log('[AUDIO-RECORDINGS] Filters:', JSON.stringify(filters));
     console.log('[AUDIO-RECORDINGS] Querying SQL Server...');

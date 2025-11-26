@@ -53,9 +53,15 @@ import {
   card,
 } from "../../../../common/styles/styles";
 import { useTranslation } from "react-i18next";
+import { useSelector } from "react-redux";
 
 export const RolesTabDesktop = () => {
   const { t } = useTranslation();
+  const authUser = useSelector((state) => state.auth.user);
+
+  // Check if user is BPO Admin or Client Admin
+  const isBPOAdmin = authUser?.permissions?.includes("admin_users");
+  const isClientAdmin = authUser?.permissions?.includes("view_invoices") && !isBPOAdmin;
 
   // RTK Query hooks
   const { data: roles = [], isLoading, error } = useGetRolesQuery();
@@ -103,7 +109,8 @@ export const RolesTabDesktop = () => {
     setRoleForm({
       role_name: "",
       description: "",
-      client_id: null,
+      // For Client Admins, pre-set their clientId
+      client_id: isClientAdmin ? authUser?.clientId : null,
     });
     setDialog(true);
   };
@@ -286,13 +293,6 @@ export const RolesTabDesktop = () => {
   // DataGrid columns
   const columns = useMemo(
     () => [
-      // {
-      //   field: "id",
-      //   headerName: "ID",
-      //   flex: 1,
-      //   align: "center",
-      //   headerAlign: "center",
-      // },
       {
         field: "role_name",
         headerName: "Role Name",
@@ -411,20 +411,6 @@ export const RolesTabDesktop = () => {
 
   return (
     <Box sx={{ px: 3 }}>
-      {/* Page Header 
-      <Box sx={{ mb: 2 }}>
-        <Typography
-          variant="h5"
-          sx={{
-            fontWeight: typography.fontWeight.semibold,
-            fontFamily: typography.fontFamily,
-          }}
-        >
-          Roles Management
-        </Typography>
-      </Box>
-
-      {/* Filter Section - Desktop Only */}
       <Card
         sx={{
           display: { xs: "none", md: "block" },
@@ -442,21 +428,23 @@ export const RolesTabDesktop = () => {
             }}
           >
             <Box sx={{ display: "flex", gap: 2, flex: 1 }}>
-              <FormControl sx={{ minWidth: 250 }}>
-                <InputLabel>Filter by Client</InputLabel>
-                <Select
-                  value={selectedClient}
-                  label="Filter by Client"
-                  onChange={(e) => setSelectedClient(e.target.value)}
-                >
-                  <MenuItem value="">All Clients</MenuItem>
-                  {clients.map((client) => (
-                    <MenuItem key={client.id} value={client.id}>
-                      {client.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              {isBPOAdmin && (
+                <FormControl sx={{ minWidth: 250 }}>
+                  <InputLabel>Filter by Client</InputLabel>
+                  <Select
+                    value={selectedClient}
+                    label="Filter by Client"
+                    onChange={(e) => setSelectedClient(e.target.value)}
+                  >
+                    <MenuItem value="">All Clients</MenuItem>
+                    {clients.map((client) => (
+                      <MenuItem key={client.id} value={client.id}>
+                        {client.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              )}
               <TextField
                 sx={{ minWidth: 300 }}
                 label="Search Roles"
@@ -506,7 +494,7 @@ export const RolesTabDesktop = () => {
           disableRowSelectionOnClick
           sx={{
             ...card,
-            padding: "1rem 0 0 0",
+            padding: "0 0 0 0",
             border: `1px solid ${colors.border}`,
             "& .MuiDataGrid-columnHeaders": {
               backgroundColor: `${colors.background} !important`,
@@ -581,23 +569,25 @@ export const RolesTabDesktop = () => {
             }
             sx={{ mb: 3 }}
           />
-          <FormControl fullWidth required>
-            <InputLabel>Client</InputLabel>
-            <Select
-              value={roleForm.client_id || ""}
-              label="Clien"
-              onChange={(e) =>
-                setRoleForm({ ...roleForm, client_id: e.target.value })
-              }
-              disabled={editingRole && isProtectedRole(editingRole.role_name)}
-            >
-              {clients.map((client) => (
-                <MenuItem key={client.id} value={client.id}>
-                  {client.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          {isBPOAdmin && (
+            <FormControl fullWidth required>
+              <InputLabel>Client</InputLabel>
+              <Select
+                value={roleForm.client_id || ""}
+                label="Client"
+                onChange={(e) =>
+                  setRoleForm({ ...roleForm, client_id: e.target.value })
+                }
+                disabled={editingRole && isProtectedRole(editingRole.role_name)}
+              >
+                {clients.map((client) => (
+                  <MenuItem key={client.id} value={client.id}>
+                    {client.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={closeDialog} sx={outlinedButton}>

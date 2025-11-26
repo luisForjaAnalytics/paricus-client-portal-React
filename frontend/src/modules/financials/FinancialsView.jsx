@@ -41,6 +41,7 @@ import {
 import { useSelector } from "react-redux";
 import { ClientSummary } from "./components/ClientSummary";
 import { ClientBreakdown } from "./components/ClientBreakdown";
+import { InvoicesTable } from "./components/InvoicesTable";
 import {
   primaryButton,
   outlinedButton,
@@ -53,39 +54,41 @@ export const FinancialsView = () => {
   const authUser = useSelector((state) => state.auth.user);
 
   // Computed values
-  const isAdmin = authUser?.permissions?.includes("admin_invoices");
+  const isBPOAdmin = authUser?.permissions?.includes("admin_invoices");
+  const isClientAdmin =
+    authUser?.permissions?.includes("view_invoices") && !isBPOAdmin;
   const hasViewAccess = authUser?.permissions?.includes("view_invoices");
 
   // Local state for selected folder
   const [selectedFolder, setSelectedFolder] = useState("");
 
-  // RTK Query hooks - Admin queries all clients data
+  // RTK Query hooks - BPO Admin queries all clients data
   const {
     data: allClientsData,
     isLoading: loadingAllClients,
     error: allClientsError,
     refetch: refetchAllClients,
   } = useGetAllClientsDataQuery(undefined, {
-    skip: !isAdmin,
+    skip: !isBPOAdmin,
   });
 
-  // RTK Query hooks - Client invoices and stats for selected folder (admin)
+  // RTK Query hooks - Client invoices and stats for selected folder (BPO admin)
   const {
     data: clientInvoicesData,
     isLoading: loadingInvoices,
     error: invoicesError,
   } = useGetClientInvoicesAndStatsQuery(selectedFolder, {
-    skip: !isAdmin || !selectedFolder,
+    skip: !isBPOAdmin || !selectedFolder,
   });
 
-  // RTK Query hooks - Regular user's invoices
+  // RTK Query hooks - Client Admin's invoices (their own company)
   const {
     data: myInvoicesData,
     isLoading: loadingMyInvoices,
     error: myInvoicesError,
     refetch: refetchMyInvoices,
   } = useGetMyInvoicesQuery(undefined, {
-    skip: isAdmin || !hasViewAccess,
+    skip: !hasViewAccess || isBPOAdmin,
   });
 
   // RTK Query mutations
@@ -97,16 +100,51 @@ export const FinancialsView = () => {
   // Derived state from RTK Query
   const clientBreakdowns = allClientsData?.clientBreakdowns || [];
   const overallStats = allClientsData?.overallStats || null;
-  const invoices = isAdmin
+  const invoices = isBPOAdmin
     ? clientInvoicesData?.invoices || []
     : myInvoicesData?.invoices || [];
   const arStats = clientInvoicesData?.stats || null;
   const clientStats = myInvoicesData?.stats || null;
   const loading = loadingAllClients || loadingMyInvoices;
 
+  // For Client Admins: Create a breakdown with only their company's data
+  const clientAdminBreakdown =
+    isClientAdmin && clientStats && authUser?.clientName
+      ? [
+          {
+            folder: authUser.clientName.toLowerCase().replace(/\s+/g, "-"),
+            folderDisplay: authUser.clientName,
+            totalRevenue: clientStats.totalPaid || 0,
+            outstandingBalance: clientStats.outstandingBalance || 0,
+            overdueAmount: clientStats.overdueAmount || 0,
+            totalInvoices:
+              (clientStats.paidCount || 0) + (clientStats.unpaidCount || 0),
+            paidCount: clientStats.paidCount || 0,
+            unpaidCount: clientStats.unpaidCount || 0,
+            overdueCount: clientStats.overdueCount || 0,
+            hasAccess: true,
+          },
+        ]
+      : [];
+
+  // For Client Admins: Create overall stats from their client stats
+  const clientAdminOverallStats =
+    isClientAdmin && clientStats
+      ? {
+          totalRevenue: clientStats.totalPaid || 0,
+          outstandingBalance: clientStats.outstandingBalance || 0,
+          overdueAmount: clientStats.overdueAmount || 0,
+          totalClients: 1,
+          totalInvoices: (clientStats.paidCount || 0) + (clientStats.unpaidCount || 0),
+          totalPaidInvoices: clientStats.paidCount || 0,
+          totalUnpaidInvoices: clientStats.unpaidCount || 0,
+          totalOverdueInvoices: clientStats.overdueCount || 0,
+        }
+      : null;
+
   // Error handling for permissions
   const permissionError =
-    !isAdmin && !hasViewAccess
+    !isBPOAdmin && !hasViewAccess
       ? "You do not have permission to view invoices"
       : null;
   const error =
@@ -147,12 +185,12 @@ export const FinancialsView = () => {
         .join(" ")
     : "";
 
-  // Auto-select first folder when data loads
+  // Auto-select first folder when data loads (BPO Admin only)
   React.useEffect(() => {
-    if (isAdmin && clientBreakdowns.length > 0 && !selectedFolder) {
+    if (isBPOAdmin && clientBreakdowns.length > 0 && !selectedFolder) {
       setSelectedFolder(clientBreakdowns[0].folder);
     }
-  }, [isAdmin, clientBreakdowns, selectedFolder]);
+  }, [isBPOAdmin, clientBreakdowns, selectedFolder]);
 
   // Methods
   const selectClient = (clientFolder) => {
@@ -367,7 +405,10 @@ export const FinancialsView = () => {
     }
   };
 
-  const ClientSummaryCardInfo = overallStats
+  // Use clientAdminOverallStats for Client Admins, overallStats for BPO Admins
+  const statsToDisplay = isBPOAdmin ? overallStats : clientAdminOverallStats;
+
+  const ClientSummaryCardInfo = statsToDisplay
     ? [
         {
           borderCol: colors.successBorder, // border-green-500
@@ -376,8 +417,8 @@ export const FinancialsView = () => {
           label: "Total Revenue",
           invoiceState: "paid invoices",
           overallStatsInfo: {
-            tp1: overallStats.totalRevenue,
-            tp2: overallStats.totalPaidInvoices,
+            tp1: statsToDisplay.totalRevenue,
+            tp2: statsToDisplay.totalPaidInvoices,
           },
           icon: { icon: <MoneyIcon color="success" />, color: "success.light" },
         },
@@ -388,8 +429,8 @@ export const FinancialsView = () => {
           label: "Outstanding Balance",
           invoiceState: "unpaid invoices",
           overallStatsInfo: {
-            tp1: overallStats.outstandingBalance,
-            tp2: overallStats.totalUnpaidInvoices,
+            tp1: statsToDisplay.outstandingBalance,
+            tp2: statsToDisplay.totalUnpaidInvoices,
           },
           icon: { icon: <ClockIcon color="warning" />, color: "warning.light" },
         },
@@ -400,8 +441,8 @@ export const FinancialsView = () => {
           label: "Overdue Amount",
           invoiceState: "overdue invoices",
           overallStatsInfo: {
-            tp1: overallStats.overdueAmount,
-            tp2: overallStats.totalOverdueInvoices,
+            tp1: statsToDisplay.overdueAmount,
+            tp2: statsToDisplay.totalOverdueInvoices,
           },
           icon: { icon: <WarningIcon color="error" />, color: "error.light" },
         },
@@ -409,14 +450,14 @@ export const FinancialsView = () => {
           borderCol: colors.infoBorder, // border-blue-500
           cardColor: colors.infoBackground, // bg-blue-100
           textColor: colors.infoText, // text-blue-800
-          label: "Active Clients",
+          label: isBPOAdmin ? "Active Clients" : "Total Invoices",
           invoiceState: "total invoices",
           overallStatsInfo: {
-            tp1: overallStats.totalClients,
-            tp2: overallStats.totalInvoices,
+            tp1: isBPOAdmin ? statsToDisplay.totalClients : statsToDisplay.totalInvoices,
+            tp2: statsToDisplay.totalInvoices,
           },
           icon: {
-            icon: <PeopleIcon color="primary" />,
+            icon: isBPOAdmin ? <PeopleIcon color="primary" /> : <PdfIcon color="primary" />,
             color: "primary.light",
           },
         },
@@ -428,7 +469,7 @@ export const FinancialsView = () => {
       <Container
         maxWidth="100%"
         // sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 1 } }}
-        sx={{  margin: "2rem 0 0 0" }}
+        sx={{ margin: "2rem 0 0 0" }}
       >
         {/* Page Header */}
         <Box sx={{ mb: 2 }}>
@@ -440,37 +481,37 @@ export const FinancialsView = () => {
               fontFamily: typography.fontFamily,
             }}
           >
-            {isAdmin ? "Financials" : "Your Invoices"}
+            {isBPOAdmin ? "Financials" : "Financials"}
           </Typography>
         </Box>
 
         {/* CARDS CONTAINER */}
 
         <Box
-        sx={{
-          marginLeft:'0rem'
-        }}
+          sx={{
+            marginLeft: "0rem",
+          }}
         >
-          {/* BPO Admin: Overall Statistics - Desktop */}
-          {isAdmin && overallStats && (
+          {/* Overall Statistics - Desktop (BPO Admin and Client Admin) */}
+          {statsToDisplay && (
             <ClientSummary
               loading={loading}
-              refetchAllClients={refetchAllClients}
+              refetchAllClients={isBPOAdmin ? refetchAllClients : refetchMyInvoices}
               formatCurrency={formatCurrency}
-              overallStats={overallStats}
+              overallStats={statsToDisplay}
               payload={ClientSummaryCardInfo}
             />
           )}
 
-          {/* BPO Admin: Client Breakdown - Mobile */}
-          {isAdmin && (
+          {/* BPO Admin: Client Breakdown */}
+          {isBPOAdmin && (
             <ClientBreakdown
               clientBreakdowns={clientBreakdowns}
               selectedFolder={selectedFolder}
               formatCurrency={formatCurrency}
               selectClient={selectClient}
               invoices={invoices}
-              isAdmin={isAdmin}
+              isAdmin={isBPOAdmin}
               formatDate={formatDate}
               getStatusColor={getStatusColor}
               downloadInvoice={downloadInvoice}
@@ -486,132 +527,62 @@ export const FinancialsView = () => {
             />
           )}
 
-          {/* AR Statistics Dashboard (Client) */}
-          {!isAdmin && clientStats && (
-            <Grid container spacing={3} sx={{ mb: 4 }}>
-              <Grid item xs={12} md={4}>
-                <Card>
-                  <CardContent>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "flex-start",
-                      }}
-                    >
-                      <Box>
-                        <Typography variant="subtitle2" color="text.secondary">
-                          Outstanding Balance
-                        </Typography>
-                        <Typography
-                          variant="h4"
-                          fontWeight="bold"
-                          color="warning.main"
-                          sx={{ my: 1 }}
-                        >
-                          {formatCurrency(clientStats.outstandingBalance)}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {clientStats.unpaidCount} unpaid
-                        </Typography>
-                      </Box>
-                      <Avatar sx={{ bgcolor: "warning.light" }}>
-                        <MoneyIcon color="warning" />
-                      </Avatar>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
-
-              <Grid item xs={12} md={4}>
-                <Card>
-                  <CardContent>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "flex-start",
-                      }}
-                    >
-                      <Box>
-                        <Typography variant="subtitle2" color="text.secondary">
-                          Total Paid
-                        </Typography>
-                        <Typography
-                          variant="h4"
-                          fontWeight="bold"
-                          color="success.main"
-                          sx={{ my: 1 }}
-                        >
-                          {formatCurrency(clientStats.totalPaid)}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {clientStats.paidCount} invoices
-                        </Typography>
-                      </Box>
-                      <Avatar sx={{ bgcolor: "success.light" }}>
-                        <CheckIcon color="success" />
-                      </Avatar>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
-
-              <Grid item xs={12} md={4}>
-                <Card>
-                  <CardContent>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "flex-start",
-                      }}
-                    >
-                      <Box>
-                        <Typography variant="subtitle2" color="text.secondary">
-                          Next Payment Due
-                        </Typography>
-                        {clientStats.nextPaymentDue ? (
-                          <>
-                            <Typography
-                              variant="h5"
-                              fontWeight="bold"
-                              color="primary.main"
-                              sx={{ my: 1 }}
-                            >
-                              {formatCurrency(
-                                clientStats.nextPaymentDue.amount
-                              )}
-                            </Typography>
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                            >
-                              {formatDate(clientStats.nextPaymentDue.dueDate)}
-                            </Typography>
-                          </>
-                        ) : (
-                          <Typography
-                            variant="h5"
-                            fontWeight="bold"
-                            color="text.disabled"
-                            sx={{ my: 1 }}
-                          >
-                            None
-                          </Typography>
-                        )}
-                      </Box>
-                      <Avatar sx={{ bgcolor: "primary.light" }}>
-                        <CalendarIcon color="primary" />
-                      </Avatar>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
-            </Grid>
+          {/* Client Admin: Client Breakdown Table */}
+          {isClientAdmin && clientAdminBreakdown.length > 0 && (
+            <ClientBreakdown
+              clientBreakdowns={clientAdminBreakdown}
+              selectedFolder={clientAdminBreakdown[0].folder}
+              formatCurrency={formatCurrency}
+              selectClient={selectClient}
+              invoices={invoices}
+              isAdmin={false}
+              formatDate={formatDate}
+              getStatusColor={getStatusColor}
+              downloadInvoice={downloadInvoice}
+              openEditInvoiceModal={openEditInvoiceModal}
+              handleDeleteInvoice={handleDeleteInvoice}
+              openPaymentLink={openPaymentLink}
+              onPaymentLinkSuccess={(message) =>
+                showNotification("success", message)
+              }
+              onPaymentLinkError={(message) =>
+                showNotification("error", message)
+              }
+            />
           )}
 
-          {/* Selected Folder Invoices (Admin) or Client Invoices */}
+          {/* Client User (non-admin): Invoices Table */}
+          {!isBPOAdmin && !isClientAdmin && invoices.length > 0 && (
+            <Box sx={{ mb: 4 }} ref={invoicesSection}>
+              <Typography
+                variant="h6"
+                sx={{
+                  mb: 2,
+                  fontWeight: typography.fontWeight.semibold,
+                  fontFamily: typography.fontFamily,
+                }}
+              >
+                Your Invoices
+              </Typography>
+              <InvoicesTable
+                invoices={invoices}
+                isAdmin={false}
+                formatDate={formatDate}
+                formatCurrency={formatCurrency}
+                getStatusColor={getStatusColor}
+                downloadInvoice={downloadInvoice}
+                openPaymentLink={openPaymentLink}
+                openEditInvoiceModal={openEditInvoiceModal}
+                handleDeleteInvoice={handleDeleteInvoice}
+                onPaymentLinkSuccess={(message) =>
+                  showNotification("success", message)
+                }
+                onPaymentLinkError={(message) =>
+                  showNotification("error", message)
+                }
+              />
+            </Box>
+          )}
 
           {/* Edit Invoice Modal */}
           <Dialog

@@ -19,111 +19,103 @@ import { useNavigate } from "react-router-dom";
 import { SingOutButton } from "./SingOutButton";
 import { colors } from "../../../styles/styles";
 
-// Drawer menu //
-const menuItemsCommon = [
+// Drawer menu - Exported for filtering in router
+export const menuItemsCommon = [
   {
     label: "dashboard",
     icon: <LeaderboardOutlinedIcon fontSize="medium" />,
     route: "dashboard",
+    permission: "view_dashboard",
   },
-
   {
     label: "reporting",
     icon: <DescriptionOutlinedIcon fontSize="medium" />,
     route: "reporting",
+    permission: "view_reporting",
   },
-
   {
     label: "audioRetrieval",
     icon: <VolumeUpOutlinedIcon fontSize="medium" />,
     route: "audio-recordings",
+    permission: "view_interactions",
   },
-
   {
     label: "knowledgeBase",
     icon: <AutoStoriesOutlinedIcon fontSize="medium" />,
     route: "knowledge-base/articles",
+    permission: "view_knowledge_base",
   },
 ];
 
-const menuItemsAdmin = [
-  // {
-  //   label: "dashboard",
-  //   icon: <LeaderboardOutlinedIcon fontSize="medium" />,
-  //   route: "dashboard",
-  // },
-
-  // {
-  //   label: "reporting",
-  //   icon: <DescriptionOutlinedIcon fontSize="medium" />,
-  //   route: "reporting",
-  // },
-
-  // {
-  //   label: "audioRetrieval",
-  //   icon: <VolumeUpOutlinedIcon fontSize="medium" />,
-  //   route: "audio-recordings",
-  // },
-
-  // {
-  //   label: "knowledgeBase",
-  //   icon: <AutoStoriesOutlinedIcon fontSize="medium" />,
-  //   route: "knowledge-base/articles",
-  // },
+export const menuItemsAdmin = [
   {
     label: "financial",
     icon: <LocalAtmOutlinedIcon fontSize="medium" />,
     route: "financial",
+    permission: "view_financials",
   },
   {
     label: "reportsManagement",
     icon: <DescriptionOutlinedIcon fontSize="medium" />,
     route: "reports-management",
+    permission: "admin_reports",
   },
   {
     label: "userManagement",
     icon: <SettingsOutlinedIcon fontSize="medium" />,
     route: "users-management/clients",
+    permission: "admin_users",
     subItems: [
       {
         label: "clientManagement",
         icon: <SettingsOutlinedIcon fontSize="medium" />,
         route: "users-management/clients",
+        permission: "admin_clients",
       },
       {
         label: "usersManagement",
         icon: <SettingsOutlinedIcon fontSize="medium" />,
         route: "users-management/users",
+        permission: "admin_users",
       },
       {
         label: "roleManagement",
         icon: <SettingsOutlinedIcon fontSize="medium" />,
         route: "users-management/rolesPermissions",
+        permission: "admin_roles",
       },
     ],
   },
 ];
 
 // Menu Avatar buttom //
-const menuItemsAvatar = [
+export const menuItemsAvatar = [
   {
     label: "myProfile",
     icon: <PersonOutlineIcon fontSize="small" />,
     route: "users-profile",
+    permission: null, // Everyone can access their profile
   },
   {
     label: "userManagement",
     icon: <SettingsOutlinedIcon fontSize="small" />,
     route: "users-management",
+    permission: "admin_users",
   },
 ];
 
-export const MenuSections = ({ setTitleState, titleState, open }) => {
+export const MenuSections = ({
+  setTitleState,
+  titleState,
+  open,
+  filteredCommonItems = menuItemsCommon,
+  filteredAdminItems = menuItemsAdmin
+}) => {
   const isMobileDrawer = open === undefined;
 
   return (
     <>
-      {menuItemsCommon.map((item, index) => (
+      {filteredCommonItems.map((item, index) => (
         <ListItem key={index} disablePadding sx={{ display: "block" }}>
           {isMobileDrawer && item.subItems ? (
             <AccordionMenuItem
@@ -145,18 +137,22 @@ export const MenuSections = ({ setTitleState, titleState, open }) => {
           )}
         </ListItem>
       ))}
-      <Divider
-        sx={{
-          width: "60%",
-          height: 3.5,
-          bgcolor: colors.border,
-          alignSelf: "center",
-          borderRadius: 2,
-          mx: "auto",
-          mb: 0,
-        }}
-      />
-      {menuItemsAdmin.map((item, index) => (
+
+      {filteredAdminItems.length > 0 && (
+        <Divider
+          sx={{
+            width: "60%",
+            height: 3.5,
+            bgcolor: colors.border,
+            alignSelf: "center",
+            borderRadius: 2,
+            mx: "auto",
+            mb: 0,
+          }}
+        />
+      )}
+
+      {filteredAdminItems.map((item, index) => (
         <ListItem key={index} disablePadding sx={{ display: "block" }}>
           {isMobileDrawer && item.subItems ? (
             <AccordionMenuItem
@@ -186,13 +182,15 @@ export const MenuSectionsAvatar = ({
   handleCloseUserMenu,
   userAuth,
   setTitleState,
+  filteredAvatarItems = menuItemsAvatar
 }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
   const handleMenuOption = (route) => {
     navigate(`/app/${route}`);
   };
 
-  const { t } = useTranslation();
   return (
     <>
       <MenuItem
@@ -216,7 +214,7 @@ export const MenuSectionsAvatar = ({
       </MenuItem>
 
       <Divider />
-      {menuItemsAvatar.map((setting, index) => (
+      {filteredAvatarItems.map((setting, index) => (
         <MenuItem
           key={index}
           onClick={() => {

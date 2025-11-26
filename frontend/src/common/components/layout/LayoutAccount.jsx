@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { styled, useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import MuiDrawer from "@mui/material/Drawer";
@@ -10,8 +10,9 @@ import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import { AppBarLayout } from "./AppBar/AppBarLayout";
 import { useTranslation } from "react-i18next";
-import { MenuSections } from "./Navigation/MenuSection.jsx";
+import { MenuSections, menuItemsCommon, menuItemsAdmin } from "./Navigation/MenuSection.jsx";
 import { Outlet } from "react-router-dom";
+import { usePermissions } from "../../hooks/usePermissions";
 import { colors } from "../../styles/styles";
 const drawerWidth = 260;
 
@@ -73,6 +74,7 @@ export const LayoutAccount = () => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [titleState, setTitleState] = useState("dashboard");
+  const { hasPermission } = usePermissions();
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -81,6 +83,26 @@ export const LayoutAccount = () => {
   const handleDrawerClose = () => {
     setOpen(false);
   };
+
+  // Filter menu items based on user permissions
+  const filteredCommonItems = useMemo(() =>
+    menuItemsCommon.filter((item) =>
+      item.permission ? hasPermission(item.permission) : true
+    ), [hasPermission]
+  );
+
+  const filteredAdminItems = useMemo(() =>
+    menuItemsAdmin.filter((item) => {
+      if (item.permission && !hasPermission(item.permission)) return false;
+      if (item.subItems) {
+        const filteredSubs = item.subItems.filter((subItem) =>
+          subItem.permission ? hasPermission(subItem.permission) : true
+        );
+        return filteredSubs.length > 0;
+      }
+      return true;
+    }), [hasPermission]
+  );
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -130,6 +152,8 @@ export const LayoutAccount = () => {
               setTitleState={setTitleState}
               titleState={titleState}
               open={open}
+              filteredCommonItems={filteredCommonItems}
+              filteredAdminItems={filteredAdminItems}
             />
           </List>
 

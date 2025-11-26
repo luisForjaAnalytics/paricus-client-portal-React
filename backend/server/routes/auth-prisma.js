@@ -48,14 +48,23 @@ router.post('/login',
     });
 
     if (!user) {
+      console.log('❌ User not found for email:', email);
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
+    console.log('✅ User found:', user.email);
+    console.log('🔑 Password hash from DB:', user.passwordHash.substring(0, 20) + '...');
+
     // Verify password
     const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+    console.log('🔐 Password validation result:', isValidPassword);
+
     if (!isValidPassword) {
+      console.log('❌ Invalid password for user:', user.email);
       return res.status(401).json({ error: 'Invalid credentials' });
     }
+
+    console.log('✅ Login successful for:', user.email);
 
     // Update last login (disabled temporarily due to SQLite timeout issues)
     // await prisma.user.update({

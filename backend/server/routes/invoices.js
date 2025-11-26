@@ -745,6 +745,7 @@ router.get('/', async (req, res) => {
         return res.json({
           success: true,
           invoices: [],
+          stats: null,
           message: 'No folder assigned to your client'
         });
       }
@@ -754,6 +755,38 @@ router.get('/', async (req, res) => {
         where: { clientId: req.user.clientId },
         orderBy: { createdAt: 'desc' }
       });
+
+      // Calculate statistics for the client
+      const now = new Date();
+      const totalInvoices = invoices.length;
+      const paidInvoices = invoices.filter(inv => inv.status === 'paid');
+      const unpaidInvoices = invoices.filter(inv => ['draft', 'sent', 'viewed', 'overdue'].includes(inv.status));
+
+      const totalPaid = paidInvoices.reduce((sum, inv) => sum + inv.amount, 0);
+      const outstandingBalance = unpaidInvoices.reduce((sum, inv) => sum + inv.amount, 0);
+
+      // Next payment due
+      const upcomingInvoices = unpaidInvoices
+        .filter(inv => inv.dueDate >= now)
+        .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+
+      const nextPaymentDue = upcomingInvoices.length > 0
+        ? {
+            invoiceNumber: upcomingInvoices[0].invoiceNumber,
+            amount: upcomingInvoices[0].amount,
+            dueDate: upcomingInvoices[0].dueDate
+          }
+        : null;
+
+      const stats = {
+        totalInvoices,
+        totalPaid,
+        outstandingBalance,
+        paidCount: paidInvoices.length,
+        unpaidCount: unpaidInvoices.length,
+        nextPaymentDue,
+        currency: invoices[0]?.currency || 'USD'
+      };
 
       // Generate download URLs for each invoice
       const invoicesWithUrls = await Promise.all(
@@ -800,6 +833,7 @@ router.get('/', async (req, res) => {
       res.json({
         success: true,
         invoices: invoicesWithUrls,
+        stats: stats,
         clientFolder: folderAccess.folderName
       });
     }

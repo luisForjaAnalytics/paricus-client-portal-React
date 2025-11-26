@@ -358,7 +358,7 @@ export default function CKEditorComponent({
                   editor={DecoupledEditor}
                   config={editorConfig}
                   data={articleContent}
-                  disabled={true}
+                  disabled={false}
                   onReady={(editor) => {
                     if (editorToolbarRef.current) {
                       editorToolbarRef.current.appendChild(
@@ -415,15 +415,3 @@ export default function CKEditorComponent({
     </div>
   );
 }
-
-
-    // <Box>
-    //   <div
-    //   style={{
-    //     height:50
-    //   }}
-    //   dangerouslySetInnerHTML={{ __html: articleContent} }
-    //   >
-
-    //   </div>
-    // </Box>

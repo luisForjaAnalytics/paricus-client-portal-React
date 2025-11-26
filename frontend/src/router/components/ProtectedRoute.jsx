@@ -1,8 +1,9 @@
 import { Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { usePermissions } from '../../hooks/usePermissions';
+
 import { Box, Typography, Button } from '@mui/material';
 import { Lock as LockIcon } from '@mui/icons-material';
+import { usePermissions } from '../../common/hooks/usePermissions';
 
 /**
  * Componente para proteger rutas con autenticación y permisos
