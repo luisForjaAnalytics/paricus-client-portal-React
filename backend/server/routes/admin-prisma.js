@@ -16,29 +16,42 @@ import { cache, CACHE_TYPES, invalidateClientCache, invalidatePatternCache } fro
 
 const router = express.Router();
 
-// Middleware to check if user has admin permissions
-const requireAdminRole = (req, res, next) => {
+// Middleware to check if user has admin permissions for clients
+const requireAdminClients = (req, res, next) => {
   if (!req.user) {
     return res.status(401).json({ error: 'Authentication required' });
   }
-  
+
   if (!req.user.permissions || !req.user.permissions.includes('admin_clients')) {
     return res.status(403).json({ error: 'Admin access required' });
   }
-  
+
   next();
 };
 
-// Apply authentication and admin role check to all admin routes
+// Middleware to check if user has admin permissions for users
+const requireAdminUsers = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+
+  if (!req.user.permissions ||
+      !(req.user.permissions.includes('admin_users') || req.user.permissions.includes('admin_clients'))) {
+    return res.status(403).json({ error: 'Admin access required' });
+  }
+
+  next();
+};
+
+// Apply authentication to all admin routes
 router.use(authenticateToken);
-router.use(requireAdminRole);
 
 // ============================================
 // CLIENT MANAGEMENT ENDPOINTS
 // ============================================
 
 // GET /api/admin/clients - List all clients
-router.get('/clients', cache({ type: CACHE_TYPES.MEDIUM, keyPrefix: 'clients' }), async (req, res) => {
+router.get('/clients', requireAdminClients, cache({ type: CACHE_TYPES.MEDIUM, keyPrefix: 'clients' }), async (req, res) => {
   try {
     const clients = await prisma.client.findMany({
       include: {
@@ -73,7 +86,7 @@ router.get('/clients', cache({ type: CACHE_TYPES.MEDIUM, keyPrefix: 'clients' })
 });
 
 // GET /api/admin/clients/:id - Get single client
-router.get('/clients/:id', validateId, async (req, res) => {
+router.get('/clients/:id', requireAdminClients, validateId, async (req, res) => {
   try {
     const { id } = req.params;
     const client = await prisma.client.findUnique({
@@ -110,9 +123,10 @@ router.get('/clients/:id', validateId, async (req, res) => {
 });
 
 // POST /api/admin/clients - Create new client
-router.post('/clients', 
-  sanitizeInput(['name']), 
-  clientValidation.create, 
+router.post('/clients',
+  requireAdminClients,
+  sanitizeInput(['name']),
+  clientValidation.create,
   async (req, res) => {
   try {
 
@@ -140,9 +154,10 @@ router.post('/clients',
 });
 
 // PUT /api/admin/clients/:id - Update client
-router.put('/clients/:id', 
-  sanitizeInput(['name']), 
-  clientValidation.update, 
+router.put('/clients/:id',
+  requireAdminClients,
+  sanitizeInput(['name']),
+  clientValidation.update,
   async (req, res) => {
   try {
 
@@ -172,7 +187,7 @@ router.put('/clients/:id',
 });
 
 // DELETE /api/admin/clients/:id - Deactivate client
-router.delete('/clients/:id', validateId, async (req, res) => {
+router.delete('/clients/:id', requireAdminClients, validateId, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -199,13 +214,23 @@ router.delete('/clients/:id', validateId, async (req, res) => {
 // ============================================
 
 // GET /api/admin/users - List users with filters
-router.get('/users', validateClientQuery, async (req, res) => {
+router.get('/users', requireAdminUsers, validateClientQuery, async (req, res) => {
   try {
     const { clientId } = req.query;
-    
+
     const where = {};
-    if (clientId) {
-      where.clientId = parseInt(clientId);
+
+    // Check if user is BPO Admin (has admin_clients permission)
+    const isBPOAdmin = req.user.permissions?.includes('admin_clients');
+
+    if (isBPOAdmin) {
+      // BPO Admin can filter by clientId or see all
+      if (clientId) {
+        where.clientId = parseInt(clientId);
+      }
+    } else {
+      // Client Admin can only see users from their own client
+      where.clientId = req.user.clientId;
     }
 
     const users = await prisma.user.findMany({
@@ -251,9 +276,10 @@ router.get('/users', validateClientQuery, async (req, res) => {
 });
 
 // POST /api/admin/users - Create new user
-router.post('/users', 
-  sanitizeInput(['firstName', 'lastName', 'email']), 
-  userValidation.create, 
+router.post('/users',
+  requireAdminUsers,
+  sanitizeInput(['firstName', 'lastName', 'email']),
+  userValidation.create,
   async (req, res) => {
   try {
 
@@ -332,9 +358,10 @@ router.post('/users',
 });
 
 // PUT /api/admin/users/:id - Update user
-router.put('/users/:id', 
-  sanitizeInput(['firstName', 'lastName', 'email']), 
-  userValidation.update, 
+router.put('/users/:id',
+  requireAdminUsers,
+  sanitizeInput(['firstName', 'lastName', 'email']),
+  userValidation.update,
   async (req, res) => {
   try {
 
@@ -384,7 +411,7 @@ router.put('/users/:id',
 });
 
 // DELETE /api/admin/users/:id - Deactivate user
-router.delete('/users/:id', validateId, async (req, res) => {
+router.delete('/users/:id', requireAdminUsers, validateId, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -410,13 +437,23 @@ router.delete('/users/:id', validateId, async (req, res) => {
 // ============================================
 
 // GET /api/admin/roles - List roles by client
-router.get('/roles', async (req, res) => {
+router.get('/roles', requireAdminUsers, async (req, res) => {
   try {
     const { clientId } = req.query;
-    
+
     const where = {};
-    if (clientId) {
-      where.clientId = parseInt(clientId);
+
+    // Check if user is BPO Admin (has admin_clients permission)
+    const isBPOAdmin = req.user.permissions?.includes('admin_clients');
+
+    if (isBPOAdmin) {
+      // BPO Admin can filter by clientId or see all
+      if (clientId) {
+        where.clientId = parseInt(clientId);
+      }
+    } else {
+      // Client Admin can only see roles from their own client
+      where.clientId = req.user.clientId;
     }
 
     const roles = await prisma.role.findMany({

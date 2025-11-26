@@ -8,20 +8,37 @@ import {
 
 // Layout components
 import { LayoutAccount, Login } from "../common/components/layout";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 // Module views
 import { DashboardView } from "../modules/dashboard";
 import { FinancialsView } from "../modules/financials";
 import { AudioRecordingsView } from "../modules/audio-recordings";
-import { KnowledgeBaseView, CKEditor, TableView } from "../modules/knowledge-base";
+import {
+  KnowledgeBaseView,
+  CKEditor,
+  TableView,
+} from "../modules/knowledge-base";
 import { ReportingView } from "../modules/reporting";
 import { ProfileView } from "../modules/profile";
 import { ReportsManagementView } from "../modules/reports-management";
-import { UserManagementView, UsersTab, ClientsTab, RolesTab } from "../modules/user-management";
+import {
+  UserManagementView,
+  UsersTab,
+  ClientsTab,
+  RolesTab,
+} from "../modules/user-management";
 import { ErrorView } from "../modules/error";
+import { ArticleView } from "../modules/knowledge-base/components/ArticleView";
+import LoginView from "../common/components/layout/Login";
 
 const router = createBrowserRouter(
   [
+    {
+      path: "/login",
+      element: <LoginView />,
+      errorElement: <ErrorView />,
+    },
     {
       path: "/app",
       element: <LayoutAccount />,
@@ -29,19 +46,35 @@ const router = createBrowserRouter(
       children: [
         {
           path: "dashboard",
-          element: <DashboardView />,
+          element: (
+            <ProtectedRoute requiredPermission="view_dashboard">
+              <DashboardView />
+            </ProtectedRoute>
+          ),
         },
         {
           path: "reporting",
-          element: <ReportingView />,
+          element: (
+            <ProtectedRoute requiredPermission="view_reporting">
+              <ReportingView />
+            </ProtectedRoute>
+          ),
         },
         {
           path: "audio-recordings",
-          element: <AudioRecordingsView />,
+          element: (
+            <ProtectedRoute requiredPermission="view_interactions">
+              <AudioRecordingsView />
+            </ProtectedRoute>
+          ),
         },
         {
           path: "knowledge-base",
-          element: <KnowledgeBaseView />,
+          element: (
+            <ProtectedRoute requiredPermission="view_knowledge_base">
+              <KnowledgeBaseView />
+            </ProtectedRoute>
+          ),
           children: [
             {
               path: "articles",
@@ -49,33 +82,65 @@ const router = createBrowserRouter(
             },
             {
               path: "editorView/:articleId",
-              element: <CKEditor />,
+              element: (
+                <ProtectedRoute anyPermissions={["create_kb_articles", "edit_kb_articles"]}>
+                  <CKEditor />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: "articleView/:articleId",
+              element: <ArticleView />,
             },
           ],
         },
         {
           path: "financial",
-          element: <FinancialsView />,
+          element: (
+            <ProtectedRoute requiredPermission="view_financials">
+              <FinancialsView />
+            </ProtectedRoute>
+          ),
         },
         {
           path: "reports-management",
-          element: <ReportsManagementView />,
+          element: (
+            <ProtectedRoute requiredPermission="admin_reports">
+              <ReportsManagementView />
+            </ProtectedRoute>
+          ),
         },
         {
           path: "users-management",
-          element: <UserManagementView />,
+          element: (
+            <ProtectedRoute requiredPermission="admin_users">
+              <UserManagementView />
+            </ProtectedRoute>
+          ),
           children: [
             {
               path: "clients",
-              element: <ClientsTab />,
+              element: (
+                <ProtectedRoute requiredPermission="admin_clients">
+                  <ClientsTab />
+                </ProtectedRoute>
+              ),
             },
             {
               path: "users",
-              element: <UsersTab />,
+              element: (
+                <ProtectedRoute requiredPermission="admin_users">
+                  <UsersTab />
+                </ProtectedRoute>
+              ),
             },
             {
               path: "rolesPermissions",
-              element: <RolesTab />,
+              element: (
+                <ProtectedRoute requiredPermission="admin_roles">
+                  <RolesTab />
+                </ProtectedRoute>
+              ),
             },
           ],
         },
@@ -86,12 +151,12 @@ const router = createBrowserRouter(
       ],
     },
     {
-      path: "/login",
-      element: <Login />,
+      path: "/",
+      element: <Navigate to="/login" replace />,
     },
     {
       path: "*",
-      element: <Navigate to="/app" />,
+      element: <Navigate to="/login" replace />,
     },
   ],
   {

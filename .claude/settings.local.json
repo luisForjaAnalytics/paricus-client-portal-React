@@ -26,7 +26,15 @@
       "Bash(xargs -I {} sh -c 'sed -i \"\"\"\"s/ClientsView\\.propTypes/ClientsTabDesktop.propTypes/g; s/ClientsViewMobile\\.propTypes/ClientsTabMobile.propTypes/g; s/RolesView\\.propTypes/RolesTabDesktop.propTypes/g; s/RolesViewMobile\\.propTypes/RolesTabMobile.propTypes/g; s/UsersManagementView\\.propTypes/UsersTabDesktop.propTypes/g; s/UsersManagementviewMobile\\.propTypes/UsersTabMobile.propTypes/g\"\"\"\" {}')",
       "Bash(AdvancedFilters.jsx)",
       "Bash(fi)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(npm run db:seed:*)",
+      "Bash(npm run:*)",
+      "Bash(node prisma/seed.js:*)",
+      "Bash(node:*)",
+      "Bash(taskkill:*)",
+      "Bash(dir:*)",
+      "Bash(timeout /t 3)",
+      "Bash(timeout:*)"
     ],
     "deny": [],
     "ask": []

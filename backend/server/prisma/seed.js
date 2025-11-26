@@ -230,32 +230,30 @@ async function main() {
     'view_dashboard', 'view_financials', 'download_invoices',
     'view_reporting', 'download_reports', 'view_interactions',
     'view_knowledge_base', 'create_kb_articles', 'edit_kb_articles',
-    'view_invoices', 'pay_invoices'
+    'view_invoices', 'pay_invoices','admin_users','admin_roles'
   ];
 
   const clientUserPermissions = [
-    'view_dashboard', 'view_financials', 'download_invoices',
-    'view_reporting', 'view_interactions', 'view_knowledge_base',
-    'view_invoices', 'pay_invoices'
+    'view_dashboard', 'view_interactions', 'view_knowledge_base','view_reporting'
   ];
 
   // Function to assign permissions to a role
   async function assignPermissionsToRole(roleId, permissions, roleName) {
     console.log(`🔐 Assigning permissions to ${roleName}...`);
+
+    // First, delete all existing permissions for this role
+    await prisma.rolePermission.deleteMany({
+      where: { roleId: roleId },
+    });
+
+    // Then, assign the new permissions
     for (const permName of permissions) {
       const permission = await prisma.permission.findUnique({
         where: { permissionName: permName },
       });
       if (permission) {
-        await prisma.rolePermission.upsert({
-          where: {
-            roleId_permissionId: {
-              roleId: roleId,
-              permissionId: permission.id,
-            },
-          },
-          update: {},
-          create: {
+        await prisma.rolePermission.create({
+          data: {
             roleId: roleId,
             permissionId: permission.id,
           },
@@ -321,6 +319,82 @@ async function main() {
       folderName: 'north-american-local'
     }
   });
+
+  // Create sample invoices for testing
+  console.log('📄 Creating sample invoices...');
+
+  // Sample invoices for Flex Mobile
+  const flexInvoices = [
+    {
+      clientId: flexMobileClient.id,
+      invoiceNumber: 'INV-FM-2025-001',
+      title: 'December 2025 Services',
+      description: 'Monthly BPO services for December 2025',
+      amount: 5000.00,
+      currency: 'USD',
+      status: 'sent',
+      dueDate: new Date('2025-12-15'),
+      issuedDate: new Date('2025-12-01'),
+      s3Key: 'client-access-reports/flex-mobile/invoices/2025/invoice-dec-2025.pdf',
+      s3Bucket: 'paricus-client-portal',
+      fileSize: 150000,
+      mimeType: 'application/pdf',
+      paymentMethod: 'credit_card'
+    },
+    {
+      clientId: flexMobileClient.id,
+      invoiceNumber: 'INV-FM-2025-002',
+      title: 'November 2025 Services',
+      description: 'Monthly BPO services for November 2025',
+      amount: 4800.00,
+      currency: 'USD',
+      status: 'paid',
+      dueDate: new Date('2025-11-15'),
+      issuedDate: new Date('2025-11-01'),
+      paidDate: new Date('2025-11-10'),
+      s3Key: 'client-access-reports/flex-mobile/invoices/2025/invoice-nov-2025.pdf',
+      s3Bucket: 'paricus-client-portal',
+      fileSize: 145000,
+      mimeType: 'application/pdf',
+      paymentMethod: 'bank_transfer'
+    }
+  ];
+
+  for (const invoice of flexInvoices) {
+    await prisma.invoice.upsert({
+      where: { invoiceNumber: invoice.invoiceNumber },
+      update: {},
+      create: invoice
+    });
+  }
+
+  // Sample invoices for IM Telecom
+  const imTelecomInvoices = [
+    {
+      clientId: imTelecomClient.id,
+      invoiceNumber: 'INV-IM-2025-001',
+      title: 'December 2025 Services',
+      description: 'Monthly support services for December 2025',
+      amount: 6500.00,
+      currency: 'USD',
+      status: 'sent',
+      dueDate: new Date('2025-12-20'),
+      issuedDate: new Date('2025-12-01'),
+      s3Key: 'client-access-reports/im-telecom/invoices/2025/invoice-dec-2025.pdf',
+      s3Bucket: 'paricus-client-portal',
+      fileSize: 160000,
+      mimeType: 'application/pdf',
+      paymentMethod: 'credit_card'
+    }
+  ];
+
+  for (const invoice of imTelecomInvoices) {
+    await prisma.invoice.upsert({
+      where: { invoiceNumber: invoice.invoiceNumber },
+      update: {},
+      create: invoice
+    });
+  }
 
   // Create mockup users
   console.log('👥 Creating mockup users...');

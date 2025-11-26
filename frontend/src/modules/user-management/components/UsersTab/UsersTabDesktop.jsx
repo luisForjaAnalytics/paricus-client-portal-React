@@ -48,9 +48,15 @@ import {
   card,
 } from "../../../../common/styles/styles";
 import { useTranslation } from "react-i18next";
+import { useSelector } from "react-redux";
 
 export const UsersTabDesktop = () => {
   const { t } = useTranslation();
+  const authUser = useSelector((state) => state.auth.user);
+
+  // Check if user is BPO Admin or Client Admin
+  const isBPOAdmin = authUser?.permissions?.includes("admin_users");
+  const isClientAdmin = authUser?.permissions?.includes("view_invoices") && !isBPOAdmin;
 
   // RTK Query hooks
   const { data: users = [], isLoading: loading } = useGetUsersQuery();
@@ -99,7 +105,13 @@ export const UsersTabDesktop = () => {
   const filteredUsers = useMemo(() => {
     let filtered = users;
 
-    if (selectedClient) {
+    // For Client Admins, only show users from their company
+    if (isClientAdmin && authUser?.clientId) {
+      filtered = filtered.filter((user) => user.client_id === authUser.clientId);
+    }
+
+    // For BPO Admins, use the selected client filter
+    if (isBPOAdmin && selectedClient) {
       filtered = filtered.filter((user) => user.client_id === selectedClient);
     }
 
@@ -114,7 +126,7 @@ export const UsersTabDesktop = () => {
     }
 
     return filtered;
-  }, [users, selectedClient, searchQuery]);
+  }, [users, selectedClient, searchQuery, isClientAdmin, isBPOAdmin, authUser?.clientId]);
 
   const isFormValid = useMemo(() => {
     const emailRegex = /.+@.+\..+/;
@@ -136,7 +148,8 @@ export const UsersTabDesktop = () => {
       first_name: "",
       last_name: "",
       email: "",
-      client_id: null,
+      // For Client Admins, pre-set their clientId
+      client_id: isClientAdmin ? authUser?.clientId : null,
       role_id: null,
       password: "",
     });
@@ -386,21 +399,24 @@ export const UsersTabDesktop = () => {
             }}
           >
             <Box sx={{ display: "flex", gap: 2, flex: 1 }}>
-              <FormControl sx={{ minWidth: 250 }}>
-                <InputLabel>Filter by Client</InputLabel>
-                <Select
-                  value={selectedClient}
-                  onChange={(e) => setSelectedClient(e.target.value)}
-                  label="Filter by Client"
-                >
-                  <MenuItem value="">All Clients</MenuItem>
-                  {clientOptions.map((client) => (
-                    <MenuItem key={client.value} value={client.value}>
-                      {client.title}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              {/* Only show client filter for BPO Admins */}
+              {isBPOAdmin && (
+                <FormControl sx={{ minWidth: 250 }}>
+                  <InputLabel>Filter by Client</InputLabel>
+                  <Select
+                    value={selectedClient}
+                    onChange={(e) => setSelectedClient(e.target.value)}
+                    label="Filter by Client"
+                  >
+                    <MenuItem value="">All Clients</MenuItem>
+                    {clientOptions.map((client) => (
+                      <MenuItem key={client.value} value={client.value}>
+                        {client.title}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              )}
               <TextField
                 sx={{ minWidth: 300 }}
                 label="Search Users"
@@ -450,7 +466,7 @@ export const UsersTabDesktop = () => {
           disableRowSelectionOnClick
           sx={{
             ...card,
-            padding: "1rem 0 0 0",
+           padding: "0 0 0 0",
             border: `1px solid ${colors.border}`, // border-gray-200
             "& .MuiDataGrid-columnHeaders": {
               backgroundColor: `${colors.background} !important`, // bg-gray-50
@@ -547,23 +563,25 @@ export const UsersTabDesktop = () => {
                   }
                 />
               </Grid>
-              <Grid item xs={12}>
-                <FormControl fullWidth required>
-                  <InputLabel>Client</InputLabel>
-                  <Select
-                    value={userForm.client_id || ""}
-                    onChange={(e) => handleClientChange(e.target.value || null)}
-                    label="Client"
-                  >
-                    <MenuItem value="">Select a client</MenuItem>
-                    {clientOptions.map((client) => (
-                      <MenuItem key={client.value} value={client.value}>
-                        {client.title}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
+              {isBPOAdmin && (
+                <Grid item xs={12}>
+                  <FormControl fullWidth required>
+                    <InputLabel>Client</InputLabel>
+                    <Select
+                      value={userForm.client_id || ""}
+                      onChange={(e) => handleClientChange(e.target.value || null)}
+                      label="Client"
+                    >
+                      <MenuItem value="">Select a client</MenuItem>
+                      {clientOptions.map((client) => (
+                        <MenuItem key={client.value} value={client.value}>
+                          {client.title}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+              )}
               <Grid item xs={12}>
                 <FormControl fullWidth disabled={!userForm.client_id}>
                   <InputLabel>Role</InputLabel>
