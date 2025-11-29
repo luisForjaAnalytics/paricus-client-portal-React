@@ -13,8 +13,8 @@ export const ArticleView = () => {
     skip: !articleId,
   });
 
-//   if (isLoading) return <p>Cargando artículo...</p>;
-//   if (error) return <p>Error cargando artículo.</p>;
+  //   if (isLoading) return <p>Cargando artículo...</p>;
+  //   if (error) return <p>Error cargando artículo.</p>;
 
   //if (!articleData) return null;
 
@@ -26,9 +26,30 @@ export const ArticleView = () => {
         <Box
           sx={{
             width: "100%",
-            maxWidth: "1200px",
             margin: "0 0 0 0",
-            padding: "1rem",
+            padding: { xs: "0.75rem", sm: "1rem" },
+            // Scroll vertical
+            maxHeight: { xs: "calc(100vh - 120px)", md: "calc(100vh - 150px)" },
+            overflowY: "auto",
+            overflowX: "hidden",
+            // Scroll personalizado
+            "&::-webkit-scrollbar": {
+              width: "8px",
+            },
+            "&::-webkit-scrollbar-track": {
+              backgroundColor: "#f1f1f1",
+              borderRadius: "10px",
+            },
+            "&::-webkit-scrollbar-thumb": {
+              backgroundColor: "#888",
+              borderRadius: "10px",
+              "&:hover": {
+                backgroundColor: "#555",
+              },
+            },
+            // Word wrap para que el texto se acomode
+            wordWrap: "break-word",
+            overflowWrap: "break-word",
             // Estilos para imágenes dentro del HTML
             "& img": {
               maxWidth: "100%",
@@ -42,20 +63,35 @@ export const ArticleView = () => {
             "& p": {
               marginBottom: "1rem",
               lineHeight: 1.6,
+              wordWrap: "break-word",
+              overflowWrap: "break-word",
             },
             "& h1, & h2, & h3, & h4, & h5, & h6": {
               marginTop: "1.5rem",
               marginBottom: "1rem",
+              wordWrap: "break-word",
+              overflowWrap: "break-word",
             },
             "& ul, & ol": {
               marginBottom: "1rem",
-              paddingLeft: "2rem",
+              paddingLeft: { xs: "1.5rem", sm: "2rem" },
             },
             "& table": {
               width: "100%",
               maxWidth: "100%",
               overflowX: "auto",
               display: "block",
+            },
+            "& pre": {
+              maxWidth: "100%",
+              overflowX: "auto",
+              padding: "1rem",
+              backgroundColor: "#f5f5f5",
+              borderRadius: "4px",
+            },
+            "& code": {
+              wordWrap: "break-word",
+              overflowWrap: "break-word",
             },
           }}
         >
@@ -66,7 +102,4 @@ export const ArticleView = () => {
       console.warn(`Error :${err}`);
     }
   }
-
-  // Si html no era un string
-  //return <p>Contenido inválido.</p>;
 };

@@ -75,11 +75,13 @@ export default {
   audioRecordings: {
     // Page header
     sectionTitle: "Grabaciones",
-    pageDescription: "Ver y escuchar grabaciones de llamadas de la base de datos de Workforce Management",
+    pageDescription:
+      "Ver y escuchar grabaciones de llamadas de la base de datos de Workforce Management",
 
     // Warnings and errors
     databaseNotConfigured: "Base de Datos No Configurada",
-    databaseNotConfiguredMessage: "Las credenciales de SQL Server no están configuradas. Por favor configure los ajustes de MSSQL en el archivo .env.",
+    databaseNotConfiguredMessage:
+      "Las credenciales de SQL Server no están configuradas. Por favor configure los ajustes de MSSQL en el archivo .env.",
 
     // Quick Filters
     quickFilter: {
@@ -339,7 +341,8 @@ export default {
     configurePermissions: "Configurar Permisos",
     confirmDelete: "Confirmar Eliminación",
     deleteWarning: "¿Está seguro de que desea eliminar el rol",
-    deleteWarningContinue: "Esta acción no se puede deshacer y afectará a todos los usuarios con este rol.",
+    deleteWarningContinue:
+      "Esta acción no se puede deshacer y afectará a todos los usuarios con este rol.",
     filterByClient: "Cliente",
     allClients: "Todos los Clientes",
     table: {
@@ -375,6 +378,29 @@ export default {
     },
   },
 
+  // Permisos
+  permission: {
+    view_dashboard: "Ver Dashboard",
+    view_financials: "Ver Finanzas",
+    download_invoices: "Descargar Facturas",
+    view_reporting: "Ver Reportes",
+    download_reports: "Descargar Reportes",
+    view_interactions: "Ver Interacciones",
+    download_audio_files: "Descargar Archivos de Audio",
+    view_knowledge_base: "Ver Base de Conocimiento",
+    create_kb_articles: "Crear Artículos KB",
+    edit_kb_articles: "Editar Artículos KB",
+    admin_clients: "Administrar Clientes",
+    admin_users: "Administrar Usuarios",
+    admin_roles: "Administrar Roles",
+    admin_reports: "Administrar Reportes",
+    admin_dashboard_config: "Configurar Dashboard",
+    admin_invoices: "Administrar Facturas",
+    admin_audio_recordings: "Administrar Grabaciones de Audio",
+    view_invoices: "Ver Facturas",
+    pay_invoices: "Pagar Facturas",
+  },
+
   // Gestión de Clientes
   clients: {
     title: "Gestión de Clientes",
@@ -383,7 +409,8 @@ export default {
     editClient: "Editar Cliente",
     confirmDeactivation: "Confirmar Desactivación",
     deactivationWarning: "¿Está seguro de que desea desactivar",
-    deactivationWarningContinue: "Esto también desactivará a todos los usuarios pertenecientes a este cliente.",
+    deactivationWarningContinue:
+      "Esto también desactivará a todos los usuarios pertenecientes a este cliente.",
     table: {
       clientName: "Nombre del Cliente",
       type: "Tipo",
@@ -418,7 +445,8 @@ export default {
   financials: {
     title: "Resumen Financiero",
     clientTitle: "Sus Facturas",
-    description: "Administre todas las facturas de clientes y rastree cuentas por cobrar",
+    description:
+      "Administre todas las facturas de clientes y rastree cuentas por cobrar",
     clientDescription: "Vea y descargue sus facturas",
     uploadInvoice: "Subir Factura",
     editInvoice: "Editar Factura",
@@ -460,7 +488,8 @@ export default {
       descriptionPlaceholder: "Agregue notas o descripción para esta factura",
       paymentLink: "URL de Enlace de Pago",
       paymentLinkOptional: "URL de Enlace de Pago (Opcional)",
-      paymentLinkHelper: "Ingrese una URL de pago válida (Stripe, PayPal, etc.)",
+      paymentLinkHelper:
+        "Ingrese una URL de pago válida (Stripe, PayPal, etc.)",
       invoiceName: "Nombre de la Factura",
       chooseFile: "Elegir Archivo PDF",
       chooseFileRequired: "Elegir Archivo PDF *",
@@ -538,7 +567,8 @@ export default {
     loadingReports: "Cargando sus reportes...",
     errorLoading: "Error al cargar reportes",
     noReports: "No hay reportes disponibles",
-    noReportsMessage: "Los reportes aparecerán aquí cuando sean subidos por nuestro equipo",
+    noReportsMessage:
+      "Los reportes aparecerán aquí cuando sean subidos por nuestro equipo",
     noReportsInFolder: "No se encontraron reportes en esta carpeta",
     downloadStarted: "Descarga iniciada",
     downloadFailed: "Error al descargar el reporte",
@@ -560,7 +590,31 @@ export default {
     title: "Base de Conocimientos",
     description: "Explore y administre artículos de la base de conocimientos",
     comingSoon: "Módulo de Base de Conocimientos",
-    comingSoonDescription: "Este módulo incluirá gestión de artículos, funcionalidad de búsqueda y herramientas de creación de contenido.",
+    comingSoonDescription:
+      "Este módulo incluirá gestión de artículos, funcionalidad de búsqueda y herramientas de creación de contenido.",
     phase: "Próximamente en Fase 5",
+  },
+
+  // Permission
+  permission: {
+    admin_audio_recordings: "Administrar grabaciones de audio",
+    admin_clients: "Administrar clientes",
+    admin_dashboard_config: "Configurar panel de administración",
+    admin_invoices: "Administrar facturas",
+    admin_reports: "Administrar reportes",
+    admin_roles: "Administrar roles",
+    admin_users: "Administrar usuarios",
+    create_kb_articles: "Crear artículos de la base de conocimiento",
+    download_audio_files: "Descargar archivos de audio",
+    download_invoices: "Descargar facturas",
+    download_reports: "Descargar reportes",
+    edit_kb_articles: "Editar artículos de la base de conocimiento",
+    pay_invoices: "Pagar facturas",
+    view_dashboard: "Ver panel",
+    view_financials: "Ver información financiera",
+    view_interactions: "Ver interacciones",
+    view_invoices: "Ver facturas",
+    view_knowledge_base: "Ver base de conocimiento",
+    view_reporting: "Ver reportes",
   },
 };

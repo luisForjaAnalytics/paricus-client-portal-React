@@ -177,9 +177,9 @@ export const AppBarLayout = ({ titleState, setTitleState }) => {
           >
             {/* /// LanguageMenu /// */}
             <Box
-            sx={{
-              margin:'0 -0.5rem 0 0'
-            }}
+              sx={{
+                margin: "0 -0.5rem 0 0",
+              }}
             >
               <LanguageMenu />
             </Box>
@@ -200,13 +200,28 @@ export const AppBarLayout = ({ titleState, setTitleState }) => {
           </Box>
 
           {/* 🔹 MENÚ MÓVIL */}
-          <Box sx={{ display: { xs: "flex", md: "none" }, padding: 0, alignItems: "center", gap: 1 }}>
-            <Box sx={{
-              "& .MuiIconButton-root": {
-                color: colors.textWhite
-              }
-            }}>
-              <LanguageMenu />
+          <Box
+            sx={{
+              display: { xs: "flex", md: "none" },
+              padding: 0,
+              alignItems: "center",
+              gap: 1,
+            }}
+          >
+            <Box
+              sx={{
+                "& .MuiIconButton-root": {
+                  color: colors.textWhite,
+                },
+              }}
+            >
+              <Box
+                sx={{
+                  margin: "0 -1.5rem 0 0",
+                }}
+              >
+                <LanguageMenu />
+              </Box>
             </Box>
             <IconButton
               size="large"

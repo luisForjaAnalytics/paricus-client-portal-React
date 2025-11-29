@@ -18,9 +18,6 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Grid,
-  Checkbox,
-  FormControlLabel,
   Badge,
   Tooltip,
   InputAdornment,
@@ -54,6 +51,7 @@ import {
 } from "../../../../common/styles/styles";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
+import { PermissionsModal } from "./PermissionsModal";
 
 export const RolesTabDesktop = () => {
   const { t } = useTranslation();
@@ -61,7 +59,8 @@ export const RolesTabDesktop = () => {
 
   // Check if user is BPO Admin or Client Admin
   const isBPOAdmin = authUser?.permissions?.includes("admin_users");
-  const isClientAdmin = authUser?.permissions?.includes("view_invoices") && !isBPOAdmin;
+  const isClientAdmin =
+    authUser?.permissions?.includes("view_invoices") && !isBPOAdmin;
 
   // RTK Query hooks
   const { data: roles = [], isLoading, error } = useGetRolesQuery();
@@ -605,51 +604,16 @@ export const RolesTabDesktop = () => {
       </Dialog>
 
       {/* Permissions Dialog */}
-      <Dialog
-        open={permissionsDialog}
-        onClose={closePermissionsDialog}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle>
-          Configure Permissions - {selectedRole?.role_name}
-        </DialogTitle>
-        <DialogContent dividers>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Select which permissions this role should have:
-          </Typography>
-          <Grid container spacing={2}>
-            {permissions.map((permission) => (
-              <Grid item xs={12} md={6} key={permission.id}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={selectedPermissions.includes(permission.id)}
-                      onChange={() => handlePermissionToggle(permission.id)}
-                    />
-                  }
-                  label={
-                    permission.permissionName || permission.permission_name
-                  }
-                />
-              </Grid>
-            ))}
-          </Grid>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={closePermissionsDialog} sx={outlinedButton}>
-            Cancel
-          </Button>
-          <Button
-            variant="contained"
-            onClick={savePermissions}
-            disabled={isUpdatingPermissions}
-            sx={primaryButton}
-          >
-            {isUpdatingPermissions ? "Saving..." : "Save Permissions"}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <PermissionsModal
+        permissionsDialog={permissionsDialog}
+        closePermissionsDialog={closePermissionsDialog}
+        selectedRole={selectedRole}
+        permissions={permissions}
+        selectedPermissions={selectedPermissions}
+        savePermissions={savePermissions}
+        isUpdatingPermissions={isUpdatingPermissions}
+        onPermissionToggle={handlePermissionToggle}
+      />
 
       {/* Delete Confirmation Dialog */}
       <Dialog

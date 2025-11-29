@@ -1,22 +1,75 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-export const adminApi = createApi({
-  reducerPath: "adminApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: `${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/admin`,
+// Custom base query with CSRF token support
+const baseQueryWithCSRF = async (args, api, extraOptions) => {
+  const baseUrl = `${
+    import.meta.env.VITE_API_URL || "http://localhost:3001/api"
+  }/admin`;
+
+  const baseQuery = fetchBaseQuery({
+    baseUrl,
     prepareHeaders: (headers, { getState }) => {
       const token = getState().auth?.token;
       if (token) headers.set("Authorization", `Bearer ${token}`);
+
+      // Get CSRF token from localStorage
+      const csrfToken = localStorage.getItem("csrfToken");
+      if (csrfToken) {
+        headers.set("X-CSRF-Token", csrfToken);
+      }
+
       return headers;
     },
-  }),
-  tagTypes: ['Users', 'Clients', 'Roles', 'Permissions', 'RolePermissions'],
+  });
+
+  let result = await baseQuery(args, api, extraOptions);
+
+  // If CSRF token is returned in response, store it
+  if (result.data?.csrfToken) {
+    localStorage.setItem("csrfToken", result.data.csrfToken);
+  }
+
+  // Handle CSRF errors
+  if (result.error?.status === 403) {
+    const errorMsg = result.error?.data?.error || "";
+    const isCsrfError = errorMsg.includes("CSRF") || errorMsg.includes("csrf");
+
+    if (isCsrfError) {
+      // Store new token if provided in error response
+      if (result.error.data?.csrfToken) {
+        localStorage.setItem("csrfToken", result.error.data.csrfToken);
+
+        // Retry the original request with new token
+        const retryQuery = fetchBaseQuery({
+          baseUrl,
+          prepareHeaders: (headers, { getState }) => {
+            const token = getState().auth?.token;
+            if (token) headers.set("Authorization", `Bearer ${token}`);
+            headers.set("X-CSRF-Token", result.error.data.csrfToken);
+            return headers;
+          },
+        });
+
+        result = await retryQuery(args, api, extraOptions);
+      } else {
+        console.error("No new CSRF token provided in error response");
+      }
+    }
+  }
+
+  return result;
+};
+
+export const adminApi = createApi({
+  reducerPath: "adminApi",
+  baseQuery: baseQueryWithCSRF,
+  tagTypes: ["Users", "Clients", "Roles", "Permissions", "RolePermissions"],
   endpoints: (builder) => ({
     // Get all users
     getUsers: builder.query({
       query: () => "/users",
       transformResponse: (response) => response.users || [],
-      providesTags: ['Users'],
+      providesTags: ["Users"],
       keepUnusedDataFor: 300, // 5 minutes cache
     }),
 
@@ -24,27 +77,27 @@ export const adminApi = createApi({
     createUser: builder.mutation({
       query: (userData) => ({
         url: "/users",
-        method: 'POST',
+        method: "POST",
         body: userData,
       }),
-      invalidatesTags: ['Users'],
+      invalidatesTags: ["Users"],
     }),
 
     // Update user
     updateUser: builder.mutation({
       query: ({ id, ...userData }) => ({
         url: `/users/${id}`,
-        method: 'PUT',
+        method: "PUT",
         body: userData,
       }),
-      invalidatesTags: ['Users'],
+      invalidatesTags: ["Users"],
     }),
 
     // Get all clients
     getClients: builder.query({
       query: () => "/clients",
       transformResponse: (response) => response.clients || [],
-      providesTags: ['Clients'],
+      providesTags: ["Clients"],
       keepUnusedDataFor: 300, // 5 minutes cache
     }),
 
@@ -52,29 +105,29 @@ export const adminApi = createApi({
     createClient: builder.mutation({
       query: (clientData) => ({
         url: "/clients",
-        method: 'POST',
+        method: "POST",
         body: clientData,
       }),
-      invalidatesTags: ['Clients'],
+      invalidatesTags: ["Clients"],
     }),
 
     // Update client
     updateClient: builder.mutation({
       query: ({ id, ...clientData }) => ({
         url: `/clients/${id}`,
-        method: 'PUT',
+        method: "PUT",
         body: clientData,
       }),
-      invalidatesTags: ['Clients'],
+      invalidatesTags: ["Clients"],
     }),
 
     // Delete client (deactivate)
     deleteClient: builder.mutation({
       query: (id) => ({
         url: `/clients/${id}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
-      invalidatesTags: ['Clients'],
+      invalidatesTags: ["Clients"],
     }),
 
     // Get all roles
@@ -92,7 +145,7 @@ export const adminApi = createApi({
           created_at: role.createdAt,
         }));
       },
-      providesTags: ['Roles'],
+      providesTags: ["Roles"],
       keepUnusedDataFor: 300, // 5 minutes cache
     }),
 
@@ -100,55 +153,58 @@ export const adminApi = createApi({
     createRole: builder.mutation({
       query: (roleData) => ({
         url: "/roles",
-        method: 'POST',
+        method: "POST",
         body: roleData,
       }),
-      invalidatesTags: ['Roles'],
+      invalidatesTags: ["Roles"],
     }),
 
     // Update role
     updateRole: builder.mutation({
       query: ({ id, ...roleData }) => ({
         url: `/roles/${id}`,
-        method: 'PUT',
+        method: "PUT",
         body: roleData,
       }),
-      invalidatesTags: ['Roles'],
+      invalidatesTags: ["Roles"],
     }),
 
     // Delete role
     deleteRole: builder.mutation({
       query: (id) => ({
         url: `/roles/${id}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
-      invalidatesTags: ['Roles'],
+      invalidatesTags: ["Roles"],
     }),
 
     // Get all permissions
     getPermissions: builder.query({
       query: () => "/permissions",
       transformResponse: (response) => response.permissions || [],
-      providesTags: ['Permissions'],
+      providesTags: ["Permissions"],
     }),
 
     // Get role permissions
     getRolePermissions: builder.query({
       query: (roleId) => `/roles/${roleId}/permissions`,
-      transformResponse: (response) => response.permissions?.map(p => p.permissionId) || [],
-      providesTags: (result, error, roleId) => [{ type: 'RolePermissions', id: roleId }],
+      transformResponse: (response) =>
+        response.permissions?.map((p) => p.permissionId) || [],
+      providesTags: (result, error, roleId) => [
+        { type: "RolePermissions", id: roleId },
+      ],
     }),
 
     // Update role permissions
     updateRolePermissions: builder.mutation({
       query: ({ roleId, permissions }) => ({
         url: `/roles/${roleId}/permissions`,
-        method: 'PUT',
+        method: "PUT",
         body: { permissions },
       }),
       invalidatesTags: (result, error, { roleId }) => [
-        { type: 'RolePermissions', id: roleId },
-        'Roles',
+        { type: "RolePermissions", id: roleId },
+        "Roles",
       ],
     }),
   }),

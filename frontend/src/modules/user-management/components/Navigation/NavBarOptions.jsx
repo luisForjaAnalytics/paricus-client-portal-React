@@ -20,9 +20,10 @@ export const NavBarOptions = ({ setTitleState }) => {
   const navigate = useNavigate();
   const authUser = useSelector((state) => state.auth.user);
 
-  // Check if user is BPO Admin or Client Admin
-  const isBPOAdmin = authUser?.permissions?.includes("admin_users");
-  const isClientAdmin = authUser?.permissions?.includes("view_invoices") && !isBPOAdmin;
+  // Check permissions
+  const hasClientsPermission = authUser?.permissions?.includes("admin_clients");
+  const hasUsersPermission = authUser?.permissions?.includes("admin_users");
+  const hasRolesPermission = authUser?.permissions?.includes("admin_roles");
 
   const [value, setValue] = useState(0);
 
@@ -30,119 +31,63 @@ export const NavBarOptions = ({ setTitleState }) => {
     setValue(newValue);
   };
 
-  useEffect(() => {
-    // For Client Admins (2 tabs: Users, Roles)
-    if (isClientAdmin) {
-      switch (value) {
-        case 0:
-          navigate(`/app/users-management/users`);
-          if (setTitleState) setTitleState("usersManagement");
-          break;
-        case 1:
-          navigate(`/app/users-management/rolesPermissions`);
-          if (setTitleState) setTitleState("roleManagement");
-          break;
-      }
-      return;
-    }
+  // Build tabs array based on permissions
+  const availableTabs = [];
+  if (hasClientsPermission) {
+    availableTabs.push({ route: 'clients', title: 'clientManagement' });
+  }
+  if (hasUsersPermission) {
+    availableTabs.push({ route: 'users', title: 'usersManagement' });
+  }
+  if (hasRolesPermission) {
+    availableTabs.push({ route: 'rolesPermissions', title: 'roleManagement' });
+  }
 
-    // For BPO Admins (3 tabs: Clients, Users, Roles)
-    switch (value) {
-      case 0:
-        navigate(`/app/users-management/clients`);
-        if (setTitleState) setTitleState("clientManagement");
-        break;
-      case 1:
-        navigate(`/app/users-management/users`);
-        if (setTitleState) setTitleState("usersManagement");
-        break;
-      case 2:
-        navigate(`/app/users-management/rolesPermissions`);
-        if (setTitleState) setTitleState("roleManagement");
-        break;
+  useEffect(() => {
+    if (availableTabs.length > 0 && value < availableTabs.length) {
+      const selectedTab = availableTabs[value];
+      navigate(`/app/users-management/${selectedTab.route}`);
+      if (setTitleState) setTitleState(selectedTab.title);
     }
-  }, [value, navigate, setTitleState, isClientAdmin]);
+  }, [value, navigate, setTitleState]);
+
+  // Map of tab configurations
+  const tabConfig = {
+    clients: { label: t("userManagement.clients.title") },
+    users: { label: t("userManagement.users.title") },
+    rolesPermissions: { label: t("userManagement.rolesPermissions.title") },
+  };
 
   return (
     <>
       <Box sx={{ borderBottom: 0, display: { xs: "none", md: "contents" } }}>
-        {/* Client Admins: Show Users and Roles tabs (2 tabs) */}
-        {isClientAdmin ? (
-          <Tabs
-            value={value}
-            onChange={handleChange}
-            sx={{
-              "& .MuiTab-root": {
-                color: "#1a7e22ff 0%",
-              },
-              "& .Mui-selected": {
-                color: `black !important`,
-              },
-              "& .MuiTabs-indicator": {
-                backgroundColor: `${colors.primary}`,
-              },
-            }}
-          >
+        <Tabs
+          value={value}
+          onChange={handleChange}
+          sx={{
+            "& .MuiTab-root": {
+              color: "#1a7e22ff 0%",
+            },
+            "& .Mui-selected": {
+              color: `black !important`,
+            },
+            "& .MuiTabs-indicator": {
+              backgroundColor: `${colors.primary}`,
+            },
+          }}
+        >
+          {availableTabs.map((tab, index) => (
             <Tab
+              key={tab.route}
               label={
                 <Typography sx={titlesTypography.managementSection}>
-                  {t("userManagement.users.title")}
+                  {tabConfig[tab.route].label}
                 </Typography>
               }
-              {...a11yProps(0)}
+              {...a11yProps(index)}
             />
-            <Tab
-              label={
-                <Typography sx={titlesTypography.managementSection}>
-                  {t("userManagement.rolesPermissions.title")}
-                </Typography>
-              }
-              {...a11yProps(1)}
-            />
-          </Tabs>
-        ) : (
-          /* BPO Admins: Show all tabs (3 tabs) */
-          <Tabs
-            value={value}
-            onChange={handleChange}
-            sx={{
-              "& .MuiTab-root": {
-                color: "#1a7e22ff 0%",
-              },
-              "& .Mui-selected": {
-                color: `black !important`,
-              },
-              "& .MuiTabs-indicator": {
-                backgroundColor: `${colors.primary}`,
-              },
-            }}
-          >
-            <Tab
-              label={
-                <Typography sx={titlesTypography.managementSection}>
-                  {t("userManagement.clients.title")}
-                </Typography>
-              }
-              {...a11yProps(0)}
-            />
-            <Tab
-              label={
-                <Typography sx={titlesTypography.managementSection}>
-                  {t("userManagement.users.title")}
-                </Typography>
-              }
-              {...a11yProps(1)}
-            />
-            <Tab
-              label={
-                <Typography sx={titlesTypography.managementSection}>
-                  {t("userManagement.rolesPermissions.title")}
-                </Typography>
-              }
-              {...a11yProps(2)}
-            />
-          </Tabs>
-        )}
+          ))}
+        </Tabs>
       </Box>
     </>
   );

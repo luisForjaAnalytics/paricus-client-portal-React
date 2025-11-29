@@ -194,7 +194,7 @@ export const TableView = () => {
       {/* Articles Table */}
       <Box
         sx={{
-          display: { xs: "none", md: "block" },
+          // display: { xs: "none", md: "block" },
           height: "auto",
           width: { md: "95%", lg: "100%" },
         }}

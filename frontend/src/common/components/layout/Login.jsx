@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import { Language as LanguageIcon } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
-import { useLoginMutation } from "../../../store/api/authApi";
+import { useLoginMutation, useLazyGetCSRFTokenQuery } from "../../../store/api/authApi";
 import { setCredentials } from "../../../store/auth/authSlice";
 import { colors, primaryIconButton } from "../../styles/styles";
 
@@ -23,6 +23,7 @@ const LoginView = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [login, { isLoading }] = useLoginMutation();
+  const [getCSRFToken] = useLazyGetCSRFTokenQuery();
 
   // Form state
   const [email, setEmail] = useState("");
@@ -44,6 +45,14 @@ const LoginView = () => {
     try {
       const result = await login({ email, password }).unwrap();
       dispatch(setCredentials(result));
+
+      // Get CSRF token after successful login
+      try {
+        await getCSRFToken().unwrap();
+      } catch (csrfError) {
+        console.warn("Failed to get CSRF token:", csrfError);
+      }
+
       navigate("/app/dashboard");
     } catch (error) {
       console.error("❌ Login error:", error);

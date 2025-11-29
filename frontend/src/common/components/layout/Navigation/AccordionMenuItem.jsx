@@ -12,6 +12,7 @@ import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { colors } from "../../../styles/styles";
 
 export const AccordionMenuItem = ({
@@ -24,6 +25,13 @@ export const AccordionMenuItem = ({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const authUser = useSelector((state) => state.auth.user);
+
+  // Filter subItems based on permissions
+  const filteredSubItems = subItems.filter((subItem) => {
+    if (!subItem.permission) return true;
+    return authUser?.permissions?.includes(subItem.permission);
+  });
 
   const handleClick = () => {
     setOpen(!open);
@@ -35,8 +43,13 @@ export const AccordionMenuItem = ({
   };
 
   // Check if any subItem is selected
-  const isSubItemSelected = subItems.some((item) => titleState === item.label);
+  const isSubItemSelected = filteredSubItems.some((item) => titleState === item.label);
   const isSelected = isSubItemSelected || titleState === label;
+
+  // Don't render if no subItems are available after filtering
+  if (filteredSubItems.length === 0) {
+    return null;
+  }
 
   return (
     <>
@@ -107,7 +120,7 @@ export const AccordionMenuItem = ({
 
       <Collapse in={open} timeout="auto" unmountOnExit>
         <List component="div" disablePadding>
-          {subItems.map((subItem, index) => {
+          {filteredSubItems.map((subItem, index) => {
             const isSubSelected = titleState === subItem.label;
             return (
               <ListItem key={index} disablePadding>
