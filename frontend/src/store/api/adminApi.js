@@ -1,15 +1,70 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-export const adminApi = createApi({
-  reducerPath: "adminApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: `${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/admin`,
+// Custom base query with CSRF token support
+const baseQueryWithCSRF = async (args, api, extraOptions) => {
+  const baseUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/admin`;
+
+  const baseQuery = fetchBaseQuery({
+    baseUrl,
     prepareHeaders: (headers, { getState }) => {
       const token = getState().auth?.token;
       if (token) headers.set("Authorization", `Bearer ${token}`);
+
+      // Get CSRF token from localStorage
+      const csrfToken = localStorage.getItem('csrfToken');
+      if (csrfToken) {
+        headers.set("X-CSRF-Token", csrfToken);
+      }
+
       return headers;
     },
-  }),
+  });
+
+  let result = await baseQuery(args, api, extraOptions);
+
+  // If CSRF token is returned in response, store it
+  if (result.data?.csrfToken) {
+    localStorage.setItem('csrfToken', result.data.csrfToken);
+  }
+
+  // Handle CSRF errors
+  if (result.error?.status === 403) {
+    const errorMsg = result.error?.data?.error || '';
+    const isCsrfError = errorMsg.includes('CSRF') || errorMsg.includes('csrf');
+
+    if (isCsrfError) {
+      console.log('CSRF token error detected:', errorMsg);
+
+      // Store new token if provided in error response
+      if (result.error.data?.csrfToken) {
+        console.log('New CSRF token received, storing and retrying...');
+        localStorage.setItem('csrfToken', result.error.data.csrfToken);
+
+        // Retry the original request with new token
+        const retryQuery = fetchBaseQuery({
+          baseUrl,
+          prepareHeaders: (headers, { getState }) => {
+            const token = getState().auth?.token;
+            if (token) headers.set("Authorization", `Bearer ${token}`);
+            headers.set("X-CSRF-Token", result.error.data.csrfToken);
+            return headers;
+          },
+        });
+
+        result = await retryQuery(args, api, extraOptions);
+        console.log('Retry result:', result.error ? 'Failed' : 'Success');
+      } else {
+        console.error('No new CSRF token provided in error response');
+      }
+    }
+  }
+
+  return result;
+};
+
+export const adminApi = createApi({
+  reducerPath: "adminApi",
+  baseQuery: baseQueryWithCSRF,
   tagTypes: ['Users', 'Clients', 'Roles', 'Permissions', 'RolePermissions'],
   endpoints: (builder) => ({
     // Get all users

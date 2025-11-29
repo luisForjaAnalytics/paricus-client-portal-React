@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import Box from "@mui/material/Box";
 import Avatar from "@mui/material/Avatar";
 import IconButton from "@mui/material/IconButton";
-import { Tooltip } from "@mui/material";
+import { Tooltip, Typography } from "@mui/material";
 import LanguageIcon from "@mui/icons-material/Language";
 import { colors } from "../../../styles/styles";
 
@@ -39,11 +39,15 @@ export default function LanguageMenu() {
     setAnchorEl(null);
   };
 
-  const current = options[selectedIndex];
-
   return (
-    <Box>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "row",
+      }}
+    >
       <IconButton
+        disableRipple
         id="language-button"
         aria-haspopup="listbox"
         aria-controls="language-menu"
@@ -51,15 +55,23 @@ export default function LanguageMenu() {
         onClick={handleClickListItem}
         size="large"
         sx={{
-          color: "text.secondary",
+          color: { xs: "white", md: "text.secondary" },
           "&:hover": {
-            backgroundColor: "action.hover",
+            backgroundColor: "transparent",
           },
         }}
       >
-        <LanguageIcon  />
+        <LanguageIcon />
+        <Typography
+          sx={{
+            display: { xs: "none", md: "flex" },
+            ml: 1,
+            fontWeight: "bold",
+          }}
+        >
+          {options[selectedIndex]?.code.toUpperCase()}
+        </Typography>
       </IconButton>
-
       <Menu
         id="language-menu"
         anchorEl={anchorEl}
@@ -68,7 +80,7 @@ export default function LanguageMenu() {
         slotProps={{
           paper: {
             sx: {
-              borderRadius: '0.7rem',
+              borderRadius: "0.7rem",
             },
           },
           list: {

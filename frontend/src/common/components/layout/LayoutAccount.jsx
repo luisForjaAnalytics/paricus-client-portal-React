@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { styled, useTheme } from "@mui/material/styles";
+import { styled} from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import MuiDrawer from "@mui/material/Drawer";
 import List from "@mui/material/List";
@@ -10,10 +10,12 @@ import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import { AppBarLayout } from "./AppBar/AppBarLayout";
 import { useTranslation } from "react-i18next";
-import { MenuSections, menuItemsCommon, menuItemsAdmin } from "./Navigation/MenuSection.jsx";
+
 import { Outlet } from "react-router-dom";
 import { usePermissions } from "../../hooks/usePermissions";
 import { colors } from "../../styles/styles";
+import { menuItemsAdmin, menuItemsCommon} from "../../../config/menu/MenusSection";
+import { MenuSections } from "./Navigation/MenuSection";
 const drawerWidth = 260;
 
 const openedMixin = (theme) => ({
