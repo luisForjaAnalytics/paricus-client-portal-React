@@ -1,8 +1,6 @@
 import { Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
-import { Box, Typography, Button } from '@mui/material';
-import { Lock as LockIcon } from '@mui/icons-material';
 import { usePermissions } from '../../common/hooks/usePermissions';
 
 /**
@@ -32,49 +30,19 @@ export const ProtectedRoute = ({
 
   // Verificar permiso único
   if (requiredPermission && !hasPermission(requiredPermission)) {
-    return <UnauthorizedView />;
+    return null;
   }
 
   // Verificar múltiples permisos (todos requeridos)
   if (requiredPermissions.length > 0 && !hasAllPermissions(requiredPermissions)) {
-    return <UnauthorizedView />;
+    return null;
   }
 
   // Verificar al menos un permiso
   if (anyPermissions.length > 0 && !hasAnyPermission(anyPermissions)) {
-    return <UnauthorizedView />;
+    return null;
   }
 
   // Usuario tiene acceso
   return children;
-};
-
-/**
- * Vista que se muestra cuando el usuario no tiene permisos
- */
-const UnauthorizedView = () => {
-  return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '60vh',
-        textAlign: 'center',
-        p: 3,
-      }}
-    >
-      <LockIcon sx={{ fontSize: 80, color: 'error.main', mb: 2 }} />
-      <Typography variant="h4" gutterBottom fontWeight="bold">
-        Acceso Denegado
-      </Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-        No tienes permisos suficientes para acceder a esta página.
-      </Typography>
-      <Button variant="contained" href="/dashboard">
-        Volver al Dashboard
-      </Button>
-    </Box>
-  );
 };
