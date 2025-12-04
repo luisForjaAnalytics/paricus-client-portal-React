@@ -146,6 +146,20 @@ export const AccordionMenuItem = ({
                       fontWeight: isSubSelected ? "bold" : "normal",
                     }}
                   />
+                  {subItem.icon && (
+                    <ListItemIcon
+                      sx={{
+                        minWidth: 0,
+                        ml: 1,
+                        justifyContent: "center",
+                        "& svg": {
+                          color: "#D1FAE5",
+                        },
+                      }}
+                    >
+                      {subItem.icon}
+                    </ListItemIcon>
+                  )}
                 </ListItemButton>
               </ListItem>
             );

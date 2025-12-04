@@ -58,7 +58,7 @@ model Role {
 
 model User {
   id                   Int             @id @default(autoincrement())
-  clientId             Int             @map("client_id")
+  clientId             Int?            @map("client_id")
   email                String          @unique
   passwordHash         String          @map("password_hash")
   firstName            String?         @map("first_name")
@@ -71,7 +71,7 @@ model User {
   createdAt            DateTime        @default(now()) @map("created_at")
   updatedAt            DateTime        @default(now()) @updatedAt @map("updated_at")
   role                 Role?           @relation(fields: [roleId], references: [id], onDelete: SetNull)
-  client               Client          @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  client               Client?         @relation(fields: [clientId], references: [id], onDelete: Cascade)
   knowledgeBase        KnowledgeBase[]
 
   @@index([email])
@@ -188,4 +188,21 @@ model Invoice {
   @@index([invoiceNumber])
   @@index([createdAt])
   @@map("invoices")
+}
+
+model Log {
+  id          String   @id @default(uuid())
+  timestamp   DateTime @default(now())
+  userId      String   @map("user_id")
+  eventType   String   @map("event_type") // CREATE, UPDATE, DELETE, LOGIN, LOGOUT, etc.
+  entity      String   // User, Role, Client, Invoice, etc.
+  description String
+  status      String   @default("SUCCESS") // SUCCESS, FAILURE, WARNING
+
+  @@index([timestamp])
+  @@index([userId])
+  @@index([eventType])
+  @@index([entity])
+  @@index([status])
+  @@map("logs")
 }

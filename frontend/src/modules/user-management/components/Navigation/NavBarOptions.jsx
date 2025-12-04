@@ -24,6 +24,8 @@ export const NavBarOptions = ({ setTitleState }) => {
   const hasClientsPermission = authUser?.permissions?.includes("admin_clients");
   const hasUsersPermission = authUser?.permissions?.includes("admin_users");
   const hasRolesPermission = authUser?.permissions?.includes("admin_roles");
+  const isSuperAdmin = authUser?.clientId === null; // Super admin tiene clientId null
+
 
   const [value, setValue] = useState(0);
 
@@ -42,6 +44,10 @@ export const NavBarOptions = ({ setTitleState }) => {
   if (hasRolesPermission) {
     availableTabs.push({ route: 'rolesPermissions', title: 'roleManagement' });
   }
+  if (isSuperAdmin) {
+    availableTabs.push({ route: 'logs', title: 'logsManagement' });
+  }
+
 
   useEffect(() => {
     if (availableTabs.length > 0 && value < availableTabs.length) {
@@ -56,6 +62,7 @@ export const NavBarOptions = ({ setTitleState }) => {
     clients: { label: t("userManagement.clients.title") },
     users: { label: t("userManagement.users.title") },
     rolesPermissions: { label: t("userManagement.rolesPermissions.title") },
+    logs: { label: t("userManagement.logs.title") },
   };
 
   return (

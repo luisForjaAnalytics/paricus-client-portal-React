@@ -11,6 +11,7 @@ import { usePermissions } from '../../common/hooks/usePermissions';
  * @param {string} props.requiredPermission - Permiso requerido (opcional)
  * @param {string[]} props.requiredPermissions - Array de permisos requeridos (todos necesarios)
  * @param {string[]} props.anyPermissions - Array de permisos (al menos uno necesario)
+ * @param {boolean} props.requireSuperAdmin - Requiere ser super admin (clientId === null)
  * @param {string} props.redirectTo - Ruta de redirección si no tiene acceso
  */
 export const ProtectedRoute = ({
@@ -18,14 +19,20 @@ export const ProtectedRoute = ({
   requiredPermission,
   requiredPermissions = [],
   anyPermissions = [],
+  requireSuperAdmin = false,
   redirectTo = '/login',
 }) => {
-  const { isAuthenticated } = useSelector((state) => state.auth);
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
   const { hasPermission, hasAllPermissions, hasAnyPermission } = usePermissions();
 
   // Si no está autenticado, redirigir al login
   if (!isAuthenticated) {
     return <Navigate to={redirectTo} replace />;
+  }
+
+  // Verificar si requiere ser super admin
+  if (requireSuperAdmin && user?.clientId !== null) {
+    return null;
   }
 
   // Verificar permiso único

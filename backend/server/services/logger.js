@@ -1,0 +1,211 @@
+import { prisma } from '../database/prisma.js';
+
+/**
+ * Create a log entry in the database
+ * @param {Object} logData - Log data
+ * @param {string} logData.userId - ID of the user performing the action
+ * @param {string} logData.eventType - Type of event (CREATE, UPDATE, DELETE, LOGIN, LOGOUT)
+ * @param {string} logData.entity - Entity being affected (User, Role, Client, Invoice, etc.)
+ * @param {string} logData.description - Description of the event
+ * @param {string} logData.status - Status of the event (SUCCESS, FAILURE, WARNING)
+ */
+export async function createLog({ userId, eventType, entity, description, status = 'SUCCESS' }) {
+  try {
+    await prisma.log.create({
+      data: {
+        userId: userId.toString(),
+        eventType,
+        entity,
+        description,
+        status,
+      },
+    });
+  } catch (error) {
+    // Don't throw error to avoid breaking the main operation
+    console.error('Error creating log:', error);
+  }
+}
+
+/**
+ * Log user login
+ */
+export async function logLogin(userId, email, success = true) {
+  await createLog({
+    userId: userId?.toString() || 'unknown',
+    eventType: 'LOGIN',
+    entity: 'Auth',
+    description: success
+      ? `User ${email} logged in successfully`
+      : `Failed login attempt for ${email}`,
+    status: success ? 'SUCCESS' : 'FAILURE',
+  });
+}
+
+/**
+ * Log user logout
+ */
+export async function logLogout(userId, email) {
+  await createLog({
+    userId: userId.toString(),
+    eventType: 'LOGOUT',
+    entity: 'Auth',
+    description: `User ${email} logged out`,
+    status: 'SUCCESS',
+  });
+}
+
+/**
+ * Log user creation
+ */
+export async function logUserCreate(performedByUserId, newUserEmail) {
+  await createLog({
+    userId: performedByUserId.toString(),
+    eventType: 'CREATE',
+    entity: 'User',
+    description: `Created new user: ${newUserEmail}`,
+    status: 'SUCCESS',
+  });
+}
+
+/**
+ * Log user update
+ */
+export async function logUserUpdate(performedByUserId, updatedUserEmail) {
+  await createLog({
+    userId: performedByUserId.toString(),
+    eventType: 'UPDATE',
+    entity: 'User',
+    description: `Updated user: ${updatedUserEmail}`,
+    status: 'SUCCESS',
+  });
+}
+
+/**
+ * Log user deletion
+ */
+export async function logUserDelete(performedByUserId, deletedUserEmail) {
+  await createLog({
+    userId: performedByUserId.toString(),
+    eventType: 'DELETE',
+    entity: 'User',
+    description: `Deleted user: ${deletedUserEmail}`,
+    status: 'SUCCESS',
+  });
+}
+
+/**
+ * Log invoice creation
+ */
+export async function logInvoiceCreate(performedByUserId, invoiceNumber, clientName) {
+  await createLog({
+    userId: performedByUserId.toString(),
+    eventType: 'CREATE',
+    entity: 'Invoice',
+    description: `Created invoice ${invoiceNumber} for client: ${clientName}`,
+    status: 'SUCCESS',
+  });
+}
+
+/**
+ * Log invoice update
+ */
+export async function logInvoiceUpdate(performedByUserId, invoiceNumber, changes) {
+  await createLog({
+    userId: performedByUserId.toString(),
+    eventType: 'UPDATE',
+    entity: 'Invoice',
+    description: `Updated invoice ${invoiceNumber}: ${changes}`,
+    status: 'SUCCESS',
+  });
+}
+
+/**
+ * Log invoice deletion
+ */
+export async function logInvoiceDelete(performedByUserId, invoiceNumber) {
+  await createLog({
+    userId: performedByUserId.toString(),
+    eventType: 'DELETE',
+    entity: 'Invoice',
+    description: `Deleted invoice ${invoiceNumber}`,
+    status: 'SUCCESS',
+  });
+}
+
+/**
+ * Log client creation
+ */
+export async function logClientCreate(performedByUserId, clientName) {
+  await createLog({
+    userId: performedByUserId.toString(),
+    eventType: 'CREATE',
+    entity: 'Client',
+    description: `Created new client: ${clientName}`,
+    status: 'SUCCESS',
+  });
+}
+
+/**
+ * Log client update
+ */
+export async function logClientUpdate(performedByUserId, clientName) {
+  await createLog({
+    userId: performedByUserId.toString(),
+    eventType: 'UPDATE',
+    entity: 'Client',
+    description: `Updated client: ${clientName}`,
+    status: 'SUCCESS',
+  });
+}
+
+/**
+ * Log client deletion
+ */
+export async function logClientDelete(performedByUserId, clientName) {
+  await createLog({
+    userId: performedByUserId.toString(),
+    eventType: 'DELETE',
+    entity: 'Client',
+    description: `Deleted client: ${clientName}`,
+    status: 'SUCCESS',
+  });
+}
+
+/**
+ * Log role creation
+ */
+export async function logRoleCreate(performedByUserId, roleName) {
+  await createLog({
+    userId: performedByUserId.toString(),
+    eventType: 'CREATE',
+    entity: 'Role',
+    description: `Created new role: ${roleName}`,
+    status: 'SUCCESS',
+  });
+}
+
+/**
+ * Log role update
+ */
+export async function logRoleUpdate(performedByUserId, roleName, changes) {
+  await createLog({
+    userId: performedByUserId.toString(),
+    eventType: 'UPDATE',
+    entity: 'Role',
+    description: `Updated role ${roleName}: ${changes}`,
+    status: 'SUCCESS',
+  });
+}
+
+/**
+ * Log role deletion
+ */
+export async function logRoleDelete(performedByUserId, roleName) {
+  await createLog({
+    userId: performedByUserId.toString(),
+    eventType: 'DELETE',
+    entity: 'Role',
+    description: `Deleted role: ${roleName}`,
+    status: 'SUCCESS',
+  });
+}

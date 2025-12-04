@@ -34,7 +34,15 @@
       "Bash(taskkill:*)",
       "Bash(dir:*)",
       "Bash(timeout /t 3)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "Bash(del:*)",
+      "Bash(npm start)",
+      "Bash(npx prisma studio:*)",
+      "Bash(sqlite3:*)",
+      "Bash(npm install)",
+      "Bash(copy:*)",
+      "Bash(docker:*)",
+      "Bash(npx prisma migrate dev:*)"
     ],
     "deny": [],
     "ask": []

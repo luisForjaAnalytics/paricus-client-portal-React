@@ -11,7 +11,7 @@ export const SingOutButton = () => {
 
   const handleMenuOption = () => {
     logout();
-    navigate(`/login`);
+    navigate(`/login`, { replace: true });
   };
   const { t } = useTranslation();
   return (

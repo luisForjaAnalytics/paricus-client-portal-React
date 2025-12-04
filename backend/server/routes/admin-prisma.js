@@ -4,15 +4,26 @@ import { body, validationResult } from 'express-validator';
 import { prisma } from '../database/prisma.js';
 import { authenticateToken } from '../middleware/auth-prisma.js';
 import { generateDownloadUrl, generateUploadUrl, generateReportKey, getBucketName } from '../services/s3.js';
-import { 
-  userValidation, 
-  clientValidation, 
-  roleValidation, 
+import {
+  userValidation,
+  clientValidation,
+  roleValidation,
   validateId,
   validateClientQuery,
-  sanitizeInput 
+  sanitizeInput
 } from '../middleware/validation.js';
 import { cache, CACHE_TYPES, invalidateClientCache, invalidatePatternCache } from '../middleware/cache.js';
+import {
+  logUserCreate,
+  logUserUpdate,
+  logUserDelete,
+  logClientCreate,
+  logClientUpdate,
+  logClientDelete,
+  logRoleCreate,
+  logRoleUpdate,
+  logRoleDelete
+} from '../services/logger.js';
 
 const router = express.Router();
 
@@ -262,7 +273,7 @@ router.get('/users', requireAdminUsers, validateClientQuery, async (req, res) =>
         last_name: user.lastName,
         is_active: user.isActive,
         client_id: user.clientId,
-        client_name: user.client.name,
+        client_name: user.client?.name || 'Paricus (Super Admin)',
         role_id: user.roleId,
         role_name: user.role?.roleName,
         created_at: user.createdAt,
@@ -344,6 +355,9 @@ router.post('/users',
     // Remove password hash from response
     const { passwordHash: _, ...userResponse } = user;
 
+    // Log user creation
+    await logUserCreate(req.user.id, email);
+
     res.status(201).json({ 
       message: 'User created successfully',
       user: userResponse
@@ -397,7 +411,10 @@ router.put('/users/:id',
     // Remove password hash from response
     const { passwordHash: _, ...userResponse } = user;
 
-    res.json({ 
+    // Log user update
+    await logUserUpdate(req.user.id, user.email);
+
+    res.json({
       message: 'User updated successfully',
       user: userResponse
     });
@@ -420,7 +437,10 @@ router.delete('/users/:id', requireAdminUsers, validateId, async (req, res) => {
       data: { isActive: false }
     });
 
-    res.json({ 
+    // Log user deletion/deactivation
+    await logUserDelete(req.user.id, user.email);
+
+    res.json({
       message: 'User deactivated successfully'
     });
   } catch (error) {
@@ -682,6 +702,24 @@ router.put('/roles/:id/permissions', [
     console.log('Updating permissions for role ID:', id);
     console.log('Permission IDs:', permissionIds);
 
+    // Get role information and old permissions before update
+    const role = await prisma.role.findUnique({
+      where: { id: parseInt(id) },
+      include: {
+        rolePermissions: {
+          include: {
+            permission: true
+          }
+        }
+      }
+    });
+
+    if (!role) {
+      return res.status(404).json({ error: 'Role not found' });
+    }
+
+    const oldPermissionNames = role.rolePermissions.map(rp => rp.permission.permissionName);
+
     await prisma.$transaction(async (tx) => {
       // Remove existing permissions
       await tx.rolePermission.deleteMany({
@@ -702,6 +740,48 @@ router.put('/roles/:id/permissions', [
         });
       }
     });
+
+    // Get new permission names
+    const newPermissions = await prisma.permission.findMany({
+      where: {
+        id: { in: permissionIds.map(id => parseInt(id)) }
+      }
+    });
+    const newPermissionNames = newPermissions.map(p => p.permissionName);
+
+    // Determine added and removed permissions
+    const addedPermissions = newPermissionNames.filter(p => !oldPermissionNames.includes(p));
+    const removedPermissions = oldPermissionNames.filter(p => !newPermissionNames.includes(p));
+
+    // Create logs for each permission change
+    if (addedPermissions.length > 0) {
+      for (const permissionName of addedPermissions) {
+        await logRoleUpdate(
+          req.user.id,
+          role.roleName,
+          `Added permission: ${permissionName}`
+        );
+      }
+    }
+
+    if (removedPermissions.length > 0) {
+      for (const permissionName of removedPermissions) {
+        await logRoleUpdate(
+          req.user.id,
+          role.roleName,
+          `Removed permission: ${permissionName}`
+        );
+      }
+    }
+
+    // If no changes, still log the update
+    if (addedPermissions.length === 0 && removedPermissions.length === 0) {
+      await logRoleUpdate(
+        req.user.id,
+        role.roleName,
+        'Updated permissions (no changes)'
+      );
+    }
 
     res.json({
       message: 'Role permissions updated successfully'

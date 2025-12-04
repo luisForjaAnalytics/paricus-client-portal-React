@@ -6,6 +6,7 @@ import { prisma } from '../database/prisma.js';
 import { authenticateToken } from '../middleware/auth-prisma.js';
 import { sendPasswordResetEmail } from '../utils/email.js';
 import { authValidation, sanitizeInput } from '../middleware/validation.js';
+import { logLogin, logLogout } from '../services/logger.js';
 
 const router = express.Router();
 
@@ -49,6 +50,8 @@ router.post('/login',
 
     if (!user) {
       console.log('❌ User not found for email:', email);
+      // Log failed login attempt
+      await logLogin(null, email, false);
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
@@ -61,6 +64,8 @@ router.post('/login',
 
     if (!isValidPassword) {
       console.log('❌ Invalid password for user:', user.email);
+      // Log failed login attempt
+      await logLogin(user.id, email, false);
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
@@ -82,6 +87,9 @@ router.post('/login',
     // Extract permissions
     const permissions = user.role?.rolePermissions.map(rp => rp.permission.permissionName) || [];
 
+    // Log successful login
+    await logLogin(user.id, email, true);
+
     res.json({
       token,
       user: {
@@ -90,7 +98,7 @@ router.post('/login',
         firstName: user.firstName,
         lastName: user.lastName,
         clientId: user.clientId,
-        clientName: user.client.name,
+        clientName: user.client?.name || null,
         roleId: user.roleId,
         roleName: user.role?.roleName,
         permissions: permissions
@@ -220,7 +228,10 @@ router.get('/profile', authenticateToken, async (req, res) => {
 });
 
 // Logout endpoint (client-side token removal)
-router.post('/logout', authenticateToken, (req, res) => {
+router.post('/logout', authenticateToken, async (req, res) => {
+  // Log logout
+  await logLogout(req.user.id, req.user.email);
+
   res.json({ message: 'Logged out successfully' });
 });
 

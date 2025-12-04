@@ -13,6 +13,7 @@ import errorRoutes from './routes/errors.js';
 import reportsRoutes from './routes/reports.js';
 import invoicesRoutes from './routes/invoices.js';
 import audioRecordingsRoutes from './routes/audio-recordings.js';
+import logsRoutes from './routes/logs-prisma.js';
 
 // Import security middleware
 import { validateCSRFToken, getCSRFToken } from './middleware/csrf.js';
@@ -197,6 +198,7 @@ app.use('/api/errors', errorRoutes);
 app.use('/api/reports', reportsRoutes);
 app.use('/api/invoices', invoicesRoutes);
 app.use('/api/audio-recordings', audioRecordingsRoutes);
+app.use('/api/logs', logsRoutes);
 
 // S3 test endpoint
 app.get('/api/s3-test', async (req, res) => {

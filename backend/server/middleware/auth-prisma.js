@@ -63,7 +63,7 @@ export const authenticateToken = async (req, res, next) => {
       firstName: user.firstName,
       lastName: user.lastName,
       clientId: user.clientId,
-      clientName: user.client.name,
+      clientName: user.client?.name || null,
       roleId: user.roleId,
       roleName: user.role?.roleName,
       permissions: user.role?.rolePermissions.map(rp => rp.permission.permissionName) || []

@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { v4 as uuidv4 } from "uuid";
 
 const prisma = new PrismaClient();
 
@@ -495,7 +496,7 @@ async function main() {
   // Create mockup users
   console.log("👥 Creating mockup users...");
 
-  // BPO Admin user
+  // BPO Admin user (Super Admin - clientId: null)
   const bpoAdminPassword = await bcrypt.hash("admin123!", 12);
   await prisma.user.upsert({
     where: { email: "admin@paricus.com" },
@@ -505,7 +506,7 @@ async function main() {
       passwordHash: bpoAdminPassword,
       firstName: "System",
       lastName: "Administrator",
-      clientId: bpoClient.id,
+      clientId: null, // Super admin - no client association
       roleId: bpoAdminRole.id,
       isActive: true,
     },
@@ -603,6 +604,110 @@ async function main() {
       isActive: true,
     },
   });
+
+  // Create sample logs
+  console.log("Creating sample logs...");
+
+  const sampleLogs = [
+    {
+      id: uuidv4(),
+      timestamp: new Date("2025-12-03T17:12:55Z"),
+      userId: "1",
+      eventType: "UPDATE",
+      entity: "Role",
+      description: "Admin updated role permissions for BPO Admin role",
+      status: "SUCCESS",
+    },
+    {
+      id: uuidv4(),
+      timestamp: new Date("2025-12-03T16:45:30Z"),
+      userId: "2",
+      eventType: "CREATE",
+      entity: "User",
+      description: "New user created: user@flexmobile.com",
+      status: "SUCCESS",
+    },
+    {
+      id: uuidv4(),
+      timestamp: new Date("2025-12-03T15:30:10Z"),
+      userId: "1",
+      eventType: "DELETE",
+      entity: "Client",
+      description: "Client deleted by super admin",
+      status: "SUCCESS",
+    },
+    {
+      id: uuidv4(),
+      timestamp: new Date("2025-12-03T14:15:45Z"),
+      userId: "3",
+      eventType: "LOGIN",
+      entity: "Auth",
+      description: "User logged in successfully from web browser",
+      status: "SUCCESS",
+    },
+    {
+      id: uuidv4(),
+      timestamp: new Date("2025-12-03T13:00:00Z"),
+      userId: "2",
+      eventType: "UPDATE",
+      entity: "Invoice",
+      description: "Invoice status updated from pending to paid",
+      status: "SUCCESS",
+    },
+    {
+      id: uuidv4(),
+      timestamp: new Date("2025-12-03T12:30:22Z"),
+      userId: "unknown",
+      eventType: "LOGIN",
+      entity: "Auth",
+      description: "Failed login attempt - invalid credentials for admin@test.com",
+      status: "FAILURE",
+    },
+    {
+      id: uuidv4(),
+      timestamp: new Date("2025-12-03T11:20:15Z"),
+      userId: "1",
+      eventType: "CREATE",
+      entity: "Role",
+      description: "New role created: Custom Manager for Flex Mobile",
+      status: "SUCCESS",
+    },
+    {
+      id: uuidv4(),
+      timestamp: new Date("2025-12-03T10:05:30Z"),
+      userId: "4",
+      eventType: "UPDATE",
+      entity: "User",
+      description: "User profile updated: Changed password",
+      status: "SUCCESS",
+    },
+    {
+      id: uuidv4(),
+      timestamp: new Date("2025-12-03T09:45:00Z"),
+      userId: "1",
+      eventType: "DELETE",
+      entity: "Permission",
+      description: "Attempted to delete system permission",
+      status: "FAILURE",
+    },
+    {
+      id: uuidv4(),
+      timestamp: new Date("2025-12-03T08:30:10Z"),
+      userId: "2",
+      eventType: "CREATE",
+      entity: "Invoice",
+      description: "New invoice created for Flex Mobile - Invoice #INV-2025-001",
+      status: "SUCCESS",
+    },
+  ];
+
+  for (const log of sampleLogs) {
+    await prisma.log.create({
+      data: log,
+    });
+  }
+
+  console.log("Sample logs created!");
 
   console.log("Seed completed successfully!");
   console.log("");

@@ -5,6 +5,9 @@ import LocalAtmOutlinedIcon from "@mui/icons-material/LocalAtmOutlined";
 import VolumeUpOutlinedIcon from "@mui/icons-material/VolumeUpOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
+import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
+import PersonIcon from "@mui/icons-material/Person";
+import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
 import { permissionListSection } from "../../common/utils/permissionParser";
 
 // Permission per section
@@ -72,21 +75,21 @@ export const menuItemsAdmin = [
     subItems: [
       {
         label: "clientManagement",
-        icon: <SettingsOutlinedIcon fontSize="medium" />,
+        icon: <PeopleAltIcon fontSize="medium" />,
         route: "users-management/clients",
         permission: "admin_clients",
         permissionList: ["admin_clients"],
       },
       {
         label: "usersManagement",
-        icon: <SettingsOutlinedIcon fontSize="medium" />,
+        icon: <PersonIcon fontSize="medium" />,
         route: "users-management/users",
         permission: "admin_users",
         permissionList: ["admin_users"],
       },
       {
         label: "roleManagement",
-        icon: <SettingsOutlinedIcon fontSize="medium" />,
+        icon: <VerifiedUserIcon fontSize="medium" />,
         route: "users-management/rolesPermissions",
         permission: "admin_roles",
         permissionList: ["admin_roles"],

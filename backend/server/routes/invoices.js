@@ -14,6 +14,11 @@ import {
   getS3ObjectMetadata,
   setS3ObjectMetadata
 } from '../services/s3.js';
+import {
+  logInvoiceCreate,
+  logInvoiceUpdate,
+  logInvoiceDelete
+} from '../services/logger.js';
 
 const router = express.Router();
 
@@ -295,8 +300,16 @@ router.post('/upload/:clientFolder',
         s3Bucket: getBucketName(),
         fileSize: req.file.size,
         mimeType: 'application/pdf'
+      },
+      include: {
+        client: {
+          select: { name: true }
+        }
       }
     });
+
+    // Log invoice creation
+    await logInvoiceCreate(req.user.id, invoiceNumber, invoice.client.name);
 
     res.json({
       success: true,
@@ -412,6 +425,9 @@ router.delete('/delete/:invoiceId', [
       where: { id: invoiceId }
     });
 
+    // Log invoice deletion
+    await logInvoiceDelete(req.user.id, invoice.invoiceNumber);
+
     res.json({
       success: true,
       message: 'Invoice deleted successfully'
@@ -485,6 +501,10 @@ router.put('/:invoiceId', [
       where: { id: invoiceId },
       data: updates
     });
+
+    // Log invoice update
+    const changesDescription = Object.keys(updates).join(', ');
+    await logInvoiceUpdate(req.user.id, invoice.invoiceNumber, changesDescription);
 
     res.json({
       success: true,
