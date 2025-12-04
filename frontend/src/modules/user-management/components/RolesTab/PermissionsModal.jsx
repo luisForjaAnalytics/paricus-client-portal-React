@@ -30,13 +30,15 @@ import {
 } from "../../../../config/menu/MenusSection";
 import { useTranslation } from "react-i18next";
 import { useGetPermissionsQuery } from "../../../../store/api/adminApi";
+import { useSelector } from "react-redux";
 
 //Checkbox Permission component
 
-const CheckboxList = ({ permission, selectedPermissions, t, onToggle }) => {
+const CheckboxList = ({ permission, selectedPermissions, t, onToggle, disabled }) => {
   const checked = selectedPermissions.includes(permission.id);
 
   const handleChecked = () => {
+    if (disabled) return;
     try {
       onToggle(permission.id);
     } catch (err) {
@@ -45,9 +47,10 @@ const CheckboxList = ({ permission, selectedPermissions, t, onToggle }) => {
   };
   return (
     <List component="div" disablePadding>
-      <ListItemButton sx={{ pl: 4 }}>
+      <ListItemButton sx={{ pl: 4 }} disabled={disabled}>
         <Checkbox
           checked={checked}
+          disabled={disabled}
           sx={{
             "&.Mui-checked": {
               color: colors.primary,
@@ -63,7 +66,7 @@ const CheckboxList = ({ permission, selectedPermissions, t, onToggle }) => {
   );
 };
 
-const NestedList = ({ t, index, item, selectedPermissions, onToggle }) => {
+const NestedList = ({ t, index, item, selectedPermissions, onToggle, disabled }) => {
   const [open, setOpen] = useState(false);
 
   const handleClick = () => {
@@ -90,6 +93,7 @@ const NestedList = ({ t, index, item, selectedPermissions, onToggle }) => {
             selectedPermissions={selectedPermissions}
             t={t}
             onToggle={onToggle}
+            disabled={disabled}
           />
         ))}
       </Collapse>
@@ -108,6 +112,10 @@ export const PermissionsModal = ({
 }) => {
   const { t } = useTranslation();
   const { data: allPermissions = [] } = useGetPermissionsQuery();
+  const authUser = useSelector((state) => state.auth.user);
+
+  // Check if the selected role is the user's own role
+  const isEditingOwnRole = selectedRole?.id === authUser?.roleId;
 
   // Build menu items with permission lists from API
   const buildMenuItems = () => {
@@ -207,6 +215,7 @@ export const PermissionsModal = ({
               item={item}
               selectedPermissions={selectedPermissions}
               onToggle={onPermissionToggle}
+              disabled={isEditingOwnRole}
             />
           ))}
         </List>
@@ -223,7 +232,7 @@ export const PermissionsModal = ({
         <Button
           variant="contained"
           onClick={savePermissions}
-          disabled={isUpdatingPermissions}
+          disabled={isUpdatingPermissions || isEditingOwnRole}
           sx={primaryIconButton}
         >
           {isUpdatingPermissions
@@ -234,6 +243,15 @@ export const PermissionsModal = ({
           {t("common.cancel")}
         </Button>
       </Box>
+      {isEditingOwnRole && (
+        <Typography
+          variant="caption"
+          color="warning.main"
+          sx={{ px: 5, pb: 2, display: "block" }}
+        >
+          {t("roles.cannotEditOwnRole")}
+        </Typography>
+      )}
     </Dialog>
   );
 };

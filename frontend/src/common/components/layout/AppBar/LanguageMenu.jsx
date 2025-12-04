@@ -55,7 +55,7 @@ export default function LanguageMenu() {
         onClick={handleClickListItem}
         size="large"
         sx={{
-          color: { xs: "white", md: "text.secondary" },
+          color: "text.secondary",
           "&:hover": {
             backgroundColor: "transparent",
           },

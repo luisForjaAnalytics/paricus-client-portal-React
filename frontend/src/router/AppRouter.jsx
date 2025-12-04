@@ -27,6 +27,7 @@ import {
   UsersTab,
   ClientsTab,
   RolesTab,
+  LogsView,
 } from "../modules/user-management";
 import { ErrorView } from "../modules/error";
 import { ArticleView } from "../modules/knowledge-base/components/ArticleView";
@@ -139,6 +140,14 @@ const router = createBrowserRouter(
               element: (
                 <ProtectedRoute requiredPermission="admin_roles">
                   <RolesTab />
+                </ProtectedRoute>
+              ),
+            },
+            {
+              path: "logs",
+              element: (
+                <ProtectedRoute requireSuperAdmin={true}>
+                  <LogsView />
                 </ProtectedRoute>
               ),
             },

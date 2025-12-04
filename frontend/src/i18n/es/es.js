@@ -69,6 +69,10 @@ export default {
       label: "Roles y Permisos",
       title: "Roles y Permisos",
     },
+    logs: {
+      label: "Registros",
+      title: "Administrador de Registros",
+    },
   },
 
   // Audio Recordings
@@ -339,6 +343,7 @@ export default {
     addRole: "Agregar Nuevo Rol",
     editRole: "Editar Rol",
     configurePermissions: "Configurar Permisos",
+    cannotEditOwnRole: "No puedes editar los permisos de tu propio rol",
     confirmDelete: "Confirmar Eliminación",
     deleteWarning: "¿Está seguro de que desea eliminar el rol",
     deleteWarningContinue:

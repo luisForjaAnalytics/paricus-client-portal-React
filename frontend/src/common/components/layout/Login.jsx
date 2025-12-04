@@ -13,13 +13,18 @@ import {
   CircularProgress,
   Avatar,
 } from "@mui/material";
-import { Language as LanguageIcon } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
-import { useLoginMutation, useLazyGetCSRFTokenQuery } from "../../../store/api/authApi";
+import { useTranslation } from "react-i18next";
+import {
+  useLoginMutation,
+  useLazyGetCSRFTokenQuery,
+} from "../../../store/api/authApi";
 import { setCredentials } from "../../../store/auth/authSlice";
 import { colors, primaryIconButton } from "../../styles/styles";
+import LanguageMenu from "./AppBar/LanguageMenu";
 
 const LoginView = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [login, { isLoading }] = useLoginMutation();
@@ -37,7 +42,7 @@ const LoginView = () => {
     e.preventDefault();
 
     if (!email || !password) {
-      setErrorMessage("Please fill in all fields");
+      setErrorMessage(t("login.fillAllFields"));
       setShowError(true);
       return;
     }
@@ -56,7 +61,7 @@ const LoginView = () => {
       navigate("/app/dashboard");
     } catch (error) {
       console.error("❌ Login error:", error);
-      setErrorMessage(error?.data?.error || "Invalid credentials");
+      setErrorMessage(error?.data?.error || t("login.invalidCredentials"));
       setShowError(true);
     }
   };
@@ -72,33 +77,47 @@ const LoginView = () => {
         alignItems: "center",
         justifyContent: "center",
         minHeight: "100vh",
-        bgcolor: colors.background,
+        bgcolor: "colors.background",
+        position: "relative",
       }}
     >
+      {/* Language Menu - Top Right */}
+      <Box
+        sx={{
+          position: "absolute",
+          top: { xs: 8, sm: 16 },
+          right: { xs: 8, sm: 16 },
+          zIndex: 10,
+        }}
+      >
+        <LanguageMenu />
+      </Box>
+
       <Container maxWidth="sm">
         <Paper
           elevation={0}
           sx={{
             p: 4,
+            px: 8,
             border: 1,
             borderColor: colors.border,
-            borderRadius: 2,
+            borderRadius: "2rem",
             bgcolor: colors.surface,
           }}
         >
           {/* Header */}
           <Box sx={{ textAlign: "center", mb: 4 }}>
-            <Avatar
+            <Box
+              component="img"
+              src="/paricus_logo.jpeg"
+              alt="Paricus Logo"
               sx={{
-                width: 64,
-                height: 64,
-                bgcolor: colors.neutral,
-                margin: "0 auto",
-                mb: 2,
+                width: open ? 120 : 40,
+                height: "auto",
+                transition: "all 0.3s ease",
+                objectFit: "contain",
               }}
-            >
-              <LanguageIcon sx={{ fontSize: 32, color: colors.primary }} />
-            </Avatar>
+            />
 
             <Typography
               variant="h4"
@@ -106,11 +125,11 @@ const LoginView = () => {
               fontWeight="bold"
               gutterBottom
             >
-              Client Portal
+              {t("login.title")}
             </Typography>
 
             <Typography variant="body2" color="text.secondary">
-              Welcome back! Please enter your details.
+              {t("login.welcome")}
             </Typography>
           </Box>
 
@@ -119,7 +138,7 @@ const LoginView = () => {
             <TextField
               id="email-login"
               name="email"
-              label="Email"
+              label={t("login.email")}
               type="email"
               fullWidth
               required
@@ -128,13 +147,18 @@ const LoginView = () => {
               margin="normal"
               autoComplete="email"
               autoFocus
-              sx={{ mb: 2 }}
+              sx={{
+                mb: 2,
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "1.5rem",
+                },
+              }}
             />
 
             <TextField
               id="password-login"
               name="password"
-              label="Password"
+              label={t("login.password")}
               type="password"
               fullWidth
               required
@@ -142,7 +166,12 @@ const LoginView = () => {
               onChange={(e) => setPassword(e.target.value)}
               margin="normal"
               autoComplete="current-password"
-              sx={{ mb: 2 }}
+              sx={{
+                mb: 2,
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "1.5rem",
+                },
+              }}
             />
 
             <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 3 }}>
@@ -160,7 +189,7 @@ const LoginView = () => {
                   },
                 }}
               >
-                Forgot password?
+                {t("login.forgotPassword")}
               </Link>
             </Box>
 
@@ -181,10 +210,10 @@ const LoginView = () => {
               {isLoading ? (
                 <>
                   <CircularProgress size={20} color="inherit" sx={{ mr: 1 }} />
-                  Signing in...
+                  {t("login.signingIn")}
                 </>
               ) : (
-                "Sign in"
+                t("login.signIn")
               )}
             </Button>
           </Box>

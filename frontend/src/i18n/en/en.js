@@ -70,6 +70,10 @@ export default {
       label: "Roles & Permissions",
       title: "Role Management",
     },
+    logs: {
+      label: "Logs",
+      title: "Logs Management",
+    },
   },
 
   // Audio Recordings
@@ -340,6 +344,7 @@ export default {
     addRole: "Add New Role",
     editRole: "Edit Role",
     configurePermissions: "Configure Permissions",
+    cannotEditOwnRole: "You cannot edit the permissions of your own role",
     confirmDelete: "Confirm Delete",
     deleteWarning: "Are you sure you want to delete the role",
     deleteWarningContinue:
