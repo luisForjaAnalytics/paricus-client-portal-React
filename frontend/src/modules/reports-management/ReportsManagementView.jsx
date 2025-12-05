@@ -34,6 +34,8 @@ import {
   useGrantFolderAccessMutation,
   useRevokeFolderAccessMutation,
 } from "../../store/api/reportsApi";
+import { useCreateLogMutation } from "../../store/api/logsApi";
+import { useSelector } from "react-redux";
 import {
   primaryButton,
   primaryIconButton,
@@ -44,6 +46,8 @@ import {
 
 export const ReportsManagementView = () => {
   const { t } = useTranslation();
+  const authUser = useSelector((state) => state.auth.user);
+  const [createLog] = useCreateLogMutation();
 
   // RTK Query hooks
   const {
@@ -190,12 +194,38 @@ export const ReportsManagementView = () => {
 
       if (response.downloadUrl) {
         window.open(response.downloadUrl, "_blank");
+
+        // Log successful download
+        try {
+          await createLog({
+            userId: authUser.id.toString(),
+            eventType: 'DOWNLOAD',
+            entity: 'Report',
+            description: `Downloaded report ${fileName} from folder ${folder}`,
+            status: 'SUCCESS',
+          }).unwrap();
+        } catch (logErr) {
+          console.error("Error logging report download:", logErr);
+        }
       }
     } catch (error) {
       showNotification(
         "error",
         error.data?.message || "Failed to generate download link"
       );
+
+      // Log failed download
+      try {
+        await createLog({
+          userId: authUser.id.toString(),
+          eventType: 'DOWNLOAD',
+          entity: 'Report',
+          description: `Failed to download report ${report.name} from folder ${folder}`,
+          status: 'FAILURE',
+        }).unwrap();
+      } catch (logErr) {
+        console.error("Error logging report download failure:", logErr);
+      }
     }
   };
 
@@ -209,6 +239,19 @@ export const ReportsManagementView = () => {
 
       showNotification("success", "Report deleted successfully");
 
+      // Log successful delete
+      try {
+        await createLog({
+          userId: authUser.id.toString(),
+          eventType: 'DELETE',
+          entity: 'Report',
+          description: `Deleted report ${fileName} from folder ${folder}`,
+          status: 'SUCCESS',
+        }).unwrap();
+      } catch (logErr) {
+        console.error("Error logging report deletion:", logErr);
+      }
+
       // Refetch reports for this folder
       await fetchReportsForFolder(folder);
     } catch (error) {
@@ -216,6 +259,19 @@ export const ReportsManagementView = () => {
         "error",
         error.data?.message || "Failed to delete report"
       );
+
+      // Log failed delete
+      try {
+        await createLog({
+          userId: authUser.id.toString(),
+          eventType: 'DELETE',
+          entity: 'Report',
+          description: `Failed to delete report ${report.name} from folder ${folder}`,
+          status: 'FAILURE',
+        }).unwrap();
+      } catch (logErr) {
+        console.error("Error logging report deletion failure:", logErr);
+      }
     }
   };
 
