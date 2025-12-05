@@ -59,16 +59,6 @@ export const authApi = createApi({
         body: { token, password, confirmPassword },
       }),
     }),
-
-    getCSRFToken: builder.query({
-      query: () => "/csrf-token",
-      transformResponse: (response) => {
-        if (response.token) {
-          localStorage.setItem("csrfToken", response.token);
-        }
-        return response;
-      },
-    }),
   }),
 });
 
@@ -77,5 +67,4 @@ export const {
   useLogoutMutation,
   useForgotPasswordMutation,
   useResetPasswordMutation,
-  useLazyGetCSRFTokenQuery,
 } = authApi;
