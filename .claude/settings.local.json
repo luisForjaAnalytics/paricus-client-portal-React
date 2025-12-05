@@ -42,7 +42,8 @@
       "Bash(npm install)",
       "Bash(copy:*)",
       "Bash(docker:*)",
-      "Bash(npx prisma migrate dev:*)"
+      "Bash(npx prisma migrate dev:*)",
+      "Bash(tasklist:*)"
     ],
     "deny": [],
     "ask": []

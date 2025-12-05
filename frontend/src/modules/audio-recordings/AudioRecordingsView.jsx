@@ -52,6 +52,8 @@ import {
   useLazyGetAudioUrlQuery,
   usePrefetch,
 } from "../../store/api/audioRecordingsApi";
+import { useCreateLogMutation } from "../../store/api/logsApi";
+import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next"; // ADDED: i18n support
 import { QuickFilters } from "./components/QuickFilters";
 import { QuickFiltersMobile } from "./components/QuickFilters/QuickFiltersMobile.jsx";
@@ -61,6 +63,9 @@ import { typography } from "../../common/styles/styles.js";
 
 export const AudioRecordingsView = () => {
   const { t } = useTranslation(); // ADDED: Translation hook
+  const authUser = useSelector((state) => state.auth.user);
+  const [createLog] = useCreateLogMutation();
+
   // Filters - Internal state for immediate UI updates
   const [filters, setFilters] = useState({
     interactionId: "",
@@ -229,6 +234,10 @@ export const AudioRecordingsView = () => {
       } else {
         setError(apiError.data?.message || "Failed to load recordings");
       }
+    } else {
+      // Clear error if request succeeded
+      setError(null);
+      setDbConfigured(true);
     }
   }, [apiError]);
 
@@ -260,18 +269,17 @@ export const AudioRecordingsView = () => {
 
   const toggleAudio = async (item) => {
     if (currentlyPlaying === item.interaction_id) {
-      stopAudio();
+      stopAudio(item);
     } else {
       try {
         setLoadingAudioUrl(item.interaction_id);
 
-        let audioUrl = audioUrlCache.current.get(item.interaction_id);
+        // ALWAYS call the backend to register the log, even if URL is cached
+        const result = await getAudioUrl(item.interaction_id).unwrap();
+        const audioUrl = result;
 
-        if (!audioUrl) {
-          const result = await getAudioUrl(item.interaction_id).unwrap();
-          audioUrl = result;
-          audioUrlCache.current.set(item.interaction_id, audioUrl);
-        }
+        // Update cache with the new URL
+        audioUrlCache.current.set(item.interaction_id, audioUrl);
 
         if (audioPlayer.current && audioUrl) {
           audioPlayer.current.src = audioUrl;
@@ -280,21 +288,66 @@ export const AudioRecordingsView = () => {
           await audioPlayer.current.play();
           setCurrentlyPlaying(item.interaction_id);
           setIsPlaying(true);
+
+          // Log the play action
+          try {
+            await createLog({
+              userId: authUser.id.toString(),
+              eventType: 'PLAY',
+              entity: 'AudioRecording',
+              description: `Played audio recording ${item.interaction_id} (Agent: ${item.agent_name || 'Unknown'})`,
+              status: 'SUCCESS',
+            }).unwrap();
+          } catch (logErr) {
+            console.error("Error logging play audio action:", logErr);
+          }
         }
       } catch (err) {
         console.error("Error loading audio:", err);
         setError("Failed to load audio file. Please try again.");
+
+        // Log the failed play action
+        try {
+          await createLog({
+            userId: authUser.id.toString(),
+            eventType: 'PLAY',
+            entity: 'AudioRecording',
+            description: `Failed to play audio recording ${item.interaction_id}`,
+            status: 'FAILURE',
+          }).unwrap();
+        } catch (logErr) {
+          console.error("Error logging play audio failure:", logErr);
+        }
       } finally {
         setLoadingAudioUrl(null);
       }
     }
   };
 
-  const stopAudio = () => {
+  const stopAudio = async (item) => {
+    // Get recording info before clearing state
+    const recordingToLog = item || recordings.find((r) => r.interaction_id === currentlyPlaying);
+
     if (audioPlayer.current) {
       audioPlayer.current.pause();
       audioPlayer.current.currentTime = 0;
     }
+
+    // Log the stop action
+    if (recordingToLog && currentlyPlaying) {
+      try {
+        await createLog({
+          userId: authUser.id.toString(),
+          eventType: 'STOP',
+          entity: 'AudioRecording',
+          description: `Stopped audio recording ${recordingToLog.interaction_id} (Agent: ${recordingToLog.agent_name || 'Unknown'})`,
+          status: 'SUCCESS',
+        }).unwrap();
+      } catch (logErr) {
+        console.error("Error logging stop audio action:", logErr);
+      }
+    }
+
     setCurrentlyPlaying(null);
     setIsPlaying(false);
     setCurrentTime(0);

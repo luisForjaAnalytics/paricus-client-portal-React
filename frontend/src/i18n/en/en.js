@@ -191,6 +191,7 @@ export default {
       editInvoice: "Edit Invoice",
       download: "Download",
       delete: "Delete",
+      view: "View Invoice"
     },
 
     // Payment Link Modal

@@ -19,6 +19,7 @@ import {
   Delete as DeleteIcon,
   Payment as PaymentIcon,
   PictureAsPdf as PdfIcon,
+  Visibility,
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import { PendingLinkModal } from "./PendingLinkModal";
@@ -34,6 +35,7 @@ export const InvoicesTableDesktop = ({
   isAdmin,
   formatDate,
   formatCurrency,
+  viewInvoice,
   downloadInvoice,
   openEditInvoiceModal,
   handleDeleteInvoice,
@@ -230,6 +232,18 @@ export const InvoicesTableDesktop = ({
                       </IconButton>
                     </Tooltip>
                   )}
+                  <Tooltip title={t("invoices.actions.view")}>
+                    <IconButton
+                      color="info"
+                      size="small"
+                      onClick={() => viewInvoice(invoice)}
+                    >
+                      <Visibility
+                        fontSize="small"
+                        sx={{ color: colors.primary }}
+                      />
+                    </IconButton>
+                  </Tooltip>
                   <Tooltip title={t("invoices.actions.download")}>
                     <IconButton
                       color="info"

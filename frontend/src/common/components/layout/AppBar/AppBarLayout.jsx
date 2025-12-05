@@ -132,7 +132,7 @@ export const AppBarLayout = ({ titleState, setTitleState }) => {
         sx={{
           backgroundColor: { xs: colors.primary, md: colors.surface },
           color: colors.textPrimary,
-          boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)", // shadow-sm from Tailwind
+          boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)", 
           borderBottom: `1px solid ${colors.border}`,
         }}
       >
@@ -155,7 +155,11 @@ export const AppBarLayout = ({ titleState, setTitleState }) => {
               justifyContent: "flex-start",
             }}
           >
-            <Search>
+            <Search
+              sx={{
+                borderRadius: "2rem",
+              }}
+            >
               <SearchIconWrapper>
                 <SearchIcon />
               </SearchIconWrapper>
