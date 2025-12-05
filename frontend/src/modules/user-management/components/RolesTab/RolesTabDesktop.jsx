@@ -117,9 +117,9 @@ export const RolesTabDesktop = () => {
   const openEditDialog = (role) => {
     setEditingRole(role);
     setRoleForm({
-      role_name: role.role_name,
+      role_name: role.roleName || role.role_name,
       description: role.description || "",
-      client_id: role.client_id,
+      client_id: role.clientId || role.client_id,
     });
     setDialog(true);
   };
@@ -269,7 +269,7 @@ export const RolesTabDesktop = () => {
 
     // Filter by client
     if (selectedClient) {
-      filtered = filtered.filter((role) => role.client_id === selectedClient);
+      filtered = filtered.filter((role) => (role.clientId || role.client_id) === selectedClient);
     }
 
     // Filter by search query (role name or description)
@@ -277,7 +277,7 @@ export const RolesTabDesktop = () => {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
         (role) =>
-          role.role_name?.toLowerCase().includes(query) ||
+          (role.roleName || role.role_name)?.toLowerCase().includes(query) ||
           role.description?.toLowerCase().includes(query)
       );
     }
@@ -398,11 +398,11 @@ export const RolesTabDesktop = () => {
     () =>
       filteredRoles.map((role) => ({
         id: role.id,
-        role_name: role.role_name,
+        role_name: role.roleName || role.role_name,
         description: role.description,
-        client_name: role.client_name,
-        permissions_count: role.permissions_count || 0,
-        created_at: role.created_at,
+        client_name: role.clientName || role.client_name,
+        permissions_count: role.permissions?.length || role.permissions_count || role.userCount || 0,
+        created_at: role.createdAt || role.created_at,
         original: role, // Keep original object for actions
       })),
     [filteredRoles]

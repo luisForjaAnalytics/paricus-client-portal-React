@@ -63,12 +63,12 @@ function Row({ user, clients, roles, handleEdit }) {
 
   const getRoleName = (roleId) => {
     const role = roles.find((r) => r.id === roleId);
-    return role ? role.role_name : "No Role";
+    return role ? role.roleName : "No Role";
   };
 
   const getInitials = () => {
-    const firstInitial = user.first_name ? user.first_name[0] : "";
-    const lastInitial = user.last_name ? user.last_name[0] : "";
+    const firstInitial = user.firstName ? user.firstName[0] : "";
+    const lastInitial = user.lastName ? user.lastName[0] : "";
     return `${firstInitial}${lastInitial}`.toUpperCase();
   };
 
@@ -98,7 +98,7 @@ function Row({ user, clients, roles, handleEdit }) {
             </Avatar>
             <Box>
               <Typography variant="body2" fontWeight="medium">
-                {user.first_name} {user.last_name}
+                {user.firstName} {user.lastName}
               </Typography>
               <Typography variant="caption" color="text.secondary">
                 {user.email}
@@ -117,7 +117,7 @@ function Row({ user, clients, roles, handleEdit }) {
                 component="div"
                 fontWeight="bold"
               >
-                {user.first_name} {user.last_name}
+                {user.firstName} {user.lastName}
               </Typography>
 
               <Box
@@ -157,7 +157,7 @@ function Row({ user, clients, roles, handleEdit }) {
                   <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
                     <BusinessIcon fontSize="small" color="primary" />
                     <Chip
-                      label={getClientName(user.client_id)}
+                      label={user.client?.name || getClientName(user.clientId)}
                       size="small"
                       color="primary"
                       variant="outlined"
@@ -177,7 +177,7 @@ function Row({ user, clients, roles, handleEdit }) {
                   <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
                     <ShieldIcon fontSize="small" color="secondary" />
                     <Chip
-                      label={getRoleName(user.role_id)}
+                      label={user.role?.roleName || getRoleName(user.roleId)}
                       size="small"
                       color="secondary"
                       variant="outlined"
@@ -195,8 +195,8 @@ function Row({ user, clients, roles, handleEdit }) {
                     Status:
                   </Typography>
                   <Chip
-                    label={user.is_active ? "Active" : "Inactive"}
-                    color={user.is_active ? "success" : "default"}
+                    label={user.isActive ? "Active" : "Inactive"}
+                    color={user.isActive ? "success" : "default"}
                     size="small"
                   />
                 </Box>
@@ -271,8 +271,8 @@ export const UsersTabMobile = () => {
 
   const roleOptions = useMemo(() => {
     return roles
-      .filter((role) => role.client_id === userForm.client_id)
-      .map((role) => ({ title: role.role_name, value: role.id }));
+      .filter((role) => role.clientId === userForm.client_id)
+      .map((role) => ({ title: role.roleName, value: role.id }));
   }, [roles, userForm.client_id]);
 
   const isFormValid = useMemo(() => {
@@ -304,11 +304,11 @@ export const UsersTabMobile = () => {
   const openEditDialog = (user) => {
     setEditingUser(user);
     setUserForm({
-      first_name: user.first_name,
-      last_name: user.last_name,
+      first_name: user.firstName,
+      last_name: user.lastName,
       email: user.email,
-      client_id: user.client_id,
-      role_id: user.role_id,
+      client_id: user.clientId,
+      role_id: user.roleId,
       password: "",
     });
     setDialog(true);
