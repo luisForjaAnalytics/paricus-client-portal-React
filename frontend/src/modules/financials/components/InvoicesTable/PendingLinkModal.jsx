@@ -33,7 +33,7 @@ export const PendingLinkModal = ({ invoice, onSuccess, onError }) => {
     setOpen(true);
   };
 
-  const handleClose = () => {
+  const handleClose = () => { 
     setPaymentLink("");
     setOpen(false);
   };
