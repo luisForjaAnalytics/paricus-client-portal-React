@@ -43,6 +43,7 @@ export const ClientBreakdownDesktop = ({
   openPaymentLink,
   onPaymentLinkSuccess,
   onPaymentLinkError,
+  selectClient,
 }) => {
   const { t } = useTranslation();
   const [expandedRows, setExpandedRows] = useState({});
@@ -51,11 +52,16 @@ export const ClientBreakdownDesktop = ({
   const [orderBy, setOrderBy] = useState("company");
   const [order, setOrder] = useState("asc");
 
-  const toggleRow = (rowId) => {
+  const toggleRow = (rowId, folder) => {
+    const isExpanding = !expandedRows[rowId];
     setExpandedRows((prev) => ({
       ...prev,
-      [rowId]: !prev[rowId],
+      [rowId]: isExpanding,
     }));
+    // When expanding a row, select that client to load its invoices
+    if (isExpanding && selectClient) {
+      selectClient(folder);
+    }
   };
 
   const handleChangePage = (event, newPage) => {
@@ -90,10 +96,20 @@ export const ClientBreakdownDesktop = ({
     const clientBreakdown = clientBreakdowns.find((cb) => cb.folder === folder);
     if (!clientBreakdown) return [];
 
+    // Helper to convert client name to folder format (e.g., "IM Telecom" -> "im-telecom")
+    const clientNameToFolder = (name) => name?.toLowerCase().replace(/\s+/g, '-') || '';
+
     // Filter invoices that belong to this client's folder
     return invoices.filter((invoice) => {
-      // Assuming invoice has a folder or clientFolder property
-      return invoice.folder === folder || invoice.clientFolder === folder;
+      // Check if invoice has folder properties (old way)
+      if (invoice.folder === folder || invoice.clientFolder === folder) {
+        return true;
+      }
+      // Match by client name converted to folder format
+      if (invoice.client?.name) {
+        return clientNameToFolder(invoice.client.name) === folder;
+      }
+      return false;
     });
   };
 
@@ -309,7 +325,7 @@ export const ClientBreakdownDesktop = ({
                   <TableCell>
                     <IconButton
                       size="small"
-                      onClick={() => toggleRow(index)}
+                      onClick={() => toggleRow(index, client.folder)}
                       sx={{ color: colors.primary }}
                     >
                       {expandedRows[index] ? (
