@@ -214,11 +214,11 @@ const transformRecordings = (rowsTable, formatDate) => {
   return rowsTable.map((data, index) => ({
     id: index,
     interactionId: data.interaction_id,
-    company: data.company_name,
+    company: data.companyName,
     callType: data.call_type,
     startTime: formatDate(data.start_time),
     endTime: formatDate(data.end_time),
-    customerPhone: data.customer_phone,
+    customerPhone: data.customer_phone_number,
     agentName: data.agent_name,
     audioFileName: data.audiofilename,
     // Keep original data for audio playback
