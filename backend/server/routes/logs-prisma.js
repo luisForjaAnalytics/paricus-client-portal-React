@@ -38,10 +38,13 @@ router.get('/',
       // Search across multiple fields
       if (search) {
         where.OR = [
-          { id: { contains: search, mode: 'insensitive' } },
-          { userId: { contains: search, mode: 'insensitive' } },
-          { description: { contains: search, mode: 'insensitive' } },
-          { entity: { contains: search, mode: 'insensitive' } },
+          { id: { contains: search } },
+          { userId: { contains: search } },
+          { description: { contains: search } },
+          { entity: { contains: search } },
+          { eventType: { contains: search } },
+          { status: { contains: search } },
+          { ipAddress: { contains: search } },
         ];
       }
 
@@ -132,7 +135,7 @@ router.post('/',
   authenticateToken,
   async (req, res) => {
     try {
-      const { userId, eventType, entity, description, status = 'SUCCESS' } = req.body;
+      const { userId, eventType, entity, description, status = 'SUCCESS', ipAddress } = req.body;
 
       // Validate required fields
       if (!userId || !eventType || !entity || !description) {
@@ -141,13 +144,17 @@ router.post('/',
         });
       }
 
+      // Get IP address from request if not provided
+      const logIpAddress = ipAddress || req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress;
+
       const log = await prisma.log.create({
         data: {
           userId,
           eventType,
           entity,
           description,
-          status
+          status,
+          ipAddress: logIpAddress
         }
       });
 

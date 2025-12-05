@@ -19,10 +19,31 @@ const router = express.Router();
 const audioUrlCache = new NodeCache({ stdTTL: 3000, checkperiod: 600 });
 
 /**
+ * Middleware to check if user has permission to access audio recordings
+ * Allows both admin_audio_recordings and view_interactions permissions
+ */
+const checkAudioRecordingsPermission = (req, res, next) => {
+  const hasAdminAccess = req.user.permissions?.includes('admin_audio_recordings');
+  const hasViewAccess = req.user.permissions?.includes('view_interactions');
+
+  if (!hasAdminAccess && !hasViewAccess) {
+    return res.status(403).json({
+      error: 'Permission denied. You need admin_audio_recordings or view_interactions permission.'
+    });
+  }
+  next();
+};
+
+/**
  * Map clientId to company name for filtering audio recordings
  * This matches the client names in the database with the company tags in MSSQL
  */
 async function getCompanyNameByClientId(clientId) {
+  // BPO Admin has clientId = null, return null to see all companies
+  if (clientId === null || clientId === undefined) {
+    return null;
+  }
+
   const client = await prisma.client.findUnique({
     where: { id: clientId },
     select: { name: true }
@@ -113,8 +134,8 @@ router.get('/', authenticateToken, async (req, res) => {
     if (hasAudio !== undefined) filters.hasAudio = hasAudio;
 
     // SECURITY: If user is NOT BPO Admin, automatically filter by their company
-    // BPO Admin has full access and can see all companies
-    const isBPOAdmin = req.user.clientId === 1;
+    // BPO Admin has clientId = null and full access to see all companies
+    const isBPOAdmin = req.user.clientId === null || req.user.clientId === undefined;
 
     if (!isBPOAdmin) {
       // Client Admin: automatically filter by their company
@@ -185,7 +206,7 @@ router.get('/', authenticateToken, async (req, res) => {
  * Get audio URL for a specific recording (on-demand with caching)
  * GET /api/audio-recordings/:interactionId/audio-url
  */
-router.get('/:interactionId/audio-url', authenticateToken, requirePermission('admin_audio_recordings'), async (req, res) => {
+router.get('/:interactionId/audio-url', authenticateToken, checkAudioRecordingsPermission, async (req, res) => {
   try {
     const { interactionId } = req.params;
 
@@ -195,6 +216,29 @@ router.get('/:interactionId/audio-url', authenticateToken, requirePermission('ad
 
     if (cachedUrl) {
       console.log(`[AUDIO-URL] Cache hit for ${interactionId}`);
+
+      // Log audio playback access with IP address
+      const ipAddress = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress;
+
+      console.log(`[AUDIO-PLAYBACK-LOG] Creating log entry for interactionId: ${interactionId}, userId: ${req.user.id}, IP: ${ipAddress}`);
+
+      try {
+        const logEntry = await prisma.log.create({
+          data: {
+            userId: req.user.id.toString(),
+            eventType: 'AUDIO_PLAYBACK',
+            entity: 'AudioRecording',
+            description: `User accessed audio recording: ${interactionId}`,
+            status: 'SUCCESS',
+            ipAddress: ipAddress
+          }
+        });
+        console.log(`[AUDIO-PLAYBACK-LOG] Log created successfully:`, logEntry.id);
+      } catch (logError) {
+        console.error('[AUDIO-PLAYBACK-LOG] Error creating log entry:', logError);
+        // Don't fail the request if logging fails
+      }
+
       return res.json({ audioUrl: cachedUrl });
     }
 
@@ -223,9 +267,50 @@ router.get('/:interactionId/audio-url', authenticateToken, requirePermission('ad
       // Cache the URL for 50 minutes (slightly less than 1 hour expiration)
       audioUrlCache.set(cacheKey, audioUrl);
 
+      // Log audio playback access with IP address
+      const ipAddress = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress;
+
+      console.log(`[AUDIO-PLAYBACK-LOG] Creating log entry for interactionId: ${interactionId}, userId: ${req.user.id}, IP: ${ipAddress}`);
+
+      try {
+        const logEntry = await prisma.log.create({
+          data: {
+            userId: req.user.id.toString(),
+            eventType: 'AUDIO_PLAYBACK',
+            entity: 'AudioRecording',
+            description: `User accessed audio recording: ${interactionId}`,
+            status: 'SUCCESS',
+            ipAddress: ipAddress
+          }
+        });
+        console.log(`[AUDIO-PLAYBACK-LOG] Log created successfully:`, logEntry.id);
+      } catch (logError) {
+        console.error('[AUDIO-PLAYBACK-LOG] Error creating log entry:', logError);
+        // Don't fail the request if logging fails
+      }
+
       res.json({ audioUrl });
     } catch (error) {
       console.error(`Error generating URL for ${recording.audiofilename}:`, error);
+
+      // Log failed attempt with IP address
+      const ipAddress = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress;
+
+      try {
+        await prisma.log.create({
+          data: {
+            userId: req.user.id.toString(),
+            eventType: 'AUDIO_PLAYBACK',
+            entity: 'AudioRecording',
+            description: `Failed to access audio recording: ${interactionId} - ${error.message}`,
+            status: 'FAILURE',
+            ipAddress: ipAddress
+          }
+        });
+      } catch (logError) {
+        console.error('Error creating log entry:', logError);
+      }
+
       res.status(500).json({
         error: 'Failed to generate audio URL',
         message: error.message
@@ -244,7 +329,7 @@ router.get('/:interactionId/audio-url', authenticateToken, requirePermission('ad
  * Get a single call recording by interaction ID
  * GET /api/audio-recordings/:interactionId
  */
-router.get('/:interactionId', authenticateToken, requirePermission('admin_audio_recordings'), async (req, res) => {
+router.get('/:interactionId', authenticateToken, checkAudioRecordingsPermission, async (req, res) => {
   try {
     const { interactionId } = req.params;
 
@@ -275,7 +360,7 @@ router.get('/:interactionId', authenticateToken, requirePermission('admin_audio_
  * Get list of unique agent names
  * GET /api/audio-recordings/filters/agents
  */
-router.get('/filters/agents', authenticateToken, requirePermission('admin_audio_recordings'), async (req, res) => {
+router.get('/filters/agents', authenticateToken, checkAudioRecordingsPermission, async (req, res) => {
   try {
     const agents = await getAgentNames();
     res.json({ data: agents });
@@ -292,7 +377,7 @@ router.get('/filters/agents', authenticateToken, requirePermission('admin_audio_
  * Get list of unique call types
  * GET /api/audio-recordings/filters/call-types
  */
-router.get('/filters/call-types', authenticateToken, requirePermission('admin_audio_recordings'), async (req, res) => {
+router.get('/filters/call-types', authenticateToken, checkAudioRecordingsPermission, async (req, res) => {
   try {
     const callTypes = await getCallTypes();
     res.json({ data: callTypes });
@@ -309,7 +394,7 @@ router.get('/filters/call-types', authenticateToken, requirePermission('admin_au
  * Get list of unique tags
  * GET /api/audio-recordings/filters/tags
  */
-router.get('/filters/tags', authenticateToken, requirePermission('admin_audio_recordings'), async (req, res) => {
+router.get('/filters/tags', authenticateToken, checkAudioRecordingsPermission, async (req, res) => {
   try {
     const tags = await getTags();
     // Map to include company names

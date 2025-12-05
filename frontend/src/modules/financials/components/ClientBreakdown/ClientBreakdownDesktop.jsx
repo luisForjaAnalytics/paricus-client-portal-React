@@ -36,6 +36,7 @@ export const ClientBreakdownDesktop = ({
   isAdmin,
   formatDate,
   getStatusColor,
+  viewInvoice,
   downloadInvoice,
   openEditInvoiceModal,
   handleDeleteInvoice,
@@ -448,6 +449,7 @@ export const ClientBreakdownDesktop = ({
                             formatDate={formatDate}
                             formatCurrency={formatCurrency}
                             getStatusColor={getStatusColor}
+                            viewInvoice={viewInvoice}
                             downloadInvoice={downloadInvoice}
                             openEditInvoiceModal={openEditInvoiceModal}
                             handleDeleteInvoice={handleDeleteInvoice}

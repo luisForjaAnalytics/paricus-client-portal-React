@@ -94,6 +94,8 @@ export const LogsView = () => {
         return "primary";
       case "LOGOUT":
         return "default";
+      case "AUDIO_PLAYBACK":
+        return "secondary";
       default:
         return "default";
     }
@@ -160,6 +162,18 @@ export const LogsView = () => {
         headerAlign: "center",
       },
       {
+        field: "ipAddress",
+        headerName: "IP Address",
+        width: 150,
+        align: "center",
+        headerAlign: "center",
+        renderCell: (params) => (
+          <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
+            {params.value || "N/A"}
+          </Typography>
+        ),
+      },
+      {
         field: "status",
         headerName: "Status",
         width: 200,
@@ -185,6 +199,7 @@ export const LogsView = () => {
           display: { xs: "none", md: "block" },
           padding: "0 2rem 0 2rem",
           mb: 3,
+          width:'100%'
         }}
       >
         <CardContent>

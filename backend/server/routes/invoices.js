@@ -308,8 +308,9 @@ router.post('/upload/:clientFolder',
       }
     });
 
-    // Log invoice creation
-    await logInvoiceCreate(req.user.id, invoiceNumber, invoice.client.name);
+    // Log invoice creation with IP address
+    const ipAddress = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress;
+    await logInvoiceCreate(req.user.id, invoiceNumber, invoice.client.name, ipAddress);
 
     res.json({
       success: true,

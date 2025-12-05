@@ -198,11 +198,13 @@ model Log {
   entity      String   // User, Role, Client, Invoice, etc.
   description String
   status      String   @default("SUCCESS") // SUCCESS, FAILURE, WARNING
+  ipAddress   String?  @map("ip_address") // IP address from which the action was performed
 
   @@index([timestamp])
   @@index([userId])
   @@index([eventType])
   @@index([entity])
   @@index([status])
+  @@index([ipAddress])
   @@map("logs")
 }

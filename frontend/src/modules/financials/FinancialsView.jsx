@@ -38,6 +38,7 @@ import {
   useDeleteInvoiceMutation,
   useLazyGetDownloadUrlQuery,
 } from "../../store/api/invoicesApi";
+import { useCreateLogMutation } from "../../store/api/logsApi";
 import { useSelector } from "react-redux";
 import { ClientSummary } from "./components/ClientSummary";
 import { ClientBreakdown } from "./components/ClientBreakdown";
@@ -96,6 +97,7 @@ export const FinancialsView = () => {
     useUpdateInvoiceMutation();
   const [deleteInvoiceMutation] = useDeleteInvoiceMutation();
   const [getDownloadUrl] = useLazyGetDownloadUrlQuery();
+  const [createLog] = useCreateLogMutation();
 
   // Derived state from RTK Query
   const clientBreakdowns = allClientsData?.clientBreakdowns || [];
@@ -215,20 +217,106 @@ export const FinancialsView = () => {
     }
   };
 
-  const downloadInvoice = async (invoice) => {
+  const viewInvoice = async (invoice) => {
     try {
-      if (invoice.downloadUrl) {
-        window.open(invoice.downloadUrl, "_blank");
-        showNotification("success", "Download started");
-      } else {
+      let downloadUrl = invoice.downloadUrl;
+
+      if (!downloadUrl) {
         const clientFolder = invoice.folder || selectedFolder;
         const result = await getDownloadUrl({
           clientFolder,
           fileName: invoice.fileName,
         }).unwrap();
-        if (result.downloadUrl) {
-          window.open(result.downloadUrl, "_blank");
-          showNotification("success", "Download started");
+        downloadUrl = result.downloadUrl;
+      }
+
+      if (downloadUrl) {
+        // Open PDF in new tab for viewing
+        window.open(downloadUrl, '_blank');
+        showNotification("success", "Opening invoice...");
+
+        // Log the view invoice action
+        try {
+          await createLog({
+            userId: authUser.id.toString(),
+            eventType: 'VIEW',
+            entity: 'Invoice',
+            description: `Viewed invoice ${invoice.invoiceNumber} (${invoice.title})`,
+            status: 'SUCCESS',
+          }).unwrap();
+        } catch (logErr) {
+          console.error("Error logging view invoice action:", logErr);
+        }
+      }
+    } catch (err) {
+      console.error("Error viewing invoice:", err);
+      showNotification(
+        "error",
+        err.data?.message || "Failed to view invoice"
+      );
+
+      // Log the failed view invoice action
+      try {
+        await createLog({
+          userId: authUser.id.toString(),
+          eventType: 'VIEW',
+          entity: 'Invoice',
+          description: `Failed to view invoice ${invoice.invoiceNumber} (${invoice.title})`,
+          status: 'FAILURE',
+        }).unwrap();
+      } catch (logErr) {
+        console.error("Error logging view invoice failure:", logErr);
+      }
+    }
+  };
+
+  const downloadInvoice = async (invoice) => {
+    try {
+      let downloadUrl = invoice.downloadUrl;
+
+      if (!downloadUrl) {
+        const clientFolder = invoice.folder || selectedFolder;
+        const result = await getDownloadUrl({
+          clientFolder,
+          fileName: invoice.fileName,
+        }).unwrap();
+        downloadUrl = result.downloadUrl;
+      }
+
+      if (downloadUrl) {
+        showNotification("success", "Downloading invoice...");
+
+        // Fetch the file as a blob to force download
+        const response = await fetch(downloadUrl);
+        const blob = await response.blob();
+
+        // Create a blob URL
+        const blobUrl = window.URL.createObjectURL(blob);
+
+        // Create a temporary anchor element to trigger download
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = invoice.fileName || 'invoice.pdf';
+        document.body.appendChild(link);
+        link.click();
+
+        // Cleanup
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(blobUrl);
+
+        showNotification("success", "Download completed");
+
+        // Log the download invoice action
+        try {
+          await createLog({
+            userId: authUser.id.toString(),
+            eventType: 'DOWNLOAD',
+            entity: 'Invoice',
+            description: `Downloaded invoice ${invoice.invoiceNumber} (${invoice.title})`,
+            status: 'SUCCESS',
+          }).unwrap();
+        } catch (logErr) {
+          console.error("Error logging download invoice action:", logErr);
         }
       }
     } catch (err) {
@@ -237,6 +325,19 @@ export const FinancialsView = () => {
         "error",
         err.data?.message || "Failed to download invoice"
       );
+
+      // Log the failed download invoice action
+      try {
+        await createLog({
+          userId: authUser.id.toString(),
+          eventType: 'DOWNLOAD',
+          entity: 'Invoice',
+          description: `Failed to download invoice ${invoice.invoiceNumber} (${invoice.title})`,
+          status: 'FAILURE',
+        }).unwrap();
+      } catch (logErr) {
+        console.error("Error logging download invoice failure:", logErr);
+      }
     }
   };
 
@@ -514,6 +615,7 @@ export const FinancialsView = () => {
               isAdmin={isBPOAdmin}
               formatDate={formatDate}
               getStatusColor={getStatusColor}
+              viewInvoice={viewInvoice}
               downloadInvoice={downloadInvoice}
               openEditInvoiceModal={openEditInvoiceModal}
               handleDeleteInvoice={handleDeleteInvoice}
@@ -538,6 +640,7 @@ export const FinancialsView = () => {
               isAdmin={false}
               formatDate={formatDate}
               getStatusColor={getStatusColor}
+              viewInvoice={viewInvoice}
               downloadInvoice={downloadInvoice}
               openEditInvoiceModal={openEditInvoiceModal}
               handleDeleteInvoice={handleDeleteInvoice}
@@ -570,6 +673,7 @@ export const FinancialsView = () => {
                 formatDate={formatDate}
                 formatCurrency={formatCurrency}
                 getStatusColor={getStatusColor}
+                viewInvoice={viewInvoice}
                 downloadInvoice={downloadInvoice}
                 openPaymentLink={openPaymentLink}
                 openEditInvoiceModal={openEditInvoiceModal}

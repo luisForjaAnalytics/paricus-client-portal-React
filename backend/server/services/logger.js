@@ -8,8 +8,9 @@ import { prisma } from '../database/prisma.js';
  * @param {string} logData.entity - Entity being affected (User, Role, Client, Invoice, etc.)
  * @param {string} logData.description - Description of the event
  * @param {string} logData.status - Status of the event (SUCCESS, FAILURE, WARNING)
+ * @param {string} logData.ipAddress - IP address from which the action was performed (optional)
  */
-export async function createLog({ userId, eventType, entity, description, status = 'SUCCESS' }) {
+export async function createLog({ userId, eventType, entity, description, status = 'SUCCESS', ipAddress = null }) {
   try {
     await prisma.log.create({
       data: {
@@ -18,6 +19,7 @@ export async function createLog({ userId, eventType, entity, description, status
         entity,
         description,
         status,
+        ipAddress,
       },
     });
   } catch (error) {
@@ -96,13 +98,14 @@ export async function logUserDelete(performedByUserId, deletedUserEmail) {
 /**
  * Log invoice creation
  */
-export async function logInvoiceCreate(performedByUserId, invoiceNumber, clientName) {
+export async function logInvoiceCreate(performedByUserId, invoiceNumber, clientName, ipAddress = null) {
   await createLog({
     userId: performedByUserId.toString(),
     eventType: 'CREATE',
     entity: 'Invoice',
     description: `Created invoice ${invoiceNumber} for client: ${clientName}`,
     status: 'SUCCESS',
+    ipAddress,
   });
 }
 

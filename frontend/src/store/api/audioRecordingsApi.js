@@ -48,6 +48,8 @@ export const audioRecordingsApi = createApi({
     getAudioUrl: builder.query({
       query: (interactionId) => `/${interactionId}/audio-url`,
       transformResponse: (response) => response.audioUrl,
+      // Force fresh data on every request (no caching) to ensure logs are created
+      keepUnusedDataFor: 0,
     }),
   }),
 });

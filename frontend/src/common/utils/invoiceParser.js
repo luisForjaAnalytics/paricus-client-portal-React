@@ -15,10 +15,6 @@ export const parseInvoiceData = (text) => {
 
   if (!text) return result;
 
-  console.log("=== OCR Text Received ===");
-  console.log(text);
-  console.log("=== End OCR Text ===");
-
   // Convertir a minúsculas para búsqueda case-insensitive
   const lowerText = text.toLowerCase();
 
@@ -60,15 +56,13 @@ export const parseInvoiceData = (text) => {
       const fullMatch = match[0].toLowerCase();
       // Doble verificación: excluir si contiene "subtotal"
       if (fullMatch.includes('subtotal')) {
-        console.log(`⚠️ Skipping Subtotal: "${match[0]}"`);
-        continue;
+               continue;
       }
 
       const amountStr = match[1].replace(/,/g, "");
       const amount = parseFloat(amountStr);
       if (!isNaN(amount) && amount > 0) {
-        console.log(`✅ Total Amount found: $${amount} from "${match[0]}"`);
-        result.amount = amount;
+                result.amount = amount;
         break;
       }
     }
@@ -95,15 +89,11 @@ export const parseInvoiceData = (text) => {
     const match = text.match(pattern);
     if (match && match[1]) {
       const dateStr = match[1];
-      console.log(`🔍 Issue Date MATCH found: "${dateStr}" using pattern: ${pattern}`);
-      console.log(`📄 Full match: "${match[0]}"`);
       const parsedDate = parseDate(dateStr);
       if (parsedDate) {
-        console.log(`✅ Issue Date parsed successfully: ${parsedDate}`);
         result.issuedDate = parsedDate;
         break;
       } else {
-        console.log(`⚠️ Issue Date found but failed to parse: "${dateStr}"`);
       }
     }
   }
@@ -126,11 +116,10 @@ export const parseInvoiceData = (text) => {
     const match = text.match(pattern);
     if (match && match[1]) {
       const dateStr = match[1];
-      console.log(`🔍 Due Date MATCH found: "${dateStr}" using pattern: ${pattern}`);
-      console.log(`📄 Full match: "${match[0]}"`);
+
       const parsedDate = parseDate(dateStr);
       if (parsedDate) {
-        console.log(`✅ Due Date parsed successfully: ${parsedDate}`);
+
         result.dueDate = parsedDate;
         break;
       } else {
@@ -166,7 +155,6 @@ export const parseInvoiceData = (text) => {
         .trim();
 
       if (notesText.length > 10) { // Solo si tiene contenido significativo
-        console.log(`📝 Notes/Terms found (${notesText.length} chars): "${notesText}"`);
         result.description = notesText;
         break;
       }
@@ -179,13 +167,8 @@ export const parseInvoiceData = (text) => {
     if (lines.length > 0) {
       const descriptionLines = lines.slice(0, 5).join(" ");
       result.description = descriptionLines.substring(0, 200);
-      console.log(`📝 Using fallback description (first lines)`);
     }
   }
-
-  console.log("=== Parsed Invoice Data ===");
-  console.log(result);
-  console.log("=== End Parsed Data ===");
 
   return result;
 };
@@ -201,7 +184,6 @@ const parseDate = (dateStr) => {
 
     // Limpiar espacios extras y normalizar separadores
     let cleanedDate = dateStr.trim().replace(/\s+/g, ' ');
-    console.log(`🔧 Parsing date: "${cleanedDate}"`);
 
     let date;
 
@@ -212,7 +194,6 @@ const parseDate = (dateStr) => {
       const month = parseInt(parts[1], 10) - 1; // Mes es 0-indexed
       const year = parseInt(parts[2], 10);
       date = new Date(year, month, day);
-      console.log(`📅 Format DD/MM/YYYY detected: ${day}/${month + 1}/${year}`);
     }
     // Formato: YYYY/MM/DD o YYYY-MM-DD o YYYY.MM.DD
     else if (/^\d{4}[\s\/\-\.]\d{1,2}[\s\/\-\.]\d{1,2}$/.test(cleanedDate)) {
@@ -221,7 +202,6 @@ const parseDate = (dateStr) => {
       const month = parseInt(parts[1], 10) - 1;
       const day = parseInt(parts[2], 10);
       date = new Date(year, month, day);
-      console.log(`📅 Format YYYY/MM/DD detected: ${year}/${month + 1}/${day}`);
     }
     // Formato: MM/DD/YYYY (común en USA)
     else if (/^\d{1,2}[\s\/\-\.]\d{1,2}[\s\/\-\.]\d{2,4}$/.test(cleanedDate)) {
@@ -231,12 +211,10 @@ const parseDate = (dateStr) => {
       let year = parseInt(parts[2], 10);
       if (year < 100) year += 2000; // Convertir 24 a 2024
       date = new Date(year, month, day);
-      console.log(`📅 Format MM/DD/YYYY detected: ${month + 1}/${day}/${year}`);
-    }
+     }
     // Formato: Mes DD, YYYY (ejemplo: January 15, 2024)
     else if (/^[a-z]+\s+\d{1,2},?\s+\d{4}$/i.test(cleanedDate)) {
       date = new Date(cleanedDate);
-      console.log(`📅 Format "Month DD, YYYY" detected`);
     }
     else {
       console.log(`⚠️ Date format not recognized: "${cleanedDate}"`);
@@ -255,7 +233,6 @@ const parseDate = (dateStr) => {
     const day = String(date.getDate()).padStart(2, "0");
 
     const result = `${year}-${month}-${day}`;
-    console.log(`✅ Date successfully parsed to: ${result}`);
     return result;
   } catch (error) {
     console.error(`❌ Error parsing date "${dateStr}":`, error);

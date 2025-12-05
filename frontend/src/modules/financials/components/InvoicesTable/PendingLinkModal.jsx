@@ -15,14 +15,18 @@ import {
 import { Warning as WarningIcon, Edit as EditIcon } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import { useUpdatePaymentLinkMutation } from "../../../../store/api/invoicesApi";
+import { useCreateLogMutation } from "../../../../store/api/logsApi";
+import { useSelector } from "react-redux";
 import { primaryButton, outlinedButton } from "../../../../common/styles/styles";
 
 export const PendingLinkModal = ({ invoice, onSuccess, onError }) => {
   const { t } = useTranslation();
+  const authUser = useSelector((state) => state.auth.user);
   const [open, setOpen] = useState(false);
   const [paymentLink, setPaymentLink] = useState("");
   const [updatePaymentLinkMutation, { isLoading: savingPaymentLink }] =
     useUpdatePaymentLinkMutation();
+  const [createLog] = useCreateLogMutation();
 
   const handleOpen = () => {
     setPaymentLink(invoice.paymentLink || "");
@@ -44,6 +48,19 @@ export const PendingLinkModal = ({ invoice, onSuccess, onError }) => {
         paymentLink: paymentLink,
       }).unwrap();
 
+      // Log the successful payment link save
+      try {
+        await createLog({
+          userId: authUser.id.toString(),
+          eventType: 'UPDATE',
+          entity: 'Invoice',
+          description: `Set payment link for invoice ${invoice.invoiceNumber} (${invoice.title})`,
+          status: 'SUCCESS',
+        }).unwrap();
+      } catch (logErr) {
+        console.error("Error logging payment link save:", logErr);
+      }
+
       if (onSuccess) {
         onSuccess(t("invoices.paymentLink.successMessage"));
       }
@@ -51,6 +68,20 @@ export const PendingLinkModal = ({ invoice, onSuccess, onError }) => {
     } catch (err) {
       console.error("Error saving payment link:", err);
       const errorMessage = err.data?.message || t("invoices.paymentLink.errorMessage");
+
+      // Log the failed payment link save
+      try {
+        await createLog({
+          userId: authUser.id.toString(),
+          eventType: 'UPDATE',
+          entity: 'Invoice',
+          description: `Failed to set payment link for invoice ${invoice.invoiceNumber} (${invoice.title})`,
+          status: 'FAILURE',
+        }).unwrap();
+      } catch (logErr) {
+        console.error("Error logging payment link save failure:", logErr);
+      }
+
       if (onError) {
         onError(errorMessage);
       }

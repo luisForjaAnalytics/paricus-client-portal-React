@@ -190,6 +190,7 @@ export default {
       editInvoice: "Editar Factura",
       download: "Descargar",
       delete: "Eliminar",
+       view: "Ver Factura"
     },
 
     // Modal de Enlace de Pago
