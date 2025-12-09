@@ -55,9 +55,6 @@ export const LogsView = () => {
   const logs = data?.logs || [];
   const totalRows = data?.pagination?.totalCount || 0;
 
-  // Debug log
-  console.log("[LogsView] data:", data, "isLoading:", isLoading, "error:", error, "logs:", logs);
-
   // Format timestamp
   const formatTimestamp = (timestamp) => {
     const date = new Date(timestamp);
