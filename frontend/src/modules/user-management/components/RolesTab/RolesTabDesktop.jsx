@@ -297,9 +297,9 @@ export const RolesTabDesktop = () => {
         headerName: "Role Name",
         flex: 1,
         align: "left",
-        headerAlign: "left",
+        headerAlign: "center",
         renderCell: (params) => (
-          <Typography variant="body2" fontWeight={500}>
+          <Typography variant="body2" fontWeight={500} sx={{ margin: "1rem" }}>
             {params.value}
           </Typography>
         ),
@@ -309,14 +309,14 @@ export const RolesTabDesktop = () => {
         headerName: "Description",
         flex: 1,
         align: "left",
-        headerAlign: "left",
+        headerAlign: "center",
       },
       {
         field: "client_name",
         headerName: "Client",
         flex: 1,
         align: "left",
-        headerAlign: "left",
+        headerAlign: "center",
         renderCell: (params) => (
           <Chip
             label={params.value}

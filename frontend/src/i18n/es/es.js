@@ -16,6 +16,7 @@ export default {
     clientManagement: "Administrador de Clientes",
     usersManagement: "Administrador de Usuarios",
     roleManagement: "Administrador de Roles",
+    logs: "Registros",
     myProfile: "My Profile",
   },
 
@@ -72,6 +73,18 @@ export default {
     logs: {
       label: "Registros",
       title: "Administrador de Registros",
+      logDetails: "Detalles del Registro",
+      eventId: "ID del Evento",
+      timestamp: "Fecha y Hora",
+      userId: "ID de Usuario",
+      eventType: "Tipo de Evento",
+      entity: "Entidad",
+      description: "Descripción",
+      ipAddress: "Dirección IP",
+      status: "Estado",
+      noLogsFound: "No se encontraron registros",
+      errorLoading: "Error al cargar registros",
+      unknownError: "Error desconocido",
     },
   },
 
@@ -599,6 +612,14 @@ export default {
     comingSoonDescription:
       "Este módulo incluirá gestión de artículos, funcionalidad de búsqueda y herramientas de creación de contenido.",
     phase: "Próximamente en Fase 5",
+    articles: "Artículos",
+    synopsis: "Sinopsis",
+    updatedAt: "Actualizado el",
+    actions: "Acciones",
+    edit: "Editar",
+    view: "Ver",
+    noArticlesFound: "No se encontraron artículos",
+    loadingArticles: "Cargando artículos...",
   },
 
   // Permission

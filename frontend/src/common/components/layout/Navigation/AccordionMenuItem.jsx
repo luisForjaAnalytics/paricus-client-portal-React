@@ -60,10 +60,8 @@ export const AccordionMenuItem = ({
             disableRipple
             sx={{
               backgroundColor: "transparent",
-              border: isSelected
-                ? `2px solid ${colors.drowerIcons}`
-                : "2px solid transparent",
-              borderRadius: isSelected ? "10px" : "0",
+              border: "2px solid transparent",
+              borderRadius: "0",
               px: 2.5,
               paddingTop: "0%",
               paddingBottom: "0%",
@@ -92,10 +90,10 @@ export const AccordionMenuItem = ({
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  backgroundColor: "transparent",
+                  backgroundColor: isSelected ? colors.drowerIcons : "transparent",
                   transition: "all 0.3s ease",
                   "& svg": {
-                    color: "#D1FAE5",
+                    color: isSelected ? "grey.700" : "grey.500",
                   },
                 }}
               >
@@ -105,14 +103,14 @@ export const AccordionMenuItem = ({
             <ListItemText
               primary={t(`navigation.${label}`)}
               sx={{
-                color: "#D1FAE5",
+                color: isSelected ? colors.textPrimary : colors.textSecondary,
                 fontWeight: isSelected ? "bold" : "normal",
               }}
             />
             {open ? (
-              <ExpandLess sx={{ color: "#D1FAE5" }} />
+              <ExpandLess sx={{ color: colors.textPrimary }} />
             ) : (
-              <ExpandMore sx={{ color: "#D1FAE5" }} />
+              <ExpandMore sx={{ color: colors.textSecondary }} />
             )}
           </ListItemButton>
         </ListItem>
@@ -127,39 +125,37 @@ export const AccordionMenuItem = ({
                 <ListItemButton
                   onClick={() => handleSubItemClick(subItem)}
                   sx={{
-                    pl: 9,
+                    pl: 4,
                     backgroundColor: "transparent",
-                    border: isSubSelected
-                      ? `2px solid ${colors.drowerIcons}`
-                      : "2px solid transparent",
-                    borderRadius: isSubSelected ? "10px" : "0",
+                    border: "2px solid transparent",
+                    borderRadius: "0",
                     transition: "all 0.3s ease",
                     "&:hover": {
                       backgroundColor: "transparent",
                     },
                   }}
                 >
-                  <ListItemText
-                    primary={t(`navigation.${subItem.label}`)}
-                    sx={{
-                      color: "#D1FAE5",
-                      fontWeight: isSubSelected ? "bold" : "normal",
-                    }}
-                  />
                   {subItem.icon && (
                     <ListItemIcon
                       sx={{
                         minWidth: 0,
-                        ml: 1,
+                        mr: 2,
                         justifyContent: "center",
                         "& svg": {
-                          color: "#D1FAE5",
+                          color: isSubSelected ? "grey.700" : "grey.500",
                         },
                       }}
                     >
                       {subItem.icon}
                     </ListItemIcon>
                   )}
+                  <ListItemText
+                    primary={t(`navigation.${subItem.label}`)}
+                    sx={{
+                      color: isSubSelected ? colors.textPrimary : colors.textSecondary,
+                      fontWeight: isSubSelected ? "bold" : "normal",
+                    }}
+                  />
                 </ListItemButton>
               </ListItem>
             );

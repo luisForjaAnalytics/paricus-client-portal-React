@@ -17,6 +17,7 @@ import { useTranslation } from "react-i18next";
 import { useGetLogsQuery } from "../../../../store/api/logsApi";
 import { useDispatch } from "react-redux";
 import { logsApi } from "../../../../store/api/logsApi";
+import { LogsViewMobile } from "./LogsViewMobil";
 
 export const LogsView = () => {
   const { t } = useTranslation();
@@ -138,6 +139,7 @@ export const LogsView = () => {
             color={getEventTypeColor(params.value)}
             size="small"
             variant="outlined"
+            sx={{ marginTop: 0.5 }}
           />
         ),
       },
@@ -148,7 +150,7 @@ export const LogsView = () => {
         align: "center",
         headerAlign: "center",
         renderCell: (params) => (
-          <Typography variant="body2" fontWeight={500}>
+          <Typography variant="body2" fontWeight={500} sx={{ marginTop: 2 }}>
             {params.value}
           </Typography>
         ),
@@ -168,7 +170,7 @@ export const LogsView = () => {
         align: "center",
         headerAlign: "center",
         renderCell: (params) => (
-          <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
+          <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
             {params.value || "N/A"}
           </Typography>
         ),
@@ -199,7 +201,7 @@ export const LogsView = () => {
           display: { xs: "none", md: "block" },
           padding: "0 2rem 0 2rem",
           mb: 3,
-          width:'100%'
+          width: "100%",
         }}
       >
         <CardContent>
@@ -298,6 +300,16 @@ export const LogsView = () => {
           }}
         />
       </Box>
+
+      {/* Mobile View */}
+      <LogsViewMobile
+        logs={logs}
+        isLoading={isLoading}
+        error={error}
+        formatTimestamp={formatTimestamp}
+        getEventTypeColor={getEventTypeColor}
+        getStatusColor={getStatusColor}
+      />
     </Box>
   );
 };

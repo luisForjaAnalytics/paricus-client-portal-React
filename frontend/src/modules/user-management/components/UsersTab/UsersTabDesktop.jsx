@@ -56,7 +56,8 @@ export const UsersTabDesktop = () => {
 
   // Check if user is BPO Admin or Client Admin
   const isBPOAdmin = authUser?.permissions?.includes("admin_users");
-  const isClientAdmin = authUser?.permissions?.includes("view_invoices") && !isBPOAdmin;
+  const isClientAdmin =
+    authUser?.permissions?.includes("view_invoices") && !isBPOAdmin;
 
   // RTK Query hooks
   const { data: users = [], isLoading: loading } = useGetUsersQuery();
@@ -107,7 +108,9 @@ export const UsersTabDesktop = () => {
 
     // For Client Admins, only show users from their company
     if (isClientAdmin && authUser?.clientId) {
-      filtered = filtered.filter((user) => user.client_id === authUser.clientId);
+      filtered = filtered.filter(
+        (user) => user.client_id === authUser.clientId
+      );
     }
 
     // For BPO Admins, use the selected client filter
@@ -126,7 +129,14 @@ export const UsersTabDesktop = () => {
     }
 
     return filtered;
-  }, [users, selectedClient, searchQuery, isClientAdmin, isBPOAdmin, authUser?.clientId]);
+  }, [
+    users,
+    selectedClient,
+    searchQuery,
+    isClientAdmin,
+    isBPOAdmin,
+    authUser?.clientId,
+  ]);
 
   const isFormValid = useMemo(() => {
     const emailRegex = /.+@.+\..+/;
@@ -261,9 +271,13 @@ export const UsersTabDesktop = () => {
         headerName: "Name",
         flex: 1,
         align: "left",
-        headerAlign: "left",
+        headerAlign: "center",
         renderCell: (params) => (
-          <Typography variant="body2" fontWeight="medium">
+          <Typography
+            variant="body2"
+            fontWeight="medium"
+            sx={{ margin: "1rem" }}
+          >
             {params.value || "N/A"}
           </Typography>
         ),
@@ -273,14 +287,14 @@ export const UsersTabDesktop = () => {
         headerName: "Email",
         flex: 1,
         align: "left",
-        headerAlign: "left",
+        headerAlign: "center",
       },
       {
         field: "client_name",
         headerName: "Client",
         flex: 1,
         align: "left",
-        headerAlign: "left",
+        headerAlign: "center",
       },
       {
         field: "role_name",
@@ -466,7 +480,7 @@ export const UsersTabDesktop = () => {
           disableRowSelectionOnClick
           sx={{
             ...card,
-           padding: "0 0 0 0",
+            padding: "0 0 0 0",
             border: `1px solid ${colors.border}`, // border-gray-200
             "& .MuiDataGrid-columnHeaders": {
               backgroundColor: `${colors.background} !important`, // bg-gray-50
@@ -569,7 +583,9 @@ export const UsersTabDesktop = () => {
                     <InputLabel>Client</InputLabel>
                     <Select
                       value={userForm.client_id || ""}
-                      onChange={(e) => handleClientChange(e.target.value || null)}
+                      onChange={(e) =>
+                        handleClientChange(e.target.value || null)
+                      }
                       label="Client"
                     >
                       <MenuItem value="">Select a client</MenuItem>

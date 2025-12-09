@@ -102,9 +102,9 @@ export const MobilMenu = () => {
         onClose={toggleDrawer(false)}
         sx={{
           "& .MuiDrawer-paper": {
-            background: colors.gradiantMobilPrimaryColor,
-            color: "white",
-            borderRight: "none",
+            backgroundColor: colors.drawer,
+            color: colors.textPrimary,
+            borderRight: `1px solid ${colors.border}`,
           },
         }}
       >

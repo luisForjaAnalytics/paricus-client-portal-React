@@ -8,6 +8,7 @@ import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
 import PersonIcon from "@mui/icons-material/Person";
 import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
+import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
 import { permissionListSection } from "../../common/utils/permissionParser";
 
 // Permission per section
@@ -93,6 +94,13 @@ export const menuItemsAdmin = [
         route: "users-management/rolesPermissions",
         permission: "admin_roles",
         permissionList: ["admin_roles"],
+      },
+      {
+        label: "logs",
+        icon: <AppRegistrationIcon fontSize="medium" />,
+        route: "users-management/logs",
+        permission: "admin_users",
+        permissionList: ["admin_users"],
       },
     ],
   },
