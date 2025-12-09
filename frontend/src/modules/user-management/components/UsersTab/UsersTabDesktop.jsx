@@ -99,8 +99,8 @@ export const UsersTabDesktop = () => {
 
   const roleOptions = useMemo(() => {
     return roles
-      .filter((role) => role.client_id === userForm.client_id)
-      .map((role) => ({ title: role.role_name, value: role.id }));
+      .filter((role) => role.clientId === userForm.client_id)
+      .map((role) => ({ title: role.roleName, value: role.id }));
   }, [roles, userForm.client_id]);
 
   const filteredUsers = useMemo(() => {
@@ -108,22 +108,20 @@ export const UsersTabDesktop = () => {
 
     // For Client Admins, only show users from their company
     if (isClientAdmin && authUser?.clientId) {
-      filtered = filtered.filter(
-        (user) => user.client_id === authUser.clientId
-      );
+      filtered = filtered.filter((user) => user.clientId === authUser.clientId);
     }
 
     // For BPO Admins, use the selected client filter
     if (isBPOAdmin && selectedClient) {
-      filtered = filtered.filter((user) => user.client_id === selectedClient);
+      filtered = filtered.filter((user) => user.clientId === selectedClient);
     }
 
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
         (user) =>
-          user.first_name?.toLowerCase().includes(query) ||
-          user.last_name?.toLowerCase().includes(query) ||
+          user.firstName?.toLowerCase().includes(query) ||
+          user.lastName?.toLowerCase().includes(query) ||
           user.email?.toLowerCase().includes(query)
       );
     }
@@ -169,11 +167,11 @@ export const UsersTabDesktop = () => {
   const openEditDialog = (user) => {
     setEditingUser(user);
     setUserForm({
-      first_name: user.first_name,
-      last_name: user.last_name,
+      first_name: user.firstName,
+      last_name: user.lastName,
       email: user.email,
-      client_id: user.client_id,
-      role_id: user.role_id,
+      client_id: user.clientId,
+      role_id: user.roleId,
       password: "",
     });
     setDialog(true);
@@ -226,11 +224,11 @@ export const UsersTabDesktop = () => {
     try {
       await updateUserMutation({
         id: user.id,
-        isActive: !user.is_active,
+        isActive: !user.isActive,
       }).unwrap();
 
       showNotification(
-        `User ${!user.is_active ? "activated" : "deactivated"} successfully`,
+        `User ${!user.isActive ? "activated" : "deactivated"} successfully`,
         "success"
       );
     } catch (error) {
@@ -382,12 +380,12 @@ export const UsersTabDesktop = () => {
       filteredUsers.map((user) => ({
         id: user.id,
         name:
-          `${user.first_name || ""} ${user.last_name || ""}`.trim() || "N/A",
+          `${user.firstName || ""} ${user.lastName || ""}`.trim() || "N/A",
         email: user.email,
-        client_name: user.client_name || "N/A",
-        role_name: user.role_name,
-        is_active: user.is_active,
-        created_at: user.created_at,
+        client_name: user.client?.name || "N/A",
+        role_name: user.role?.roleName,
+        is_active: user.isActive,
+        created_at: user.createdAt,
         original: user, // Keep original object for actions
       })),
     [filteredUsers]

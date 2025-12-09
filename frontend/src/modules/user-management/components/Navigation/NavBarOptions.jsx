@@ -24,7 +24,9 @@ export const NavBarOptions = ({ setTitleState }) => {
   const hasClientsPermission = authUser?.permissions?.includes("admin_clients");
   const hasUsersPermission = authUser?.permissions?.includes("admin_users");
   const hasRolesPermission = authUser?.permissions?.includes("admin_roles");
-  const isSuperAdmin = authUser?.clientId === null; // Super admin tiene clientId null
+  // BPO Admin can access logs - check by client name or admin_users permission
+  const isBPOAdmin = authUser?.clientName === "BPO Administration" ||
+                     (hasUsersPermission && hasClientsPermission && hasRolesPermission);
 
 
   const [value, setValue] = useState(0);
@@ -44,7 +46,7 @@ export const NavBarOptions = ({ setTitleState }) => {
   if (hasRolesPermission) {
     availableTabs.push({ route: 'rolesPermissions', title: 'roleManagement' });
   }
-  if (isSuperAdmin) {
+  if (isBPOAdmin) {
     availableTabs.push({ route: 'logs', title: 'logsManagement' });
   }
 

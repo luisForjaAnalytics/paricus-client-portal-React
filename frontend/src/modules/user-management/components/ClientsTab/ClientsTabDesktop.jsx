@@ -177,8 +177,8 @@ export const ClientsTabDesktop = ({
         name: client.name,
         isProspect: client.isProspect,
         isActive: client.isActive,
-        userCount: client.userCount || 0,
-        roleCount: client.roleCount || 0,
+        userCount: client.userCount || client._count?.users || 0,
+        roleCount: client.roleCount || client._count?.roles || 0,
         createdAt: client.createdAt,
         original: client, // Keep original object for actions
       })),
