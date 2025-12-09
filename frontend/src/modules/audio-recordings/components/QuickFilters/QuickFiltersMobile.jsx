@@ -68,7 +68,7 @@ function Row(props) {
           </IconButton>
         </TableCell>
         <TableCell component="th" scope="row">
-          {row.company_name}
+          {row.companyName}
         </TableCell>
       </TableRow>
       <TableRow>
@@ -147,7 +147,7 @@ function Row(props) {
                       sx={{ color: "action.active" }}
                     />
                     <Typography variant="body2">
-                      {row.customer_phone || "N/A"}
+                      {row.customer_phone_number || "N/A"}
                     </Typography>
                   </Box>
                 </Box>
@@ -250,11 +250,11 @@ function Row(props) {
 Row.propTypes = {
   row: PropTypes.shape({
     interaction_id: PropTypes.string.isRequired,
-    company_name: PropTypes.string.isRequired,
+    companyName: PropTypes.string,
     call_type: PropTypes.string,
     start_time: PropTypes.string,
     end_time: PropTypes.string,
-    customer_phone: PropTypes.string,
+    customer_phone_number: PropTypes.string,
     agent_name: PropTypes.string,
     audiofilename: PropTypes.string,
   }).isRequired,

@@ -114,7 +114,7 @@ function Row({ client, handleEdit, handleDeactivate, formatDate }) {
                     Created:
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {formatDate(client.created_at)}
+                    {formatDate(client.createdAt || client.created_at)}
                   </Typography>
                 </Box>
 

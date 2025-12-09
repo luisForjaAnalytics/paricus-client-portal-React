@@ -19,30 +19,30 @@ export const logsApi = createApi({
       query: (params = {}) => {
         const {
           page = 1,
-          limit = 10,
-          sortBy = "timestamp",
-          sortOrder = "desc",
-          search = "",
+          limit = 50,
+          userId = "",
           eventType = "",
           entity = "",
           status = "",
+          startDate = "",
+          endDate = "",
         } = params;
 
         const queryParams = new URLSearchParams({
           page: page.toString(),
           limit: limit.toString(),
-          sortBy,
-          sortOrder,
-          ...(search && { search }),
+          ...(userId && { userId }),
           ...(eventType && { eventType }),
           ...(entity && { entity }),
           ...(status && { status }),
+          ...(startDate && { startDate }),
+          ...(endDate && { endDate }),
         });
 
         return `?${queryParams.toString()}`;
       },
       transformResponse: (response) => ({
-        data: response.data || [],
+        logs: response.logs || [],
         pagination: response.pagination || {},
       }),
       providesTags: ["Logs"],
@@ -51,8 +51,23 @@ export const logsApi = createApi({
     // Get a specific log by ID
     getLogById: builder.query({
       query: (id) => `/${id}`,
-      transformResponse: (response) => response.data,
+      transformResponse: (response) => response.log,
       providesTags: (result, error, id) => [{ type: "Logs", id }],
+    }),
+
+    // Get log statistics
+    getLogStats: builder.query({
+      query: () => "/stats",
+      transformResponse: (response) => response.stats,
+    }),
+
+    // Cleanup old logs
+    cleanupLogs: builder.mutation({
+      query: (days) => ({
+        url: `/cleanup/${days}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Logs"],
     }),
 
     // Create a new log
@@ -79,6 +94,8 @@ export const logsApi = createApi({
 export const {
   useGetLogsQuery,
   useGetLogByIdQuery,
+  useGetLogStatsQuery,
   useCreateLogMutation,
   useDeleteLogMutation,
+  useCleanupLogsMutation,
 } = logsApi;

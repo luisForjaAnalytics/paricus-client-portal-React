@@ -45,10 +45,21 @@ function Row({
     selectClient(client.folder);
   };
 
+  // Helper to convert client name to folder format (e.g., "IM Telecom" -> "im-telecom")
+  const clientNameToFolder = (name) => name?.toLowerCase().replace(/\s+/g, '-') || '';
+
   // Filter invoices for this client
-  const clientInvoices = invoices.filter(
-    (invoice) => invoice.folder === client.folder
-  );
+  const clientInvoices = invoices.filter((invoice) => {
+    // Check if invoice has folder properties (old way)
+    if (invoice.folder === client.folder || invoice.clientFolder === client.folder) {
+      return true;
+    }
+    // Match by client name converted to folder format
+    if (invoice.client?.name) {
+      return clientNameToFolder(invoice.client.name) === client.folder;
+    }
+    return false;
+  });
 
   return (
     <React.Fragment>

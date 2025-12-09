@@ -52,7 +52,7 @@ export const LogsView = () => {
     dispatch(logsApi.util.invalidateTags(["Logs"]));
   }, [dispatch]);
 
-  const logs = data?.data || [];
+  const logs = data?.logs || [];
   const totalRows = data?.pagination?.totalCount || 0;
 
   // Format timestamp
@@ -195,6 +195,11 @@ export const LogsView = () => {
 
   return (
     <Box sx={{ px: 3 }}>
+      {/* Debug Info */}
+      <Alert severity="info" sx={{ mb: 2 }}>
+        Debug: isLoading={String(isLoading)}, error={error ? JSON.stringify(error) : "none"}, logs count={logs.length}, totalRows={totalRows}
+      </Alert>
+
       {/* Header with Search */}
       <Card
         sx={{
@@ -243,7 +248,7 @@ export const LogsView = () => {
       <Box
         sx={{
           display: { xs: "none", md: "block" },
-          height: "auto",
+          minHeight: 400,
           width: "100%",
         }}
       >
@@ -257,6 +262,7 @@ export const LogsView = () => {
           onPaginationModelChange={setPaginationModel}
           pageSizeOptions={[10, 25, 50, 100]}
           disableRowSelectionOnClick
+          autoHeight
           sx={{
             ...card,
             padding: "0 0 0 0",

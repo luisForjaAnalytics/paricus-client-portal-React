@@ -32,7 +32,7 @@ export const audioRecordingsApi = createApi({
         },
       }),
       transformResponse: (response) => ({
-        data: response.data || [],
+        data: response.recordings || [],
         totalCount: response.pagination?.totalCount || 0,
       }),
       providesTags: ['AudioRecordings'],
@@ -41,13 +41,25 @@ export const audioRecordingsApi = createApi({
     // Get call types for filters
     getCallTypes: builder.query({
       query: () => "/filters/call-types",
-      transformResponse: (response) => response.data || [],
+      transformResponse: (response) => response.callTypes || [],
+    }),
+
+    // Get agent names for filters
+    getAgentNames: builder.query({
+      query: () => "/filters/agents",
+      transformResponse: (response) => response.agents || [],
+    }),
+
+    // Get tags for filters
+    getTags: builder.query({
+      query: () => "/filters/tags",
+      transformResponse: (response) => response.tags || [],
     }),
 
     // Get audio URL for a specific recording
     getAudioUrl: builder.query({
       query: (interactionId) => `/${interactionId}/audio-url`,
-      transformResponse: (response) => response.audioUrl,
+      transformResponse: (response) => response.downloadUrl,
       // Force fresh data on every request (no caching) to ensure logs are created
       keepUnusedDataFor: 0,
     }),
@@ -57,6 +69,8 @@ export const audioRecordingsApi = createApi({
 export const {
   useGetAudioRecordingsQuery,
   useGetCallTypesQuery,
+  useGetAgentNamesQuery,
+  useGetTagsQuery,
   useLazyGetAudioUrlQuery,
   usePrefetch,
 } = audioRecordingsApi;
