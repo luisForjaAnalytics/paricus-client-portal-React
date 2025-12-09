@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { styled} from "@mui/material/styles";
+import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import MuiDrawer from "@mui/material/Drawer";
 import List from "@mui/material/List";
@@ -14,7 +14,10 @@ import { useTranslation } from "react-i18next";
 import { Outlet } from "react-router-dom";
 import { usePermissions } from "../../hooks/usePermissions";
 import { colors } from "../../styles/styles";
-import { menuItemsAdmin, menuItemsCommon} from "../../../config/menu/MenusSection";
+import {
+  menuItemsAdmin,
+  menuItemsCommon,
+} from "../../../config/menu/MenusSection";
 import { MenuSections } from "./Navigation/MenuSection";
 const drawerWidth = 260;
 
@@ -56,7 +59,7 @@ const Drawer = styled(MuiDrawer, {
         ...openedMixin(theme),
         "& .MuiDrawer-paper": {
           ...openedMixin(theme),
-          backgroundColor: "white",
+          backgroundColor: colors.drawer,
           color: colors.textPrimary,
           borderRight: `1px solid ${colors.border}`,
         },
@@ -65,7 +68,7 @@ const Drawer = styled(MuiDrawer, {
         ...closedMixin(theme),
         "& .MuiDrawer-paper": {
           ...closedMixin(theme),
-          backgroundColor: "white",
+          backgroundColor: colors.drawer,
           color: colors.textPrimary,
           borderRight: `1px solid ${colors.border}`,
         },
@@ -87,23 +90,27 @@ export const LayoutAccount = () => {
   };
 
   // Filter menu items based on user permissions
-  const filteredCommonItems = useMemo(() =>
-    menuItemsCommon.filter((item) =>
-      item.permission ? hasPermission(item.permission) : true
-    ), [hasPermission]
+  const filteredCommonItems = useMemo(
+    () =>
+      menuItemsCommon.filter((item) =>
+        item.permission ? hasPermission(item.permission) : true
+      ),
+    [hasPermission]
   );
 
-  const filteredAdminItems = useMemo(() =>
-    menuItemsAdmin.filter((item) => {
-      if (item.permission && !hasPermission(item.permission)) return false;
-      if (item.subItems) {
-        const filteredSubs = item.subItems.filter((subItem) =>
-          subItem.permission ? hasPermission(subItem.permission) : true
-        );
-        return filteredSubs.length > 0;
-      }
-      return true;
-    }), [hasPermission]
+  const filteredAdminItems = useMemo(
+    () =>
+      menuItemsAdmin.filter((item) => {
+        if (item.permission && !hasPermission(item.permission)) return false;
+        if (item.subItems) {
+          const filteredSubs = item.subItems.filter((subItem) =>
+            subItem.permission ? hasPermission(subItem.permission) : true
+          );
+          return filteredSubs.length > 0;
+        }
+        return true;
+      }),
+    [hasPermission]
   );
 
   return (
@@ -138,12 +145,14 @@ export const LayoutAccount = () => {
             borderRadius: 2,
           }}
         />
-        <Box sx={{
-          display: "flex",
-          flexDirection: "column",
-          height: "100%",
-          justifyContent: "space-between"
-        }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            height: "100%",
+            justifyContent: "space-between",
+          }}
+        >
           <List
             sx={{
               marginTop: { sx: "none", md: 2 },

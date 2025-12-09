@@ -75,9 +75,9 @@ export const ClientsTabDesktop = ({
         headerName: "Client Name",
         flex: 1,
         align: "left",
-        headerAlign: "left",
+        headerAlign: "center",
         renderCell: (params) => (
-          <Typography variant="body2" fontWeight={500}>
+          <Typography variant="body2" fontWeight={500} sx={{ margin: '1rem' }}>
             {params.value}
           </Typography>
         ),

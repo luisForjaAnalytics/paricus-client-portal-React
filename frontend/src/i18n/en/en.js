@@ -16,6 +16,7 @@ export default {
     clientManagement: "Client Management",
     usersManagement: "User Management",
     roleManagement: "Role Management",
+    logs: "Logs",
     myProfile: "My Profile",
   },
 
@@ -73,6 +74,18 @@ export default {
     logs: {
       label: "Logs",
       title: "Logs Management",
+      logDetails: "Log Details",
+      eventId: "Event ID",
+      timestamp: "Timestamp",
+      userId: "User ID",
+      eventType: "Event Type",
+      entity: "Entity",
+      description: "Description",
+      ipAddress: "IP Address",
+      status: "Status",
+      noLogsFound: "No logs found",
+      errorLoading: "Error loading logs",
+      unknownError: "Unknown error",
     },
   },
 
@@ -599,6 +612,14 @@ export default {
     comingSoonDescription:
       "This module will include article management, search functionality, and content creation tools.",
     phase: "Coming in Phase 5",
+    articles: "Articles",
+    synopsis: "Synopsis",
+    updatedAt: "Updated At",
+    actions: "Actions",
+    edit: "Edit",
+    view: "View",
+    noArticlesFound: "No articles found",
+    loadingArticles: "Loading articles...",
   },
 
   // Permission

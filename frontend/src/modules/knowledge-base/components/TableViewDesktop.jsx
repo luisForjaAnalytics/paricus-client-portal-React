@@ -19,6 +19,7 @@ import {
 } from "../../../store/api/articlesApi";
 import { colors, typography, card } from "../../../common/styles/styles";
 import { useNavigate } from "react-router-dom";
+import { TableViewMobil } from "./TableViewMobil";
 
 const createColumns = (handleEditClick, handleViewClick) => [
   {
@@ -126,7 +127,10 @@ export const TableView = () => {
     );
   }, [data, searchQuery]);
 
-  const rows = useMemo(() => dataStructure(filteredArticles), [filteredArticles]);
+  const rows = useMemo(
+    () => dataStructure(filteredArticles),
+    [filteredArticles]
+  );
 
   // Función para editar (navega a editorView)
   const handleEditClick = async (articleId) => {
@@ -154,7 +158,7 @@ export const TableView = () => {
   );
 
   return (
-    <>
+    <Box sx={{ width: "100%" }}>
       {/* Search Filter */}
       <Card
         sx={{
@@ -162,7 +166,7 @@ export const TableView = () => {
           padding: "0 2rem 0 2rem",
           mb: 3,
           width: { md: "95%", lg: "100%" },
-          borderRadius:'0.5rem'
+          borderRadius: "0.5rem",
         }}
       >
         <CardContent>
@@ -194,86 +198,94 @@ export const TableView = () => {
       {/* Articles Table */}
       <Box
         sx={{
-          // display: { xs: "none", md: "block" },
+          display: { xs: "none", md: "block" },
           height: "auto",
           width: { md: "95%", lg: "100%" },
         }}
       >
         <DataGrid
-        rows={rows}
-        columns={columns}
-        loading={isLoading}
-        pageSizeOptions={[10, 25, 50, 100]}
-        // onCellClick={(params, event) => {
-        //   // Click en una celda - obtener artículo completo
-        //   handleArticleClick(params.id);
-        // }}
-        initialState={{
-          pagination: {
-            paginationModel: { pageSize: 10, page: 0 },
-          },
-        }}
-        sortingOrder={["asc", "desc"]}
-        sx={{
-          ...card,
-          padding: "0 0 0 0",
-          border: `1px solid ${colors.border}`,
-          // Header styles
-          "& .MuiDataGrid-columnHeaders": {
-            backgroundColor: `${colors.background} !important`,
-            borderBottom: `2px solid ${colors.border}`,
-          },
-          "& .MuiDataGrid-columnHeader": {
-            backgroundColor: `${colors.background} !important`,
-          },
-          "& .MuiDataGrid-columnHeaderTitle": {
-            fontWeight: typography.fontWeight.bold,
-            textTransform: "uppercase",
-            fontSize: typography.fontSize.tableHeader,
-            fontFamily: typography.fontFamily,
-            color: colors.textMuted,
-            letterSpacing: "0.05em",
-          },
-          // Sorting icons
-          "& .MuiDataGrid-sortIcon": {
-            color: colors.primary,
-          },
-          "& .MuiDataGrid-columnHeader--sorted": {
-            backgroundColor: `${colors.primaryLight} !important`,
-          },
-          // Filler column
-          "& .MuiDataGrid-filler": {
-            backgroundColor: `${colors.background} !important`,
-            width: "0 !important",
-            minWidth: "0 !important",
-            maxWidth: "0 !important",
-          },
-          // Scrollbar
-          "& .MuiDataGrid-scrollbarFiller": {
-            display: "none !important",
-          },
-          "& .MuiDataGrid-scrollbar--vertical": {
-            position: "absolute",
-            right: 0,
-          },
-          // Cell styles
-          "& .MuiDataGrid-cell": {
-            borderBottom: `1px solid ${colors.border}`,
-            fontSize: typography.fontSize.body,
-            fontFamily: typography.fontFamily,
-            color: colors.textPrimary,
-          },
-          "& .MuiDataGrid-cell:focus": {
-            outline: "none",
-          },
-          // Row hover effect
-          "& .MuiDataGrid-row:hover": {
-            backgroundColor: colors.background,
-          },
-        }}
+          rows={rows}
+          columns={columns}
+          loading={isLoading}
+          pageSizeOptions={[10, 25, 50, 100]}
+          // onCellClick={(params, event) => {
+          //   // Click en una celda - obtener artículo completo
+          //   handleArticleClick(params.id);
+          // }}
+          initialState={{
+            pagination: {
+              paginationModel: { pageSize: 10, page: 0 },
+            },
+          }}
+          sortingOrder={["asc", "desc"]}
+          sx={{
+            ...card,
+            padding: "0 0 0 0",
+            border: `1px solid ${colors.border}`,
+            // Header styles
+            "& .MuiDataGrid-columnHeaders": {
+              backgroundColor: `${colors.background} !important`,
+              borderBottom: `2px solid ${colors.border}`,
+            },
+            "& .MuiDataGrid-columnHeader": {
+              backgroundColor: `${colors.background} !important`,
+            },
+            "& .MuiDataGrid-columnHeaderTitle": {
+              fontWeight: typography.fontWeight.bold,
+              textTransform: "uppercase",
+              fontSize: typography.fontSize.tableHeader,
+              fontFamily: typography.fontFamily,
+              color: colors.textMuted,
+              letterSpacing: "0.05em",
+            },
+            // Sorting icons
+            "& .MuiDataGrid-sortIcon": {
+              color: colors.primary,
+            },
+            "& .MuiDataGrid-columnHeader--sorted": {
+              backgroundColor: `${colors.primaryLight} !important`,
+            },
+            // Filler column
+            "& .MuiDataGrid-filler": {
+              backgroundColor: `${colors.background} !important`,
+              width: "0 !important",
+              minWidth: "0 !important",
+              maxWidth: "0 !important",
+            },
+            // Scrollbar
+            "& .MuiDataGrid-scrollbarFiller": {
+              display: "none !important",
+            },
+            "& .MuiDataGrid-scrollbar--vertical": {
+              position: "absolute",
+              right: 0,
+            },
+            // Cell styles
+            "& .MuiDataGrid-cell": {
+              borderBottom: `1px solid ${colors.border}`,
+              fontSize: typography.fontSize.body,
+              fontFamily: typography.fontFamily,
+              color: colors.textPrimary,
+            },
+            "& .MuiDataGrid-cell:focus": {
+              outline: "none",
+            },
+            // Row hover effect
+            "& .MuiDataGrid-row:hover": {
+              backgroundColor: colors.background,
+            },
+          }}
+        />
+      </Box>
+
+      {/* Mobile View */}
+      <TableViewMobil
+        articles={rows}
+        isLoading={isLoading}
+        handleEditClick={handleEditClick}
+        handleViewClick={handleViewClick}
       />
     </Box>
-    </>
   );
 };
 

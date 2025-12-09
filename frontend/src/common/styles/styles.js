@@ -27,7 +27,7 @@ export const colors = {
   financialClientAvatar: "#11e7464d",
   drowerIcons: "#D1FAE5",
   folderCloseIcon: "#68686844",
-
+  drawer:"#FFFFFF",
   // Secondary colors
   secondary: "#4db66750", // Kept for backward compatibility
   tertiary: "#2160a2", // Kept for backward compatibility
