@@ -150,8 +150,12 @@ export const ReportsManagementView = () => {
   const fileInputRef = useRef(null);
 
   const handleFileSelect = (event) => {
-    if (event.target.files && event.target.files[0]) {
-      setUploadForm({ ...uploadForm, file: event.target.files[0] });
+    try {
+      if (event.target.files && event.target.files[0]) {
+        setUploadForm({ ...uploadForm, file: event.target.files[0] });
+      }
+    } catch (err) {
+      console.log(`ERROR handleFileSelect: ${err}`);
     }
   };
 
@@ -170,7 +174,7 @@ export const ReportsManagementView = () => {
 
       await uploadReport({ folder: showUploadModal, formData }).unwrap();
 
-      showNotification("success", "Report uploaded successfully");
+      showNotification("success", t("reportsManagement.upload.uploadSuccess"));
       setShowUploadModal(null);
       resetUploadForm();
 
@@ -179,7 +183,7 @@ export const ReportsManagementView = () => {
     } catch (error) {
       showNotification(
         "error",
-        error.data?.message || "Failed to upload report"
+        error.data?.message || t("reportsManagement.upload.uploadError")
       );
     }
   };
@@ -211,7 +215,7 @@ export const ReportsManagementView = () => {
     } catch (error) {
       showNotification(
         "error",
-        error.data?.message || "Failed to generate download link"
+        error.data?.message || t("reportsManagement.upload.downloadError")
       );
 
       // Log failed download
@@ -230,14 +234,14 @@ export const ReportsManagementView = () => {
   };
 
   const handleDeleteReport = async (folder, report) => {
-    if (!window.confirm(`Are you sure you want to delete "${report.name}"?`))
+    if (!window.confirm(t("reportsManagement.upload.confirmDelete", { reportName: report.name })))
       return;
 
     try {
       const fileName = report.name;
       await deleteReportMutation({ folder, fileName }).unwrap();
 
-      showNotification("success", "Report deleted successfully");
+      showNotification("success", t("reportsManagement.upload.deleteSuccess"));
 
       // Log successful delete
       try {
@@ -257,7 +261,7 @@ export const ReportsManagementView = () => {
     } catch (error) {
       showNotification(
         "error",
-        error.data?.message || "Failed to delete report"
+        error.data?.message || t("reportsManagement.upload.deleteError")
       );
 
       // Log failed delete
@@ -276,40 +280,68 @@ export const ReportsManagementView = () => {
   };
 
   const resetUploadForm = () => {
-    setUploadForm({
-      reportName: "",
-      description: "",
-      file: null,
-    });
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+    try {
+      setUploadForm({
+        reportName: "",
+        description: "",
+        file: null,
+      });
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    } catch (err) {
+      console.log(`ERROR resetUploadForm: ${err}`);
     }
   };
 
   const formatFileSize = (bytes) => {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+    try {
+      if (bytes === 0) return `0 ${t("reportsManagement.fileSize.bytes")}`;
+      const k = 1024;
+      const sizes = [
+        t("reportsManagement.fileSize.bytes"),
+        t("reportsManagement.fileSize.kb"),
+        t("reportsManagement.fileSize.mb"),
+        t("reportsManagement.fileSize.gb"),
+      ];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+    } catch (err) {
+      console.log(`ERROR formatFileSize: ${err}`);
+      return `0 ${t("reportsManagement.fileSize.bytes")}`;
+    }
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    try {
+      const locale = t("common.locale") || "en-US";
+      return new Date(dateString).toLocaleDateString(locale, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch (err) {
+      console.log(`ERROR formatDate: ${err}`);
+      return t("reportsManagement.invalidDate");
+    }
   };
 
   const showNotification = (type, message) => {
-    setNotification({ type, message });
+    try {
+      setNotification({ type, message });
+    } catch (err) {
+      console.log(`ERROR showNotification: ${err}`);
+    }
   };
 
   const handleCloseNotification = () => {
-    setNotification(null);
+    try {
+      setNotification(null);
+    } catch (err) {
+      console.log(`ERROR handleCloseNotification: ${err}`);
+    }
   };
 
   // Folder access management functions
@@ -322,12 +354,12 @@ export const ReportsManagementView = () => {
         folderName: accessForm.folderName,
       }).unwrap();
 
-      showNotification("success", "Folder access granted successfully");
+      showNotification("success", t("reportsManagement.folderAccess.grantSuccess"));
       setAccessForm({ clientId: "", folderName: "" });
     } catch (error) {
       showNotification(
         "error",
-        error.data?.message || "Failed to grant folder access"
+        error.data?.message || t("reportsManagement.folderAccess.grantError")
       );
     }
   };
@@ -335,24 +367,28 @@ export const ReportsManagementView = () => {
   const handleRevokeFolderAccess = async (clientId, folderName) => {
     if (
       !window.confirm(
-        `Are you sure you want to revoke access to "${folderName}" for this client?`
+        t("reportsManagement.folderAccess.confirmRevoke", { folderName })
       )
     )
       return;
 
     try {
       await revokeAccess({ clientId, folderName }).unwrap();
-      showNotification("success", "Folder access revoked successfully");
+      showNotification("success", t("reportsManagement.folderAccess.revokeSuccess"));
     } catch (error) {
       showNotification(
         "error",
-        error.data?.message || "Failed to revoke folder access"
+        error.data?.message || t("reportsManagement.folderAccess.revokeError")
       );
     }
   };
 
   const openFolderAccessModal = () => {
-    setShowFolderAccessModal(true);
+    try {
+      setShowFolderAccessModal(true);
+    } catch (err) {
+      console.log(`ERROR openFolderAccessModal: ${err}`);
+    }
   };
 
   return (
@@ -366,7 +402,7 @@ export const ReportsManagementView = () => {
             fontFamily: typography.fontFamily,
           }}
         >
-          Reports Management
+          {t("reportsManagement.title")}
         </Typography>
       </Box>
       <Box>
@@ -410,7 +446,7 @@ export const ReportsManagementView = () => {
               alignItems: "center",
             }}
           >
-            <Typography variant="h6">Manage Client Folder Access</Typography>
+            <Typography variant="h6">{t("reportsManagement.folderAccess.title")}</Typography>
             <IconButton
               onClick={() => setShowFolderAccessModal(false)}
               size="small"
@@ -423,20 +459,20 @@ export const ReportsManagementView = () => {
           {/* Grant Access Form */}
           <Paper variant="outlined" sx={{ p: 3, mb: 3, bgcolor: "grey.50" }}>
             <Typography variant="subtitle1" fontWeight="600" gutterBottom>
-              Grant Folder Access
+              {t("reportsManagement.folderAccess.grantTitle")}
             </Typography>
             <Grid container spacing={2} alignItems="flex-end">
               <Grid item xs={12} md={5}>
                 <FormControl fullWidth>
-                  <InputLabel>Client</InputLabel>
+                  <InputLabel>{t("reportsManagement.folderAccess.client")}</InputLabel>
                   <Select
                     value={accessForm.clientId}
                     onChange={(e) =>
                       setAccessForm({ ...accessForm, clientId: e.target.value })
                     }
-                    label="Client"
+                    label={t("reportsManagement.folderAccess.client")}
                   >
-                    <MenuItem value="">Select a client</MenuItem>
+                    <MenuItem value="">{t("reportsManagement.folderAccess.selectClient")}</MenuItem>
                     {clients.map((client) => (
                       <MenuItem key={client.id} value={client.id}>
                         {client.name}
@@ -447,7 +483,7 @@ export const ReportsManagementView = () => {
               </Grid>
               <Grid item xs={12} md={5}>
                 <FormControl fullWidth>
-                  <InputLabel>Folder</InputLabel>
+                  <InputLabel>{t("reportsManagement.folderAccess.folder")}</InputLabel>
                   <Select
                     value={accessForm.folderName}
                     onChange={(e) =>
@@ -456,9 +492,9 @@ export const ReportsManagementView = () => {
                         folderName: e.target.value,
                       })
                     }
-                    label="Folder"
+                    label={t("reportsManagement.folderAccess.folder")}
                   >
-                    <MenuItem value="">Select a folder</MenuItem>
+                    <MenuItem value="">{t("reportsManagement.folderAccess.selectFolder")}</MenuItem>
                     {clientFolders.map((folder) => (
                       <MenuItem key={folder} value={folder}>
                         {folder}
@@ -486,7 +522,7 @@ export const ReportsManagementView = () => {
                   }
                   sx={primaryIconButton}
                 >
-                  {grantingAccess ? "Granting..." : "Grant"}
+                  {grantingAccess ? t("reportsManagement.folderAccess.granting") : t("reportsManagement.folderAccess.grantButton")}
                 </Button>
               </Grid>
             </Grid>
@@ -494,20 +530,20 @@ export const ReportsManagementView = () => {
 
           {/* Current Access List */}
           <Typography variant="subtitle1" fontWeight="600" gutterBottom>
-            Current Access Permissions
+            {t("reportsManagement.folderAccess.currentTitle")}
           </Typography>
 
           {loadingAccess ? (
             <Box sx={{ textAlign: "center", py: 4 }}>
               <CircularProgress />
               <Typography sx={{ mt: 2 }}>
-                Loading access permissions...
+                {t("reportsManagement.folderAccess.loadingPermissions")}
               </Typography>
             </Box>
           ) : folderAccess.length === 0 ? (
             <Box sx={{ textAlign: "center", py: 4 }}>
               <Typography color="text.secondary">
-                No folder access permissions configured
+                {t("reportsManagement.folderAccess.noPermissions")}
               </Typography>
             </Box>
           ) : (
@@ -530,7 +566,7 @@ export const ReportsManagementView = () => {
                         {access.client.name}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        Access to: {access.folderName}
+                        {t("reportsManagement.folderAccess.accessTo")} {access.folderName}
                       </Typography>
                     </Box>
                     <Button
@@ -545,7 +581,7 @@ export const ReportsManagementView = () => {
                       }
                       sx={outlinedButton}
                     >
-                      Revoke
+                      {t("reportsManagement.folderAccess.revokeButton")}
                     </Button>
                   </Box>
                 </Paper>

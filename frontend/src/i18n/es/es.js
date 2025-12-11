@@ -85,6 +85,8 @@ export default {
       noLogsFound: "No se encontraron registros",
       errorLoading: "Error al cargar registros",
       unknownError: "Error desconocido",
+      searchLabel: "Buscar Registros",
+      searchPlaceholder: "Buscar por ID, usuario, evento, entidad, descripción o estado...",
     },
   },
 
@@ -229,6 +231,7 @@ export default {
 
   // Strings comunes
   common: {
+    locale: "es-ES",
     cancel: "Cancelar",
     save: "Guardar",
     saving: "Guardando...",
@@ -267,6 +270,9 @@ export default {
     optional: "Opcional",
     updating: "Actualizando...",
     update: "Actualizar",
+    na: "N/D",
+    unknown: "Desconocido",
+    invalidDate: "Fecha Inválida",
   },
 
   // Login
@@ -311,11 +317,14 @@ export default {
   users: {
     title: "Gestión de Usuarios",
     description: "Administre cuentas de usuario y permisos",
-    addUser: "Agregar Nuevo Usuario",
+    addUser: "Agregar Usuario",
+    addNewUser: "Agregar Nuevo Usuario",
     editUser: "Editar Usuario",
+    searchLabel: "Buscar Usuarios",
     searchPlaceholder: "Buscar por nombre o correo...",
     filterByClient: "Filtrar por Cliente",
     allClients: "Todos los Clientes",
+    noUsersFound: "No se encontraron usuarios",
     table: {
       id: "ID",
       name: "Nombre",
@@ -325,7 +334,9 @@ export default {
       status: "Estado",
       created: "Creado",
       actions: "Acciones",
-      noRole: "Sin rol asignado",
+      noRoleAssigned: "Sin rol asignado",
+      active: "Activo",
+      inactive: "Inactivo",
     },
     form: {
       firstName: "Nombre",
@@ -340,16 +351,17 @@ export default {
       selectRole: "Seleccione un rol",
     },
     actions: {
-      edit: "Editar usuario",
-      deactivate: "Desactivar usuario",
-      activate: "Activar usuario",
+      editUser: "Editar usuario",
+      deactivateUser: "Desactivar usuario",
+      activateUser: "Activar usuario",
     },
     messages: {
       userUpdated: "Usuario actualizado exitosamente",
       userCreated: "Usuario creado exitosamente",
-      userSaveFailed: "Error al guardar el usuario",
+      saveFailed: "Error al guardar el usuario",
       userActivated: "Usuario activado exitosamente",
       userDeactivated: "Usuario desactivado exitosamente",
+      statusUpdateFailed: "Error al actualizar el estado del usuario",
     },
   },
 
@@ -365,8 +377,12 @@ export default {
     deleteWarning: "¿Está seguro de que desea eliminar el rol",
     deleteWarningContinue:
       "Esta acción no se puede deshacer y afectará a todos los usuarios con este rol.",
-    filterByClient: "Cliente",
+    filterByClient: "Filtrar por Cliente",
     allClients: "Todos los Clientes",
+    searchLabel: "Buscar Roles",
+    searchPlaceholder: "Buscar por nombre o descripción...",
+    noRolesFound: "No se encontraron roles",
+    unknownClient: "Desconocido",
     table: {
       id: "ID",
       roleName: "Nombre del Rol",
@@ -397,6 +413,8 @@ export default {
       roleDeleteFailed: "Error al eliminar el rol",
       permissionsUpdated: "Permisos actualizados exitosamente",
       permissionsUpdateFailed: "Error al actualizar los permisos",
+      invalidRole: "Rol inválido seleccionado",
+      selectClient: "Por favor seleccione un cliente para este rol",
     },
   },
 
@@ -433,6 +451,13 @@ export default {
     deactivationWarning: "¿Está seguro de que desea desactivar",
     deactivationWarningContinue:
       "Esto también desactivará a todos los usuarios pertenecientes a este cliente.",
+    filterByStatus: "Filtrar por Estado",
+    allClients: "Todos los Clientes",
+    clientsOnly: "Solo Clientes",
+    prospectsOnly: "Solo Prospectos",
+    searchClients: "Buscar Clientes",
+    searchPlaceholder: "Buscar por nombre...",
+    noClientsFound: "No se encontraron clientes",
     table: {
       clientName: "Nombre del Cliente",
       type: "Tipo",
@@ -451,7 +476,6 @@ export default {
     },
     actions: {
       edit: "Editar cliente",
-      deactivate: "Desactivar cliente",
       deactivate: "Desactivar",
     },
     messages: {
@@ -595,6 +619,86 @@ export default {
     downloadStarted: "Descarga iniciada",
     downloadFailed: "Error al descargar el reporte",
     generatingLink: "Generando enlace de descarga...",
+  },
+
+  // Gestión de Reportes
+  reportsManagement: {
+    title: "Gestión de Reportes",
+    clientFolders: {
+      title: "Carpetas de Clientes",
+      noFoldersFound: "No se encontraron carpetas de clientes",
+      noFoldersMessage:
+        "Cree carpetas en su bucket S3: client-access-reports/nombre-del-cliente/",
+      manageAccess: "Administrar Acceso",
+      refreshFolders: "Actualizar Carpetas",
+      loading: "Cargando...",
+      columnFolder: "CARPETA DE CLIENTE",
+      columnReports: "REPORTES",
+      reportsFor: "Reportes",
+    },
+    folderAccess: {
+      title: "Administrar Acceso a Carpetas de Clientes",
+      grantTitle: "Otorgar Acceso a Carpeta",
+      currentTitle: "Permisos de Acceso Actuales",
+      selectClient: "Seleccione un cliente",
+      selectFolder: "Seleccione una carpeta",
+      client: "Cliente",
+      folder: "Carpeta",
+      grantButton: "Otorgar",
+      granting: "Otorgando...",
+      revokeButton: "Revocar",
+      accessTo: "Acceso a:",
+      noPermissions: "No hay permisos de acceso a carpetas configurados",
+      loadingPermissions: "Cargando permisos de acceso...",
+      grantSuccess: "Acceso a carpeta otorgado exitosamente",
+      grantError: "Error al otorgar acceso a carpeta",
+      revokeSuccess: "Acceso a carpeta revocado exitosamente",
+      revokeError: "Error al revocar acceso a carpeta",
+      confirmRevoke:
+        '¿Está seguro de que desea revocar el acceso a "{folderName}" para este cliente?',
+    },
+    reports: {
+      title: "Reportes para {folder}",
+      uploadReport: "Subir Reporte",
+      refresh: "Actualizar",
+      loadingReports: "Cargando reportes...",
+      noReportsFound: "No se encontraron reportes",
+      noReportsMessage: "Suba algunos reportes PDF para este cliente",
+      noReportsForFolder: "No se encontraron reportes para esta carpeta",
+      fileName: "Nombre del Archivo",
+      size: "Tamaño",
+      lastModified: "Última Modificación",
+      actions: "Acciones",
+      pdfDocument: "Documento PDF",
+      download: "Descargar",
+      delete: "Eliminar",
+    },
+    upload: {
+      title: "Subir Reporte",
+      clientFolder: "Carpeta del Cliente",
+      reportName: "Nombre del Reporte (Opcional)",
+      reportNamePlaceholder: "Dejar vacío para usar el nombre del archivo",
+      description: "Descripción (Opcional)",
+      descriptionPlaceholder: "Breve descripción del reporte",
+      chooseFile: "Elegir Archivo PDF",
+      fileRestriction: "Solo se permiten archivos PDF (máx. 50MB)",
+      cancel: "Cancelar",
+      upload: "Subir Reporte",
+      uploading: "Subiendo...",
+      uploadSuccess: "Reporte subido exitosamente",
+      uploadError: "Error al subir el reporte",
+      deleteSuccess: "Reporte eliminado exitosamente",
+      deleteError: "Error al eliminar el reporte",
+      confirmDelete: '¿Está seguro de que desea eliminar "{reportName}"?',
+      downloadError: "Error al generar enlace de descarga",
+    },
+    fileSize: {
+      bytes: "Bytes",
+      kb: "KB",
+      mb: "MB",
+      gb: "GB",
+    },
+    invalidDate: "Fecha Inválida",
   },
 
   // Páginas de Error

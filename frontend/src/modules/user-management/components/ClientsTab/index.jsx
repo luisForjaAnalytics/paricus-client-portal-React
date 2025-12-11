@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useBreakpoint } from "../../../../common/hooks/useBreakpoint";
 import { ClientsTabDesktop } from "./ClientsTabDesktop";
 import { ClientsTabMobile } from "./ClientsTabMobile";
@@ -34,6 +35,7 @@ import {
  * y renderiza la versión móvil o desktop según el breakpoint actual.
  */
 export const ClientsTab = () => {
+  const { t } = useTranslation();
   const { isMobile } = useBreakpoint();
 
   // RTK Query hooks
@@ -66,28 +68,37 @@ export const ClientsTab = () => {
   const isSaving = isCreating || isUpdating;
 
   const handleEdit = (client) => {
-    setEditingClient(client);
-    setClientForm({
-      name: client.name,
-      isProspect: client.isProspect,
-      isActive: client.isActive,
-    });
-    setShowCreateDialog(true);
+    try {
+      setEditingClient(client);
+      setClientForm({
+        name: client.name,
+        isProspect: client.isProspect,
+        isActive: client.isActive,
+      });
+      setShowCreateDialog(true);
+    } catch (err) {
+      console.log(`ERROR handleEdit: ${err}`);
+    }
   };
 
   const handleDeactivate = (client) => {
-    setClientToDeactivate(client);
-    setShowConfirmDialog(true);
+    try {
+      setClientToDeactivate(client);
+      setShowConfirmDialog(true);
+    } catch (err) {
+      console.log(`ERROR handleDeactivate: ${err}`);
+    }
   };
 
   const confirmDeactivation = async () => {
     try {
       await deleteClient(clientToDeactivate.id).unwrap();
-      showNotification("Client deactivated successfully", "success");
+      showNotification(t("clients.messages.clientDeactivated"), "success");
       setShowConfirmDialog(false);
       setClientToDeactivate(null);
     } catch (error) {
-      showNotification("Failed to deactivate client", "error");
+      console.log(`ERROR confirmDeactivation: ${error}`);
+      showNotification(t("clients.messages.clientDeactivateFailed"), "error");
     }
   };
 
@@ -97,47 +108,71 @@ export const ClientsTab = () => {
     try {
       if (editingClient) {
         await updateClient({ id: editingClient.id, ...clientForm }).unwrap();
-        showNotification("Client updated successfully", "success");
+        showNotification(t("clients.messages.clientUpdated"), "success");
       } else {
         await createClient(clientForm).unwrap();
-        showNotification("Client created successfully", "success");
+        showNotification(t("clients.messages.clientCreated"), "success");
       }
 
       handleCloseDialog();
     } catch (error) {
-      const errorMessage = error.data?.error || "An error occurred";
+      console.log(`ERROR handleSave: ${error}`);
+      const errorMessage = error.data?.error || t("clients.messages.clientSaveFailed");
       showNotification(errorMessage, "error");
     }
   };
 
   const handleCloseDialog = () => {
-    setShowCreateDialog(false);
-    setEditingClient(null);
-    setClientForm({
-      name: "",
-      isProspect: false,
-      isActive: true,
-    });
+    try {
+      setShowCreateDialog(false);
+      setEditingClient(null);
+      setClientForm({
+        name: "",
+        isProspect: false,
+        isActive: true,
+      });
+    } catch (err) {
+      console.log(`ERROR handleCloseDialog: ${err}`);
+    }
   };
 
   const isFormValid = () => {
-    return clientForm.name && clientForm.name.length >= 2;
+    try {
+      return clientForm.name && clientForm.name.length >= 2;
+    } catch (err) {
+      console.log(`ERROR isFormValid: ${err}`);
+      return false;
+    }
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString();
+    try {
+      const locale = t("common.locale") || "en-US";
+      return new Date(dateString).toLocaleDateString(locale);
+    } catch (err) {
+      console.log(`ERROR formatDate: ${err}`);
+      return dateString;
+    }
   };
 
   const showNotification = (message, severity = "success") => {
-    setSnackbar({
-      open: true,
-      message,
-      severity,
-    });
+    try {
+      setSnackbar({
+        open: true,
+        message,
+        severity,
+      });
+    } catch (err) {
+      console.log(`ERROR showNotification: ${err}`);
+    }
   };
 
   const handleCloseSnackbar = () => {
-    setSnackbar({ ...snackbar, open: false });
+    try {
+      setSnackbar({ ...snackbar, open: false });
+    } catch (err) {
+      console.log(`ERROR handleCloseSnackbar: ${err}`);
+    }
   };
 
   const sharedProps = {
@@ -173,7 +208,7 @@ export const ClientsTab = () => {
             }}
           >
             <Typography variant="h6">
-              {editingClient ? "Edit Client" : "Add New Client"}
+              {editingClient ? t("clients.editClient") : t("clients.addClient")}
             </Typography>
             <IconButton onClick={handleCloseDialog} size="small">
               <CloseIcon />
@@ -182,7 +217,7 @@ export const ClientsTab = () => {
         </DialogTitle>
         <DialogContent dividers>
           <TextField
-            label="Client Name"
+            label={t("clients.form.clientName")}
             required
             fullWidth
             value={clientForm.name}
@@ -200,7 +235,7 @@ export const ClientsTab = () => {
                 }
               />
             }
-            label="Is Prospect"
+            label={t("clients.form.isProspect")}
             sx={{ mb: 2, display: "block" }}
           />
           {editingClient && (
@@ -213,14 +248,14 @@ export const ClientsTab = () => {
                   }
                 />
               }
-              label="Active"
+              label={t("clients.form.active")}
               sx={{ display: "block" }}
             />
           )}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog} sx={outlinedButton}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button
             variant="contained"
@@ -228,7 +263,7 @@ export const ClientsTab = () => {
             disabled={isSaving || !isFormValid()}
             sx={primaryButton}
           >
-            {isSaving ? "Saving..." : "Save"}
+            {isSaving ? t("common.saving") : t("common.save")}
           </Button>
         </DialogActions>
       </Dialog>
@@ -240,11 +275,11 @@ export const ClientsTab = () => {
         maxWidth="xs"
         fullWidth
       >
-        <DialogTitle>Confirm Deactivation</DialogTitle>
+        <DialogTitle>{t("clients.confirmDeactivation")}</DialogTitle>
         <DialogContent>
           <Typography>
-            Are you sure you want to deactivate "{clientToDeactivate?.name}"?
-            This will also deactivate all users associated with this client.
+            {t("clients.deactivationWarning")} "{clientToDeactivate?.name}"?{" "}
+            {t("clients.deactivationWarningContinue")}
           </Typography>
         </DialogContent>
         <DialogActions>
@@ -252,7 +287,7 @@ export const ClientsTab = () => {
             onClick={() => setShowConfirmDialog(false)}
             sx={outlinedButton}
           >
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button
             variant="contained"
@@ -260,7 +295,7 @@ export const ClientsTab = () => {
             onClick={confirmDeactivation}
             sx={primaryButton}
           >
-            Deactivate
+            {t("clients.actions.deactivate")}
           </Button>
         </DialogActions>
       </Dialog>

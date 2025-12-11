@@ -1,4 +1,5 @@
 import { useState, useMemo, Fragment } from "react";
+import PropTypes from "prop-types";
 import {
   Box,
   Typography,
@@ -35,6 +36,7 @@ import {
   Close as CloseIcon,
   Description as DescriptionIcon,
 } from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
 import {
   card,
   colors,
@@ -67,6 +69,7 @@ export const ClientFolders = ({
   fileInputRef,
   selectedFolderForUpload,
 }) => {
+  const { t } = useTranslation();
   const [expandedRows, setExpandedRows] = useState({});
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -74,29 +77,45 @@ export const ClientFolders = ({
   const [order, setOrder] = useState("asc");
 
   const toggleRow = (rowId, folder) => {
-    const isExpanding = !expandedRows[rowId];
+    try {
+      const isExpanding = !expandedRows[rowId];
 
-    setExpandedRows((prev) => ({
-      ...prev,
-      [rowId]: isExpanding,
-    }));
+      setExpandedRows((prev) => ({
+        ...prev,
+        [rowId]: isExpanding,
+      }));
 
-    // Reports are already loaded on mount, no need to fetch here
+      // Reports are already loaded on mount, no need to fetch here
+    } catch (err) {
+      console.log(`ERROR toggleRow: ${err}`);
+    }
   };
 
   const handleChangePage = (event, newPage) => {
-    setPage(newPage);
+    try {
+      setPage(newPage);
+    } catch (err) {
+      console.log(`ERROR handleChangePage: ${err}`);
+    }
   };
 
   const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
+    try {
+      setRowsPerPage(parseInt(event.target.value, 10));
+      setPage(0);
+    } catch (err) {
+      console.log(`ERROR handleChangeRowsPerPage: ${err}`);
+    }
   };
 
   const handleRequestSort = (property) => {
-    const isAsc = orderBy === property && order === "asc";
-    setOrder(isAsc ? "desc" : "asc");
-    setOrderBy(property);
+    try {
+      const isAsc = orderBy === property && order === "asc";
+      setOrder(isAsc ? "desc" : "asc");
+      setOrderBy(property);
+    } catch (err) {
+      console.log(`ERROR handleRequestSort: ${err}`);
+    }
   };
 
   // Sort and paginate data
@@ -143,7 +162,7 @@ export const ClientFolders = ({
               ...titlesTypography.primaryTitle,
             }}
           >
-            Client Folders
+            {t("reportsManagement.clientFolders.title")}
           </Typography>
           <Stack direction="row" spacing={2}>
             <Button
@@ -153,7 +172,7 @@ export const ClientFolders = ({
               onClick={openFolderAccessModal}
               sx={primaryIconButton}
             >
-              Manage Access
+              {t("reportsManagement.clientFolders.manageAccess")}
             </Button>
             <Button
               variant="outlined"
@@ -164,7 +183,7 @@ export const ClientFolders = ({
               disabled={loading}
               sx={outlinedIconButton}
             >
-              {loading ? "Loading..." : "Refresh Folders"}
+              {loading ? t("reportsManagement.clientFolders.loading") : t("reportsManagement.clientFolders.refreshFolders")}
             </Button>
           </Stack>
         </Box>
@@ -172,10 +191,10 @@ export const ClientFolders = ({
         <Box sx={{ textAlign: "center", py: 8 }}>
           <FolderIcon sx={{ fontSize: 64, color: "text.disabled", mb: 2 }} />
           <Typography variant="h6" fontWeight="medium" gutterBottom>
-            No client folders found
+            {t("reportsManagement.clientFolders.noFoldersFound")}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Create folders in your S3 bucket: client-access-reports/your-client-name/
+            {t("reportsManagement.clientFolders.noFoldersMessage")}
           </Typography>
         </Box>
       </Box>
@@ -197,7 +216,7 @@ export const ClientFolders = ({
             ...titlesTypography.primaryTitle,
           }}
         >
-          Client Folders
+          {t("reportsManagement.clientFolders.title")}
         </Typography>
         <Stack direction="row" spacing={2}>
           <Button
@@ -207,7 +226,7 @@ export const ClientFolders = ({
             onClick={openFolderAccessModal}
             sx={primaryIconButton}
           >
-            Manage Access
+            {t("reportsManagement.clientFolders.manageAccess")}
           </Button>
           <Button
             variant="outlined"
@@ -218,7 +237,7 @@ export const ClientFolders = ({
             disabled={loading}
             sx={outlinedIconButton}
           >
-            {loading ? "Loading..." : "Refresh Folders"}
+            {loading ? t("reportsManagement.clientFolders.loading") : t("reportsManagement.clientFolders.refreshFolders")}
           </Button>
         </Stack>
       </Box>
@@ -255,7 +274,7 @@ export const ClientFolders = ({
                     },
                   }}
                 >
-                  CLIENT FOLDER
+                  {t("reportsManagement.clientFolders.columnFolder")}
                 </TableSortLabel>
               </TableCell>
               <TableCell align="center">
@@ -275,7 +294,7 @@ export const ClientFolders = ({
                     },
                   }}
                 >
-                  REPORTS
+                  {t("reportsManagement.clientFolders.columnReports")}
                 </TableSortLabel>
               </TableCell>
             </TableRow>
@@ -374,7 +393,7 @@ export const ClientFolders = ({
                                 fontFamily: typography.fontFamily,
                               }}
                             >
-                              {folder} Reports
+                              {folder} {t("reportsManagement.clientFolders.reportsFor")}
                             </Typography>
                             <Stack direction="row" spacing={1}>
                               <Button
@@ -385,7 +404,7 @@ export const ClientFolders = ({
                                 onClick={() => setShowUploadModal(folder)}
                                 sx={primaryIconButton}
                               >
-                                Upload Report
+                                {t("reportsManagement.reports.uploadReport")}
                               </Button>
                             </Stack>
                           </Box>
@@ -393,7 +412,7 @@ export const ClientFolders = ({
                           {loadingReports ? (
                             <Box sx={{ textAlign: "center", py: 4 }}>
                               <CircularProgress size={36} sx={{ mb: 1 }} />
-                              <Typography variant="body2">Loading reports...</Typography>
+                              <Typography variant="body2">{t("reportsManagement.reports.loadingReports")}</Typography>
                             </Box>
                           ) : folderReports.length === 0 ? (
                             <Box sx={{ textAlign: "center", py: 4 }}>
@@ -401,7 +420,7 @@ export const ClientFolders = ({
                                 sx={{ fontSize: 48, color: "text.disabled", mb: 1 }}
                               />
                               <Typography variant="body2" color="text.secondary">
-                                No reports found for this folder
+                                {t("reportsManagement.reports.noReportsForFolder")}
                               </Typography>
                             </Box>
                           ) : (
@@ -415,11 +434,11 @@ export const ClientFolders = ({
                               <Table size="small">
                                 <TableHead sx={table.header}>
                                   <TableRow>
-                                    <TableCell sx={table.headerCell}>File Name</TableCell>
-                                    <TableCell sx={table.headerCell}>Size</TableCell>
-                                    <TableCell sx={table.headerCell}>Last Modified</TableCell>
+                                    <TableCell sx={table.headerCell}>{t("reportsManagement.reports.fileName")}</TableCell>
+                                    <TableCell sx={table.headerCell}>{t("reportsManagement.reports.size")}</TableCell>
+                                    <TableCell sx={table.headerCell}>{t("reportsManagement.reports.lastModified")}</TableCell>
                                     <TableCell sx={{ ...table.headerCell, textAlign: "right" }}>
-                                      Actions
+                                      {t("reportsManagement.reports.actions")}
                                     </TableCell>
                                   </TableRow>
                                 </TableHead>
@@ -473,7 +492,7 @@ export const ClientFolders = ({
                                           spacing={0.5}
                                           justifyContent="flex-end"
                                         >
-                                          <Tooltip title="Download">
+                                          <Tooltip title={t("reportsManagement.reports.download")}>
                                             <IconButton
                                               size="small"
                                               onClick={() => handleDownloadReport(folder, report)}
@@ -487,7 +506,7 @@ export const ClientFolders = ({
                                               <DownloadIcon fontSize="small" />
                                             </IconButton>
                                           </Tooltip>
-                                          <Tooltip title="Delete">
+                                          <Tooltip title={t("reportsManagement.reports.delete")}>
                                             <IconButton
                                               size="small"
                                               onClick={() => handleDeleteReport(folder, report)}
@@ -550,7 +569,7 @@ export const ClientFolders = ({
               alignItems: "center",
             }}
           >
-            <Typography variant="h6">Upload Report</Typography>
+            <Typography variant="h6">{t("reportsManagement.upload.title")}</Typography>
             <IconButton onClick={() => setShowUploadModal(null)} size="small">
               <CloseIcon />
             </IconButton>
@@ -559,16 +578,16 @@ export const ClientFolders = ({
         <DialogContent dividers>
           <Stack spacing={3}>
             <TextField
-              label="Client Folder"
+              label={t("reportsManagement.upload.clientFolder")}
               value={selectedFolderForUpload || ""}
-              InputProps={{ readOnly: true }}
+              slotProps={{ input: { readOnly: true } }}
               fullWidth
               disabled
             />
 
             <TextField
-              label="Report Name (Optional)"
-              placeholder="Leave empty to use filename"
+              label={t("reportsManagement.upload.reportName")}
+              placeholder={t("reportsManagement.upload.reportNamePlaceholder")}
               value={uploadForm.reportName}
               onChange={(e) =>
                 setUploadForm({ ...uploadForm, reportName: e.target.value })
@@ -577,8 +596,8 @@ export const ClientFolders = ({
             />
 
             <TextField
-              label="Description (Optional)"
-              placeholder="Brief description of the report"
+              label={t("reportsManagement.upload.description")}
+              placeholder={t("reportsManagement.upload.descriptionPlaceholder")}
               value={uploadForm.description}
               onChange={(e) =>
                 setUploadForm({ ...uploadForm, description: e.target.value })
@@ -605,7 +624,7 @@ export const ClientFolders = ({
                   fullWidth
                   sx={outlinedIconButton}
                 >
-                  {uploadForm.file ? uploadForm.file.name : "Choose PDF File"}
+                  {uploadForm.file ? uploadForm.file.name : t("reportsManagement.upload.chooseFile")}
                 </Button>
               </label>
               <Typography
@@ -613,7 +632,7 @@ export const ClientFolders = ({
                 color="text.secondary"
                 sx={{ mt: 1, display: "block" }}
               >
-                Only PDF files are allowed (max 50MB)
+                {t("reportsManagement.upload.fileRestriction")}
               </Typography>
             </Box>
           </Stack>
@@ -623,7 +642,7 @@ export const ClientFolders = ({
             onClick={() => setShowUploadModal(null)}
             sx={outlinedIconButton}
           >
-            Cancel
+            {t("reportsManagement.upload.cancel")}
           </Button>
           <Button
             variant="contained"
@@ -634,12 +653,57 @@ export const ClientFolders = ({
             }
             sx={primaryIconButton}
           >
-            {uploading ? "Uploading..." : "Upload Report"}
+            {uploading ? t("reportsManagement.upload.uploading") : t("reportsManagement.upload.upload")}
           </Button>
         </DialogActions>
       </Dialog>
     </Box>
   );
+};
+
+ClientFolders.propTypes = {
+  clientFolders: PropTypes.arrayOf(PropTypes.string),
+  loading: PropTypes.bool,
+  refetchFolders: PropTypes.func.isRequired,
+  openFolderAccessModal: PropTypes.func.isRequired,
+  reports: PropTypes.objectOf(
+    PropTypes.arrayOf(
+      PropTypes.shape({
+        key: PropTypes.string.isRequired,
+        name: PropTypes.string.isRequired,
+        size: PropTypes.number.isRequired,
+        lastModified: PropTypes.string.isRequired,
+      })
+    )
+  ),
+  loadingReports: PropTypes.bool,
+  fetchReportsForFolder: PropTypes.func.isRequired,
+  handleDownloadReport: PropTypes.func.isRequired,
+  handleDeleteReport: PropTypes.func.isRequired,
+  formatFileSize: PropTypes.func.isRequired,
+  formatDate: PropTypes.func.isRequired,
+  showUploadModal: PropTypes.string,
+  setShowUploadModal: PropTypes.func.isRequired,
+  uploadForm: PropTypes.shape({
+    reportName: PropTypes.string,
+    description: PropTypes.string,
+    file: PropTypes.object,
+  }).isRequired,
+  setUploadForm: PropTypes.func.isRequired,
+  handleFileSelect: PropTypes.func.isRequired,
+  handleUploadReport: PropTypes.func.isRequired,
+  uploading: PropTypes.bool.isRequired,
+  fileInputRef: PropTypes.object.isRequired,
+  selectedFolderForUpload: PropTypes.string,
+};
+
+ClientFolders.defaultProps = {
+  clientFolders: [],
+  loading: false,
+  reports: {},
+  loadingReports: false,
+  showUploadModal: null,
+  selectedFolderForUpload: null,
 };
 
 export default ClientFolders;

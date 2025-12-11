@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import {
   Box,
   FormControl,
@@ -8,7 +9,7 @@ import {
   IconButton,
 } from "@mui/material";
 import FilterListIcon from "@mui/icons-material/FilterList";
-import { colors } from "../../../../common/styles/styles";
+import { colors, filterStyles } from "../../../../common/styles/styles";
 import { useTranslation } from "react-i18next";
 
 export const CompanyFilter = ({
@@ -24,15 +25,18 @@ export const CompanyFilter = ({
     <Box
       sx={{ display: "flex", gap: 2, alignItems: "center", marginBottom: 2 }}
     >
-      <FormControl size="small" sx={{ minWidth: 150 }}>
+      <FormControl
+        size="small"
+        sx={{
+          minWidth: 150,
+          "&:hover .MuiInputLabel-root": {
+            color: filters.company ? colors.focusRing : undefined,
+          },
+        }}
+      >
         <InputLabel
           id="company-filter-label"
-          sx={{
-
-            "&.Mui-focused.MuiInputLabel-animated": {
-              color: colors.focusRing,
-            },
-          }}
+          sx={filterStyles?.multiOptionFilter?.inputLabelSection}
         >
           {t("audioRecordings.quickFilter.company")}
         </InputLabel>
@@ -41,18 +45,7 @@ export const CompanyFilter = ({
           value={filters.company || ""}
           onChange={(e) => setCompanyFilter(e.target.value || null)}
           label={t("audioRecordings.quickFilter.company")}
-          sx={{
-            "& .MuiOutlinedInput-notchedOutline": {
-              borderColor: colors.textMuted,
-              borderRadius: "3rem",
-            },
-            "&:hover .MuiOutlinedInput-notchedOutline": {
-              borderColor: colors.focusRing,
-            },
-            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-              borderColor: colors.focusRing,
-            },
-          }}
+          sx={filterStyles?.multiOptionFilter?.selectSection}
         >
           <MenuItem value="">
             <em>{t("audioRecordings.quickFilter.allCompanies")}</em>
@@ -75,4 +68,25 @@ export const CompanyFilter = ({
       </Tooltip>
     </Box>
   );
+};
+
+CompanyFilter.propTypes = {
+  setCompanyFilter: PropTypes.func.isRequired,
+  filters: PropTypes.shape({
+    interactionId: PropTypes.string,
+    customerPhone: PropTypes.string,
+    agentName: PropTypes.string,
+    callType: PropTypes.string,
+    startDate: PropTypes.string,
+    endDate: PropTypes.string,
+    company: PropTypes.string,
+    hasAudio: PropTypes.string,
+  }).isRequired,
+  companies: PropTypes.arrayOf(
+    PropTypes.shape({
+      name: PropTypes.string.isRequired,
+    })
+  ).isRequired,
+  isOpen: PropTypes.bool.isRequired,
+  setIsOpen: PropTypes.func.isRequired,
 };

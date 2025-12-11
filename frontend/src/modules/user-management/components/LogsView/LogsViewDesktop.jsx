@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import PropTypes from "prop-types";
 import {
   Box,
   Card,
@@ -57,55 +58,76 @@ export const LogsView = () => {
 
   // Format timestamp
   const formatTimestamp = (timestamp) => {
-    const date = new Date(timestamp);
-    return date.toLocaleString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    });
+    try {
+      const locale = t("common.locale") || "en-US";
+      const date = new Date(timestamp);
+      return date.toLocaleString(locale, {
+        year: "numeric",
+        month: "short",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      });
+    } catch (err) {
+      console.log(`ERROR formatTimestamp: ${err}`);
+      return timestamp;
+    }
   };
 
   // Clean IPv6-mapped IPv4 addresses
   const cleanIpAddress = (ip) => {
-    if (!ip) return "N/A";
-    // Remove ::ffff: prefix if present
-    return ip.startsWith("::ffff:") ? ip.replace("::ffff:", "") : ip;
+    try {
+      if (!ip) return "N/A";
+      // Remove ::ffff: prefix if present
+      return ip.startsWith("::ffff:") ? ip.replace("::ffff:", "") : ip;
+    } catch (err) {
+      console.log(`ERROR cleanIpAddress: ${err}`);
+      return "N/A";
+    }
   };
 
   // Get status color
   const getStatusColor = (status) => {
-    switch (status) {
-      case "SUCCESS":
-        return "success";
-      case "FAILURE":
-        return "error";
-      case "WARNING":
-        return "warning";
-      default:
-        return "default";
+    try {
+      switch (status) {
+        case "SUCCESS":
+          return "success";
+        case "FAILURE":
+          return "error";
+        case "WARNING":
+          return "warning";
+        default:
+          return "default";
+      }
+    } catch (err) {
+      console.log(`ERROR getStatusColor: ${err}`);
+      return "default";
     }
   };
 
   // Get event type color
   const getEventTypeColor = (eventType) => {
-    switch (eventType) {
-      case "CREATE":
-        return "success";
-      case "UPDATE":
-        return "info";
-      case "DELETE":
-        return "error";
-      case "LOGIN":
-        return "primary";
-      case "LOGOUT":
-        return "default";
-      case "AUDIO_PLAYBACK":
-        return "secondary";
-      default:
-        return "default";
+    try {
+      switch (eventType) {
+        case "CREATE":
+          return "success";
+        case "UPDATE":
+          return "info";
+        case "DELETE":
+          return "error";
+        case "LOGIN":
+          return "primary";
+        case "LOGOUT":
+          return "default";
+        case "AUDIO_PLAYBACK":
+          return "secondary";
+        default:
+          return "default";
+      }
+    } catch (err) {
+      console.log(`ERROR getEventTypeColor: ${err}`);
+      return "default";
     }
   };
 
@@ -114,14 +136,14 @@ export const LogsView = () => {
     () => [
       {
         field: "id",
-        headerName: "Event ID",
+        headerName: t("userManagement.logs.eventId"),
         width: 280,
         align: "center",
         headerAlign: "center",
       },
       {
         field: "timestamp",
-        headerName: "Timestamp",
+        headerName: t("userManagement.logs.timestamp"),
         width: 200,
         align: "center",
         headerAlign: "center",
@@ -129,14 +151,14 @@ export const LogsView = () => {
       },
       {
         field: "userId",
-        headerName: "User ID",
+        headerName: t("userManagement.logs.userId"),
         width: 100,
         align: "center",
         headerAlign: "center",
       },
       {
         field: "eventType",
-        headerName: "Event Type",
+        headerName: t("userManagement.logs.eventType"),
         width: 140,
         align: "center",
         headerAlign: "center",
@@ -152,7 +174,7 @@ export const LogsView = () => {
       },
       {
         field: "entity",
-        headerName: "Entity",
+        headerName: t("userManagement.logs.entity"),
         width: 120,
         align: "center",
         headerAlign: "center",
@@ -164,7 +186,7 @@ export const LogsView = () => {
       },
       {
         field: "description",
-        headerName: "Description",
+        headerName: t("userManagement.logs.description"),
         flex: 1,
         minWidth: 300,
         align: "left",
@@ -172,7 +194,7 @@ export const LogsView = () => {
       },
       {
         field: "ipAddress",
-        headerName: "IP Address",
+        headerName: t("userManagement.logs.ipAddress"),
         width: 150,
         align: "center",
         headerAlign: "center",
@@ -187,7 +209,7 @@ export const LogsView = () => {
       },
       {
         field: "status",
-        headerName: "Status",
+        headerName: t("userManagement.logs.status"),
         width: 200,
         align: "center",
         headerAlign: "center",
@@ -200,7 +222,7 @@ export const LogsView = () => {
         ),
       },
     ],
-    [cleanIpAddress]
+    [t, formatTimestamp, getEventTypeColor, cleanIpAddress, getStatusColor]
   );
 
   return (
@@ -225,8 +247,8 @@ export const LogsView = () => {
           >
             <TextField
               sx={{ flex: 1 }}
-              label="Search Logs"
-              placeholder="Search by ID, user, event, entity, description, or status..."
+              label={t("userManagement.logs.searchLabel")}
+              placeholder={t("userManagement.logs.searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               InputProps={{
@@ -244,8 +266,8 @@ export const LogsView = () => {
       {/* Error Alert */}
       {error && (
         <Alert severity="error" sx={{ mb: 3 }}>
-          Error loading logs:{" "}
-          {error?.data?.error || error?.error || "Unknown error"}
+          {t("userManagement.logs.errorLoading")}:{" "}
+          {error?.data?.error || error?.error || t("userManagement.logs.unknownError")}
         </Alert>
       )}
 
@@ -303,6 +325,15 @@ export const LogsView = () => {
               color: colors.textPrimary,
             },
             "& .MuiDataGrid-cell:focus": {
+              outline: "none",
+            },
+            "& .MuiDataGrid-cell:focus-within": {
+              outline: "none",
+            },
+            "& .MuiDataGrid-columnHeader:focus": {
+              outline: "none",
+            },
+            "& .MuiDataGrid-columnHeader:focus-within": {
               outline: "none",
             },
             "& .MuiDataGrid-row:hover": {

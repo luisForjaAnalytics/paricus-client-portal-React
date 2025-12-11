@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Box,
   Button,
@@ -38,41 +39,48 @@ export const ClientsTabDesktop = ({
   formatDate,
   onAddClick,
 }) => {
+  const { t } = useTranslation();
+
   // State for filters
   const [selectedStatus, setSelectedStatus] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
   // Filter clients based on status and search query
   const filteredClients = useMemo(() => {
-    let filtered = clients;
+    try {
+      let filtered = clients;
 
-    // Filter by status
-    if (selectedStatus === "active") {
-      filtered = filtered.filter((client) => client.isActive);
-    } else if (selectedStatus === "inactive") {
-      filtered = filtered.filter((client) => !client.isActive);
-    } else if (selectedStatus === "prospect") {
-      filtered = filtered.filter((client) => client.isProspect);
-    } else if (selectedStatus === "client") {
-      filtered = filtered.filter((client) => !client.isProspect);
+      // Filter by status
+      if (selectedStatus === "active") {
+        filtered = filtered.filter((client) => client.isActive);
+      } else if (selectedStatus === "inactive") {
+        filtered = filtered.filter((client) => !client.isActive);
+      } else if (selectedStatus === "prospect") {
+        filtered = filtered.filter((client) => client.isProspect);
+      } else if (selectedStatus === "client") {
+        filtered = filtered.filter((client) => !client.isProspect);
+      }
+
+      // Filter by search query
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        filtered = filtered.filter((client) =>
+          client.name?.toLowerCase().includes(query)
+        );
+      }
+
+      return filtered;
+    } catch (err) {
+      console.log(`ERROR filteredClients: ${err}`);
+      return clients;
     }
-
-    // Filter by search query
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter((client) =>
-        client.name?.toLowerCase().includes(query)
-      );
-    }
-
-    return filtered;
   }, [clients, selectedStatus, searchQuery]);
   // DataGrid columns
   const columns = useMemo(
     () => [
       {
         field: "name",
-        headerName: "Client Name",
+        headerName: t("clients.table.clientName"),
         flex: 1,
         align: "left",
         headerAlign: "center",
@@ -84,13 +92,13 @@ export const ClientsTabDesktop = ({
       },
       {
         field: "type",
-        headerName: "Type",
+        headerName: t("clients.table.type"),
         flex: 1,
         align: "center",
         headerAlign: "center",
         renderCell: (params) => (
           <Chip
-            label={params.row.isProspect ? "Prospect" : "Client"}
+            label={params.row.isProspect ? t("clients.table.prospect") : t("clients.table.client")}
             color={params.row.isProspect ? "warning" : "primary"}
             size="small"
           />
@@ -98,13 +106,13 @@ export const ClientsTabDesktop = ({
       },
       {
         field: "isActive",
-        headerName: "Status",
+        headerName: t("clients.table.status"),
         flex: 1,
         align: "center",
         headerAlign: "center",
         renderCell: (params) => (
           <Chip
-            label={params.value ? "Active" : "Inactive"}
+            label={params.value ? t("common.active") : t("common.inactive")}
             color={params.value ? "success" : "error"}
             size="small"
           />
@@ -112,21 +120,21 @@ export const ClientsTabDesktop = ({
       },
       {
         field: "userCount",
-        headerName: "Users",
+        headerName: t("clients.table.users"),
         flex: 1,
         align: "center",
         headerAlign: "center",
       },
       {
         field: "roleCount",
-        headerName: "Roles",
+        headerName: t("clients.table.roles"),
         flex: 1,
         align: "center",
         headerAlign: "center",
       },
       {
         field: "createdAt",
-        headerName: "Created",
+        headerName: t("clients.table.created"),
         flex: 1,
         align: "center",
         headerAlign: "center",
@@ -134,7 +142,7 @@ export const ClientsTabDesktop = ({
       },
       {
         field: "actions",
-        headerName: "Actions",
+        headerName: t("clients.table.actions"),
         flex: 1,
         align: "center",
         headerAlign: "center",
@@ -143,7 +151,7 @@ export const ClientsTabDesktop = ({
         disableColumnMenu: true,
         renderCell: (params) => (
           <Box sx={{ display: "flex", gap: 0.5, justifyContent: "center" }}>
-            <Tooltip title="Edit client">
+            <Tooltip title={t("clients.actions.edit")}>
               <IconButton
                 size="small"
                 onClick={() => handleEdit(params.row.original)}
@@ -151,7 +159,7 @@ export const ClientsTabDesktop = ({
                 <EditIcon fontSize="small" />
               </IconButton>
             </Tooltip>
-            <Tooltip title="Deactivate client">
+            <Tooltip title={t("clients.actions.deactivate")}>
               <span>
                 <IconButton
                   size="small"
@@ -166,22 +174,28 @@ export const ClientsTabDesktop = ({
         ),
       },
     ],
-    []
+    [t, handleEdit, handleDeactivate, formatDate]
   );
 
   // Transform clients data for DataGrid
   const rows = useMemo(
-    () =>
-      filteredClients.map((client) => ({
-        id: client.id,
-        name: client.name,
-        isProspect: client.isProspect,
-        isActive: client.isActive,
-        userCount: client.userCount || client._count?.users || 0,
-        roleCount: client.roleCount || client._count?.roles || 0,
-        createdAt: client.createdAt,
-        original: client, // Keep original object for actions
-      })),
+    () => {
+      try {
+        return filteredClients.map((client) => ({
+          id: client.id,
+          name: client.name,
+          isProspect: client.isProspect,
+          isActive: client.isActive,
+          userCount: client.userCount || client._count?.users || 0,
+          roleCount: client.roleCount || client._count?.roles || 0,
+          createdAt: client.createdAt,
+          original: client, // Keep original object for actions
+        }));
+      } catch (err) {
+        console.log(`ERROR rows: ${err}`);
+        return [];
+      }
+    },
     [filteredClients]
   );
 
@@ -206,23 +220,23 @@ export const ClientsTabDesktop = ({
           >
             <Box sx={{ display: "flex", gap: 2, flex: 1 }}>
               <FormControl sx={{ minWidth: 250 }}>
-                <InputLabel>Filter by Status</InputLabel>
+                <InputLabel>{t("clients.filterByStatus")}</InputLabel>
                 <Select
                   value={selectedStatus}
                   onChange={(e) => setSelectedStatus(e.target.value)}
-                  label="Filter by Status"
+                  label={t("clients.filterByStatus")}
                 >
-                  <MenuItem value="">All Clients</MenuItem>
-                  <MenuItem value="active">Active</MenuItem>
-                  <MenuItem value="inactive">Inactive</MenuItem>
-                  <MenuItem value="client">Clients Only</MenuItem>
-                  <MenuItem value="prospect">Prospects Only</MenuItem>
+                  <MenuItem value="">{t("clients.allClients")}</MenuItem>
+                  <MenuItem value="active">{t("common.active")}</MenuItem>
+                  <MenuItem value="inactive">{t("common.inactive")}</MenuItem>
+                  <MenuItem value="client">{t("clients.clientsOnly")}</MenuItem>
+                  <MenuItem value="prospect">{t("clients.prospectsOnly")}</MenuItem>
                 </Select>
               </FormControl>
               <TextField
                 sx={{ minWidth: 300 }}
-                label="Search Clients"
-                placeholder="Search by name..."
+                label={t("clients.searchClients")}
+                placeholder={t("clients.searchPlaceholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 InputProps={{
@@ -241,7 +255,7 @@ export const ClientsTabDesktop = ({
               onClick={onAddClick}
               sx={primaryIconButton}
             >
-              Add New Client
+              {t("clients.addClient")}
             </Button>
           </Box>
         </CardContent>
@@ -301,6 +315,15 @@ export const ClientsTabDesktop = ({
               color: colors.textPrimary,
             },
             "& .MuiDataGrid-cell:focus": {
+              outline: "none",
+            },
+            "& .MuiDataGrid-cell:focus-within": {
+              outline: "none",
+            },
+            "& .MuiDataGrid-columnHeader:focus": {
+              outline: "none",
+            },
+            "& .MuiDataGrid-columnHeader:focus-within": {
               outline: "none",
             },
             "& .MuiDataGrid-row:hover": {

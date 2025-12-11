@@ -124,16 +124,27 @@ export const AppBarLayout = ({ titleState, setTitleState }) => {
       />
     </Menu>
   );
-
+  /// Nav Bar responsive features
   return (
-    <Box sx={{ flexGrow: 1 }}>
+    <Box
+      sx={{
+        flexGrow: 1,
+        display: { xs: "flex", md: "contents" },
+        alignContent: "center",
+        margin: { xs: "0.5rem 0 0 0rem", md: "0" },
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
       <AppBar
         position="static"
         sx={{
-          backgroundColor: { xs: colors.primary, md: colors.surface },
+          backgroundColor: { xs: colors.navBarColor, md: colors.surface },
           color: colors.textPrimary,
-          boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)", 
+          boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
           borderBottom: `1px solid ${colors.border}`,
+          borderRadius: { xs: "3rem", md: "0" },
+          width: { xs: "94%", md: "100%" },
         }}
       >
         <Toolbar
@@ -141,8 +152,8 @@ export const AppBarLayout = ({ titleState, setTitleState }) => {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            gap: 2,
-            py: 1.1,
+            gap: 1,
+            padding: { xs: "0 0 0 0.5rem", md: 0 },
           }}
         >
           <MobilMenu />

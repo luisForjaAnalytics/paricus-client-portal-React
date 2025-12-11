@@ -1,4 +1,5 @@
 import * as React from "react";
+import PropTypes from "prop-types";
 import { DataGrid, Toolbar } from "@mui/x-data-grid";
 import Tooltip from "@mui/material/Tooltip";
 import {
@@ -258,76 +259,87 @@ export const TableView = ({
 }) => {
   const { t } = useTranslation();
 
+  // State for advanced filters visibility
+  const [isOpen, setIsOpen] = React.useState(false);
+
   // Wrapper component for AdvancedFilters to work as DataGrid toolbar
-  const AdvancedFiltersToolbar = () => {
-    const [isOpen, setIsOpen] = React.useState(false);
-    // Auth store
-    const authUser = useSelector((state) => state.auth.user);
+  // Memoized to prevent unnecessary re-renders
+  const AdvancedFiltersToolbar = React.useMemo(() => {
+    return () => {
+      // Auth store
+      const authUser = useSelector((state) => state.auth.user);
 
-    // Computed values
-    const isBPOAdmin = authUser?.permissions?.includes("admin_invoices");
+      // Computed values
+      const isBPOAdmin = authUser?.permissions?.includes("admin_invoices");
 
-    return (
-      <>
-        <Toolbar
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            width: "100%",
-            marginTop:'0.6rem'
-          }}
-        >
-          <Box
+      return (
+        <>
+          <Toolbar
             sx={{
-              marginLeft: 6,
-              marginBottom: 2,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              width: "100%",
+              marginTop:'0.6rem'
             }}
           >
-            <Typography
-              sx={{ ...titlesTypography.primaryTitle, marginBottom: "-0.2rem" }}
+            <Box
+              sx={{
+                marginLeft: 6,
+                marginBottom: 2,
+              }}
             >
-              {t("audioRecordings.results.title")}
-            </Typography>
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ lineHeight: 1 }}
-            >
-              {totalCount} {t("audioRecordings.results.totalRecordings")}
-            </Typography>
-          </Box>
+              <Typography
+                sx={{ ...titlesTypography.primaryTitle, marginBottom: "-0.2rem" }}
+              >
+                {t("audioRecordings.results.title")}
+              </Typography>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ lineHeight: 1 }}
+              >
+                {totalCount} {t("audioRecordings.results.totalRecordings")}
+              </Typography>
+            </Box>
 
-          {isBPOAdmin && (
-            <CompanyFilter
-              setCompanyFilter={setCompanyFilter}
-              filters={filters}
-              companies={companies}
-              isOpen={isOpen}
-              setIsOpen={setIsOpen}
-            />
+            {isBPOAdmin && (
+              <CompanyFilter
+                setCompanyFilter={setCompanyFilter}
+                filters={filters}
+                companies={companies}
+                isOpen={isOpen}
+                setIsOpen={setIsOpen}
+              />
+            )}
+          </Toolbar>
+
+          {isOpen && (
+            <Box sx={{
+              px: 2,
+              pb: 2,
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+              <AdvancedFilters
+                filters={filters}
+                refetch={refetch}
+                setFilters={setFilters}
+                setLoadCallTypes={setLoadCallTypes}
+                isDebouncing={isDebouncing}
+                loading={loading}
+                clearFilters={clearFilters}
+                callTypes={callTypes}
+                setCompanyFilter={setCompanyFilter}
+                setAudioFilter={setAudioFilter}
+              />
+            </Box>
           )}
-        </Toolbar>
-
-        {isOpen && (
-          <Box sx={{ px: 2, pb: 2 }}>
-            <AdvancedFilters
-              filters={filters}
-              refetch={refetch}
-              setFilters={setFilters}
-              setLoadCallTypes={setLoadCallTypes}
-              isDebouncing={isDebouncing}
-              loading={loading}
-              clearFilters={clearFilters}
-              callTypes={callTypes}
-              setCompanyFilter={setCompanyFilter}
-              setAudioFilter={setAudioFilter}
-            />
-          </Box>
-        )}
-      </>
-    );
-  };
+        </>
+      );
+    };
+  }, [t, totalCount, setCompanyFilter, filters, isOpen, setIsOpen, refetch, setFilters, setLoadCallTypes, isDebouncing, loading, clearFilters, callTypes, setAudioFilter]);
 
   // Transform recordings data for DataGrid
   const rows = React.useMemo(
@@ -453,6 +465,15 @@ export const TableView = ({
           "& .MuiDataGrid-cell:focus": {
             outline: "none",
           },
+          "& .MuiDataGrid-cell:focus-within": {
+            outline: "none",
+          },
+          "& .MuiDataGrid-columnHeader:focus": {
+            outline: "none",
+          },
+          "& .MuiDataGrid-columnHeader:focus-within": {
+            outline: "none",
+          },
           // Row hover effect
           "& .MuiDataGrid-row:hover": {
             backgroundColor: colors.background, // hover:bg-gray-50
@@ -461,6 +482,61 @@ export const TableView = ({
       />
     </Box>
   );
+};
+
+TableView.propTypes = {
+  dataViewInfo: PropTypes.arrayOf(
+    PropTypes.shape({
+      interaction_id: PropTypes.string.isRequired,
+      companyName: PropTypes.string,
+      call_type: PropTypes.string,
+      start_time: PropTypes.string,
+      end_time: PropTypes.string,
+      customer_phone_number: PropTypes.string,
+      agent_name: PropTypes.string,
+      audiofilename: PropTypes.string,
+    })
+  ),
+  loading: PropTypes.bool,
+  formatDateTime: PropTypes.func.isRequired,
+  toggleAudio: PropTypes.func.isRequired,
+  downloadAudio: PropTypes.func.isRequired,
+  currentlyPlaying: PropTypes.string,
+  loadingAudioUrl: PropTypes.string,
+  handlePrefetchAudio: PropTypes.func.isRequired,
+  page: PropTypes.number,
+  itemsPerPage: PropTypes.number,
+  totalCount: PropTypes.number,
+  onPageChange: PropTypes.func.isRequired,
+  onPageSizeChange: PropTypes.func.isRequired,
+  filters: PropTypes.shape({
+    interactionId: PropTypes.string,
+    customerPhone: PropTypes.string,
+    agentName: PropTypes.string,
+    callType: PropTypes.string,
+    startDate: PropTypes.string,
+    endDate: PropTypes.string,
+    company: PropTypes.string,
+    hasAudio: PropTypes.string,
+  }).isRequired,
+  refetch: PropTypes.func.isRequired,
+  setFilters: PropTypes.func.isRequired,
+  setLoadCallTypes: PropTypes.func.isRequired,
+  isDebouncing: PropTypes.bool.isRequired,
+  clearFilters: PropTypes.func.isRequired,
+  callTypes: PropTypes.arrayOf(PropTypes.string).isRequired,
+  setCompanyFilter: PropTypes.func.isRequired,
+  setAudioFilter: PropTypes.func.isRequired,
+};
+
+TableView.defaultProps = {
+  dataViewInfo: [],
+  loading: false,
+  currentlyPlaying: null,
+  loadingAudioUrl: null,
+  page: 1,
+  itemsPerPage: 10,
+  totalCount: 0,
 };
 
 export default TableView;

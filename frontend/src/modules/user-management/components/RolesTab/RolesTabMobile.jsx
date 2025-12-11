@@ -62,16 +62,35 @@ function Row({
   openEditDialog,
   openPermissionsDialog,
   openDeleteDialog,
+  t,
 }) {
   const [open, setOpen] = React.useState(false);
 
+  const toggleOpen = () => {
+    try {
+      setOpen(!open);
+    } catch (err) {
+      console.log(`ERROR toggleOpen: ${err}`);
+    }
+  };
+
   const getClientName = (clientId) => {
-    const client = clients.find((c) => c.id === clientId);
-    return client ? client.name : "Unknown";
+    try {
+      const client = clients.find((c) => c.id === clientId);
+      return client ? client.name : t("roles.unknownClient");
+    } catch (err) {
+      console.log(`ERROR getClientName: ${err}`);
+      return t("roles.unknownClient");
+    }
   };
 
   const isProtectedRole = (roleName) => {
-    return roleName === "BPO Admin" || roleName === "Client Admin";
+    try {
+      return roleName === "BPO Admin" || roleName === "Client Admin";
+    } catch (err) {
+      console.log(`ERROR isProtectedRole: ${err}`);
+      return false;
+    }
   };
 
   return (
@@ -81,7 +100,7 @@ function Row({
           <IconButton
             aria-label="expand row"
             size="small"
-            onClick={() => setOpen(!open)}
+            onClick={toggleOpen}
           >
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
@@ -123,7 +142,7 @@ function Row({
                     fontWeight="600"
                     sx={{ minWidth: 110 }}
                   >
-                    Client:
+                    {t("roles.table.client")}:
                   </Typography>
                   <Chip
                     label={getClientName(role.client_id)}
@@ -140,7 +159,7 @@ function Row({
                       fontWeight="600"
                       sx={{ minWidth: 110 }}
                     >
-                      Description:
+                      {t("roles.table.description")}:
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       {role.description}
@@ -155,7 +174,7 @@ function Row({
                     fontWeight="600"
                     sx={{ minWidth: 110 }}
                   >
-                    Permissions:
+                    {t("roles.table.permissions")}:
                   </Typography>
                   <Badge
                     badgeContent={role.permissions_count || 0}
@@ -174,10 +193,10 @@ function Row({
                     fontWeight="600"
                     sx={{ minWidth: 110 }}
                   >
-                    Actions:
+                    {t("roles.table.actions")}:
                   </Typography>
                   <Box sx={{ display: "flex", gap: 0.5 }}>
-                    <Tooltip title="Edit Role">
+                    <Tooltip title={t("roles.actions.edit")}>
                       <IconButton
                         size="small"
                         color="primary"
@@ -186,7 +205,7 @@ function Row({
                         <EditIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
-                    <Tooltip title="Manage Permissions">
+                    <Tooltip title={t("roles.actions.configurePermissions")}>
                       <IconButton
                         size="small"
                         color="info"
@@ -195,7 +214,7 @@ function Row({
                         <SecurityIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
-                    <Tooltip title="Delete Role">
+                    <Tooltip title={t("roles.actions.delete")}>
                       <span>
                         <IconButton
                           size="small"
@@ -260,58 +279,78 @@ export const RolesTabMobile = () => {
   const isSaving = isCreating || isUpdating;
 
   const openAddDialog = () => {
-    setEditingRole(null);
-    setRoleForm({
-      role_name: "",
-      description: "",
-      client_id: null,
-    });
-    setDialog(true);
+    try {
+      setEditingRole(null);
+      setRoleForm({
+        role_name: "",
+        description: "",
+        client_id: null,
+      });
+      setDialog(true);
+    } catch (err) {
+      console.log(`ERROR openAddDialog: ${err}`);
+    }
   };
 
   const openEditDialog = (role) => {
-    setEditingRole(role);
-    setRoleForm({
-      role_name: role.role_name,
-      description: role.description || "",
-      client_id: role.client_id,
-    });
-    setDialog(true);
+    try {
+      setEditingRole(role);
+      setRoleForm({
+        role_name: role.role_name,
+        description: role.description || "",
+        client_id: role.client_id,
+      });
+      setDialog(true);
+    } catch (err) {
+      console.log(`ERROR openEditDialog: ${err}`);
+    }
   };
 
   const closeDialog = () => {
-    setDialog(false);
-    setEditingRole(null);
-    setRoleForm({
-      role_name: "",
-      description: "",
-      client_id: null,
-    });
+    try {
+      setDialog(false);
+      setEditingRole(null);
+      setRoleForm({
+        role_name: "",
+        description: "",
+        client_id: null,
+      });
+    } catch (err) {
+      console.log(`ERROR closeDialog: ${err}`);
+    }
   };
 
   const openPermissionsDialog = async (role) => {
-    setSelectedRole(role);
-
-    if (!role.id) {
-      showNotification("Invalid role selected", "error");
-      return;
-    }
-
     try {
-      const result = await getRolePermissions(role.id).unwrap();
-      setSelectedPermissions(result);
-    } catch (error) {
-      console.error("Error fetching role permissions:", error);
-      setSelectedPermissions([]);
-    }
+      setSelectedRole(role);
 
-    setPermissionsDialog(true);
+      if (!role.id) {
+        showNotification(t("roles.messages.invalidRole"), "error");
+        return;
+      }
+
+      try {
+        const result = await getRolePermissions(role.id).unwrap();
+        setSelectedPermissions(result);
+      } catch (error) {
+        console.error("Error fetching role permissions:", error);
+        setSelectedPermissions([]);
+      }
+
+      setPermissionsDialog(true);
+    } catch (err) {
+      console.log(`ERROR openPermissionsDialog: ${err}`);
+    }
   };
 
   const closePermissionsDialog = () => {
-    setPermissionsDialog(false);
-    setSelectedRole(null);
-    setSelectedPermissions([]);
+    try {
+      setPermissionsDialog(false);
+      setSelectedRole(null);
+      setSelectedPermissions([]);
+    } catch (err) {
+      console.log(`ERROR closePermissionsDialog: ${err}`);
+    }
   };
 
   const saveRole = async () => {
@@ -326,7 +365,7 @@ export const RolesTabMobile = () => {
           client_id: roleForm.client_id,
         };
         await updateRole(updateData).unwrap();
-        showNotification("Role updated successfully", "success");
+        showNotification(t("roles.messages.roleUpdated"), "success");
       } else {
         const roleData = {
           clientId: roleForm.client_id,
@@ -336,25 +375,25 @@ export const RolesTabMobile = () => {
         };
 
         if (!roleData.clientId) {
-          showNotification("Please select a client for this role", "error");
+          showNotification(t("roles.messages.selectClient"), "error");
           return;
         }
 
         await createRole(roleData).unwrap();
-        showNotification("Role created successfully", "success");
+        showNotification(t("roles.messages.roleCreated"), "success");
       }
 
       closeDialog();
     } catch (error) {
       const errorMessage =
-        error.data?.error || error.data?.message || "Failed to save role";
+        error.data?.error || error.data?.message || t("roles.messages.roleSaveFailed");
       showNotification(errorMessage, "error");
     }
   };
 
   const savePermissions = async () => {
     if (!selectedRole?.id) {
-      showNotification("Invalid role selected", "error");
+      showNotification(t("roles.messages.invalidRole"), "error");
       return;
     }
 
@@ -364,59 +403,85 @@ export const RolesTabMobile = () => {
         permissions: selectedPermissions,
       }).unwrap();
 
-      showNotification("Permissions updated successfully", "success");
+      showNotification(t("roles.messages.permissionsUpdated"), "success");
       closePermissionsDialog();
     } catch (error) {
-      const errorMessage = error.data?.error || "Failed to save permissions";
+      const errorMessage = error.data?.error || t("roles.messages.permissionsUpdateFailed");
       showNotification(errorMessage, "error");
     }
   };
 
   const confirmDelete = (role) => {
-    setRoleToDelete(role);
-    setDeleteDialog(true);
+    try {
+      setRoleToDelete(role);
+      setDeleteDialog(true);
+    } catch (err) {
+      console.log(`ERROR confirmDelete: ${err}`);
+    }
   };
 
   const handleDeleteRole = async () => {
     try {
       await deleteRole(roleToDelete.id).unwrap();
-      showNotification("Role deleted successfully", "success");
+      showNotification(t("roles.messages.roleDeleted"), "success");
       setDeleteDialog(false);
       setRoleToDelete(null);
     } catch (error) {
-      const errorMessage = error.data?.error || "Failed to delete role";
+      const errorMessage = error.data?.error || t("roles.messages.roleDeleteFailed");
       showNotification(errorMessage, "error");
     }
   };
 
   const handlePermissionToggle = (permissionId) => {
-    setSelectedPermissions((prev) =>
-      prev.includes(permissionId)
-        ? prev.filter((id) => id !== permissionId)
-        : [...prev, permissionId]
-    );
+    try {
+      setSelectedPermissions((prev) =>
+        prev.includes(permissionId)
+          ? prev.filter((id) => id !== permissionId)
+          : [...prev, permissionId]
+      );
+    } catch (err) {
+      console.log(`ERROR handlePermissionToggle: ${err}`);
+    }
   };
 
   const isFormValid = () => {
-    return (
-      roleForm.role_name && roleForm.role_name.length >= 2 && roleForm.client_id
-    );
+    try {
+      return (
+        roleForm.role_name && roleForm.role_name.length >= 2 && roleForm.client_id
+      );
+    } catch (err) {
+      console.log(`ERROR isFormValid: ${err}`);
+      return false;
+    }
   };
 
   const isProtectedRole = (roleName) => {
-    return roleName === "BPO Admin" || roleName === "Client Admin";
+    try {
+      return roleName === "BPO Admin" || roleName === "Client Admin";
+    } catch (err) {
+      console.log(`ERROR isProtectedRole: ${err}`);
+      return false;
+    }
   };
 
   const showNotification = (message, severity = "success") => {
-    setSnackbar({
-      open: true,
-      message,
-      severity,
-    });
+    try {
+      setSnackbar({
+        open: true,
+        message,
+        severity,
+      });
+    } catch (err) {
+      console.log(`ERROR showNotification: ${err}`);
+    }
   };
 
   const handleCloseSnackbar = () => {
-    setSnackbar({ ...snackbar, open: false });
+    try {
+      setSnackbar({ ...snackbar, open: false });
+    } catch (err) {
+      console.log(`ERROR handleCloseSnackbar: ${err}`);
+    }
   };
 
   return (
@@ -456,7 +521,7 @@ export const RolesTabMobile = () => {
                   <Typography sx={titlesTypography.sectionTitle}>
                     {t("userManagement.rolesPermissions.title")}
                   </Typography>
-                  <Tooltip title="Add Role">
+                  <Tooltip title={t("roles.addRole")}>
                     <IconButton
                       color="primary"
                       size="small"
@@ -478,6 +543,7 @@ export const RolesTabMobile = () => {
                 openEditDialog={openEditDialog}
                 openPermissionsDialog={openPermissionsDialog}
                 openDeleteDialog={confirmDelete}
+                t={t}
               />
             ))}
             {roles.length === 0 && (
@@ -488,7 +554,7 @@ export const RolesTabMobile = () => {
                       sx={{ fontSize: 48, color: "text.disabled", mb: 1 }}
                     />
                     <Typography variant="body2" color="text.secondary">
-                      No roles found
+                      {t("roles.noRolesFound")}
                     </Typography>
                     <Button
                       variant="contained"
@@ -496,7 +562,7 @@ export const RolesTabMobile = () => {
                       onClick={openAddDialog}
                       sx={{ mt: 2 }}
                     >
-                      Add Role
+                      {t("roles.addRole")}
                     </Button>
                   </Box>
                 </TableCell>
@@ -508,10 +574,10 @@ export const RolesTabMobile = () => {
 
       {/* Add/Edit Role Dialog */}
       <Dialog open={dialog} onClose={closeDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>{editingRole ? "Edit Role" : "Add New Role"}</DialogTitle>
+        <DialogTitle>{editingRole ? t("roles.editRole") : t("roles.addRole")}</DialogTitle>
         <DialogContent dividers>
           <TextField
-            label="Role Name"
+            label={t("roles.form.roleName")}
             required
             fullWidth
             value={roleForm.role_name}
@@ -524,12 +590,12 @@ export const RolesTabMobile = () => {
             }
             helperText={
               roleForm.role_name.length > 0 && roleForm.role_name.length < 2
-                ? "Role name must be at least 2 characters"
+                ? t("roles.form.roleNameMinLength")
                 : ""
             }
           />
           <TextField
-            label="Description"
+            label={t("roles.form.description")}
             fullWidth
             multiline
             rows={3}
@@ -540,10 +606,10 @@ export const RolesTabMobile = () => {
             sx={{ mb: 3 }}
           />
           <FormControl fullWidth required>
-            <InputLabel>Client</InputLabel>
+            <InputLabel>{t("roles.form.client")}</InputLabel>
             <Select
               value={roleForm.client_id || ""}
-              label="Client"
+              label={t("roles.form.client")}
               onChange={(e) =>
                 setRoleForm({ ...roleForm, client_id: e.target.value })
               }
@@ -559,7 +625,7 @@ export const RolesTabMobile = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={closeDialog} sx={outlinedButton}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button
             variant="contained"
@@ -567,7 +633,7 @@ export const RolesTabMobile = () => {
             disabled={isSaving || !isFormValid()}
             sx={primaryButton}
           >
-            {isSaving ? "Saving..." : "Save"}
+            {isSaving ? t("common.saving") : t("common.save")}
           </Button>
         </DialogActions>
       </Dialog>
@@ -580,11 +646,11 @@ export const RolesTabMobile = () => {
         fullWidth
       >
         <DialogTitle>
-          Configure Permissions - {selectedRole?.role_name}
+          {t("roles.configurePermissions")} - {selectedRole?.role_name}
         </DialogTitle>
         <DialogContent dividers>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Select which permissions this role should have:
+            {t("roles.form.permissionsTitle")}
           </Typography>
           <Grid container spacing={2}>
             {permissions.map((permission) => (
@@ -606,7 +672,7 @@ export const RolesTabMobile = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={closePermissionsDialog} sx={outlinedButton}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button
             variant="contained"
@@ -614,7 +680,7 @@ export const RolesTabMobile = () => {
             disabled={isUpdatingPermissions}
             sx={primaryButton}
           >
-            {isUpdatingPermissions ? "Saving..." : "Save Permissions"}
+            {isUpdatingPermissions ? t("common.saving") : t("roles.actions.savePermissions")}
           </Button>
         </DialogActions>
       </Dialog>
@@ -626,17 +692,15 @@ export const RolesTabMobile = () => {
         maxWidth="xs"
         fullWidth
       >
-        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogTitle>{t("roles.confirmDelete")}</DialogTitle>
         <DialogContent>
           <Typography>
-            Are you sure you want to delete the role "{roleToDelete?.role_name}
-            "? This action cannot be undone and will affect any users assigned
-            to this role.
+            {t("roles.deleteWarning")} "{roleToDelete?.role_name}"? {t("roles.deleteWarningContinue")}
           </Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteDialog(false)} sx={outlinedButton}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button
             variant="contained"
@@ -645,7 +709,7 @@ export const RolesTabMobile = () => {
             disabled={isDeleting}
             sx={primaryButton}
           >
-            {isDeleting ? "Deleting..." : "Delete"}
+            {isDeleting ? t("common.deleting") : t("common.delete")}
           </Button>
         </DialogActions>
       </Dialog>

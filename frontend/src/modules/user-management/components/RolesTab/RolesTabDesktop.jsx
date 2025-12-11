@@ -104,59 +104,79 @@ export const RolesTabDesktop = () => {
   const isSaving = isCreating || isUpdating;
 
   const openAddDialog = () => {
-    setEditingRole(null);
-    setRoleForm({
-      role_name: "",
-      description: "",
-      // For Client Admins, pre-set their clientId
-      client_id: isClientAdmin ? authUser?.clientId : null,
-    });
-    setDialog(true);
+    try {
+      setEditingRole(null);
+      setRoleForm({
+        role_name: "",
+        description: "",
+        // For Client Admins, pre-set their clientId
+        client_id: isClientAdmin ? authUser?.clientId : null,
+      });
+      setDialog(true);
+    } catch (err) {
+      console.log(`ERROR openAddDialog: ${err}`);
+    }
   };
 
   const openEditDialog = (role) => {
-    setEditingRole(role);
-    setRoleForm({
-      role_name: role.roleName || role.role_name,
-      description: role.description || "",
-      client_id: role.clientId || role.client_id,
-    });
-    setDialog(true);
+    try {
+      setEditingRole(role);
+      setRoleForm({
+        role_name: role.roleName || role.role_name,
+        description: role.description || "",
+        client_id: role.clientId || role.client_id,
+      });
+      setDialog(true);
+    } catch (err) {
+      console.log(`ERROR openEditDialog: ${err}`);
+    }
   };
 
   const closeDialog = () => {
-    setDialog(false);
-    setEditingRole(null);
-    setRoleForm({
-      role_name: "",
-      description: "",
-      client_id: null,
-    });
+    try {
+      setDialog(false);
+      setEditingRole(null);
+      setRoleForm({
+        role_name: "",
+        description: "",
+        client_id: null,
+      });
+    } catch (err) {
+      console.log(`ERROR closeDialog: ${err}`);
+    }
   };
 
   const openPermissionsDialog = async (role) => {
-    setSelectedRole(role);
-
-    if (!role.id) {
-      showNotification("Invalid role selected", "error");
-      return;
-    }
-
     try {
-      const result = await getRolePermissions(role.id).unwrap();
-      setSelectedPermissions(result);
-    } catch (error) {
-      console.error("Error fetching role permissions:", error);
-      setSelectedPermissions([]);
-    }
+      setSelectedRole(role);
 
-    setPermissionsDialog(true);
+      if (!role.id) {
+        showNotification(t("roles.messages.invalidRole"), "error");
+        return;
+      }
+
+      try {
+        const result = await getRolePermissions(role.id).unwrap();
+        setSelectedPermissions(result);
+      } catch (error) {
+        console.error("Error fetching role permissions:", error);
+        setSelectedPermissions([]);
+      }
+
+      setPermissionsDialog(true);
+    } catch (err) {
+      console.log(`ERROR openPermissionsDialog: ${err}`);
+    }
   };
 
   const closePermissionsDialog = () => {
-    setPermissionsDialog(false);
-    setSelectedRole(null);
-    setSelectedPermissions([]);
+    try {
+      setPermissionsDialog(false);
+      setSelectedRole(null);
+      setSelectedPermissions([]);
+    } catch (err) {
+      console.log(`ERROR closePermissionsDialog: ${err}`);
+    }
   };
 
   const saveRole = async () => {
@@ -171,7 +191,7 @@ export const RolesTabDesktop = () => {
           client_id: roleForm.client_id,
         };
         await updateRole(updateData).unwrap();
-        showNotification("Role updated successfully", "success");
+        showNotification(t("roles.messages.roleUpdated"), "success");
       } else {
         const roleData = {
           clientId: roleForm.client_id,
@@ -181,25 +201,25 @@ export const RolesTabDesktop = () => {
         };
 
         if (!roleData.clientId) {
-          showNotification("Please select a client for this role", "error");
+          showNotification(t("roles.messages.selectClient"), "error");
           return;
         }
 
         await createRole(roleData).unwrap();
-        showNotification("Role created successfully", "success");
+        showNotification(t("roles.messages.roleCreated"), "success");
       }
 
       closeDialog();
     } catch (error) {
       const errorMessage =
-        error.data?.error || error.data?.message || "Failed to save role";
+        error.data?.error || error.data?.message || t("roles.messages.roleSaveFailed");
       showNotification(errorMessage, "error");
     }
   };
 
   const savePermissions = async () => {
     if (!selectedRole?.id) {
-      showNotification("Invalid role selected", "error");
+      showNotification(t("roles.messages.invalidRole"), "error");
       return;
     }
 
@@ -209,84 +229,121 @@ export const RolesTabDesktop = () => {
         permissions: selectedPermissions,
       }).unwrap();
 
-      showNotification("Permissions updated successfully", "success");
+      showNotification(t("roles.messages.permissionsUpdated"), "success");
       closePermissionsDialog();
     } catch (error) {
-      const errorMessage = error.data?.error || "Failed to save permissions";
+      const errorMessage = error.data?.error || t("roles.messages.permissionsUpdateFailed");
       showNotification(errorMessage, "error");
     }
   };
 
   const confirmDelete = (role) => {
-    setRoleToDelete(role);
-    setDeleteDialog(true);
+    try {
+      setRoleToDelete(role);
+      setDeleteDialog(true);
+    } catch (err) {
+      console.log(`ERROR confirmDelete: ${err}`);
+    }
   };
 
   const handleDeleteRole = async () => {
     try {
       await deleteRole(roleToDelete.id).unwrap();
-      showNotification("Role deleted successfully", "success");
+      showNotification(t("roles.messages.roleDeleted"), "success");
       setDeleteDialog(false);
       setRoleToDelete(null);
     } catch (error) {
-      const errorMessage = error.data?.error || "Failed to delete role";
+      const errorMessage = error.data?.error || t("roles.messages.roleDeleteFailed");
       showNotification(errorMessage, "error");
     }
   };
 
   const handlePermissionToggle = (permissionId) => {
-    setSelectedPermissions((prev) =>
-      prev.includes(permissionId)
-        ? prev.filter((id) => id !== permissionId)
-        : [...prev, permissionId]
-    );
+    try {
+      setSelectedPermissions((prev) =>
+        prev.includes(permissionId)
+          ? prev.filter((id) => id !== permissionId)
+          : [...prev, permissionId]
+      );
+    } catch (err) {
+      console.log(`ERROR handlePermissionToggle: ${err}`);
+    }
   };
 
   const isFormValid = () => {
-    return (
-      roleForm.role_name && roleForm.role_name.length >= 2 && roleForm.client_id
-    );
+    try {
+      return (
+        roleForm.role_name && roleForm.role_name.length >= 2 && roleForm.client_id
+      );
+    } catch (err) {
+      console.log(`ERROR isFormValid: ${err}`);
+      return false;
+    }
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString();
+    try {
+      const locale = t("common.locale") || "en-US";
+      return new Date(dateString).toLocaleDateString(locale);
+    } catch (err) {
+      console.log(`ERROR formatDate: ${err}`);
+      return dateString;
+    }
   };
 
   const showNotification = (message, severity = "success") => {
-    setSnackbar({
-      open: true,
-      message,
-      severity,
-    });
+    try {
+      setSnackbar({
+        open: true,
+        message,
+        severity,
+      });
+    } catch (err) {
+      console.log(`ERROR showNotification: ${err}`);
+    }
   };
 
   const handleCloseSnackbar = () => {
-    setSnackbar({ ...snackbar, open: false });
+    try {
+      setSnackbar({ ...snackbar, open: false });
+    } catch (err) {
+      console.log(`ERROR handleCloseSnackbar: ${err}`);
+    }
   };
 
   const filteredRoles = useMemo(() => {
-    let filtered = roles;
+    try {
+      let filtered = roles;
 
-    // Filter by client
-    if (selectedClient) {
-      filtered = filtered.filter((role) => (role.clientId || role.client_id) === selectedClient);
+      // Filter by client
+      if (selectedClient) {
+        filtered = filtered.filter((role) => (role.clientId || role.client_id) === selectedClient);
+      }
+
+      // Filter by search query (role name or description)
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        filtered = filtered.filter(
+          (role) =>
+            (role.roleName || role.role_name)?.toLowerCase().includes(query) ||
+            role.description?.toLowerCase().includes(query)
+        );
+      }
+
+      return filtered;
+    } catch (err) {
+      console.log(`ERROR filteredRoles: ${err}`);
+      return roles;
     }
-
-    // Filter by search query (role name or description)
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (role) =>
-          (role.roleName || role.role_name)?.toLowerCase().includes(query) ||
-          role.description?.toLowerCase().includes(query)
-      );
-    }
-
-    return filtered;
   }, [roles, selectedClient, searchQuery]);
 
   const isProtectedRole = (roleName) => {
-    return roleName === "BPO Admin" || roleName === "Client Admin";
+    try {
+      return roleName === "BPO Admin" || roleName === "Client Admin";
+    } catch (err) {
+      console.log(`ERROR isProtectedRole: ${err}`);
+      return false;
+    }
   };
 
   // DataGrid columns
@@ -294,7 +351,7 @@ export const RolesTabDesktop = () => {
     () => [
       {
         field: "role_name",
-        headerName: "Role Name",
+        headerName: t("roles.table.roleName"),
         flex: 1,
         align: "left",
         headerAlign: "center",
@@ -306,14 +363,14 @@ export const RolesTabDesktop = () => {
       },
       {
         field: "description",
-        headerName: "Description",
+        headerName: t("roles.table.description"),
         flex: 1,
         align: "left",
         headerAlign: "center",
       },
       {
         field: "client_name",
-        headerName: "Client",
+        headerName: t("roles.table.client"),
         flex: 1,
         align: "left",
         headerAlign: "center",
@@ -328,7 +385,7 @@ export const RolesTabDesktop = () => {
       },
       {
         field: "permissions_count",
-        headerName: "Permissions",
+        headerName: t("roles.table.permissions"),
         flex: 1,
         align: "center",
         headerAlign: "center",
@@ -340,7 +397,7 @@ export const RolesTabDesktop = () => {
       },
       {
         field: "created_at",
-        headerName: "Created",
+        headerName: t("roles.table.created"),
         flex: 1,
         align: "center",
         headerAlign: "center",
@@ -348,7 +405,7 @@ export const RolesTabDesktop = () => {
       },
       {
         field: "actions",
-        headerName: "Actions",
+        headerName: t("roles.table.actions"),
         flex: 1,
         align: "center",
         headerAlign: "center",
@@ -357,7 +414,7 @@ export const RolesTabDesktop = () => {
         disableColumnMenu: true,
         renderCell: (params) => (
           <Box sx={{ display: "flex", gap: 0.5, justifyContent: "center" }}>
-            <Tooltip title="Edit role">
+            <Tooltip title={t("roles.actions.edit")}>
               <IconButton
                 size="small"
                 onClick={() => openEditDialog(params.row.original)}
@@ -365,7 +422,7 @@ export const RolesTabDesktop = () => {
                 <EditIcon fontSize="small" />
               </IconButton>
             </Tooltip>
-            <Tooltip title="Configure permissions">
+            <Tooltip title={t("roles.actions.configurePermissions")}>
               <IconButton
                 size="small"
                 color="success"
@@ -374,7 +431,7 @@ export const RolesTabDesktop = () => {
                 <SecurityIcon fontSize="small" />
               </IconButton>
             </Tooltip>
-            <Tooltip title="Delete role">
+            <Tooltip title={t("roles.actions.delete")}>
               <span>
                 <IconButton
                   size="small"
@@ -390,21 +447,27 @@ export const RolesTabDesktop = () => {
         ),
       },
     ],
-    [openEditDialog, openPermissionsDialog, confirmDelete]
+    [t, openEditDialog, openPermissionsDialog, confirmDelete, formatDate]
   );
 
   // Transform roles data for DataGrid
   const rows = useMemo(
-    () =>
-      filteredRoles.map((role) => ({
-        id: role.id,
-        role_name: role.roleName || role.role_name,
-        description: role.description,
-        client_name: role.clientName || role.client_name,
-        permissions_count: role.permissions?.length || role.permissions_count || role.userCount || 0,
-        created_at: role.createdAt || role.created_at,
-        original: role, // Keep original object for actions
-      })),
+    () => {
+      try {
+        return filteredRoles.map((role) => ({
+          id: role.id,
+          role_name: role.roleName || role.role_name,
+          description: role.description,
+          client_name: role.clientName || role.client_name,
+          permissions_count: role.permissions?.length || role.permissions_count || role.userCount || 0,
+          created_at: role.createdAt || role.created_at,
+          original: role, // Keep original object for actions
+        }));
+      } catch (err) {
+        console.log(`ERROR rows: ${err}`);
+        return [];
+      }
+    },
     [filteredRoles]
   );
 
@@ -429,13 +492,13 @@ export const RolesTabDesktop = () => {
             <Box sx={{ display: "flex", gap: 2, flex: 1 }}>
               {isBPOAdmin && (
                 <FormControl sx={{ minWidth: 250 }}>
-                  <InputLabel>Filter by Client</InputLabel>
+                  <InputLabel>{t("roles.filterByClient")}</InputLabel>
                   <Select
                     value={selectedClient}
-                    label="Filter by Client"
+                    label={t("roles.filterByClient")}
                     onChange={(e) => setSelectedClient(e.target.value)}
                   >
-                    <MenuItem value="">All Clients</MenuItem>
+                    <MenuItem value="">{t("roles.allClients")}</MenuItem>
                     {clients.map((client) => (
                       <MenuItem key={client.id} value={client.id}>
                         {client.name}
@@ -446,8 +509,8 @@ export const RolesTabDesktop = () => {
               )}
               <TextField
                 sx={{ minWidth: 300 }}
-                label="Search Roles"
-                placeholder="Search by name or description..."
+                label={t("roles.searchLabel")}
+                placeholder={t("roles.searchPlaceholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 InputProps={{
@@ -466,7 +529,7 @@ export const RolesTabDesktop = () => {
               onClick={openAddDialog}
               sx={primaryIconButton}
             >
-              Add New Role
+              {t("roles.addRole")}
             </Button>
           </Box>
         </CardContent>
@@ -528,6 +591,15 @@ export const RolesTabDesktop = () => {
             "& .MuiDataGrid-cell:focus": {
               outline: "none",
             },
+            "& .MuiDataGrid-cell:focus-within": {
+              outline: "none",
+            },
+            "& .MuiDataGrid-columnHeader:focus": {
+              outline: "none",
+            },
+            "& .MuiDataGrid-columnHeader:focus-within": {
+              outline: "none",
+            },
             "& .MuiDataGrid-row:hover": {
               backgroundColor: colors.background,
             },
@@ -537,10 +609,10 @@ export const RolesTabDesktop = () => {
 
       {/* Add/Edit Role Dialog */}
       <Dialog open={dialog} onClose={closeDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>{editingRole ? "Edit Role" : "Add New Role"}</DialogTitle>
+        <DialogTitle>{editingRole ? t("roles.editRole") : t("roles.addRole")}</DialogTitle>
         <DialogContent dividers>
           <TextField
-            label="Role Name"
+            label={t("roles.form.roleName")}
             required
             fullWidth
             value={roleForm.role_name}
@@ -553,12 +625,12 @@ export const RolesTabDesktop = () => {
             }
             helperText={
               roleForm.role_name.length > 0 && roleForm.role_name.length < 2
-                ? "Role name must be at least 2 characters"
+                ? t("roles.form.roleNameMinLength")
                 : ""
             }
           />
           <TextField
-            label="Description"
+            label={t("roles.form.description")}
             fullWidth
             multiline
             rows={3}
@@ -570,10 +642,10 @@ export const RolesTabDesktop = () => {
           />
           {isBPOAdmin && (
             <FormControl fullWidth required>
-              <InputLabel>Client</InputLabel>
+              <InputLabel>{t("roles.form.client")}</InputLabel>
               <Select
                 value={roleForm.client_id || ""}
-                label="Client"
+                label={t("roles.form.client")}
                 onChange={(e) =>
                   setRoleForm({ ...roleForm, client_id: e.target.value })
                 }
@@ -590,7 +662,7 @@ export const RolesTabDesktop = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={closeDialog} sx={outlinedButton}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button
             variant="contained"
@@ -598,7 +670,7 @@ export const RolesTabDesktop = () => {
             disabled={isSaving || !isFormValid()}
             sx={primaryButton}
           >
-            {isSaving ? "Saving..." : "Save"}
+            {isSaving ? t("common.saving") : t("common.save")}
           </Button>
         </DialogActions>
       </Dialog>
@@ -622,17 +694,15 @@ export const RolesTabDesktop = () => {
         maxWidth="xs"
         fullWidth
       >
-        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogTitle>{t("roles.confirmDelete")}</DialogTitle>
         <DialogContent>
           <Typography>
-            Are you sure you want to delete the role "{roleToDelete?.role_name}
-            "? This action cannot be undone and will affect any users assigned
-            to this role.
+            {t("roles.deleteWarning")} "{roleToDelete?.role_name}"? {t("roles.deleteWarningContinue")}
           </Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteDialog(false)} sx={outlinedButton}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button
             variant="contained"
@@ -641,7 +711,7 @@ export const RolesTabDesktop = () => {
             disabled={isDeleting}
             sx={primaryButton}
           >
-            {isDeleting ? "Deleting..." : "Delete"}
+            {isDeleting ? t("common.deleting") : t("common.delete")}
           </Button>
         </DialogActions>
       </Dialog>

@@ -32,6 +32,9 @@ export const colors = {
   secondary: "#4db66750", // Kept for backward compatibility
   tertiary: "#2160a2", // Kept for backward compatibility
 
+  //Nav Bar
+  navBarColor: "#22c55ee8",
+
   // Neutral colors (Grays - from Tailwind)
   background: "#F9FAFB", // bg-gray-50 - Page background
   surface: "#FFFFFF", // bg-white - Card background
@@ -373,6 +376,16 @@ export const shadowedIconButton = {
     width: 20,
     height: 14,
   },
+};
+
+// ========================================
+// BUTTON WITHOUT LABEL JUST ICON
+// ========================================
+export const buttonIconNoLabel = {
+  ...outlinedButton,
+  width: "1.5rem",
+  height: "2.6rem",
+  borderRadius: "50%",
 };
 
 // ========================================
@@ -722,4 +735,53 @@ export const uploadInvoiceModalStyle = {
 export const PaymentLinkStyle = {
   intranetYellow: colors.intranetYellow,
   intranetgreen: colors.intranetgreen,
+};
+
+// ================================================
+// Filters Styles
+// ================================================
+
+export const filterStyles = {
+  audioAdvanceFilter: {
+    "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+      borderColor: colors.focusRing,
+    },
+    "& .MuiOutlinedInput-root": {
+      borderRadius: "3rem",
+      height: "2.6rem",
+      "&.Mui-focused fieldset": {
+        borderColor: colors.focusRing,
+      },
+    },
+    "& .MuiInputLabel-root": {
+      top: "-0.4rem",
+      "&.Mui-focused": {
+        color: colors.focusRing,
+      },
+      "&.MuiInputLabel-shrink": {
+        top: "0",
+      },
+    },
+  },
+
+  multiOptionFilter: {
+    selectSection: {
+      "& .MuiOutlinedInput-notchedOutline": {
+        borderColor: colors.textMuted,
+        borderRadius: "3rem",
+      },
+      "&:hover .MuiOutlinedInput-notchedOutline": {
+        borderColor: colors.focusRing,
+      },
+      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+        borderColor: colors.focusRing,
+      },
+    },
+    inputLabelSection: {
+      paddingTop: "0",
+      "&.Mui-focused.MuiInputLabel-animated": {
+        color: colors.focusRing,
+      },
+    },
+  },
 };

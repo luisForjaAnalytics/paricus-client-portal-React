@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import PropTypes from "prop-types";
 import {
   Avatar,
   Box,
@@ -501,4 +502,56 @@ export const ClientBreakdownDesktop = ({
       />
     </Box>
   );
+};
+
+ClientBreakdownDesktop.propTypes = {
+  clientBreakdowns: PropTypes.arrayOf(
+    PropTypes.shape({
+      folder: PropTypes.string.isRequired,
+      folderDisplay: PropTypes.string.isRequired,
+      totalRevenue: PropTypes.number.isRequired,
+      outstandingBalance: PropTypes.number.isRequired,
+      overdueAmount: PropTypes.number.isRequired,
+      totalInvoices: PropTypes.number.isRequired,
+      paidCount: PropTypes.number.isRequired,
+      unpaidCount: PropTypes.number.isRequired,
+      overdueCount: PropTypes.number.isRequired,
+      hasAccess: PropTypes.bool.isRequired,
+    })
+  ).isRequired,
+  formatCurrency: PropTypes.func.isRequired,
+  invoices: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      invoiceNumber: PropTypes.string.isRequired,
+      title: PropTypes.string.isRequired,
+      amount: PropTypes.number.isRequired,
+      currency: PropTypes.string.isRequired,
+      status: PropTypes.string.isRequired,
+      dueDate: PropTypes.string,
+      issuedDate: PropTypes.string,
+      paidDate: PropTypes.string,
+      folder: PropTypes.string,
+      clientFolder: PropTypes.string,
+      client: PropTypes.shape({
+        name: PropTypes.string,
+      }),
+    })
+  ),
+  isAdmin: PropTypes.bool.isRequired,
+  formatDate: PropTypes.func.isRequired,
+  getStatusColor: PropTypes.func.isRequired,
+  viewInvoice: PropTypes.func.isRequired,
+  downloadInvoice: PropTypes.func.isRequired,
+  openEditInvoiceModal: PropTypes.func.isRequired,
+  handleDeleteInvoice: PropTypes.func.isRequired,
+  openPaymentLink: PropTypes.func.isRequired,
+  onPaymentLinkSuccess: PropTypes.func.isRequired,
+  onPaymentLinkError: PropTypes.func.isRequired,
+  selectClient: PropTypes.func,
+};
+
+ClientBreakdownDesktop.defaultProps = {
+  invoices: [],
+  selectClient: null,
 };

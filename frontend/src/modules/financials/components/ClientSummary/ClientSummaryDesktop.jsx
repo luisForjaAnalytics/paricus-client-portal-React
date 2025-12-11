@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import {
   Box,
   Button,
@@ -70,4 +71,31 @@ export const ClientSummaryDesktop = ({
       <ClientSummaryCard formatCurrency={formatCurrency} payload={payload} />
     </Box>
   );
+};
+
+ClientSummaryDesktop.propTypes = {
+  loading: PropTypes.bool,
+  refetchAllClients: PropTypes.func.isRequired,
+  formatCurrency: PropTypes.func.isRequired,
+  payload: PropTypes.arrayOf(
+    PropTypes.shape({
+      borderCol: PropTypes.string.isRequired,
+      cardColor: PropTypes.string.isRequired,
+      textColor: PropTypes.string.isRequired,
+      label: PropTypes.string.isRequired,
+      invoiceState: PropTypes.string.isRequired,
+      overallStatsInfo: PropTypes.shape({
+        tp1: PropTypes.number.isRequired,
+        tp2: PropTypes.number.isRequired,
+      }).isRequired,
+      icon: PropTypes.shape({
+        icon: PropTypes.node.isRequired,
+        color: PropTypes.string.isRequired,
+      }).isRequired,
+    })
+  ).isRequired,
+};
+
+ClientSummaryDesktop.defaultProps = {
+  loading: false,
 };

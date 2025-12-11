@@ -28,6 +28,14 @@ function Row({ log, formatTimestamp, getEventTypeColor, getStatusColor, cleanIpA
   const [open, setOpen] = React.useState(false);
   const { t } = useTranslation();
 
+  const toggleOpen = () => {
+    try {
+      setOpen(!open);
+    } catch (err) {
+      console.log(`ERROR toggleOpen: ${err}`);
+    }
+  };
+
   return (
     <React.Fragment>
       <TableRow sx={{ "& > *": { borderBottom: "unset" } }}>
@@ -35,7 +43,7 @@ function Row({ log, formatTimestamp, getEventTypeColor, getStatusColor, cleanIpA
           <IconButton
             aria-label="expand row"
             size="small"
-            onClick={() => setOpen(!open)}
+            onClick={toggleOpen}
           >
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
