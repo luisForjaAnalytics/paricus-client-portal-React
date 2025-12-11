@@ -104,6 +104,9 @@ export default {
     quickFilter: {
       label: "Compañía:",
       clearCompanyFilter: "Limpiar Filtro de Compañía",
+      company: "Compañía",
+      allCompanies: "Todas las Compañías",
+      filters: "Filtros",
       audio: "Audio:",
       withAudio: "Con Audio",
       withoutAudio: "Sin Audio",

@@ -322,9 +322,10 @@ export const ClientFolders = ({
                           }}
                         />
                         <Typography
+                        variant="body2" fontWeight={500}
                           sx={{
                             fontSize: typography.fontSize.body,
-                            fontWeight: typography.fontWeight.semibold,
+                            //fontWeight: typography.fontWeight.semibold,
                             color: colors.textPrimary,
                             fontFamily: typography.fontFamily,
                           }}

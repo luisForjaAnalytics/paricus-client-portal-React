@@ -211,20 +211,25 @@ const createColumns = (
 ];
 
 const transformRecordings = (rowsTable, formatDate) => {
-  return rowsTable.map((data, index) => ({
-    id: index,
-    interactionId: data.interaction_id,
-    company: data.companyName,
-    callType: data.call_type,
-    startTime: formatDate(data.start_time),
-    endTime: formatDate(data.end_time),
-    customerPhone: data.customer_phone_number,
-    agentName: data.agent_name,
-    audioFileName: data.audiofilename,
-    // Keep original data for audio playback
-    interaction_id: data.interaction_id,
-    audiofilename: data.audiofilename,
-  }));
+  try {
+    return rowsTable.map((data, index) => ({
+      id: index,
+      interactionId: data.interaction_id,
+      company: data.companyName,
+      callType: data.call_type,
+      startTime: formatDate(data.start_time),
+      endTime: formatDate(data.end_time),
+      customerPhone: data.customer_phone_number,
+      agentName: data.agent_name,
+      audioFileName: data.audiofilename,
+      // Keep original data for audio playback
+      interaction_id: data.interaction_id,
+      audiofilename: data.audiofilename,
+    }));
+  } catch (err) {
+    console.error(`ERROR: transformRecordings - ${err.message}`, err);
+    return [];
+  }
 };
 
 export const TableView = ({
@@ -270,6 +275,7 @@ export const TableView = ({
             justifyContent: "space-between",
             alignItems: "center",
             width: "100%",
+            marginTop:'0.6rem'
           }}
         >
           <Box
@@ -297,6 +303,8 @@ export const TableView = ({
               setCompanyFilter={setCompanyFilter}
               filters={filters}
               companies={companies}
+              isOpen={isOpen}
+              setIsOpen={setIsOpen}
             />
           )}
         </Toolbar>
@@ -366,7 +374,7 @@ export const TableView = ({
     <Box
       sx={{
         display: { xs: "none", md: "block" },
-        height: 700,
+        height: 'auto',
         width: { md: "95%", lg: "100%" },
       }}
     >

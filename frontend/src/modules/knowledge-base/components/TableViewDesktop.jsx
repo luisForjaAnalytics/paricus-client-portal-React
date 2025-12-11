@@ -7,6 +7,7 @@ import {
   InputAdornment,
   Card,
   CardContent,
+  Typography,
 } from "@mui/material";
 import {
   Edit as EditIcon,
@@ -27,9 +28,18 @@ const createColumns = (handleEditClick, handleViewClick) => [
     headerName: "Article Name",
     width: 300,
     flex: 1,
-    align: "center",
+    align: "left",
     headerAlign: "center",
     sortable: true,
+    renderCell: (params) => (
+          <Typography
+            variant="body2"
+            fontWeight="medium"
+            sx={{ margin: "1rem" }}
+          >
+            {params.value || "N/A"}
+          </Typography>
+        ),
   },
   {
     field: "article_synopsis",

@@ -68,6 +68,13 @@ export const LogsView = () => {
     });
   };
 
+  // Clean IPv6-mapped IPv4 addresses
+  const cleanIpAddress = (ip) => {
+    if (!ip) return "N/A";
+    // Remove ::ffff: prefix if present
+    return ip.startsWith("::ffff:") ? ip.replace("::ffff:", "") : ip;
+  };
+
   // Get status color
   const getStatusColor = (status) => {
     switch (status) {
@@ -170,8 +177,11 @@ export const LogsView = () => {
         align: "center",
         headerAlign: "center",
         renderCell: (params) => (
-          <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
-            {params.value || "N/A"}
+          <Typography
+            variant="body2"
+            sx={{ fontFamily: "monospace", marginTop: 2 }}
+          >
+            {cleanIpAddress(params.value)}
           </Typography>
         ),
       },
@@ -190,16 +200,11 @@ export const LogsView = () => {
         ),
       },
     ],
-    []
+    [cleanIpAddress]
   );
 
   return (
     <Box sx={{ px: 3 }}>
-      {/* Debug Info */}
-      <Alert severity="info" sx={{ mb: 2 }}>
-        Debug: isLoading={String(isLoading)}, error={error ? JSON.stringify(error) : "none"}, logs count={logs.length}, totalRows={totalRows}
-      </Alert>
-
       {/* Header with Search */}
       <Card
         sx={{
@@ -248,7 +253,7 @@ export const LogsView = () => {
       <Box
         sx={{
           display: { xs: "none", md: "block" },
-          minHeight: 400,
+          minHeight: 'auto',
           width: "100%",
         }}
       >
@@ -315,6 +320,7 @@ export const LogsView = () => {
         formatTimestamp={formatTimestamp}
         getEventTypeColor={getEventTypeColor}
         getStatusColor={getStatusColor}
+        cleanIpAddress={cleanIpAddress}
       />
     </Box>
   );

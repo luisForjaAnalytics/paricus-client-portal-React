@@ -36,13 +36,10 @@ export const AdvancedFilters = ({
   loading,
   clearFilters,
   callTypes,
-  setCompanyFilter,
-  setAudioFilter,
+
 }) => {
   const { t } = useTranslation();
-  // const [isExpanded, setIsExpanded] = useState(false);
 
-  // Green theme styling for TextField and Select components
   const greenFieldStyles = {
     "& .MuiOutlinedInput-root": {
       "&.Mui-focused fieldset": {
@@ -56,139 +53,9 @@ export const AdvancedFilters = ({
     },
   };
 
-  // const handleToggle = () => {
-  //   setIsExpanded(!isExpanded);
-  // };
-
-  // const handleClickAway = () => {
-  //   setIsExpanded(false);
-  // };
-
   return (
     <Box sx={{margin:'0.5rem 0 -0.5rem 0'}}>
-      {/* COMMENTED OUT: Original Card/ClickAwayListener wrapper */}
-      {/* <ClickAwayListener onClickAway={handleClickAway}>
-        <Card sx={{ mb: 3, borderRadius: "0.7rem" }}>
-          <CardContent> */}
-
-      {/* <QuickFilters
-              setCompanyFilter={setCompanyFilter}
-              setAudioFilter={setAudioFilter}
-              filters={filters}
-            /> */}
-
-      {/* <Divider
-              sx={{
-                width: "95%",
-                margin: "1.5rem auto",
-                backgroundColor: "${colors.primary}",
-                height: "2px",
-              }}
-            /> */}
-
-      {/* COMMENTED OUT: Header with expand/collapse button */}
-      {/* <Box
-              sx={{
-                display: "flex",
-                flexDirection: { xs: "column", sm: "row" },
-                justifyContent: { xs: "flex-start", sm: "space-between" },
-                alignItems: { xs: "flex-start", sm: "center" },
-                gap: 2,
-                mb: isExpanded ? 2 : 0,
-              }}
-            >
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 2,
-                  flexWrap: "wrap",
-                  cursor: "pointer",
-                }}
-                onClick={handleToggle}
-              >
-                <Typography variant="h6">
-                  {t("audioRecordings.advancedFilters.title")}
-                </Typography>
-                <IconButton
-                  size="small"
-                  sx={{
-                    transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)",
-                    transition: "transform 0.3s",
-                  }}
-                >
-                  <ExpandMoreIcon />
-                </IconButton>
-                {isDebouncing && (
-                  <Chip
-                    icon={<CircularProgress size={16} />}
-                    label={t("audioRecordings.advancedFilters.typing")}
-                    size="small"
-                    color="info"
-                    variant="outlined"
-                  />
-                )}
-              </Box>
-            </Box> */}
-
-      {/* COMMENTED OUT: Collapse wrapper */}
-      {/* <Collapse in={isExpanded}> */}
-
-      {/* COMMENTED OUT: Action Buttons - Now in Grid */}
-      {/* <Box
-              sx={{
-                display: "flex",
-                gap: 1,
-                flexWrap: "wrap",
-                width: "100%",
-                mb: 2,
-                justifyContent: "flex-end",
-              }}
-            >
-              <Button
-                variant="contained"
-                onClick={() => refetch()}
-                disabled={loading || isDebouncing}
-                startIcon={
-                  loading ? <CircularProgress size={16} /> : <SearchIcon />
-                }
-                sx={{
-                  flex: { xs: "1 1 auto", sm: "0 1 auto" },
-                  borderRadius:'1rem',
-                  backgroundColor: "${colors.primary}",
-                  "&:hover": {
-                    backgroundColor: "#0a6333",
-                  },
-                  "&:disabled": {
-                    backgroundColor: "#0c7b404b",
-                  },
-                }}
-              >
-                {loading
-                  ? t("audioRecordings.advancedFilters.loading")
-                  : t("audioRecordings.advancedFilters.search")}
-              </Button>
-              <Button
-                variant="contained"
-                onClick={clearFilters}
-                startIcon={<FilterListOffIcon />}
-                sx={{
-                  flex: { xs: "1 1 auto", sm: "0 1 auto" },
-                  backgroundColor: "${colors.primary}",
-                  color: "#fff",
-                  "&:hover": {
-                    backgroundColor: "#0a6333",
-                  },
-                  borderRadius:'1rem',
-                  fontWeight: "bold",
-                  boxShadow: "none",
-                  textTransform: "none",
-                }}
-              >
-                {t("audioRecordings.advancedFilters.clearAll")}
-              </Button>
-            </Box> */}
-
+      
       <Grid container spacing={2}>
         <Grid item xs={12} sm={6} md={4}>
           <TextField
@@ -353,7 +220,7 @@ export const AdvancedFilters = ({
             sx={{
               height: "40px",
               backgroundColor: "${colors.primary}",
-              color: "#fff",
+              color: "#ffff",
               "&:hover": {
                 backgroundColor: "#0a6333",
               },

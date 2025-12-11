@@ -32,7 +32,7 @@ export const ItemMenu = ({
           onClick={handleRedirect}
           disableRipple
           sx={{
-            backgroundColor: "transparent",
+            backgroundColor: (open && isSelected) ? colors.drowerIcons : "transparent",
             border: "2px solid transparent",
             borderRadius: "0",
             justifyContent: open ? "initial" : "center",
@@ -41,10 +41,10 @@ export const ItemMenu = ({
             paddingBottom: "0%",
             transition: "all 0.3s ease",
             "&:hover": {
-              backgroundColor: "transparent",
+              backgroundColor: (open && isSelected) ? colors.drowerIcons : "transparent",
             },
             "&:active": {
-              backgroundColor: "transparent",
+              backgroundColor: (open && isSelected) ? colors.drowerIcons : "transparent",
             },
           }}
         >
@@ -64,7 +64,7 @@ export const ItemMenu = ({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                backgroundColor: ((open !== undefined && isSelected) || (open === undefined && isSelected))
+                backgroundColor: ((open === undefined && isSelected) || (open === false && isSelected))
                   ? colors.drowerIcons
                   : "transparent",
                 transition: "all 0.3s ease",

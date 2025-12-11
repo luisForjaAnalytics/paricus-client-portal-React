@@ -97,7 +97,8 @@ export const ClientBreakdownDesktop = ({
     if (!clientBreakdown) return [];
 
     // Helper to convert client name to folder format (e.g., "IM Telecom" -> "im-telecom")
-    const clientNameToFolder = (name) => name?.toLowerCase().replace(/\s+/g, '-') || '';
+    const clientNameToFolder = (name) =>
+      name?.toLowerCase().replace(/\s+/g, "-") || "";
 
     // Filter invoices that belong to this client's folder
     return invoices.filter((invoice) => {
@@ -355,14 +356,7 @@ export const ClientBreakdownDesktop = ({
                       >
                         {getInitials(client.folderDisplay)}
                       </Avatar>
-                      <Typography
-                        sx={{
-                          fontSize: typography.fontSize.body,
-                          fontWeight: typography.fontWeight.semibold,
-                          color: colors.textPrimary,
-                          fontFamily: typography.fontFamily,
-                        }}
-                      >
+                      <Typography variant="body2" fontWeight={500}>
                         {client.folderDisplay}
                       </Typography>
                     </Box>
@@ -374,6 +368,7 @@ export const ClientBreakdownDesktop = ({
                         fontWeight: typography.fontWeight.medium,
                         color: colors.textPrimary,
                         fontFamily: typography.fontFamily,
+                        paddingRight: "1.5rem",
                       }}
                     >
                       {client.totalInvoices}
@@ -381,11 +376,10 @@ export const ClientBreakdownDesktop = ({
                   </TableCell>
                   <TableCell align="center">
                     <Typography
+                      variant="body2"
+                      fontWeight={500}
                       sx={{
-                        fontSize: typography.fontSize.body,
-                        fontWeight: typography.fontWeight.bold,
-                        color: colors.textPrimary,
-                        fontFamily: typography.fontFamily,
+                        paddingRight: "1.5rem",
                       }}
                     >
                       {formatCurrency(client.totalRevenue)}
@@ -393,11 +387,10 @@ export const ClientBreakdownDesktop = ({
                   </TableCell>
                   <TableCell align="center">
                     <Typography
+                      variant="body2"
+                      fontWeight={500}
                       sx={{
-                        fontSize: typography.fontSize.body,
-                        fontWeight: typography.fontWeight.bold,
-                        color: colors.textPrimary,
-                        fontFamily: typography.fontFamily,
+                        paddingRight: "1.5rem",
                       }}
                     >
                       {formatCurrency(client.outstandingBalance)}
@@ -405,11 +398,11 @@ export const ClientBreakdownDesktop = ({
                   </TableCell>
                   <TableCell align="center">
                     <Typography
+                      variant="body2"
+                      fontWeight={500}
                       sx={{
-                        fontSize: typography.fontSize.body,
-                        fontWeight: typography.fontWeight.bold,
                         color: colors.error,
-                        fontFamily: typography.fontFamily,
+                        paddingRight: "1.5rem",
                       }}
                     >
                       {formatCurrency(client.overdueAmount)}
