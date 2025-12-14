@@ -727,6 +727,16 @@ export default {
     view: "Ver",
     noArticlesFound: "No se encontraron artículos",
     loadingArticles: "Cargando artículos...",
+    filters: {
+      articleName: "Nombre del Artículo",
+      articleNamePlaceholder: "Buscar por nombre del artículo...",
+      synopsis: "Sinopsis del Artículo",
+      synopsisPlaceholder: "Buscar por sinopsis...",
+      updatedAt: "Actualizado el",
+      search: "Buscar",
+      loading: "Cargando...",
+      clearAll: "Limpiar Todos los Filtros",
+    },
   },
 
   // Permission

@@ -19,6 +19,7 @@ import { useGetLogsQuery } from "../../../../store/api/logsApi";
 import { useDispatch } from "react-redux";
 import { logsApi } from "../../../../store/api/logsApi";
 import { LogsViewMobile } from "./LogsViewMobil";
+import AdvancedFilters from "./AdvancedFilters";
 
 export const LogsView = () => {
   const { t } = useTranslation();
@@ -29,22 +30,22 @@ export const LogsView = () => {
     page: 0,
     pageSize: 10,
   });
-  const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-
-  // Debounce search
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchQuery);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
+  const [filters, setFilters] = useState({
+    eventId: "",
+    userId: "",
+    eventType: "",
+    entity: "",
+    description: "",
+    ipAddress: "",
+    status: "",
+    timestamp: "",
+  });
 
   // Fetch logs from backend
-  const { data, isLoading, error } = useGetLogsQuery({
+  const { data, isLoading, error, refetch } = useGetLogsQuery({
     page: paginationModel.page + 1,
     limit: paginationModel.pageSize,
-    search: debouncedSearch,
+    search: "", // We'll filter on frontend
   });
 
   // Invalidate logs cache when component mounts to force fresh data
@@ -53,8 +54,86 @@ export const LogsView = () => {
     dispatch(logsApi.util.invalidateTags(["Logs"]));
   }, [dispatch]);
 
-  const logs = data?.logs || [];
-  const totalRows = data?.pagination?.totalCount || 0;
+  // Clear all filters
+  const clearFilters = () => {
+    setFilters({
+      eventId: "",
+      userId: "",
+      eventType: "",
+      entity: "",
+      description: "",
+      ipAddress: "",
+      status: "",
+      timestamp: "",
+    });
+  };
+
+  // Filter logs based on advanced filters
+  const filteredLogs = useMemo(() => {
+    const allLogs = data?.logs || [];
+
+    // If no filters are active, return all logs
+    if (
+      !filters.eventId &&
+      !filters.userId &&
+      !filters.eventType &&
+      !filters.entity &&
+      !filters.description &&
+      !filters.ipAddress &&
+      !filters.status &&
+      !filters.timestamp
+    ) {
+      return allLogs;
+    }
+
+    return allLogs.filter((log) => {
+      const matchesEventId = filters.eventId
+        ? log.id?.toLowerCase().includes(filters.eventId.toLowerCase())
+        : true;
+
+      const matchesUserId = filters.userId
+        ? String(log.userId)?.includes(filters.userId)
+        : true;
+
+      const matchesEventType = filters.eventType
+        ? log.eventType === filters.eventType
+        : true;
+
+      const matchesEntity = filters.entity
+        ? log.entity?.toLowerCase().includes(filters.entity.toLowerCase())
+        : true;
+
+      const matchesDescription = filters.description
+        ? log.description?.toLowerCase().includes(filters.description.toLowerCase())
+        : true;
+
+      const matchesIpAddress = filters.ipAddress
+        ? log.ipAddress?.includes(filters.ipAddress)
+        : true;
+
+      const matchesStatus = filters.status
+        ? log.status === filters.status
+        : true;
+
+      const matchesTimestamp = filters.timestamp
+        ? log.timestamp?.startsWith(filters.timestamp)
+        : true;
+
+      return (
+        matchesEventId &&
+        matchesUserId &&
+        matchesEventType &&
+        matchesEntity &&
+        matchesDescription &&
+        matchesIpAddress &&
+        matchesStatus &&
+        matchesTimestamp
+      );
+    });
+  }, [data?.logs, filters]);
+
+  const logs = filteredLogs;
+  const totalRows = filteredLogs.length;
 
   // Format timestamp
   const formatTimestamp = (timestamp) => {
@@ -245,19 +324,13 @@ export const LogsView = () => {
               gap: 2,
             }}
           >
-            <TextField
-              sx={{ flex: 1 }}
-              label={t("userManagement.logs.searchLabel")}
-              placeholder={t("userManagement.logs.searchPlaceholder")}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
-              }}
+            <AdvancedFilters
+              filters={filters}
+              setFilters={setFilters}
+              refetch={refetch}
+              isDebouncing={false}
+              loading={isLoading}
+              clearFilters={clearFilters}
             />
           </Box>
         </CardContent>
@@ -267,7 +340,9 @@ export const LogsView = () => {
       {error && (
         <Alert severity="error" sx={{ mb: 3 }}>
           {t("userManagement.logs.errorLoading")}:{" "}
-          {error?.data?.error || error?.error || t("userManagement.logs.unknownError")}
+          {error?.data?.error ||
+            error?.error ||
+            t("userManagement.logs.unknownError")}
         </Alert>
       )}
 
@@ -275,7 +350,7 @@ export const LogsView = () => {
       <Box
         sx={{
           display: { xs: "none", md: "block" },
-          minHeight: 'auto',
+          minHeight: "auto",
           width: "100%",
         }}
       >

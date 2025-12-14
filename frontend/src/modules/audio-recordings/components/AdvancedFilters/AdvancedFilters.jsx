@@ -13,7 +13,6 @@ import {
 import {
   Search as SearchIcon,
   FilterListOff as FilterListOffIcon,
-  ExpandMore as ExpandMoreIcon,
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import { QuickFilters } from "../QuickFilters";
@@ -60,7 +59,7 @@ export const AdvancedFilters = ({
               interactionId: e.target.value,
             }))
           }
-          sx={filterStyles?.audioAdvanceFilter}
+          sx={filterStyles?.inputFilter}
         />
       </Box>
       <Box>
@@ -77,7 +76,7 @@ export const AdvancedFilters = ({
               customerPhone: e.target.value,
             }))
           }
-          sx={filterStyles?.audioAdvanceFilter}
+          sx={filterStyles?.inputFilter}
         />
       </Box>
       <Box>
@@ -94,7 +93,7 @@ export const AdvancedFilters = ({
               agentName: e.target.value,
             }))
           }
-          sx={filterStyles?.audioAdvanceFilter}
+          sx={filterStyles?.inputFilter}
         />
       </Box>
       <Box>
@@ -116,6 +115,12 @@ export const AdvancedFilters = ({
               "&.MuiInputLabel-shrink": {
                 top: "0",
               },
+            },
+            "& .MuiSelect-icon": {
+              color: `${colors.textIcon} !important`,
+            },
+            "& .MuiSelect-iconOutlined": {
+              color: `${colors.textIcon} !important`,
             },
           }}
         >
@@ -163,7 +168,7 @@ export const AdvancedFilters = ({
               startDate: e.target.value,
             }))
           }
-          sx={filterStyles?.audioAdvanceFilter}
+          sx={filterStyles?.inputFilter}
         />
       </Box>
       <Box>
@@ -176,7 +181,7 @@ export const AdvancedFilters = ({
           onChange={(e) =>
             setFilters((prev) => ({ ...prev, endDate: e.target.value }))
           }
-          sx={filterStyles?.audioAdvanceFilter}
+          sx={filterStyles?.inputFilter}
         />
       </Box>
 
@@ -216,7 +221,10 @@ export const AdvancedFilters = ({
         <Box sx={{ marginTop: "0.5rem" }}>
           <Tooltip title={t("audioRecordings.advancedFilters.clearAll")}>
             <IconButton onClick={clearFilters} sx={buttonIconNoLabel}>
-              <FilterListOffIcon fontSize="small" />
+              <FilterListOffIcon
+                fontSize="small"
+                sx={{ color: colors.primary }}
+              />
             </IconButton>
           </Tooltip>
         </Box>

@@ -725,6 +725,16 @@ export default {
     view: "View",
     noArticlesFound: "No articles found",
     loadingArticles: "Loading articles...",
+    filters: {
+      articleName: "Article Name",
+      articleNamePlaceholder: "Search by article name...",
+      synopsis: "Article Synopsis",
+      synopsisPlaceholder: "Search by synopsis...",
+      updatedAt: "Updated At",
+      search: "Search",
+      loading: "Loading...",
+      clearAll: "Clear All Filters",
+    },
   },
 
   // Permission

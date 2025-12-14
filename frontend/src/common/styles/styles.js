@@ -91,6 +91,14 @@ export const colors = {
   error: "#DC2626", // Primary error
   errorContainer: "#FEE2E2",
 
+// ========================================
+//   Sub Sections open
+// ========================================
+
+  subSectionBackground: "#58b98123",
+  backgroundOpenSubSection: "#b3b3b32c",
+  subSectionBorder: "#26b8633a",
+
   //Intranet Styles//
   intranetYellow: {
     backgroundColor: "#fff5d3",
@@ -742,11 +750,12 @@ export const PaymentLinkStyle = {
 // ================================================
 
 export const filterStyles = {
-  audioAdvanceFilter: {
+  inputFilter: {
     "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
       borderColor: colors.focusRing,
     },
     "& .MuiOutlinedInput-root": {
+      backgroundColor: colors.surface,
       borderRadius: "3rem",
       height: "2.6rem",
       "&.Mui-focused fieldset": {
@@ -767,6 +776,29 @@ export const filterStyles = {
   multiOptionFilter: {
     selectSection: {
       "& .MuiOutlinedInput-notchedOutline": {
+        backgroundColor: colors.surface,
+        borderColor: colors.textIcon,
+        borderRadius: "3rem",
+      },
+      "&:hover .MuiOutlinedInput-notchedOutline": {
+        borderColor: colors.focusRing,
+      },
+      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+        borderColor: colors.focusRing,
+      },
+    },
+    inputLabelSection: {
+      paddingTop: "0",
+      "&.Mui-focused": {
+        color: colors.focusRing,
+      },
+    },
+  },
+  //Company filter Audio Recording //
+  companyFilter: {
+    selectSection: {
+      "& .MuiOutlinedInput-notchedOutline": {
+        //backgroundColor: colors.surface,
         borderColor: colors.textMuted,
         borderRadius: "3rem",
       },
