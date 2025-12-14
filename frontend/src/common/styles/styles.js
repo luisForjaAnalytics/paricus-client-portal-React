@@ -27,10 +27,13 @@ export const colors = {
   financialClientAvatar: "#11e7464d",
   drowerIcons: "#D1FAE5",
   folderCloseIcon: "#68686844",
-  drawer:"#FFFFFF",
+  drawer: "#FFFFFF",
   // Secondary colors
   secondary: "#4db66750", // Kept for backward compatibility
   tertiary: "#2160a2", // Kept for backward compatibility
+
+  //Nav Bar
+  navBarColor: "#22c55ee8",
 
   // Neutral colors (Grays - from Tailwind)
   background: "#F9FAFB", // bg-gray-50 - Page background
@@ -87,6 +90,32 @@ export const colors = {
   errorBorder: "#EF4444", // border-red-500
   error: "#DC2626", // Primary error
   errorContainer: "#FEE2E2",
+
+// ========================================
+//   Sub Sections open
+// ========================================
+
+  subSectionBackground: "#58b98123",
+  backgroundOpenSubSection: "#b3b3b32c",
+  subSectionBorder: "#26b8633a",
+
+  //Intranet Styles//
+  intranetYellow: {
+    backgroundColor: "#fff5d3",
+    color: "#ffc400",
+  },
+  intranetgreen: {
+    backgroundColor: "#bdf3cf",
+    color: "#225339",
+  },
+  intranetRed: {
+    backgroundColor: "#fff0ee",
+    color: "#ba1a1a",
+  },
+  intranetGrey: {
+    backgroundColor: "#e8eaeb",
+    color: " #161d18",
+  },
 };
 
 // ========================================
@@ -358,6 +387,16 @@ export const shadowedIconButton = {
 };
 
 // ========================================
+// BUTTON WITHOUT LABEL JUST ICON
+// ========================================
+export const buttonIconNoLabel = {
+  ...outlinedButton,
+  width: "1.5rem",
+  height: "2.6rem",
+  borderRadius: "50%",
+};
+
+// ========================================
 // CARD STYLES
 // ========================================
 // Based on STYLE_GUIDE.md card components
@@ -547,6 +586,16 @@ export const table = {
     letterSpacing: "0.05em", // tracking-wider
     fontFamily: typography.fontFamily,
   },
+  headerCellInvoice: {
+    padding: "12px 30px", // px-6 py-3
+    textAlign: "left",
+    fontSize: typography.fontSize.tableHeader, // text-xs
+    fontWeight: typography.fontWeight.bold,
+    color: colors.textMuted, // text-gray-500
+    textTransform: "uppercase",
+    letterSpacing: "0.05em", // tracking-wider
+    fontFamily: typography.fontFamily,
+  },
   body: {
     backgroundColor: colors.surface,
     "& tr": {
@@ -658,31 +707,113 @@ export const titlesTypography = {
     fontWeight: typography.fontWeight.semibold,
     fontFamily: typography.fontFamily,
   },
-  managementSection:{
+  managementSection: {
     fontWeight: typography.fontWeight.semibold,
     fontFamily: typography.fontFamily,
-    textTransform: "none", fontSize:'1.5rem' 
-  }
+    textTransform: "none",
+    fontSize: "1.5rem",
+  },
 };
-
 
 // ========================================
 // Box Upload New Invoice Modal styles
 // ========================================
 
 export const uploadInvoiceModalStyle = {
-boxUploadInvoiceModal:
-{  display: "flex",
-  flexDirection: "row",
-  gap: 3,
-  margin: "0 0 1rem 0",},
-textFielUploadInvoiceModal:{
-'& .MuiOutlinedInput-root': {
-      borderRadius: '1.5rem',
-      '&.Mui-focused fieldset': {
+  boxUploadInvoiceModal: {
+    display: "flex",
+    flexDirection: "row",
+    gap: 3,
+    margin: "0 0 1rem 0",
+  },
+  textFielUploadInvoiceModal: {
+    "& .MuiOutlinedInput-root": {
+      borderRadius: "1.5rem",
+      "&.Mui-focused fieldset": {
         borderColor: colors.primary,
       },
     },
-}
+  },
+};
 
+// ================================================
+// Payment Link  color and backGround color select
+// ================================================
+
+export const PaymentLinkStyle = {
+  intranetYellow: colors.intranetYellow,
+  intranetgreen: colors.intranetgreen,
+};
+
+// ================================================
+// Filters Styles
+// ================================================
+
+export const filterStyles = {
+  inputFilter: {
+    "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+      borderColor: colors.focusRing,
+    },
+    "& .MuiOutlinedInput-root": {
+      backgroundColor: colors.surface,
+      borderRadius: "3rem",
+      height: "2.6rem",
+      "&.Mui-focused fieldset": {
+        borderColor: colors.focusRing,
+      },
+    },
+    "& .MuiInputLabel-root": {
+      top: "-0.4rem",
+      "&.Mui-focused": {
+        color: colors.focusRing,
+      },
+      "&.MuiInputLabel-shrink": {
+        top: "0",
+      },
+    },
+  },
+
+  multiOptionFilter: {
+    selectSection: {
+      "& .MuiOutlinedInput-notchedOutline": {
+        backgroundColor: colors.surface,
+        borderColor: colors.textIcon,
+        borderRadius: "3rem",
+      },
+      "&:hover .MuiOutlinedInput-notchedOutline": {
+        borderColor: colors.focusRing,
+      },
+      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+        borderColor: colors.focusRing,
+      },
+    },
+    inputLabelSection: {
+      paddingTop: "0",
+      "&.Mui-focused": {
+        color: colors.focusRing,
+      },
+    },
+  },
+  //Company filter Audio Recording //
+  companyFilter: {
+    selectSection: {
+      "& .MuiOutlinedInput-notchedOutline": {
+        //backgroundColor: colors.surface,
+        borderColor: colors.textMuted,
+        borderRadius: "3rem",
+      },
+      "&:hover .MuiOutlinedInput-notchedOutline": {
+        borderColor: colors.focusRing,
+      },
+      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+        borderColor: colors.focusRing,
+      },
+    },
+    inputLabelSection: {
+      paddingTop: "0",
+      "&.Mui-focused.MuiInputLabel-animated": {
+        color: colors.focusRing,
+      },
+    },
+  },
 };

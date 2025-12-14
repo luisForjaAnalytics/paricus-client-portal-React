@@ -70,7 +70,11 @@ const NestedList = ({ t, index, item, selectedPermissions, onToggle, disabled })
   const [open, setOpen] = useState(false);
 
   const handleClick = () => {
-    setOpen(!open);
+    try {
+      setOpen(!open);
+    } catch (err) {
+      console.log(`ERROR handleClick: ${err}`);
+    }
   };
 
   // Don't render if no permissions
@@ -119,59 +123,64 @@ export const PermissionsModal = ({
 
   // Build menu items with permission lists from API
   const buildMenuItems = () => {
-    const sections = {
-      dashboard: ["view_dashboard", "admin_dashboard_config"],
-      reporting: ["view_reporting"],
-      audioRetrieval: [
-        "view_interactions",
-        "admin_audio_recordings",
-        "download_audio_files",
-      ],
-      knowledgeBase: [
-        "view_knowledge_base",
-        "create_kb_articles",
-        "edit_kb_articles",
-      ],
-      financial: [
-        "view_financials",
-        "admin_invoices",
-        "download_invoices",
-        "pay_invoices",
-        "view_invoices",
-      ],
-      reportsManagement: ["admin_reports", "download_reports"],
-      userManagement: ["admin_clients", "admin_users", "admin_roles"],
-    };
+    try {
+      const sections = {
+        dashboard: ["view_dashboard", "admin_dashboard_config"],
+        reporting: ["view_reporting"],
+        audioRetrieval: [
+          "view_interactions",
+          "admin_audio_recordings",
+          "download_audio_files",
+        ],
+        knowledgeBase: [
+          "view_knowledge_base",
+          "create_kb_articles",
+          "edit_kb_articles",
+        ],
+        financial: [
+          "view_financials",
+          "admin_invoices",
+          "download_invoices",
+          "pay_invoices",
+          "view_invoices",
+        ],
+        reportsManagement: ["admin_reports", "download_reports"],
+        userManagement: ["admin_clients", "admin_users", "admin_roles"],
+      };
 
-    const getPermissionsForSection = (sectionKey) => {
-      const permissionNames = sections[sectionKey];
-      return allPermissions.filter((p) =>
-        permissionNames.includes(p.permissionName)
-      );
-    };
+      const getPermissionsForSection = (sectionKey) => {
+        const permissionNames = sections[sectionKey];
+        return allPermissions.filter((p) =>
+          permissionNames.includes(p.permissionName)
+        );
+      };
 
-    return [
-      ...menuItemsCommon.map((item) => ({
-        ...item,
-        permissionList: getPermissionsForSection(item.label),
-      })),
-      ...menuItemsAdmin.map((item) => {
-        if (item.label === "userManagement" && item.subItems) {
-          return {
-            ...item,
-            permissionList: item.subItems.flatMap((subItem) =>
-              allPermissions.filter((p) =>
-                subItem.permissionList?.includes(p.permissionName)
-              )
-            ),
-          };
-        }
-        return {
+      return [
+        ...menuItemsCommon.map((item) => ({
           ...item,
           permissionList: getPermissionsForSection(item.label),
-        };
-      }),
-    ];
+        })),
+        ...menuItemsAdmin.map((item) => {
+          if (item.label === "userManagement" && item.subItems) {
+            return {
+              ...item,
+              permissionList: item.subItems.flatMap((subItem) =>
+                allPermissions.filter((p) =>
+                  subItem.permissionList?.includes(p.permissionName)
+                )
+              ),
+            };
+          }
+          return {
+            ...item,
+            permissionList: getPermissionsForSection(item.label),
+          };
+        }),
+      ];
+    } catch (err) {
+      console.log(`ERROR buildMenuItems: ${err}`);
+      return [];
+    }
   };
 
   const menuitem = buildMenuItems();

@@ -86,6 +86,8 @@ export default {
       noLogsFound: "No logs found",
       errorLoading: "Error loading logs",
       unknownError: "Unknown error",
+      searchLabel: "Search Logs",
+      searchPlaceholder: "Search by ID, user, event, entity, description, or status...",
     },
   },
 
@@ -105,6 +107,9 @@ export default {
     quickFilter: {
       label: "Company Filter:",
       clearCompanyFilter: "Clear Company Filter",
+      company: "Company",
+      allCompanies: "All Companies",
+      filters: "Filters",
       audio: "Audio:",
       withAudio: "With Audio",
       withoutAudio: "Without Audio",
@@ -227,6 +232,7 @@ export default {
 
   // Common strings
   common: {
+    locale: "en-US",
     cancel: "Cancel",
     save: "Save",
     saving: "Saving...",
@@ -265,6 +271,9 @@ export default {
     optional: "Optional",
     updating: "Updating...",
     update: "Update",
+    na: "N/A",
+    unknown: "Unknown",
+    invalidDate: "Invalid Date",
   },
 
   // Login
@@ -309,11 +318,14 @@ export default {
   users: {
     title: "User Management",
     description: "Manage user accounts and permissions",
-    addUser: "Add New User",
+    addUser: "Add User",
+    addNewUser: "Add New User",
     editUser: "Edit User",
+    searchLabel: "Search Users",
     searchPlaceholder: "Search by name or email...",
     filterByClient: "Filter by Client",
     allClients: "All Clients",
+    noUsersFound: "No users found",
     table: {
       id: "ID",
       name: "Name",
@@ -323,7 +335,9 @@ export default {
       status: "Status",
       created: "Created",
       actions: "Actions",
-      noRole: "No role assigned",
+      noRoleAssigned: "No role assigned",
+      active: "Active",
+      inactive: "Inactive",
     },
     form: {
       firstName: "First Name",
@@ -338,16 +352,17 @@ export default {
       selectRole: "Select a role",
     },
     actions: {
-      edit: "Edit user",
-      deactivate: "Deactivate user",
-      activate: "Activate user",
+      editUser: "Edit user",
+      deactivateUser: "Deactivate user",
+      activateUser: "Activate user",
     },
     messages: {
       userUpdated: "User updated successfully",
       userCreated: "User created successfully",
-      userSaveFailed: "Failed to save user",
+      saveFailed: "Failed to save user",
       userActivated: "User activated successfully",
       userDeactivated: "User deactivated successfully",
+      statusUpdateFailed: "Failed to update user status",
     },
   },
 
@@ -363,8 +378,12 @@ export default {
     deleteWarning: "Are you sure you want to delete the role",
     deleteWarningContinue:
       "This action cannot be undone and will affect all users with this role.",
-    filterByClient: "Client",
+    filterByClient: "Filter by Client",
     allClients: "All Clients",
+    searchLabel: "Search Roles",
+    searchPlaceholder: "Search by name or description...",
+    noRolesFound: "No roles found",
+    unknownClient: "Unknown",
     table: {
       id: "ID",
       roleName: "Role Name",
@@ -395,6 +414,8 @@ export default {
       roleDeleteFailed: "Failed to delete role",
       permissionsUpdated: "Permissions updated successfully",
       permissionsUpdateFailed: "Failed to update permissions",
+      invalidRole: "Invalid role selected",
+      selectClient: "Please select a client for this role",
     },
   },
 
@@ -431,6 +452,13 @@ export default {
     deactivationWarning: "Are you sure you want to deactivate",
     deactivationWarningContinue:
       "This will also deactivate all users belonging to this client.",
+    filterByStatus: "Filter by Status",
+    allClients: "All Clients",
+    clientsOnly: "Clients Only",
+    prospectsOnly: "Prospects Only",
+    searchClients: "Search Clients",
+    searchPlaceholder: "Search by name...",
+    noClientsFound: "No clients found",
     table: {
       clientName: "Client Name",
       type: "Type",
@@ -449,7 +477,6 @@ export default {
     },
     actions: {
       edit: "Edit client",
-      deactivate: "Deactivate client",
       deactivate: "Deactivate",
     },
     messages: {
@@ -593,6 +620,84 @@ export default {
     generatingLink: "Generating download link...",
   },
 
+  // Reports Management
+  reportsManagement: {
+    title: "Reports Management",
+    clientFolders: {
+      title: "Client Folders",
+      noFoldersFound: "No client folders found",
+      noFoldersMessage: "Create folders in your S3 bucket: client-access-reports/your-client-name/",
+      manageAccess: "Manage Access",
+      refreshFolders: "Refresh Folders",
+      loading: "Loading...",
+      columnFolder: "CLIENT FOLDER",
+      columnReports: "REPORTS",
+      reportsFor: "Reports",
+    },
+    folderAccess: {
+      title: "Manage Client Folder Access",
+      grantTitle: "Grant Folder Access",
+      currentTitle: "Current Access Permissions",
+      selectClient: "Select a client",
+      selectFolder: "Select a folder",
+      client: "Client",
+      folder: "Folder",
+      grantButton: "Grant",
+      granting: "Granting...",
+      revokeButton: "Revoke",
+      accessTo: "Access to:",
+      noPermissions: "No folder access permissions configured",
+      loadingPermissions: "Loading access permissions...",
+      grantSuccess: "Folder access granted successfully",
+      grantError: "Failed to grant folder access",
+      revokeSuccess: "Folder access revoked successfully",
+      revokeError: "Failed to revoke folder access",
+      confirmRevoke: "Are you sure you want to revoke access to \"{folderName}\" for this client?",
+    },
+    reports: {
+      title: "Reports for {folder}",
+      uploadReport: "Upload Report",
+      refresh: "Refresh",
+      loadingReports: "Loading reports...",
+      noReportsFound: "No reports found",
+      noReportsMessage: "Upload some PDF reports for this client",
+      noReportsForFolder: "No reports found for this folder",
+      fileName: "File Name",
+      size: "Size",
+      lastModified: "Last Modified",
+      actions: "Actions",
+      pdfDocument: "PDF Document",
+      download: "Download",
+      delete: "Delete",
+    },
+    upload: {
+      title: "Upload Report",
+      clientFolder: "Client Folder",
+      reportName: "Report Name (Optional)",
+      reportNamePlaceholder: "Leave empty to use filename",
+      description: "Description (Optional)",
+      descriptionPlaceholder: "Brief description of the report",
+      chooseFile: "Choose PDF File",
+      fileRestriction: "Only PDF files are allowed (max 50MB)",
+      cancel: "Cancel",
+      upload: "Upload Report",
+      uploading: "Uploading...",
+      uploadSuccess: "Report uploaded successfully",
+      uploadError: "Failed to upload report",
+      deleteSuccess: "Report deleted successfully",
+      deleteError: "Failed to delete report",
+      confirmDelete: "Are you sure you want to delete \"{reportName}\"?",
+      downloadError: "Failed to generate download link",
+    },
+    fileSize: {
+      bytes: "Bytes",
+      kb: "KB",
+      mb: "MB",
+      gb: "GB",
+    },
+    invalidDate: "Invalid Date",
+  },
+
   // Error Pages
   errors: {
     notFound: {
@@ -620,6 +725,16 @@ export default {
     view: "View",
     noArticlesFound: "No articles found",
     loadingArticles: "Loading articles...",
+    filters: {
+      articleName: "Article Name",
+      articleNamePlaceholder: "Search by article name...",
+      synopsis: "Article Synopsis",
+      synopsisPlaceholder: "Search by synopsis...",
+      updatedAt: "Updated At",
+      search: "Search",
+      loading: "Loading...",
+      clearAll: "Clear All Filters",
+    },
   },
 
   // Permission

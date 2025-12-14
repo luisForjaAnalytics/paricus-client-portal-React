@@ -92,41 +92,55 @@ export const UsersTabDesktop = () => {
   });
 
   // Computed values
-  const clientOptions = useMemo(
-    () => clients.map((client) => ({ title: client.name, value: client.id })),
-    [clients]
-  );
+  const clientOptions = useMemo(() => {
+    try {
+      return clients.map((client) => ({ title: client.name, value: client.id }));
+    } catch (err) {
+      console.log(`ERROR clientOptions: ${err}`);
+      return [];
+    }
+  }, [clients]);
 
   const roleOptions = useMemo(() => {
-    return roles
-      .filter((role) => role.clientId === userForm.client_id)
-      .map((role) => ({ title: role.roleName, value: role.id }));
+    try {
+      return roles
+        .filter((role) => role.clientId === userForm.client_id)
+        .map((role) => ({ title: role.roleName, value: role.id }));
+    } catch (err) {
+      console.log(`ERROR roleOptions: ${err}`);
+      return [];
+    }
   }, [roles, userForm.client_id]);
 
   const filteredUsers = useMemo(() => {
-    let filtered = users;
+    try {
+      let filtered = users;
 
-    // For Client Admins, only show users from their company
-    if (isClientAdmin && authUser?.clientId) {
-      filtered = filtered.filter((user) => user.clientId === authUser.clientId);
+      // For Client Admins, only show users from their company
+      if (isClientAdmin && authUser?.clientId) {
+        filtered = filtered.filter((user) => user.clientId === authUser.clientId);
+      }
+
+      // For BPO Admins, use the selected client filter
+      if (isBPOAdmin && selectedClient) {
+        filtered = filtered.filter((user) => user.clientId === selectedClient);
+      }
+
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        filtered = filtered.filter(
+          (user) =>
+            user.firstName?.toLowerCase().includes(query) ||
+            user.lastName?.toLowerCase().includes(query) ||
+            user.email?.toLowerCase().includes(query)
+        );
+      }
+
+      return filtered;
+    } catch (err) {
+      console.log(`ERROR filteredUsers: ${err}`);
+      return users;
     }
-
-    // For BPO Admins, use the selected client filter
-    if (isBPOAdmin && selectedClient) {
-      filtered = filtered.filter((user) => user.clientId === selectedClient);
-    }
-
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (user) =>
-          user.firstName?.toLowerCase().includes(query) ||
-          user.lastName?.toLowerCase().includes(query) ||
-          user.email?.toLowerCase().includes(query)
-      );
-    }
-
-    return filtered;
   }, [
     users,
     selectedClient,
@@ -137,57 +151,74 @@ export const UsersTabDesktop = () => {
   ]);
 
   const isFormValid = useMemo(() => {
-    const emailRegex = /.+@.+\..+/;
-    return (
-      userForm.first_name &&
-      userForm.last_name &&
-      userForm.email &&
-      emailRegex.test(userForm.email) &&
-      userForm.client_id &&
-      (editingUser || userForm.password)
-    );
+    try {
+      const emailRegex = /.+@.+\..+/;
+      return (
+        userForm.first_name &&
+        userForm.last_name &&
+        userForm.email &&
+        emailRegex.test(userForm.email) &&
+        userForm.client_id &&
+        (editingUser || userForm.password)
+      );
+    } catch (err) {
+      console.log(`ERROR isFormValid: ${err}`);
+      return false;
+    }
   }, [userForm, editingUser]);
 
   // Methods
 
   const openAddDialog = () => {
-    setEditingUser(null);
-    setUserForm({
-      first_name: "",
-      last_name: "",
-      email: "",
-      // For Client Admins, pre-set their clientId
-      client_id: isClientAdmin ? authUser?.clientId : null,
-      role_id: null,
-      password: "",
-    });
-    setDialog(true);
+    try {
+      setEditingUser(null);
+      setUserForm({
+        first_name: "",
+        last_name: "",
+        email: "",
+        // For Client Admins, pre-set their clientId
+        client_id: isClientAdmin ? authUser?.clientId : null,
+        role_id: null,
+        password: "",
+      });
+      setDialog(true);
+    } catch (err) {
+      console.log(`ERROR openAddDialog: ${err}`);
+    }
   };
 
   const openEditDialog = (user) => {
-    setEditingUser(user);
-    setUserForm({
-      first_name: user.firstName,
-      last_name: user.lastName,
-      email: user.email,
-      client_id: user.clientId,
-      role_id: user.roleId,
-      password: "",
-    });
-    setDialog(true);
+    try {
+      setEditingUser(user);
+      setUserForm({
+        first_name: user.firstName,
+        last_name: user.lastName,
+        email: user.email,
+        client_id: user.clientId,
+        role_id: user.roleId,
+        password: "",
+      });
+      setDialog(true);
+    } catch (err) {
+      console.log(`ERROR openEditDialog: ${err}`);
+    }
   };
 
   const closeDialog = () => {
-    setDialog(false);
-    setEditingUser(null);
-    setUserForm({
-      first_name: "",
-      last_name: "",
-      email: "",
-      client_id: null,
-      role_id: null,
-      password: "",
-    });
+    try {
+      setDialog(false);
+      setEditingUser(null);
+      setUserForm({
+        first_name: "",
+        last_name: "",
+        email: "",
+        client_id: null,
+        role_id: null,
+        password: "",
+      });
+    } catch (err) {
+      console.log(`ERROR closeDialog: ${err}`);
+    }
   };
 
   const saveUser = async () => {
@@ -206,17 +237,17 @@ export const UsersTabDesktop = () => {
       if (editingUser) {
         // Update existing user
         await updateUserMutation({ id: editingUser.id, ...userData }).unwrap();
-        showNotification("User updated successfully", "success");
+        showNotification(t("users.messages.userUpdated"), "success");
       } else {
         // Create new user
         await createUserMutation(userData).unwrap();
-        showNotification("User created successfully", "success");
+        showNotification(t("users.messages.userCreated"), "success");
       }
 
       closeDialog();
     } catch (error) {
       console.error("Error saving user:", error);
-      showNotification(error.data?.error || "Failed to save user", "error");
+      showNotification(error.data?.error || t("users.messages.saveFailed"), "error");
     }
   };
 
@@ -228,37 +259,51 @@ export const UsersTabDesktop = () => {
       }).unwrap();
 
       showNotification(
-        `User ${!user.isActive ? "activated" : "deactivated"} successfully`,
+        !user.isActive ? t("users.messages.userActivated") : t("users.messages.userDeactivated"),
         "success"
       );
     } catch (error) {
       console.error("Error toggling user status:", error);
       showNotification(
-        error.data?.error || "Failed to update user status",
+        error.data?.error || t("users.messages.statusUpdateFailed"),
         "error"
       );
     }
   };
 
   const showNotification = (message, severity) => {
-    setNotification({ open: true, message, severity });
+    try {
+      setNotification({ open: true, message, severity });
+    } catch (err) {
+      console.log(`ERROR showNotification: ${err}`);
+    }
   };
 
   const handleCloseNotification = () => {
-    setNotification({ ...notification, open: false });
+    try {
+      setNotification({ ...notification, open: false });
+    } catch (err) {
+      console.log(`ERROR handleCloseNotification: ${err}`);
+    }
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return "N/A";
+    if (!dateString) return t("common.na");
     try {
-      return new Date(dateString).toLocaleDateString();
+      const locale = t("common.locale") || "en-US";
+      return new Date(dateString).toLocaleDateString(locale);
     } catch (error) {
-      return "Invalid Date";
+      console.log(`ERROR formatDate: ${error}`);
+      return t("common.invalidDate");
     }
   };
 
   const handleClientChange = (clientId) => {
-    setUserForm((prev) => ({ ...prev, client_id: clientId, role_id: null }));
+    try {
+      setUserForm((prev) => ({ ...prev, client_id: clientId, role_id: null }));
+    } catch (err) {
+      console.log(`ERROR handleClientChange: ${err}`);
+    }
   };
 
   // DataGrid columns
@@ -266,7 +311,7 @@ export const UsersTabDesktop = () => {
     () => [
       {
         field: "name",
-        headerName: "Name",
+        headerName: t("users.table.name"),
         flex: 1,
         align: "left",
         headerAlign: "center",
@@ -276,27 +321,27 @@ export const UsersTabDesktop = () => {
             fontWeight="medium"
             sx={{ margin: "1rem" }}
           >
-            {params.value || "N/A"}
+            {params.value || t("common.na")}
           </Typography>
         ),
       },
       {
         field: "email",
-        headerName: "Email",
+        headerName: t("users.table.email"),
         flex: 1,
         align: "left",
         headerAlign: "center",
       },
       {
         field: "client_name",
-        headerName: "Client",
+        headerName: t("users.table.client"),
         flex: 1,
         align: "left",
         headerAlign: "center",
       },
       {
         field: "role_name",
-        headerName: "Role",
+        headerName: t("users.table.role"),
         flex: 1,
         align: "center",
         headerAlign: "center",
@@ -305,7 +350,7 @@ export const UsersTabDesktop = () => {
             <Chip label={params.value} color="primary" size="small" />
           ) : (
             <Chip
-              label="No role assigned"
+              label={t("users.table.noRoleAssigned")}
               color="default"
               size="small"
               variant="outlined"
@@ -314,13 +359,13 @@ export const UsersTabDesktop = () => {
       },
       {
         field: "is_active",
-        headerName: "Status",
+        headerName: t("users.table.status"),
         flex: 1,
         align: "center",
         headerAlign: "center",
         renderCell: (params) => (
           <Chip
-            label={params.value ? "Active" : "Inactive"}
+            label={params.value ? t("users.table.active") : t("users.table.inactive")}
             color={params.value ? "success" : "error"}
             size="small"
           />
@@ -328,7 +373,7 @@ export const UsersTabDesktop = () => {
       },
       {
         field: "created_at",
-        headerName: "Created",
+        headerName: t("users.table.created"),
         flex: 1,
         align: "center",
         headerAlign: "center",
@@ -336,7 +381,7 @@ export const UsersTabDesktop = () => {
       },
       {
         field: "actions",
-        headerName: "Actions",
+        headerName: t("users.table.actions"),
         flex: 1,
         align: "center",
         headerAlign: "center",
@@ -345,7 +390,7 @@ export const UsersTabDesktop = () => {
         disableColumnMenu: true,
         renderCell: (params) => (
           <Box sx={{ display: "flex", gap: 0.5, justifyContent: "center" }}>
-            <Tooltip title="Edit user">
+            <Tooltip title={t("users.actions.editUser")}>
               <IconButton
                 size="small"
                 onClick={() => openEditDialog(params.row.original)}
@@ -354,7 +399,7 @@ export const UsersTabDesktop = () => {
               </IconButton>
             </Tooltip>
             <Tooltip
-              title={params.row.is_active ? "Deactivate user" : "Activate user"}
+              title={params.row.is_active ? t("users.actions.deactivateUser") : t("users.actions.activateUser")}
             >
               <IconButton
                 size="small"
@@ -371,25 +416,28 @@ export const UsersTabDesktop = () => {
         ),
       },
     ],
-    []
+    [t]
   );
 
   // Transform users data for DataGrid
-  const rows = useMemo(
-    () =>
-      filteredUsers.map((user) => ({
+  const rows = useMemo(() => {
+    try {
+      return filteredUsers.map((user) => ({
         id: user.id,
         name:
-          `${user.firstName || ""} ${user.lastName || ""}`.trim() || "N/A",
+          `${user.firstName || ""} ${user.lastName || ""}`.trim() || t("common.na"),
         email: user.email,
-        client_name: user.client?.name || "N/A",
+        client_name: user.client?.name || t("common.na"),
         role_name: user.role?.roleName,
         is_active: user.isActive,
         created_at: user.createdAt,
         original: user, // Keep original object for actions
-      })),
-    [filteredUsers]
-  );
+      }));
+    } catch (err) {
+      console.log(`ERROR rows: ${err}`);
+      return [];
+    }
+  }, [filteredUsers, t]);
 
   return (
     <Box sx={{ px: 3 }}>
@@ -414,13 +462,13 @@ export const UsersTabDesktop = () => {
               {/* Only show client filter for BPO Admins */}
               {isBPOAdmin && (
                 <FormControl sx={{ minWidth: 250 }}>
-                  <InputLabel>Filter by Client</InputLabel>
+                  <InputLabel>{t("users.filterByClient")}</InputLabel>
                   <Select
                     value={selectedClient}
                     onChange={(e) => setSelectedClient(e.target.value)}
-                    label="Filter by Client"
+                    label={t("users.filterByClient")}
                   >
-                    <MenuItem value="">All Clients</MenuItem>
+                    <MenuItem value="">{t("users.allClients")}</MenuItem>
                     {clientOptions.map((client) => (
                       <MenuItem key={client.value} value={client.value}>
                         {client.title}
@@ -431,8 +479,8 @@ export const UsersTabDesktop = () => {
               )}
               <TextField
                 sx={{ minWidth: 300 }}
-                label="Search Users"
-                placeholder="Search by name or email..."
+                label={t("users.searchLabel")}
+                placeholder={t("users.searchPlaceholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 InputProps={{
@@ -451,7 +499,7 @@ export const UsersTabDesktop = () => {
               onClick={openAddDialog}
               sx={primaryIconButton}
             >
-              Add New User
+              {t("users.addNewUser")}
             </Button>
           </Box>
         </CardContent>
@@ -513,6 +561,15 @@ export const UsersTabDesktop = () => {
             "& .MuiDataGrid-cell:focus": {
               outline: "none",
             },
+            "& .MuiDataGrid-cell:focus-within": {
+              outline: "none",
+            },
+            "& .MuiDataGrid-columnHeader:focus": {
+              outline: "none",
+            },
+            "& .MuiDataGrid-columnHeader:focus-within": {
+              outline: "none",
+            },
             "& .MuiDataGrid-row:hover": {
               backgroundColor: colors.background, // hover:bg-gray-50
             },
@@ -531,7 +588,7 @@ export const UsersTabDesktop = () => {
             }}
           >
             <Typography variant="h6">
-              {editingUser ? "Edit User" : "Add New User"}
+              {editingUser ? t("users.editUser") : t("users.addNewUser")}
             </Typography>
             <IconButton onClick={closeDialog} size="small">
               <CloseIcon />
@@ -545,7 +602,7 @@ export const UsersTabDesktop = () => {
                 <TextField
                   fullWidth
                   required
-                  label="First Name"
+                  label={t("users.form.firstName")}
                   value={userForm.first_name}
                   onChange={(e) =>
                     setUserForm({ ...userForm, first_name: e.target.value })
@@ -556,7 +613,7 @@ export const UsersTabDesktop = () => {
                 <TextField
                   fullWidth
                   required
-                  label="Last Name"
+                  label={t("users.form.lastName")}
                   value={userForm.last_name}
                   onChange={(e) =>
                     setUserForm({ ...userForm, last_name: e.target.value })
@@ -568,7 +625,7 @@ export const UsersTabDesktop = () => {
                   fullWidth
                   required
                   type="email"
-                  label="Email"
+                  label={t("users.form.email")}
                   value={userForm.email}
                   onChange={(e) =>
                     setUserForm({ ...userForm, email: e.target.value })
@@ -578,15 +635,15 @@ export const UsersTabDesktop = () => {
               {isBPOAdmin && (
                 <Grid item xs={12}>
                   <FormControl fullWidth required>
-                    <InputLabel>Client</InputLabel>
+                    <InputLabel>{t("users.form.client")}</InputLabel>
                     <Select
                       value={userForm.client_id || ""}
                       onChange={(e) =>
                         handleClientChange(e.target.value || null)
                       }
-                      label="Client"
+                      label={t("users.form.client")}
                     >
-                      <MenuItem value="">Select a client</MenuItem>
+                      <MenuItem value="">{t("users.form.selectClient")}</MenuItem>
                       {clientOptions.map((client) => (
                         <MenuItem key={client.value} value={client.value}>
                           {client.title}
@@ -598,7 +655,7 @@ export const UsersTabDesktop = () => {
               )}
               <Grid item xs={12}>
                 <FormControl fullWidth disabled={!userForm.client_id}>
-                  <InputLabel>Role</InputLabel>
+                  <InputLabel>{t("users.form.role")}</InputLabel>
                   <Select
                     value={userForm.role_id || ""}
                     onChange={(e) =>
@@ -607,14 +664,14 @@ export const UsersTabDesktop = () => {
                         role_id: e.target.value || null,
                       })
                     }
-                    label="Role"
+                    label={t("users.form.role")}
                   >
                     <MenuItem value="">
                       {!userForm.client_id
-                        ? "Select a client first"
+                        ? t("users.form.selectClientFirst")
                         : roleOptions.length === 0
-                        ? "No roles available for this client"
-                        : "Select a role"}
+                        ? t("users.form.noRolesAvailable")
+                        : t("users.form.selectRole")}
                     </MenuItem>
                     {roleOptions.map((role) => (
                       <MenuItem key={role.value} value={role.value}>
@@ -630,7 +687,7 @@ export const UsersTabDesktop = () => {
                     fullWidth
                     required
                     type="password"
-                    label="Password"
+                    label={t("users.form.password")}
                     value={userForm.password}
                     onChange={(e) =>
                       setUserForm({ ...userForm, password: e.target.value })
@@ -643,7 +700,7 @@ export const UsersTabDesktop = () => {
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button onClick={closeDialog} sx={outlinedButton}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button
             onClick={saveUser}
@@ -651,7 +708,7 @@ export const UsersTabDesktop = () => {
             disabled={saving || !isFormValid}
             sx={primaryButton}
           >
-            {saving ? "Saving..." : "Save"}
+            {saving ? t("common.saving") : t("common.save")}
           </Button>
         </DialogActions>
       </Dialog>

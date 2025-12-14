@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { Box, Button, Typography } from "@mui/material";
 import FilterListOffIcon from "@mui/icons-material/FilterListOff";
 import { companies } from "../AdvancedFilters/company.js";
@@ -83,4 +84,19 @@ export const QuickFiltersDesktop = ({ setCompanyFilter, setAudioFilter, filters 
       </Button>
     </Box>
   );
+};
+
+QuickFiltersDesktop.propTypes = {
+  setCompanyFilter: PropTypes.func.isRequired,
+  setAudioFilter: PropTypes.func.isRequired,
+  filters: PropTypes.shape({
+    interactionId: PropTypes.string,
+    customerPhone: PropTypes.string,
+    agentName: PropTypes.string,
+    callType: PropTypes.string,
+    startDate: PropTypes.string,
+    endDate: PropTypes.string,
+    company: PropTypes.string,
+    hasAudio: PropTypes.string,
+  }).isRequired,
 };

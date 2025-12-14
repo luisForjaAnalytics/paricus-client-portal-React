@@ -7,6 +7,7 @@ import {
   InputAdornment,
   Card,
   CardContent,
+  Typography,
 } from "@mui/material";
 import {
   Edit as EditIcon,
@@ -20,6 +21,7 @@ import {
 import { colors, typography, card } from "../../../common/styles/styles";
 import { useNavigate } from "react-router-dom";
 import { TableViewMobil } from "./TableViewMobil";
+import AdvancedFilters from "./AdvancedFilters";
 
 const createColumns = (handleEditClick, handleViewClick) => [
   {
@@ -27,9 +29,14 @@ const createColumns = (handleEditClick, handleViewClick) => [
     headerName: "Article Name",
     width: 300,
     flex: 1,
-    align: "center",
+    align: "left",
     headerAlign: "center",
     sortable: true,
+    renderCell: (params) => (
+      <Typography variant="body2" fontWeight="medium" sx={{ margin: "1rem" }}>
+        {params.value || "N/A"}
+      </Typography>
+    ),
   },
   {
     field: "article_synopsis",
@@ -64,9 +71,6 @@ const createColumns = (handleEditClick, handleViewClick) => [
           size="small"
           aria-label="edit"
           color="primary"
-          // sx={{
-          //   color: colors.tertiary,
-          // }}
         >
           <EditIcon />
         </IconButton>
@@ -108,24 +112,48 @@ const dataStructure = (data) => {
 };
 
 export const TableView = () => {
-  const { data = [], isLoading, isError } = useGetAllArticlesQuery();
+  const { data = [], isLoading, isError, refetch } = useGetAllArticlesQuery();
 
   const [getArticleById] = useLazyGetArticleByIdQuery();
-  const [searchQuery, setSearchQuery] = useState("");
+  const [filters, setFilters] = useState({
+    articleName: "",
+    synopsis: "",
+    updatedAt: "",
+  });
 
   const navigate = useNavigate();
 
-  // Filter articles by search query
-  const filteredArticles = useMemo(() => {
-    if (!searchQuery) return data;
+  // Clear all filters
+  const clearFilters = () => {
+    setFilters({
+      articleName: "",
+      synopsis: "",
+      updatedAt: "",
+    });
+  };
 
-    const query = searchQuery.toLowerCase();
-    return data.filter(
-      (article) =>
-        article.article_name?.toLowerCase().includes(query) ||
-        article.article_synopsis?.toLowerCase().includes(query)
-    );
-  }, [data, searchQuery]);
+  // Filter articles by advanced filters
+  const filteredArticles = useMemo(() => {
+    if (!filters.articleName && !filters.synopsis && !filters.updatedAt) {
+      return data;
+    }
+
+    return data.filter((article) => {
+      const matchesName = filters.articleName
+        ? article.article_name?.toLowerCase().includes(filters.articleName.toLowerCase())
+        : true;
+
+      const matchesSynopsis = filters.synopsis
+        ? article.article_synopsis?.toLowerCase().includes(filters.synopsis.toLowerCase())
+        : true;
+
+      const matchesDate = filters.updatedAt
+        ? article.updated_at?.startsWith(filters.updatedAt)
+        : true;
+
+      return matchesName && matchesSynopsis && matchesDate;
+    });
+  }, [data, filters]);
 
   const rows = useMemo(
     () => dataStructure(filteredArticles),
@@ -162,7 +190,7 @@ export const TableView = () => {
       {/* Search Filter */}
       <Card
         sx={{
-          display: { xs: "none", md: "block" },
+          display: { xs: "none", md: "flex" },
           padding: "0 2rem 0 2rem",
           mb: 3,
           width: { md: "95%", lg: "100%" },
@@ -177,19 +205,13 @@ export const TableView = () => {
               justifyContent: "flex-start",
             }}
           >
-            <TextField
-              sx={{ minWidth: 400 }}
-              label="Search Articles"
-              placeholder="Search by Article Name or Synopsis..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
-              }}
+            <AdvancedFilters
+              filters={filters}
+              setFilters={setFilters}
+              refetch={refetch}
+              isDebouncing={false}
+              loading={isLoading}
+              clearFilters={clearFilters}
             />
           </Box>
         </CardContent>
@@ -208,10 +230,6 @@ export const TableView = () => {
           columns={columns}
           loading={isLoading}
           pageSizeOptions={[10, 25, 50, 100]}
-          // onCellClick={(params, event) => {
-          //   // Click en una celda - obtener artículo completo
-          //   handleArticleClick(params.id);
-          // }}
           initialState={{
             pagination: {
               paginationModel: { pageSize: 10, page: 0 },

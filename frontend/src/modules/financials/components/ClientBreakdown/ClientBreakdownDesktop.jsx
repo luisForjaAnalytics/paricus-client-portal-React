@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import PropTypes from "prop-types";
 import {
   Avatar,
   Box,
@@ -97,7 +98,8 @@ export const ClientBreakdownDesktop = ({
     if (!clientBreakdown) return [];
 
     // Helper to convert client name to folder format (e.g., "IM Telecom" -> "im-telecom")
-    const clientNameToFolder = (name) => name?.toLowerCase().replace(/\s+/g, '-') || '';
+    const clientNameToFolder = (name) =>
+      name?.toLowerCase().replace(/\s+/g, "-") || "";
 
     // Filter invoices that belong to this client's folder
     return invoices.filter((invoice) => {
@@ -355,14 +357,7 @@ export const ClientBreakdownDesktop = ({
                       >
                         {getInitials(client.folderDisplay)}
                       </Avatar>
-                      <Typography
-                        sx={{
-                          fontSize: typography.fontSize.body,
-                          fontWeight: typography.fontWeight.semibold,
-                          color: colors.textPrimary,
-                          fontFamily: typography.fontFamily,
-                        }}
-                      >
+                      <Typography variant="body2" fontWeight={500}>
                         {client.folderDisplay}
                       </Typography>
                     </Box>
@@ -374,6 +369,7 @@ export const ClientBreakdownDesktop = ({
                         fontWeight: typography.fontWeight.medium,
                         color: colors.textPrimary,
                         fontFamily: typography.fontFamily,
+                        paddingRight: "1.5rem",
                       }}
                     >
                       {client.totalInvoices}
@@ -381,11 +377,10 @@ export const ClientBreakdownDesktop = ({
                   </TableCell>
                   <TableCell align="center">
                     <Typography
+                      variant="body2"
+                      fontWeight={500}
                       sx={{
-                        fontSize: typography.fontSize.body,
-                        fontWeight: typography.fontWeight.bold,
-                        color: colors.textPrimary,
-                        fontFamily: typography.fontFamily,
+                        paddingRight: "1.5rem",
                       }}
                     >
                       {formatCurrency(client.totalRevenue)}
@@ -393,11 +388,10 @@ export const ClientBreakdownDesktop = ({
                   </TableCell>
                   <TableCell align="center">
                     <Typography
+                      variant="body2"
+                      fontWeight={500}
                       sx={{
-                        fontSize: typography.fontSize.body,
-                        fontWeight: typography.fontWeight.bold,
-                        color: colors.textPrimary,
-                        fontFamily: typography.fontFamily,
+                        paddingRight: "1.5rem",
                       }}
                     >
                       {formatCurrency(client.outstandingBalance)}
@@ -405,18 +399,21 @@ export const ClientBreakdownDesktop = ({
                   </TableCell>
                   <TableCell align="center">
                     <Typography
+                      variant="body2"
+                      fontWeight={500}
                       sx={{
-                        fontSize: typography.fontSize.body,
-                        fontWeight: typography.fontWeight.bold,
                         color: colors.error,
-                        fontFamily: typography.fontFamily,
+                        paddingRight: "1.5rem",
                       }}
                     >
                       {formatCurrency(client.overdueAmount)}
                     </Typography>
                   </TableCell>
                 </TableRow>
-                <TableRow key={`collapse-${index}`}>
+                <TableRow
+                  key={`collapse-${index}`}
+                  sx={{ backgroundColor: colors.backgroundOpenSubSection }}
+                >
                   <TableCell
                     style={{ paddingBottom: 0, paddingTop: 0 }}
                     colSpan={6}
@@ -429,7 +426,6 @@ export const ClientBreakdownDesktop = ({
                       <Box
                         sx={{
                           py: 3,
-                          bgcolor: colors.surface,
                         }}
                       >
                         <Box
@@ -445,9 +441,10 @@ export const ClientBreakdownDesktop = ({
                             sx={{
                               fontWeight: typography.fontWeight.semibold,
                               fontFamily: typography.fontFamily,
+                              marginLeft: "0.5rem",
                             }}
                           >
-                            {client.folderDisplay}{" "}
+                            {/* {client.folderDisplay}{" "} */}
                             {t("financials.clientBreakdown.invoicesTitle")}
                           </Typography>
                           {isAdmin && (
@@ -508,4 +505,56 @@ export const ClientBreakdownDesktop = ({
       />
     </Box>
   );
+};
+
+ClientBreakdownDesktop.propTypes = {
+  clientBreakdowns: PropTypes.arrayOf(
+    PropTypes.shape({
+      folder: PropTypes.string.isRequired,
+      folderDisplay: PropTypes.string.isRequired,
+      totalRevenue: PropTypes.number.isRequired,
+      outstandingBalance: PropTypes.number.isRequired,
+      overdueAmount: PropTypes.number.isRequired,
+      totalInvoices: PropTypes.number.isRequired,
+      paidCount: PropTypes.number.isRequired,
+      unpaidCount: PropTypes.number.isRequired,
+      overdueCount: PropTypes.number.isRequired,
+      hasAccess: PropTypes.bool.isRequired,
+    })
+  ).isRequired,
+  formatCurrency: PropTypes.func.isRequired,
+  invoices: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      invoiceNumber: PropTypes.string.isRequired,
+      title: PropTypes.string.isRequired,
+      amount: PropTypes.number.isRequired,
+      currency: PropTypes.string.isRequired,
+      status: PropTypes.string.isRequired,
+      dueDate: PropTypes.string,
+      issuedDate: PropTypes.string,
+      paidDate: PropTypes.string,
+      folder: PropTypes.string,
+      clientFolder: PropTypes.string,
+      client: PropTypes.shape({
+        name: PropTypes.string,
+      }),
+    })
+  ),
+  isAdmin: PropTypes.bool.isRequired,
+  formatDate: PropTypes.func.isRequired,
+  getStatusColor: PropTypes.func.isRequired,
+  viewInvoice: PropTypes.func.isRequired,
+  downloadInvoice: PropTypes.func.isRequired,
+  openEditInvoiceModal: PropTypes.func.isRequired,
+  handleDeleteInvoice: PropTypes.func.isRequired,
+  openPaymentLink: PropTypes.func.isRequired,
+  onPaymentLinkSuccess: PropTypes.func.isRequired,
+  onPaymentLinkError: PropTypes.func.isRequired,
+  selectClient: PropTypes.func,
+};
+
+ClientBreakdownDesktop.defaultProps = {
+  invoices: [],
+  selectClient: null,
 };

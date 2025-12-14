@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import {
   Box,
   Button,
@@ -192,37 +192,29 @@ export const AudioRecordingsView = () => {
     return recordings.find((r) => r.interaction_id === currentlyPlaying);
   }, [recordings, currentlyPlaying]);
 
-  // Prefetch next page automatically when current page loads
-  useEffect(() => {
-    if (!loading && page < totalPages) {
-      // Prefetch next page in background
-      const nextPageParams = {
-        page: page + 1,
-        limit: itemsPerPage,
-        ...debouncedFilters,
-      };
-      prefetchAudioRecordings(nextPageParams);
-    }
-  }, [
-    page,
-    totalPages,
-    itemsPerPage,
-    debouncedFilters,
-    loading,
-    prefetchAudioRecordings,
-  ]);
+  // DISABLED: Prefetch causes performance issues - too many simultaneous API calls
+  // useEffect(() => {
+  //   if (!loading && page < totalPages) {
+  //     const nextPageParams = {
+  //       page: page + 1,
+  //       limit: itemsPerPage,
+  //       ...debouncedFilters,
+  //     };
+  //     prefetchAudioRecordings(nextPageParams);
+  //   }
+  // }, [page, totalPages, itemsPerPage, debouncedFilters, loading, prefetchAudioRecordings]);
 
-  // Handler to prefetch page on hover
-  const handlePrefetchPage = (targetPage) => {
-    if (targetPage !== page && targetPage >= 1 && targetPage <= totalPages) {
-      const prefetchParams = {
-        page: targetPage,
-        limit: itemsPerPage,
-        ...debouncedFilters,
-      };
-      prefetchAudioRecordings(prefetchParams);
-    }
-  };
+  // DISABLED: Handler to prefetch page on hover - causes performance issues
+  // const handlePrefetchPage = (targetPage) => {
+  //   if (targetPage !== page && targetPage >= 1 && targetPage <= totalPages) {
+  //     const prefetchParams = {
+  //       page: targetPage,
+  //       limit: itemsPerPage,
+  //       ...debouncedFilters,
+  //     };
+  //     prefetchAudioRecordings(prefetchParams);
+  //   }
+  // };
 
   // Methods
   // Check for API errors
@@ -241,33 +233,45 @@ export const AudioRecordingsView = () => {
     }
   }, [apiError]);
 
-  const clearFilters = () => {
-    setFilters({
-      interactionId: "",
-      customerPhone: "",
-      agentName: "",
-      callType: "",
-      startDate: "",
-      endDate: "",
-      company: null,
-      hasAudio: null,
-    });
-    setPage(1);
-  };
+  const clearFilters = useCallback(() => {
+    try {
+      setFilters({
+        interactionId: "",
+        customerPhone: "",
+        agentName: "",
+        callType: "",
+        startDate: "",
+        endDate: "",
+        company: null,
+        hasAudio: null,
+      });
+      setPage(1);
+    } catch (err) {
+      console.error(`ERROR: clearFilters - ${err.message}`, err);
+    }
+  }, []);
 
-  const setCompanyFilter = (company) => {
-    setFilters((prev) => ({ ...prev, company }));
-    setDebouncedFilters((prev) => ({ ...prev, company })); // Apply immediately without debounce
-    setPage(1);
-  };
+  const setCompanyFilter = useCallback((company) => {
+    try {
+      setFilters((prev) => ({ ...prev, company }));
+      setDebouncedFilters((prev) => ({ ...prev, company })); // Apply immediately without debounce
+      setPage(1);
+    } catch (err) {
+      console.error(`ERROR: setCompanyFilter - ${err.message}`, err);
+    }
+  }, []);
 
-  const setAudioFilter = (hasAudio) => {
-    setFilters((prev) => ({ ...prev, hasAudio }));
-    setDebouncedFilters((prev) => ({ ...prev, hasAudio })); // Apply immediately without debounce
-    setPage(1);
-  };
+  const setAudioFilter = useCallback((hasAudio) => {
+    try {
+      setFilters((prev) => ({ ...prev, hasAudio }));
+      setDebouncedFilters((prev) => ({ ...prev, hasAudio })); // Apply immediately without debounce
+      setPage(1);
+    } catch (err) {
+      console.error(`ERROR: setAudioFilter - ${err.message}`, err);
+    }
+  }, []);
 
-  const toggleAudio = async (item) => {
+  const toggleAudio = useCallback(async (item) => {
     if (currentlyPlaying === item.interaction_id) {
       stopAudio(item);
     } else {
@@ -289,171 +293,229 @@ export const AudioRecordingsView = () => {
           setCurrentlyPlaying(item.interaction_id);
           setIsPlaying(true);
 
-          // Log the play action
-          try {
-            await createLog({
-              userId: authUser.id.toString(),
-              eventType: 'PLAY',
-              entity: 'AudioRecording',
-              description: `Played audio recording ${item.interaction_id} (Agent: ${item.agent_name || 'Unknown'})`,
-              status: 'SUCCESS',
-            }).unwrap();
-          } catch (logErr) {
-            console.error("Error logging play audio action:", logErr);
-          }
+          // OPTIMIZED: Log async without blocking UI
+          createLog({
+            userId: authUser.id.toString(),
+            eventType: "PLAY",
+            entity: "AudioRecording",
+            description: `Played audio recording ${
+              item.interaction_id
+            } (Agent: ${item.agent_name || "Unknown"})`,
+            status: "SUCCESS",
+          }).catch((logErr) => {
+            console.error(
+              `ERROR: toggleAudio (createLog) - ${logErr.message}`,
+              logErr
+            );
+          });
         }
       } catch (err) {
-        console.error("Error loading audio:", err);
+        console.error(`ERROR: toggleAudio - ${err.message}`, err);
         setError("Failed to load audio file. Please try again.");
 
-        // Log the failed play action
-        try {
-          await createLog({
-            userId: authUser.id.toString(),
-            eventType: 'PLAY',
-            entity: 'AudioRecording',
-            description: `Failed to play audio recording ${item.interaction_id}`,
-            status: 'FAILURE',
-          }).unwrap();
-        } catch (logErr) {
-          console.error("Error logging play audio failure:", logErr);
-        }
+        // OPTIMIZED: Log async without blocking UI
+        createLog({
+          userId: authUser.id.toString(),
+          eventType: "PLAY",
+          entity: "AudioRecording",
+          description: `Failed to play audio recording ${item.interaction_id}`,
+          status: "FAILURE",
+        }).catch((logErr) => {
+          console.error(
+            `ERROR: toggleAudio (createLog failure) - ${logErr.message}`,
+            logErr
+          );
+        });
       } finally {
         setLoadingAudioUrl(null);
       }
     }
-  };
+  }, [currentlyPlaying, volume, playbackSpeed, getAudioUrl, createLog, authUser.id]);
 
-  const stopAudio = async (item) => {
+  const stopAudio = useCallback(async (item) => {
     // Get recording info before clearing state
-    const recordingToLog = item || recordings.find((r) => r.interaction_id === currentlyPlaying);
+    const recordingToLog =
+      item || recordings.find((r) => r.interaction_id === currentlyPlaying);
 
     if (audioPlayer.current) {
       audioPlayer.current.pause();
       audioPlayer.current.currentTime = 0;
     }
 
-    // Log the stop action
+    // OPTIMIZED: Log async without blocking UI
     if (recordingToLog && currentlyPlaying) {
-      try {
-        await createLog({
-          userId: authUser.id.toString(),
-          eventType: 'STOP',
-          entity: 'AudioRecording',
-          description: `Stopped audio recording ${recordingToLog.interaction_id} (Agent: ${recordingToLog.agent_name || 'Unknown'})`,
-          status: 'SUCCESS',
-        }).unwrap();
-      } catch (logErr) {
-        console.error("Error logging stop audio action:", logErr);
-      }
+      createLog({
+        userId: authUser.id.toString(),
+        eventType: "STOP",
+        entity: "AudioRecording",
+        description: `Stopped audio recording ${
+          recordingToLog.interaction_id
+        } (Agent: ${recordingToLog.agent_name || "Unknown"})`,
+        status: "SUCCESS",
+      }).catch((logErr) => {
+        console.error(
+          `ERROR: stopAudio (createLog) - ${logErr.message}`,
+          logErr
+        );
+      });
     }
 
     setCurrentlyPlaying(null);
     setIsPlaying(false);
     setCurrentTime(0);
-  };
+  }, [recordings, currentlyPlaying, createLog, authUser.id]);
 
   const togglePlayPause = () => {
-    if (!audioPlayer.current) return;
+    try {
+      if (!audioPlayer.current) return;
 
-    if (isPlaying) {
-      audioPlayer.current.pause();
-      setIsPlaying(false);
-    } else {
-      audioPlayer.current.play();
-      setIsPlaying(true);
+      if (isPlaying) {
+        audioPlayer.current.pause();
+        setIsPlaying(false);
+      } else {
+        audioPlayer.current.play();
+        setIsPlaying(true);
+      }
+    } catch (err) {
+      console.error(`ERROR: togglePlayPause - ${err.message}`, err);
     }
   };
 
   const updateProgress = () => {
-    if (audioPlayer.current) {
-      setCurrentTime(audioPlayer.current.currentTime);
+    try {
+      if (audioPlayer.current) {
+        setCurrentTime(audioPlayer.current.currentTime);
+      }
+    } catch (err) {
+      console.error(`ERROR: updateProgress - ${err.message}`, err);
     }
   };
 
   const handleMetadataLoaded = () => {
-    if (audioPlayer.current) {
-      setDuration(audioPlayer.current.duration);
+    try {
+      if (audioPlayer.current) {
+        setDuration(audioPlayer.current.duration);
+      }
+    } catch (err) {
+      console.error(`ERROR: handleMetadataLoaded - ${err.message}`, err);
     }
   };
 
   const seekAudio = (event, newValue) => {
-    if (!audioPlayer.current) return;
-    const seekTime = (newValue / 100) * duration;
-    audioPlayer.current.currentTime = seekTime;
-    setCurrentTime(seekTime);
+    try {
+      if (!audioPlayer.current) return;
+      const seekTime = (newValue / 100) * duration;
+      audioPlayer.current.currentTime = seekTime;
+      setCurrentTime(seekTime);
+    } catch (err) {
+      console.error(`ERROR: seekAudio - ${err.message}`, err);
+    }
   };
 
   const rewind = () => {
-    if (!audioPlayer.current) return;
-    audioPlayer.current.currentTime = Math.max(
-      0,
-      audioPlayer.current.currentTime - 10
-    );
+    try {
+      if (!audioPlayer.current) return;
+      audioPlayer.current.currentTime = Math.max(
+        0,
+        audioPlayer.current.currentTime - 10
+      );
+    } catch (err) {
+      console.error(`ERROR: rewind - ${err.message}`, err);
+    }
   };
 
   const forward = () => {
-    if (!audioPlayer.current) return;
-    audioPlayer.current.currentTime = Math.min(
-      duration,
-      audioPlayer.current.currentTime + 10
-    );
+    try {
+      if (!audioPlayer.current) return;
+      audioPlayer.current.currentTime = Math.min(
+        duration,
+        audioPlayer.current.currentTime + 10
+      );
+    } catch (err) {
+      console.error(`ERROR: forward - ${err.message}`, err);
+    }
   };
 
   const toggleMute = () => {
-    if (!audioPlayer.current) return;
+    try {
+      if (!audioPlayer.current) return;
 
-    if (isMuted) {
-      audioPlayer.current.volume = volume;
-      setIsMuted(false);
-    } else {
-      audioPlayer.current.volume = 0;
-      setIsMuted(true);
+      if (isMuted) {
+        audioPlayer.current.volume = volume;
+        setIsMuted(false);
+      } else {
+        audioPlayer.current.volume = 0;
+        setIsMuted(true);
+      }
+    } catch (err) {
+      console.error(`ERROR: toggleMute - ${err.message}`, err);
     }
   };
 
   const handleVolumeChange = (event, newValue) => {
-    const newVolume = newValue / 100;
-    setVolume(newVolume);
-    if (audioPlayer.current) {
-      audioPlayer.current.volume = newVolume;
-    }
-    if (newVolume > 0) {
-      setIsMuted(false);
+    try {
+      const newVolume = newValue / 100;
+      setVolume(newVolume);
+      if (audioPlayer.current) {
+        audioPlayer.current.volume = newVolume;
+      }
+      if (newVolume > 0) {
+        setIsMuted(false);
+      }
+    } catch (err) {
+      console.error(`ERROR: handleVolumeChange - ${err.message}`, err);
     }
   };
 
   const cyclePlaybackSpeed = () => {
-    const speeds = [0.5, 0.75, 1, 1.25, 1.5, 2];
-    const currentIndex = speeds.indexOf(playbackSpeed);
-    const nextIndex = (currentIndex + 1) % speeds.length;
-    setPlaybackSpeed(speeds[nextIndex]);
+    try {
+      const speeds = [0.5, 0.75, 1, 1.25, 1.5, 2];
+      const currentIndex = speeds.indexOf(playbackSpeed);
+      const nextIndex = (currentIndex + 1) % speeds.length;
+      setPlaybackSpeed(speeds[nextIndex]);
 
-    if (audioPlayer.current) {
-      audioPlayer.current.playbackRate = speeds[nextIndex];
+      if (audioPlayer.current) {
+        audioPlayer.current.playbackRate = speeds[nextIndex];
+      }
+    } catch (err) {
+      console.error(`ERROR: cyclePlaybackSpeed - ${err.message}`, err);
     }
   };
 
   const formatTime = (seconds) => {
-    if (isNaN(seconds)) return "0:00";
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
+    try {
+      if (isNaN(seconds)) return "0:00";
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins}:${secs.toString().padStart(2, "0")}`;
+    } catch (err) {
+      console.error(`ERROR: formatTime - ${err.message}`, err);
+      return "0:00";
+    }
   };
 
   const handleAudioEnded = () => {
-    setCurrentlyPlaying(null);
-    setIsPlaying(false);
-    setCurrentTime(0);
+    try {
+      setCurrentlyPlaying(null);
+      setIsPlaying(false);
+      setCurrentTime(0);
+    } catch (err) {
+      console.error(`ERROR: handleAudioEnded - ${err.message}`, err);
+    }
   };
 
-  const handleAudioError = () => {
-    setError("Failed to play audio file");
-    setCurrentlyPlaying(null);
-    setIsPlaying(false);
+  const handleAudioError = (err) => {
+    try {
+      console.error(`ERROR: handleAudioError - Audio playback failed`, err);
+      setError("Failed to play audio file");
+      setCurrentlyPlaying(null);
+      setIsPlaying(false);
+    } catch (error) {
+      console.error(`ERROR: handleAudioError - ${error.message}`, error);
+    }
   };
 
-  const downloadAudio = async (item) => {
+  const downloadAudio = useCallback(async (item) => {
     try {
       setLoadingAudioUrl(item.interaction_id);
 
@@ -467,37 +529,33 @@ export const AudioRecordingsView = () => {
 
       window.open(audioUrl, "_blank");
     } catch (err) {
-      console.error("Error downloading audio:", err);
+      console.error(`ERROR: downloadAudio - ${err.message}`, err);
       setError("Failed to download audio file. Please try again.");
     } finally {
       setLoadingAudioUrl(null);
     }
-  };
+  }, [getAudioUrl]);
 
-  // Prefetch audio URL on hover over play button
-  const handlePrefetchAudio = async (interactionId) => {
-    // Only prefetch if not already cached
-    if (!audioUrlCache.current.has(interactionId)) {
-      try {
-        const result = await getAudioUrl(interactionId).unwrap();
-        audioUrlCache.current.set(interactionId, result);
-      } catch (err) {
-        // Silently fail - user can try again on click
-        console.debug("Prefetch failed for audio:", interactionId);
-      }
-    }
-  };
+  // DISABLED: Prefetch audio causes performance issues - too many API calls on hover
+  const handlePrefetchAudio = useCallback(() => {
+    // Disabled for performance
+  }, []);
 
   const formatDateTime = (dateString) => {
-    if (!dateString) return "N/A";
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(date);
+    try {
+      if (!dateString) return "N/A";
+      const date = new Date(dateString);
+      return new Intl.DateTimeFormat("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      }).format(date);
+    } catch (err) {
+      console.error(`ERROR: formatDateTime - ${err.message}`, err);
+      return "N/A";
+    }
   };
 
   const getCallTypeColor = (callType) => {
@@ -515,7 +573,7 @@ export const AudioRecordingsView = () => {
   return (
     <Box sx={{ p: 3, pb: currentlyPlaying ? 15 : 3 }}>
       {/* Page Header */}
-      <Box sx={{ mb: 2, mt:1 }}>
+      <Box sx={{ mb: 2, mt: 1 }}>
         <Typography
           variant="h5"
           sx={{

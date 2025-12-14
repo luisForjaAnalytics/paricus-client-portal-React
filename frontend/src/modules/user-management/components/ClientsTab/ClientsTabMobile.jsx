@@ -28,7 +28,16 @@ import { useTranslation } from "react-i18next";
 import { titlesTypography } from "../../../../common/styles/styles";
 
 function Row({ client, handleEdit, handleDeactivate, formatDate }) {
+  const { t } = useTranslation();
   const [open, setOpen] = React.useState(false);
+
+  const toggleOpen = () => {
+    try {
+      setOpen(!open);
+    } catch (err) {
+      console.log(`ERROR toggleOpen: ${err}`);
+    }
+  };
 
   return (
     <React.Fragment>
@@ -37,7 +46,7 @@ function Row({ client, handleEdit, handleDeactivate, formatDate }) {
           <IconButton
             aria-label="expand row"
             size="small"
-            onClick={() => setOpen(!open)}
+            onClick={toggleOpen}
           >
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
@@ -79,10 +88,10 @@ function Row({ client, handleEdit, handleDeactivate, formatDate }) {
                     fontWeight="600"
                     sx={{ minWidth: 100 }}
                   >
-                    Status:
+                    {t("clients.table.status")}:
                   </Typography>
                   <Chip
-                    label={client.isActive ? "Active" : "Inactive"}
+                    label={client.isActive ? t("common.active") : t("common.inactive")}
                     color={client.isActive ? "success" : "default"}
                     size="small"
                   />
@@ -95,10 +104,10 @@ function Row({ client, handleEdit, handleDeactivate, formatDate }) {
                     fontWeight="600"
                     sx={{ minWidth: 100 }}
                   >
-                    Type:
+                    {t("clients.table.type")}:
                   </Typography>
                   <Chip
-                    label={client.isProspect ? "Prospect" : "Client"}
+                    label={client.isProspect ? t("clients.table.prospect") : t("clients.table.client")}
                     color={client.isProspect ? "warning" : "primary"}
                     size="small"
                   />
@@ -111,7 +120,7 @@ function Row({ client, handleEdit, handleDeactivate, formatDate }) {
                     fontWeight="600"
                     sx={{ minWidth: 100 }}
                   >
-                    Created:
+                    {t("clients.table.created")}:
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     {formatDate(client.createdAt || client.created_at)}
@@ -127,10 +136,10 @@ function Row({ client, handleEdit, handleDeactivate, formatDate }) {
                     fontWeight="600"
                     sx={{ minWidth: 100 }}
                   >
-                    Actions:
+                    {t("clients.table.actions")}:
                   </Typography>
                   <Box sx={{ display: "flex", gap: 0.5 }}>
-                    <Tooltip title="Edit">
+                    <Tooltip title={t("common.edit")}>
                       <IconButton
                         size="small"
                         color="primary"
@@ -140,7 +149,7 @@ function Row({ client, handleEdit, handleDeactivate, formatDate }) {
                       </IconButton>
                     </Tooltip>
                     {client.isActive && (
-                      <Tooltip title="Deactivate">
+                      <Tooltip title={t("clients.actions.deactivate")}>
                         <IconButton
                           size="small"
                           color="error"
@@ -182,6 +191,7 @@ export const ClientsTabMobile = ({
   onAddClick,
 }) => {
   const { t } = useTranslation();
+
   return (
     <TableContainer
       component={Paper}
@@ -246,7 +256,7 @@ export const ClientsTabMobile = ({
                     sx={{ fontSize: 48, color: "text.disabled", mb: 1 }}
                   />
                   <Typography variant="body2" color="text.secondary">
-                    No clients found
+                    {t("clients.noClientsFound")}
                   </Typography>
                   <Button
                     variant="contained"
@@ -254,7 +264,7 @@ export const ClientsTabMobile = ({
                     onClick={onAddClick}
                     sx={{ mt: 2 }}
                   >
-                    Add Client
+                    {t("clients.addClient")}
                   </Button>
                 </Box>
               </TableCell>

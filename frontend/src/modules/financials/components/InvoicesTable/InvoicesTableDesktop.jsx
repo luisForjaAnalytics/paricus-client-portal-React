@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Table,
   TableBody,
@@ -79,27 +78,33 @@ export const InvoicesTableDesktop = ({
             <TableCell sx={table.headerCell}>
               {t("invoices.table.invoiceNumber")}
             </TableCell>
-            <TableCell sx={table.headerCell}>
+            <TableCell sx={table.headerCellInvoice}>
               {t("invoices.table.fileName")}
             </TableCell>
-            <TableCell sx={table.headerCell}>
+            <TableCell sx={table.headerCellInvoice}>
               {t("invoices.table.amount")}
             </TableCell>
-            <TableCell sx={table.headerCell}>
+            <TableCell sx={{...table.headerCellInvoice, paddingLeft:'2.5rem'}}>
               {t("invoices.table.status")}
             </TableCell>
-            <TableCell sx={table.headerCell}>
+            <TableCell sx={table.headerCellInvoice}>
               {t("invoices.table.dueDate")}
             </TableCell>
             <TableCell sx={table.headerCell}>
               {t("invoices.table.paymentDate")}
             </TableCell>
             {isAdmin && (
-              <TableCell sx={table.headerCell}>
+              <TableCell sx={table.headerCellInvoice}>
                 {t("invoices.table.paymentLink")}
               </TableCell>
             )}
-            <TableCell sx={{ ...table.headerCell, textAlign: "right" }}>
+            <TableCell
+              sx={{
+                ...table.headerCell,
+                textAlign: "right",
+                paddingRight: "4rem",
+              }}
+            >
               {t("invoices.table.actions")}
             </TableCell>
           </TableRow>
@@ -161,7 +166,7 @@ export const InvoicesTableDesktop = ({
                 </Typography>
               </TableCell>
               <TableCell sx={table.cell}>
-                <Box component="span" sx={getStatusBadgeStyle(invoice.status)}>
+                <Box component="span" sx={{...getStatusBadgeStyle(invoice.status), ...colors.intranetRed}}>
                   {invoice.status.toUpperCase()}
                 </Box>
               </TableCell>

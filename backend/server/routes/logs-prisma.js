@@ -77,7 +77,7 @@ router.get('/',
       });
 
       res.json({
-        data: logs,
+        logs: logs,
         pagination: {
           page: parseInt(page),
           limit: parseInt(limit),
@@ -145,7 +145,12 @@ router.post('/',
       }
 
       // Get IP address from request if not provided
-      const logIpAddress = ipAddress || req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress;
+      let logIpAddress = ipAddress || req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress;
+
+      // Clean IPv6-mapped IPv4 addresses (::ffff:192.168.1.1 -> 192.168.1.1)
+      if (logIpAddress && logIpAddress.startsWith('::ffff:')) {
+        logIpAddress = logIpAddress.replace('::ffff:', '');
+      }
 
       const log = await prisma.log.create({
         data: {

@@ -24,9 +24,17 @@ import {
 import { useTranslation } from "react-i18next";
 import { titlesTypography } from "../../../../common/styles/styles";
 
-function Row({ log, formatTimestamp, getEventTypeColor, getStatusColor }) {
+function Row({ log, formatTimestamp, getEventTypeColor, getStatusColor, cleanIpAddress }) {
   const [open, setOpen] = React.useState(false);
   const { t } = useTranslation();
+
+  const toggleOpen = () => {
+    try {
+      setOpen(!open);
+    } catch (err) {
+      console.log(`ERROR toggleOpen: ${err}`);
+    }
+  };
 
   return (
     <React.Fragment>
@@ -35,7 +43,7 @@ function Row({ log, formatTimestamp, getEventTypeColor, getStatusColor }) {
           <IconButton
             aria-label="expand row"
             size="small"
-            onClick={() => setOpen(!open)}
+            onClick={toggleOpen}
           >
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
@@ -185,7 +193,7 @@ function Row({ log, formatTimestamp, getEventTypeColor, getStatusColor }) {
                     variant="body2"
                     sx={{ fontFamily: "monospace" }}
                   >
-                    {log.ipAddress || "N/A"}
+                    {cleanIpAddress(log.ipAddress)}
                   </Typography>
                 </Box>
 
@@ -229,6 +237,7 @@ Row.propTypes = {
   formatTimestamp: PropTypes.func.isRequired,
   getEventTypeColor: PropTypes.func.isRequired,
   getStatusColor: PropTypes.func.isRequired,
+  cleanIpAddress: PropTypes.func.isRequired,
 };
 
 export const LogsViewMobile = ({
@@ -238,6 +247,7 @@ export const LogsViewMobile = ({
   formatTimestamp,
   getEventTypeColor,
   getStatusColor,
+  cleanIpAddress,
 }) => {
   const { t } = useTranslation();
 
@@ -299,6 +309,7 @@ export const LogsViewMobile = ({
                   formatTimestamp={formatTimestamp}
                   getEventTypeColor={getEventTypeColor}
                   getStatusColor={getStatusColor}
+                  cleanIpAddress={cleanIpAddress}
                 />
               ))}
               {logs.length === 0 && !isLoading && (
@@ -341,6 +352,7 @@ LogsViewMobile.propTypes = {
   formatTimestamp: PropTypes.func.isRequired,
   getEventTypeColor: PropTypes.func.isRequired,
   getStatusColor: PropTypes.func.isRequired,
+  cleanIpAddress: PropTypes.func.isRequired,
 };
 
 LogsViewMobile.defaultProps = {

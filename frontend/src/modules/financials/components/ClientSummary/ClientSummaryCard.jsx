@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { Box, Card, CardContent, Typography } from "@mui/material";
 import {
   summaryCard,
@@ -75,6 +76,27 @@ export const ClientSummaryCard = ({ payload, formatCurrency }) => {
       })}
     </Box>
   );
+};
+
+ClientSummaryCard.propTypes = {
+  payload: PropTypes.arrayOf(
+    PropTypes.shape({
+      borderCol: PropTypes.string.isRequired,
+      cardColor: PropTypes.string.isRequired,
+      textColor: PropTypes.string,
+      label: PropTypes.string.isRequired,
+      invoiceState: PropTypes.string.isRequired,
+      overallStatsInfo: PropTypes.shape({
+        tp1: PropTypes.number.isRequired,
+        tp2: PropTypes.number.isRequired,
+      }).isRequired,
+      icon: PropTypes.shape({
+        icon: PropTypes.node.isRequired,
+        color: PropTypes.string.isRequired,
+      }),
+    })
+  ).isRequired,
+  formatCurrency: PropTypes.func.isRequired,
 };
 
 export default ClientSummaryCard;

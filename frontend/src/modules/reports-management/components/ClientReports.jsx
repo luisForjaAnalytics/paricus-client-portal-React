@@ -1,4 +1,5 @@
-import React, { useRef } from "react";
+import { useRef } from "react";
+import PropTypes from "prop-types";
 import {
   Box,
   Typography,
@@ -28,6 +29,7 @@ import {
   Close as CloseIcon,
   Description as DescriptionIcon,
 } from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
 import {
   primaryIconButton,
   outlinedIconButton,
@@ -55,6 +57,7 @@ export const ClientReports = ({
   handleUploadReport,
   uploading,
 }) => {
+  const { t } = useTranslation();
   const fileInputRef = useRef(null);
 
   if (!selectedFolder) {
@@ -81,7 +84,7 @@ export const ClientReports = ({
               ...titlesTypography.primaryTitle,
             }}
           >
-            Reports for {selectedFolder}
+            {t("reportsManagement.reports.title", { folder: selectedFolder })}
           </Typography>
           <Stack direction="row" spacing={1}>
             <Button
@@ -91,7 +94,7 @@ export const ClientReports = ({
               onClick={() => setShowUploadModal(true)}
               sx={primaryIconButton}
             >
-              Upload Report
+              {t("reportsManagement.reports.uploadReport")}
             </Button>
             <Button
               variant="outlined"
@@ -100,7 +103,7 @@ export const ClientReports = ({
               disabled={loadingReports}
               sx={outlinedIconButton}
             >
-              Refresh
+              {t("reportsManagement.reports.refresh")}
             </Button>
           </Stack>
         </Box>
@@ -108,7 +111,7 @@ export const ClientReports = ({
         {loadingReports ? (
           <Box sx={{ textAlign: "center", py: 6 }}>
             <CircularProgress size={48} sx={{ mb: 2 }} />
-            <Typography>Loading reports...</Typography>
+            <Typography>{t("reportsManagement.reports.loadingReports")}</Typography>
           </Box>
         ) : reports.length === 0 ? (
           <Box sx={{ textAlign: "center", py: 6 }}>
@@ -116,10 +119,10 @@ export const ClientReports = ({
               sx={{ fontSize: 64, color: "text.disabled", mb: 2 }}
             />
             <Typography variant="h6" fontWeight="500" gutterBottom>
-              No reports found
+              {t("reportsManagement.reports.noReportsFound")}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Upload some PDF reports for this client
+              {t("reportsManagement.reports.noReportsMessage")}
             </Typography>
           </Box>
         ) : (
@@ -135,11 +138,11 @@ export const ClientReports = ({
             <Table>
               <TableHead sx={table.header}>
                 <TableRow>
-                  <TableCell sx={table.headerCell}>File Name</TableCell>
-                  <TableCell sx={table.headerCell}>Size</TableCell>
-                  <TableCell sx={table.headerCell}>Last Modified</TableCell>
+                  <TableCell sx={table.headerCell}>{t("reportsManagement.reports.fileName")}</TableCell>
+                  <TableCell sx={table.headerCell}>{t("reportsManagement.reports.size")}</TableCell>
+                  <TableCell sx={table.headerCell}>{t("reportsManagement.reports.lastModified")}</TableCell>
                   <TableCell sx={{ ...table.headerCell, textAlign: "right" }}>
-                    Actions
+                    {t("reportsManagement.reports.actions")}
                   </TableCell>
                 </TableRow>
               </TableHead>
@@ -169,7 +172,7 @@ export const ClientReports = ({
                               fontFamily: typography.fontFamily,
                             }}
                           >
-                            PDF Document
+                            {t("reportsManagement.reports.pdfDocument")}
                           </Typography>
                         </Box>
                       </Box>
@@ -202,7 +205,7 @@ export const ClientReports = ({
                         spacing={0.5}
                         justifyContent="flex-end"
                       >
-                        <Tooltip title="Download">
+                        <Tooltip title={t("reportsManagement.reports.download")}>
                           <IconButton
                             size="small"
                             onClick={() => handleDownloadReport(report)}
@@ -216,7 +219,7 @@ export const ClientReports = ({
                             <DownloadIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
-                        <Tooltip title="Delete">
+                        <Tooltip title={t("reportsManagement.reports.delete")}>
                           <IconButton
                             size="small"
                             onClick={() => handleDeleteReport(report)}
@@ -255,7 +258,7 @@ export const ClientReports = ({
               alignItems: "center",
             }}
           >
-            <Typography variant="h6">Upload Report</Typography>
+            <Typography variant="h6">{t("reportsManagement.upload.title")}</Typography>
             <IconButton onClick={() => setShowUploadModal(false)} size="small">
               <CloseIcon />
             </IconButton>
@@ -264,16 +267,16 @@ export const ClientReports = ({
         <DialogContent dividers>
           <Stack spacing={3}>
             <TextField
-              label="Client Folder"
+              label={t("reportsManagement.upload.clientFolder")}
               value={selectedFolder}
-              InputProps={{ readOnly: true }}
+              slotProps={{ input: { readOnly: true } }}
               fullWidth
               disabled
             />
 
             <TextField
-              label="Report Name (Optional)"
-              placeholder="Leave empty to use filename"
+              label={t("reportsManagement.upload.reportName")}
+              placeholder={t("reportsManagement.upload.reportNamePlaceholder")}
               value={uploadForm.reportName}
               onChange={(e) =>
                 setUploadForm({ ...uploadForm, reportName: e.target.value })
@@ -282,8 +285,8 @@ export const ClientReports = ({
             />
 
             <TextField
-              label="Description (Optional)"
-              placeholder="Brief description of the report"
+              label={t("reportsManagement.upload.description")}
+              placeholder={t("reportsManagement.upload.descriptionPlaceholder")}
               value={uploadForm.description}
               onChange={(e) =>
                 setUploadForm({ ...uploadForm, description: e.target.value })
@@ -310,7 +313,7 @@ export const ClientReports = ({
                   fullWidth
                   sx={outlinedIconButton}
                 >
-                  {uploadForm.file ? uploadForm.file.name : "Choose PDF File"}
+                  {uploadForm.file ? uploadForm.file.name : t("reportsManagement.upload.chooseFile")}
                 </Button>
               </label>
               <Typography
@@ -318,7 +321,7 @@ export const ClientReports = ({
                 color="text.secondary"
                 sx={{ mt: 1, display: "block" }}
               >
-                Only PDF files are allowed (max 50MB)
+                {t("reportsManagement.upload.fileRestriction")}
               </Typography>
             </Box>
           </Stack>
@@ -328,7 +331,7 @@ export const ClientReports = ({
             onClick={() => setShowUploadModal(false)}
             sx={outlinedIconButton}
           >
-            Cancel
+            {t("reportsManagement.upload.cancel")}
           </Button>
           <Button
             variant="contained"
@@ -339,12 +342,47 @@ export const ClientReports = ({
             }
             sx={primaryIconButton}
           >
-            {uploading ? "Uploading..." : "Upload Report"}
+            {uploading ? t("reportsManagement.upload.uploading") : t("reportsManagement.upload.upload")}
           </Button>
         </DialogActions>
       </Dialog>
     </Box>
   );
+};
+
+ClientReports.propTypes = {
+  selectedFolder: PropTypes.string,
+  reports: PropTypes.arrayOf(
+    PropTypes.shape({
+      key: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      size: PropTypes.number.isRequired,
+      lastModified: PropTypes.string.isRequired,
+    })
+  ),
+  loadingReports: PropTypes.bool,
+  refetchReports: PropTypes.func.isRequired,
+  handleDownloadReport: PropTypes.func.isRequired,
+  handleDeleteReport: PropTypes.func.isRequired,
+  formatFileSize: PropTypes.func.isRequired,
+  formatDate: PropTypes.func.isRequired,
+  showUploadModal: PropTypes.bool.isRequired,
+  setShowUploadModal: PropTypes.func.isRequired,
+  uploadForm: PropTypes.shape({
+    reportName: PropTypes.string,
+    description: PropTypes.string,
+    file: PropTypes.object,
+  }).isRequired,
+  setUploadForm: PropTypes.func.isRequired,
+  handleFileSelect: PropTypes.func.isRequired,
+  handleUploadReport: PropTypes.func.isRequired,
+  uploading: PropTypes.bool.isRequired,
+};
+
+ClientReports.defaultProps = {
+  selectedFolder: null,
+  reports: [],
+  loadingReports: false,
 };
 
 export default ClientReports;

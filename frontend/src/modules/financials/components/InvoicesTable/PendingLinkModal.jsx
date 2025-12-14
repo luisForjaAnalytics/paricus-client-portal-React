@@ -17,7 +17,11 @@ import { useTranslation } from "react-i18next";
 import { useUpdatePaymentLinkMutation } from "../../../../store/api/invoicesApi";
 import { useCreateLogMutation } from "../../../../store/api/logsApi";
 import { useSelector } from "react-redux";
-import { primaryButton, outlinedButton } from "../../../../common/styles/styles";
+import {
+  primaryButton,
+  outlinedButton,
+  PaymentLinkStyle,
+} from "../../../../common/styles/styles";
 
 export const PendingLinkModal = ({ invoice, onSuccess, onError }) => {
   const { t } = useTranslation();
@@ -33,7 +37,7 @@ export const PendingLinkModal = ({ invoice, onSuccess, onError }) => {
     setOpen(true);
   };
 
-  const handleClose = () => { 
+  const handleClose = () => {
     setPaymentLink("");
     setOpen(false);
   };
@@ -52,10 +56,10 @@ export const PendingLinkModal = ({ invoice, onSuccess, onError }) => {
       try {
         await createLog({
           userId: authUser.id.toString(),
-          eventType: 'UPDATE',
-          entity: 'Invoice',
+          eventType: "UPDATE",
+          entity: "Invoice",
           description: `Set payment link for invoice ${invoice.invoiceNumber} (${invoice.title})`,
-          status: 'SUCCESS',
+          status: "SUCCESS",
         }).unwrap();
       } catch (logErr) {
         console.error("Error logging payment link save:", logErr);
@@ -67,16 +71,17 @@ export const PendingLinkModal = ({ invoice, onSuccess, onError }) => {
       handleClose();
     } catch (err) {
       console.error("Error saving payment link:", err);
-      const errorMessage = err.data?.message || t("invoices.paymentLink.errorMessage");
+      const errorMessage =
+        err.data?.message || t("invoices.paymentLink.errorMessage");
 
       // Log the failed payment link save
       try {
         await createLog({
           userId: authUser.id.toString(),
-          eventType: 'UPDATE',
-          entity: 'Invoice',
+          eventType: "UPDATE",
+          entity: "Invoice",
           description: `Failed to set payment link for invoice ${invoice.invoiceNumber} (${invoice.title})`,
-          status: 'FAILURE',
+          status: "FAILURE",
         }).unwrap();
       } catch (logErr) {
         console.error("Error logging payment link save failure:", logErr);
@@ -94,11 +99,10 @@ export const PendingLinkModal = ({ invoice, onSuccess, onError }) => {
       {!invoice.paymentLink ? (
         <Chip
           label={t("invoices.paymentLink.pendingLink")}
-          color="warning"
           size="small"
-          icon={<WarningIcon />}
+          icon={<WarningIcon color={PaymentLinkStyle.intranetYellow.color} />}
           onClick={handleOpen}
-          sx={{ cursor: "pointer" }}
+          sx={{ cursor: "pointer", ...PaymentLinkStyle.intranetYellow }}
         />
       ) : (
         <Box
@@ -108,7 +112,12 @@ export const PendingLinkModal = ({ invoice, onSuccess, onError }) => {
             gap: 1,
           }}
         >
-          <Chip label={t("invoices.paymentLink.linkSet")} color="success" size="small" />
+          <Chip
+            label={t("invoices.paymentLink.linkSet")}
+            color="success"
+            size="small"
+            sx={PaymentLinkStyle.intranetgreen}
+          />
           <Tooltip title={t("invoices.paymentLink.updateLink")}>
             <IconButton size="small" color="primary" onClick={handleOpen}>
               <EditIcon fontSize="small" />
@@ -123,7 +132,8 @@ export const PendingLinkModal = ({ invoice, onSuccess, onError }) => {
           <DialogTitle>{t("invoices.paymentLink.modalTitle")}</DialogTitle>
           <DialogContent>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              {t("invoices.paymentLink.invoiceLabel")}: {invoice?.fileName || invoice?.title}
+              {t("invoices.paymentLink.invoiceLabel")}:{" "}
+              {invoice?.fileName || invoice?.title}
             </Typography>
             <TextField
               fullWidth
@@ -147,7 +157,9 @@ export const PendingLinkModal = ({ invoice, onSuccess, onError }) => {
               disabled={savingPaymentLink}
               sx={primaryButton}
             >
-              {savingPaymentLink ? t("invoices.paymentLink.saving") : t("invoices.paymentLink.saveButton")}
+              {savingPaymentLink
+                ? t("invoices.paymentLink.saving")
+                : t("invoices.paymentLink.saveButton")}
             </Button>
           </DialogActions>
         </form>
