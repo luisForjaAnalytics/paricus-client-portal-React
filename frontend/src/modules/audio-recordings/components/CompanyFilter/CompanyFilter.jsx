@@ -23,7 +23,13 @@ export const CompanyFilter = ({
 
   return (
     <Box
-      sx={{ display: "flex", gap: 2, alignItems: "center", marginBottom: 2 }}
+      sx={{
+        display: "flex",
+        gap: 2,
+        alignItems: "center",
+        marginBottom: 2,
+        marginRight: 5,
+      }}
     >
       <FormControl
         size="small"
@@ -36,7 +42,7 @@ export const CompanyFilter = ({
       >
         <InputLabel
           id="company-filter-label"
-          sx={filterStyles?.multiOptionFilter?.inputLabelSection}
+          sx={filterStyles?.companyFilter?.inputLabelSection}
         >
           {t("audioRecordings.quickFilter.company")}
         </InputLabel>
@@ -45,7 +51,7 @@ export const CompanyFilter = ({
           value={filters.company || ""}
           onChange={(e) => setCompanyFilter(e.target.value || null)}
           label={t("audioRecordings.quickFilter.company")}
-          sx={filterStyles?.multiOptionFilter?.selectSection}
+          sx={filterStyles?.companyFilter?.selectSection}
         >
           <MenuItem value="">
             <em>{t("audioRecordings.quickFilter.allCompanies")}</em>

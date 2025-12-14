@@ -410,7 +410,10 @@ export const ClientBreakdownDesktop = ({
                     </Typography>
                   </TableCell>
                 </TableRow>
-                <TableRow key={`collapse-${index}`}>
+                <TableRow
+                  key={`collapse-${index}`}
+                  sx={{ backgroundColor: colors.backgroundOpenSubSection }}
+                >
                   <TableCell
                     style={{ paddingBottom: 0, paddingTop: 0 }}
                     colSpan={6}
@@ -423,7 +426,6 @@ export const ClientBreakdownDesktop = ({
                       <Box
                         sx={{
                           py: 3,
-                          bgcolor: colors.surface,
                         }}
                       >
                         <Box
@@ -439,9 +441,10 @@ export const ClientBreakdownDesktop = ({
                             sx={{
                               fontWeight: typography.fontWeight.semibold,
                               fontFamily: typography.fontFamily,
+                              marginLeft: "0.5rem",
                             }}
                           >
-                            {client.folderDisplay}{" "}
+                            {/* {client.folderDisplay}{" "} */}
                             {t("financials.clientBreakdown.invoicesTitle")}
                           </Typography>
                           {isAdmin && (

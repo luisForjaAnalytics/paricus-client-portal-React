@@ -142,7 +142,10 @@ export const ClientFolders = ({
   }, [clientFolders, order, orderBy, reports]);
 
   const paginatedData = useMemo(() => {
-    return sortedData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+    return sortedData.slice(
+      page * rowsPerPage,
+      page * rowsPerPage + rowsPerPage
+    );
   }, [sortedData, page, rowsPerPage]);
 
   // Early return if no data - after all hooks
@@ -183,7 +186,9 @@ export const ClientFolders = ({
               disabled={loading}
               sx={outlinedIconButton}
             >
-              {loading ? t("reportsManagement.clientFolders.loading") : t("reportsManagement.clientFolders.refreshFolders")}
+              {loading
+                ? t("reportsManagement.clientFolders.loading")
+                : t("reportsManagement.clientFolders.refreshFolders")}
             </Button>
           </Stack>
         </Box>
@@ -237,7 +242,9 @@ export const ClientFolders = ({
             disabled={loading}
             sx={outlinedIconButton}
           >
-            {loading ? t("reportsManagement.clientFolders.loading") : t("reportsManagement.clientFolders.refreshFolders")}
+            {loading
+              ? t("reportsManagement.clientFolders.loading")
+              : t("reportsManagement.clientFolders.refreshFolders")}
           </Button>
         </Stack>
       </Box>
@@ -305,7 +312,6 @@ export const ClientFolders = ({
               return (
                 <Fragment key={index}>
                   <TableRow
-                    
                     sx={{
                       cursor: "pointer",
                       "&:hover": {
@@ -341,10 +347,10 @@ export const ClientFolders = ({
                           }}
                         />
                         <Typography
-                        variant="body2" fontWeight={500}
+                          variant="body2"
+                          fontWeight={500}
                           sx={{
                             fontSize: typography.fontSize.body,
-                            //fontWeight: typography.fontWeight.semibold,
                             color: colors.textPrimary,
                             fontFamily: typography.fontFamily,
                           }}
@@ -366,16 +372,22 @@ export const ClientFolders = ({
                       </Typography>
                     </TableCell>
                   </TableRow>
-                  <TableRow key={`collapse-${index}`}>
+                  <TableRow
+                    key={`collapse-${index}`}
+                    sx={{ backgroundColor: colors.backgroundOpenSubSection }}
+                  >
                     <TableCell
                       style={{ paddingBottom: 0, paddingTop: 0 }}
                       colSpan={3}
                     >
-                      <Collapse in={expandedRows[index]} timeout="auto" unmountOnExit>
+                      <Collapse
+                        in={expandedRows[index]}
+                        timeout="auto"
+                        unmountOnExit
+                      >
                         <Box
                           sx={{
                             py: 3,
-                            bgcolor: colors.surface,
                           }}
                         >
                           <Box
@@ -391,9 +403,10 @@ export const ClientFolders = ({
                               sx={{
                                 fontWeight: typography.fontWeight.semibold,
                                 fontFamily: typography.fontFamily,
+                                marginLeft: "0.5rem",
                               }}
                             >
-                              {folder} {t("reportsManagement.clientFolders.reportsFor")}
+                              {t("reportsManagement.clientFolders.reportsFor")}
                             </Typography>
                             <Stack direction="row" spacing={1}>
                               <Button
@@ -412,32 +425,56 @@ export const ClientFolders = ({
                           {loadingReports ? (
                             <Box sx={{ textAlign: "center", py: 4 }}>
                               <CircularProgress size={36} sx={{ mb: 1 }} />
-                              <Typography variant="body2">{t("reportsManagement.reports.loadingReports")}</Typography>
+                              <Typography variant="body2">
+                                {t("reportsManagement.reports.loadingReports")}
+                              </Typography>
                             </Box>
                           ) : folderReports.length === 0 ? (
                             <Box sx={{ textAlign: "center", py: 4 }}>
                               <DescriptionIcon
-                                sx={{ fontSize: 48, color: "text.disabled", mb: 1 }}
+                                sx={{
+                                  fontSize: 48,
+                                  color: "text.disabled",
+                                  mb: 1,
+                                }}
                               />
-                              <Typography variant="body2" color="text.secondary">
-                                {t("reportsManagement.reports.noReportsForFolder")}
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                              >
+                                {t(
+                                  "reportsManagement.reports.noReportsForFolder"
+                                )}
                               </Typography>
                             </Box>
                           ) : (
                             <TableContainer
                               sx={{
                                 backgroundColor: "transparent",
-                                borderRadius: "0.5rem",
+                                borderRadius: "1rem",
                                 overflow: "hidden",
                               }}
                             >
                               <Table size="small">
                                 <TableHead sx={table.header}>
                                   <TableRow>
-                                    <TableCell sx={table.headerCell}>{t("reportsManagement.reports.fileName")}</TableCell>
-                                    <TableCell sx={table.headerCell}>{t("reportsManagement.reports.size")}</TableCell>
-                                    <TableCell sx={table.headerCell}>{t("reportsManagement.reports.lastModified")}</TableCell>
-                                    <TableCell sx={{ ...table.headerCell, textAlign: "right" }}>
+                                    <TableCell sx={table.headerCell}>
+                                      {t("reportsManagement.reports.fileName")}
+                                    </TableCell>
+                                    <TableCell sx={table.headerCell}>
+                                      {t("reportsManagement.reports.size")}
+                                    </TableCell>
+                                    <TableCell sx={table.headerCell}>
+                                      {t(
+                                        "reportsManagement.reports.lastModified"
+                                      )}
+                                    </TableCell>
+                                    <TableCell
+                                      sx={{
+                                        ...table.headerCell,
+                                        textAlign: "right",
+                                      }}
+                                    >
                                       {t("reportsManagement.reports.actions")}
                                     </TableCell>
                                   </TableRow>
@@ -447,15 +484,27 @@ export const ClientFolders = ({
                                     <TableRow key={report.key} sx={table.row}>
                                       <TableCell sx={table.cell}>
                                         <Box
-                                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                                          sx={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: 1,
+                                          }}
                                         >
-                                          <PdfIcon sx={{ color: colors.error, fontSize: 20 }} />
+                                          <PdfIcon
+                                            sx={{
+                                              color: colors.error,
+                                              fontSize: 20,
+                                            }}
+                                          />
                                           <Box>
                                             <Typography
                                               sx={{
-                                                fontSize: typography.fontSize.small,
-                                                fontWeight: typography.fontWeight.medium,
-                                                fontFamily: typography.fontFamily,
+                                                fontSize:
+                                                  typography.fontSize.small,
+                                                fontWeight:
+                                                  typography.fontWeight.medium,
+                                                fontFamily:
+                                                  typography.fontFamily,
                                                 color: colors.textPrimary,
                                               }}
                                             >
@@ -486,34 +535,59 @@ export const ClientFolders = ({
                                           {formatDate(report.lastModified)}
                                         </Typography>
                                       </TableCell>
-                                      <TableCell sx={{ ...table.cell, textAlign: "right" }}>
+                                      <TableCell
+                                        sx={{
+                                          ...table.cell,
+                                          textAlign: "right",
+                                        }}
+                                      >
                                         <Stack
                                           direction="row"
                                           spacing={0.5}
                                           justifyContent="flex-end"
                                         >
-                                          <Tooltip title={t("reportsManagement.reports.download")}>
+                                          <Tooltip
+                                            title={t(
+                                              "reportsManagement.reports.download"
+                                            )}
+                                          >
                                             <IconButton
                                               size="small"
-                                              onClick={() => handleDownloadReport(folder, report)}
+                                              onClick={() =>
+                                                handleDownloadReport(
+                                                  folder,
+                                                  report
+                                                )
+                                              }
                                               sx={{
                                                 color: colors.primary,
                                                 "&:hover": {
-                                                  backgroundColor: colors.primaryLight,
+                                                  backgroundColor:
+                                                    colors.primaryLight,
                                                 },
                                               }}
                                             >
                                               <DownloadIcon fontSize="small" />
                                             </IconButton>
                                           </Tooltip>
-                                          <Tooltip title={t("reportsManagement.reports.delete")}>
+                                          <Tooltip
+                                            title={t(
+                                              "reportsManagement.reports.delete"
+                                            )}
+                                          >
                                             <IconButton
                                               size="small"
-                                              onClick={() => handleDeleteReport(folder, report)}
+                                              onClick={() =>
+                                                handleDeleteReport(
+                                                  folder,
+                                                  report
+                                                )
+                                              }
                                               sx={{
                                                 color: colors.error,
                                                 "&:hover": {
-                                                  backgroundColor: colors.errorContainer,
+                                                  backgroundColor:
+                                                    colors.errorContainer,
                                                 },
                                               }}
                                             >
@@ -569,7 +643,9 @@ export const ClientFolders = ({
               alignItems: "center",
             }}
           >
-            <Typography variant="h6">{t("reportsManagement.upload.title")}</Typography>
+            <Typography variant="h6">
+              {t("reportsManagement.upload.title")}
+            </Typography>
             <IconButton onClick={() => setShowUploadModal(null)} size="small">
               <CloseIcon />
             </IconButton>
@@ -624,7 +700,9 @@ export const ClientFolders = ({
                   fullWidth
                   sx={outlinedIconButton}
                 >
-                  {uploadForm.file ? uploadForm.file.name : t("reportsManagement.upload.chooseFile")}
+                  {uploadForm.file
+                    ? uploadForm.file.name
+                    : t("reportsManagement.upload.chooseFile")}
                 </Button>
               </label>
               <Typography
@@ -653,7 +731,9 @@ export const ClientFolders = ({
             }
             sx={primaryIconButton}
           >
-            {uploading ? t("reportsManagement.upload.uploading") : t("reportsManagement.upload.upload")}
+            {uploading
+              ? t("reportsManagement.upload.uploading")
+              : t("reportsManagement.upload.upload")}
           </Button>
         </DialogActions>
       </Dialog>

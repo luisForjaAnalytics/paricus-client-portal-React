@@ -280,7 +280,7 @@ export const TableView = ({
               justifyContent: "space-between",
               alignItems: "center",
               width: "100%",
-              marginTop:'0.6rem'
+              marginTop: "0.6rem",
             }}
           >
             <Box
@@ -290,7 +290,10 @@ export const TableView = ({
               }}
             >
               <Typography
-                sx={{ ...titlesTypography.primaryTitle, marginBottom: "-0.2rem" }}
+                sx={{
+                  ...titlesTypography.primaryTitle,
+                  marginBottom: "-0.2rem",
+                }}
               >
                 {t("audioRecordings.results.title")}
               </Typography>
@@ -315,13 +318,17 @@ export const TableView = ({
           </Toolbar>
 
           {isOpen && (
-            <Box sx={{
-              px: 2,
-              pb: 2,
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}>
+            <Box
+              sx={{
+                padding: "0.2rem 0 1rem 0",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: colors.subSectionBackground,
+                borderBottom: `1px solid ${colors.subSectionBorder}`,
+                //borderTop: `0.5px solid ${colors.subSectionBorder}`,
+              }}
+            >
               <AdvancedFilters
                 filters={filters}
                 refetch={refetch}
@@ -339,7 +346,22 @@ export const TableView = ({
         </>
       );
     };
-  }, [t, totalCount, setCompanyFilter, filters, isOpen, setIsOpen, refetch, setFilters, setLoadCallTypes, isDebouncing, loading, clearFilters, callTypes, setAudioFilter]);
+  }, [
+    t,
+    totalCount,
+    setCompanyFilter,
+    filters,
+    isOpen,
+    setIsOpen,
+    refetch,
+    setFilters,
+    setLoadCallTypes,
+    isDebouncing,
+    loading,
+    clearFilters,
+    callTypes,
+    setAudioFilter,
+  ]);
 
   // Transform recordings data for DataGrid
   const rows = React.useMemo(
@@ -386,7 +408,7 @@ export const TableView = ({
     <Box
       sx={{
         display: { xs: "none", md: "block" },
-        height: 'auto',
+        height: "auto",
         width: { md: "95%", lg: "100%" },
       }}
     >
