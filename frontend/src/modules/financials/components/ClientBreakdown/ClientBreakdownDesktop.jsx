@@ -44,7 +44,6 @@ export const ClientBreakdownDesktop = ({
   openPaymentLink,
   onPaymentLinkSuccess,
   onPaymentLinkError,
-  selectClient,
 }) => {
   const { t } = useTranslation();
   const [expandedRows, setExpandedRows] = useState({});
@@ -53,16 +52,14 @@ export const ClientBreakdownDesktop = ({
   const [orderBy, setOrderBy] = useState("company");
   const [order, setOrder] = useState("asc");
 
-  const toggleRow = (rowId, folder) => {
+  const toggleRow = (rowId) => {
     const isExpanding = !expandedRows[rowId];
     setExpandedRows((prev) => ({
       ...prev,
       [rowId]: isExpanding,
     }));
-    // When expanding a row, select that client to load its invoices
-    if (isExpanding && selectClient) {
-      selectClient(folder);
-    }
+    // Note: We don't call selectClient here anymore because all invoices
+    // are already loaded in the invoices prop from FinancialsView
   };
 
   const handleChangePage = (event, newPage) => {
@@ -327,7 +324,7 @@ export const ClientBreakdownDesktop = ({
                   <TableCell>
                     <IconButton
                       size="small"
-                      onClick={() => toggleRow(index, client.folder)}
+                      onClick={() => toggleRow(index)}
                       sx={{ color: colors.primary }}
                     >
                       {expandedRows[index] ? (
@@ -551,10 +548,8 @@ ClientBreakdownDesktop.propTypes = {
   openPaymentLink: PropTypes.func.isRequired,
   onPaymentLinkSuccess: PropTypes.func.isRequired,
   onPaymentLinkError: PropTypes.func.isRequired,
-  selectClient: PropTypes.func,
 };
 
 ClientBreakdownDesktop.defaultProps = {
   invoices: [],
-  selectClient: null,
 };

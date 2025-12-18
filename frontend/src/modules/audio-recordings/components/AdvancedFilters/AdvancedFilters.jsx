@@ -21,7 +21,6 @@ import {
   colors,
   filterStyles,
   outlinedButton,
-  secondaryIconButton,
 } from "../../../../common/styles/styles";
 
 export const AdvancedFilters = ({
@@ -57,40 +56,6 @@ export const AdvancedFilters = ({
             setFilters((prev) => ({
               ...prev,
               interactionId: e.target.value,
-            }))
-          }
-          sx={filterStyles?.inputFilter}
-        />
-      </Box>
-      <Box>
-        <TextField
-          fullWidth
-          label={t("audioRecordings.advancedFilters.customerPhone")}
-          placeholder={t(
-            "audioRecordings.advancedFilters.customerPhonePlaceholder"
-          )}
-          value={filters.customerPhone}
-          onChange={(e) =>
-            setFilters((prev) => ({
-              ...prev,
-              customerPhone: e.target.value,
-            }))
-          }
-          sx={filterStyles?.inputFilter}
-        />
-      </Box>
-      <Box>
-        <TextField
-          fullWidth
-          label={t("audioRecordings.advancedFilters.agentName")}
-          placeholder={t(
-            "audioRecordings.advancedFilters.agentNamePlaceholder"
-          )}
-          value={filters.agentName}
-          onChange={(e) =>
-            setFilters((prev) => ({
-              ...prev,
-              agentName: e.target.value,
             }))
           }
           sx={filterStyles?.inputFilter}
@@ -155,6 +120,7 @@ export const AdvancedFilters = ({
           </Select>
         </FormControl>
       </Box>
+
       <Box>
         <TextField
           fullWidth
@@ -180,6 +146,40 @@ export const AdvancedFilters = ({
           value={filters.endDate}
           onChange={(e) =>
             setFilters((prev) => ({ ...prev, endDate: e.target.value }))
+          }
+          sx={filterStyles?.inputFilter}
+        />
+      </Box>
+      <Box>
+        <TextField
+          fullWidth
+          label={t("audioRecordings.advancedFilters.customerPhone")}
+          placeholder={t(
+            "audioRecordings.advancedFilters.customerPhonePlaceholder"
+          )}
+          value={filters.customerPhone}
+          onChange={(e) =>
+            setFilters((prev) => ({
+              ...prev,
+              customerPhone: e.target.value,
+            }))
+          }
+          sx={filterStyles?.inputFilter}
+        />
+      </Box>
+      <Box>
+        <TextField
+          fullWidth
+          label={t("audioRecordings.advancedFilters.agentName")}
+          placeholder={t(
+            "audioRecordings.advancedFilters.agentNamePlaceholder"
+          )}
+          value={filters.agentName}
+          onChange={(e) =>
+            setFilters((prev) => ({
+              ...prev,
+              agentName: e.target.value,
+            }))
           }
           sx={filterStyles?.inputFilter}
         />

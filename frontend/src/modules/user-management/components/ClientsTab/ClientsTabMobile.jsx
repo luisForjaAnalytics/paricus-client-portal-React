@@ -289,7 +289,6 @@ ClientsTabMobile.propTypes = {
   handleEdit: PropTypes.func.isRequired,
   handleDeactivate: PropTypes.func.isRequired,
   formatDate: PropTypes.func.isRequired,
-  onAddClick: PropTypes.func.isRequired,
 };
 
 ClientsTabMobile.defaultProps = {

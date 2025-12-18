@@ -28,11 +28,15 @@ export default function LanguageMenu() {
   };
 
   const handleMenuItemClick = (event, index) => {
-    const selectedLang = options[index].code;
-    setSelectedIndex(index);
-    i18n.changeLanguage(selectedLang);
-    localStorage.setItem("lang", selectedLang);
-    setAnchorEl(null);
+    try {
+      const selectedLang = options[index].code;
+      setSelectedIndex(index);
+      i18n.changeLanguage(selectedLang);
+      localStorage.setItem("lang", selectedLang);
+      setAnchorEl(null);
+    } catch (err) {
+      console.log(`ERROR handleMenuItemClick: ${err}`);
+    }
   };
 
   const handleClose = () => {

@@ -1,9 +1,6 @@
 // ========================================
 // DESIGN SYSTEM - STYLES
 // ========================================
-// Centralized design system for the entire application
-// Compatible with MUI v5+ using sx prop
-// Based on STYLE_GUIDE.md (Invoice Rover - Tailwind CSS Design System)
 
 // ========================================
 // FONT FAMILY
@@ -20,17 +17,14 @@ export const colors = {
   primaryLight: "#D1FAE5", // bg-green-100
   primaryDark: "#065F46", // text-green-800
   primaryHover: "#15803c8c", // green-700 for hover
-  secondaryHover: "#0a6a38bb", // Kept for button compatibility
+  secondaryHover: "#0a6a38bb",
   focusRing: "#22C55E", // ring-green-500
-  gradiantPrimaryColor: "linear-gradient(90deg, #1fb467c7, #0a6a38bb )", // Kept for button compatibility
+  gradiantPrimaryColor: "linear-gradient(90deg, #1fb467c7, #0a6a38bb )",
   gradiantMobilPrimaryColor: "linear-gradient(15deg, #1fb467d0, #0a6a38ff )",
   financialClientAvatar: "#11e7464d",
   drowerIcons: "#D1FAE5",
   folderCloseIcon: "#68686844",
   drawer: "#FFFFFF",
-  // Secondary colors
-  secondary: "#4db66750", // Kept for backward compatibility
-  tertiary: "#2160a2", // Kept for backward compatibility
 
   //Nav Bar
   navBarColor: "#22c55ee8",
@@ -39,8 +33,6 @@ export const colors = {
   background: "#F9FAFB", // bg-gray-50 - Page background
   surface: "#FFFFFF", // bg-white - Card background
   surfaceHighest: "#F3F4F6", // bg-gray-100
-  outlineButtonIcon: "#2bb41f13", // Kept for button compatibility
-
   // Borders (from Tailwind)
   border: "#E5E7EB", // border-gray-200
   borderInput: "#D1D5DB", // border-gray-300
@@ -55,15 +47,6 @@ export const colors = {
   textMuted: "#6B7281", // text-gray-500
   textIcon: "#9CA3AF", // text-gray-400
   textWhite: "#ffffff",
-
-  // Surface content (kept for compatibility)
-  onSurfaceNormal: "#111827", // Aligned with textPrimary
-  onSurfaceVariant: "#374151", // Aligned with textSecondary
-  onSurfaceLowContrast: "#6B7281", // Aligned with textMuted
-
-  // Additional colors
-  accent: "#FFB74D", // Warm orange - kept for backward compatibility
-  neutral: "#E8F5E9", // Light green - kept for backward compatibility
 
   // Status colors (from STYLE_GUIDE.md)
   // Info (Blue) - Used for "Sent" status
@@ -91,9 +74,9 @@ export const colors = {
   error: "#DC2626", // Primary error
   errorContainer: "#FEE2E2",
 
-// ========================================
-//   Sub Sections open
-// ========================================
+  // ========================================
+  //   Sub Sections open
+  // ========================================
 
   subSectionBackground: "#58b98123",
   backgroundOpenSubSection: "#b3b3b32c",
@@ -148,22 +131,6 @@ export const typography = {
   fontWeightRegular: 400,
   fontWeightMedium: 500,
   fontWeightHigh: 600,
-};
-
-// Predefined text styles (legacy compatibility)
-export const textStyles = {
-  regular: {
-    fontFamily: fontFamilyCustom,
-    fontWeight: 400,
-  },
-  medium: {
-    fontFamily: fontFamilyCustom,
-    fontWeight: 500,
-  },
-  high: {
-    fontFamily: fontFamilyCustom,
-    fontWeight: 600,
-  },
 };
 
 // ========================================
@@ -246,15 +213,6 @@ export const primaryButton = {
 };
 
 // ========================================
-// PRIMARY DROPDOWN BUTTON
-// ========================================
-export const primaryDropdownButton = {
-  ...primaryButton,
-  paddingRight: "12px",
-  gap: "8px",
-};
-
-// ========================================
 // PRIMARY BUTTON WITH ICON
 // ========================================
 export const primaryIconButton = {
@@ -282,48 +240,6 @@ export const primaryIconButton = {
 };
 
 // ========================================
-// SECONDARY BUTTON
-// ========================================
-export const secondaryButton = {
-  ...baseButton,
-  backgroundColor: colors.surface,
-  color: colors.primary,
-  border: `2px solid ${colors.primary}`,
-  "&:hover": {
-    backgroundColor: colors.primary,
-    color: colors.surface,
-    borderColor: colors.primary,
-  },
-  "&:disabled": {
-    backgroundColor: colors.surface,
-    color: colors.textTertiary,
-    borderColor: colors.borderrVariant,
-  },
-};
-
-// ========================================
-// SECONDARY ICON BUTTON
-// ========================================
-export const secondaryIconButton = {
-  ...baseButton,
-  backgroundColor: colors.surface,
-  color: colors.primary,
-  border: `2px solid ${colors.primary}`,
-  padding: "8px 16px",
-  gap: "8px",
-  "&:hover": {
-    backgroundColor: colors.primary,
-    color: colors.surface,
-    borderColor: colors.primary,
-  },
-  "&:disabled": {
-    backgroundColor: colors.surface,
-    color: colors.textTertiary,
-    borderColor: colors.borderrVariant,
-  },
-};
-
-// ========================================
 // OUTLINED BUTTON
 // ========================================
 export const outlinedButton = {
@@ -337,7 +253,7 @@ export const outlinedButton = {
   "&:disabled": {
     backgroundColor: colors.surface,
     color: colors.onSurfaceLowContrast,
-    borderColor: colors.borderrVariant,
+    borderColor: colors.borderVariant,
   },
 };
 
@@ -360,29 +276,7 @@ export const outlinedIconButton = {
   "&:disabled": {
     backgroundColor: colors.surface,
     color: colors.onSurfaceLowContrast,
-    borderColor: colors.borderrVariant,
-  },
-};
-
-// ========================================
-// SHADOWED BUTTON WITH ICON
-// ========================================
-export const shadowedIconButton = {
-  ...primaryIconButton,
-  boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
-  "&:hover": {
-    background:
-      "linear-gradient(90deg, rgba(32, 103, 135, 1) 0%, rgba(67, 179, 113, 1) 50%, rgba(217, 201, 63, 1) 100%)",
-    boxShadow: "0px 6px 12px rgba(0, 0, 0, 0.25)",
-  },
-  "&:disabled": {
-    background: colors.surfaceHighest,
-    color: colors.textTertiary,
-    boxShadow: "none",
-  },
-  "& svg": {
-    width: 20,
-    height: 14,
+    borderColor: colors.borderVariant,
   },
 };
 
@@ -408,14 +302,6 @@ export const card = {
   border: `1px solid ${colors.border}`,
 };
 
-export const cardHover = {
-  ...card,
-  "&:hover": {
-    boxShadow:
-      "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)", // shadow-md from Tailwind
-  },
-};
-
 // Summary Card (with left border for status)
 export const summaryCard = {
   backgroundColor: colors.surface,
@@ -430,28 +316,6 @@ export const summaryCard = {
   },
 };
 
-// Client Card (selectable)
-export const clientCard = {
-  backgroundColor: colors.surface,
-  borderRadius: layout.borderRadius.sm,
-  border: `1px solid ${colors.borderVariant}`,
-  boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
-  // padding: spacing.gap5,
-  cursor: "pointer",
-  transition: "all 300ms ease-in-out",
-  "&:hover": {
-    boxShadow:
-      "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
-  },
-};
-
-// Selected Client Card
-export const clientCardSelected = {
-  ...clientCard,
-  border: `1px solid ${colors.borderSelected}`,
-  boxShadow: `0 0 0 2px ${colors.border}`, // ring-2
-};
-
 // Reports Card Selected
 export const reportsCardSelected = {
   display: { xs: "none", md: "block" },
@@ -461,44 +325,6 @@ export const reportsCardSelected = {
   boxShadow: "0px 0.5px 0.5px 0px rgba(0, 0, 0, 0.32)",
   padding: "1rem 1rem 0.2rem 1rem",
   borderRadius: "1rem",
-};
-
-// ========================================
-// FORM STYLES
-// ========================================
-// Based on STYLE_GUIDE.md form components
-export const searchInput = {
-  width: "100%",
-  borderRadius: layout.borderRadius.sm,
-  border: `1px solid ${colors.borderInput}`,
-  backgroundColor: colors.background, // bg-gray-50
-  padding: "10px 16px 10px 40px", // py-2.5 pl-10 pr-4
-  fontSize: typography.fontSize.body, // text-sm
-  color: colors.textPrimary,
-  fontFamily: typography.fontFamily,
-  outline: "none",
-  transition: transitions.base,
-  "&:focus": {
-    borderColor: colors.focusRing,
-    boxShadow: `0 0 0 1px ${colors.focusRing}`,
-  },
-};
-
-export const textInput = {
-  width: "100%",
-  borderRadius: layout.borderRadius.sm,
-  border: `1px solid ${colors.borderInput}`,
-  backgroundColor: colors.surface,
-  padding: "10px 16px",
-  fontSize: typography.fontSize.body,
-  color: colors.textPrimary,
-  fontFamily: typography.fontFamily,
-  outline: "none",
-  transition: transitions.base,
-  "&:focus": {
-    borderColor: colors.focusRing,
-    boxShadow: `0 0 0 1px ${colors.focusRing}`,
-  },
 };
 
 // ========================================
@@ -621,77 +447,6 @@ export const table = {
 };
 
 // ========================================
-// UTILITIES
-// ========================================
-export const utilities = {
-  textBalance: {
-    textWrap: "balance",
-  },
-  smoothHover: {
-    transition: transitions.base,
-  },
-  container: {
-    maxWidth: layout.maxWidthContainer,
-    marginLeft: "auto",
-    marginRight: "auto",
-    paddingLeft: "8%",
-    paddingRight: "8%",
-  },
-  section: {
-    paddingTop: spacing["3xl"],
-    paddingBottom: spacing["3xl"],
-  },
-};
-
-// ========================================
-// GROUPED EXPORTS
-// ========================================
-
-// Export all button styles
-export const buttonStyles = {
-  base: baseButton,
-  primary: primaryButton,
-  secondary: secondaryButton,
-  primaryDropdown: primaryDropdownButton,
-  primaryIcon: primaryIconButton,
-  secondaryIcon: secondaryIconButton,
-  outlined: outlinedButton,
-  outlinedIcon: outlinedIconButton,
-  shadowedIcon: shadowedIconButton,
-};
-
-// Export all card styles
-export const cardStyles = {
-  base: card,
-  hover: cardHover,
-  summary: summaryCard,
-  client: clientCard,
-  clientSelected: clientCardSelected,
-};
-
-// Export all form styles
-export const formStyles = {
-  searchInput,
-  textInput,
-};
-
-// Export the entire design system
-export const designSystem = {
-  colors,
-  typography,
-  spacing,
-  layout,
-  transitions,
-  textStyles,
-  buttonStyles,
-  cardStyles,
-  formStyles,
-  statusBadges,
-  table,
-  utilities,
-};
-
-// ========================================
 // Titles Text styles
 // ========================================
 
@@ -715,27 +470,6 @@ export const titlesTypography = {
   },
 };
 
-// ========================================
-// Box Upload New Invoice Modal styles
-// ========================================
-
-export const uploadInvoiceModalStyle = {
-  boxUploadInvoiceModal: {
-    display: "flex",
-    flexDirection: "row",
-    gap: 3,
-    margin: "0 0 1rem 0",
-  },
-  textFielUploadInvoiceModal: {
-    "& .MuiOutlinedInput-root": {
-      borderRadius: "1.5rem",
-      "&.Mui-focused fieldset": {
-        borderColor: colors.primary,
-      },
-    },
-  },
-};
-
 // ================================================
 // Payment Link  color and backGround color select
 // ================================================
@@ -750,6 +484,23 @@ export const PaymentLinkStyle = {
 // ================================================
 
 export const filterStyles = {
+  boxFilterbyGroup: {
+    display: "flex",
+    flexDirection: "row",
+    gap: 1,
+  },
+  formControlStyleCUR: {
+    minWidth: 250,
+    "& .MuiOutlinedInput-root": {
+      height: "2.6rem",
+    },
+    "& .MuiInputLabel-root": {
+      top: "-0.4rem",
+      "&.MuiInputLabel-shrink": {
+        top: "0",
+      },
+    },
+  },
   inputFilter: {
     "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
       borderColor: colors.focusRing,
@@ -775,8 +526,14 @@ export const filterStyles = {
 
   multiOptionFilter: {
     selectSection: {
+      backgroundColor: colors.surface,
+      borderRadius: "3rem",
+      "& .MuiSelect-select": {
+        color: colors.textPrimary,
+        display: "flex",
+        alignItems: "center",
+      },
       "& .MuiOutlinedInput-notchedOutline": {
-        backgroundColor: colors.surface,
         borderColor: colors.textIcon,
         borderRadius: "3rem",
       },
@@ -812,6 +569,114 @@ export const filterStyles = {
     inputLabelSection: {
       paddingTop: "0",
       "&.Mui-focused.MuiInputLabel-animated": {
+        color: colors.focusRing,
+      },
+    },
+  },
+};
+
+// ========================================
+//  Modal styles
+// ========================================
+//Main border Radious
+const borderRadiusSection = "1.5rem";
+export const modalCard = {
+  //Dialogue main style
+  dialogSection: {
+    borderRadius: "1.5rem",
+    overflow: "hidden",
+    width:'auto'
+  },
+  //Box style
+  boxModalStyle: {
+    boxUploadInvoiceModal: {
+      display: "flex",
+      flexDirection: "row",
+      gap: 1.5,
+      margin: "0 0 1rem 0",
+    },
+    textFielUploadInvoiceModal: {
+      "& .MuiOutlinedInput-root": {
+        borderRadius: "1.5rem",
+        "&.Mui-focused fieldset": {
+          borderColor: colors.primary,
+        },
+      },
+    },
+  },
+
+  //Input style
+  inputSection: {
+    "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+      borderColor: colors.focusRing,
+    },
+    "& .MuiOutlinedInput-root": {
+      backgroundColor: colors.surface,
+      borderRadius: borderRadiusSection,
+      height: "3rem",
+      "&.Mui-focused fieldset": {
+        borderColor: colors.focusRing,
+      },
+    },
+    "& .MuiInputLabel-root": {
+      top: "-0.4rem",
+      "&.Mui-focused": {
+        color: colors.focusRing,
+      },
+      "&.MuiInputLabel-shrink": {
+        top: "0",
+      },
+    },
+  },
+
+    //Input Description style
+  inputDescriptionSection: {
+    "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+      borderColor: colors.focusRing,
+    },
+    "& .MuiOutlinedInput-root": {
+      backgroundColor: colors.surface,
+      borderRadius: borderRadiusSection,
+      height: "5.5rem",
+      "&.Mui-focused fieldset": {
+        borderColor: colors.focusRing,
+      },
+    },
+    "& .MuiInputLabel-root": {
+      top: "-0.4rem",
+      "&.Mui-focused": {
+        color: colors.focusRing,
+      },
+      "&.MuiInputLabel-shrink": {
+        top: "0",
+      },
+    },
+  },
+
+  //Multiple Options style
+  multiOptionFilter: {
+    selectSection: {
+      backgroundColor: colors.surface,
+      borderRadius: borderRadiusSection,
+      "& .MuiSelect-select": {
+        color: colors.textPrimary,
+        display: "flex",
+        alignItems: "center",
+      },
+      "& .MuiOutlinedInput-notchedOutline": {
+        borderColor: colors.textIcon,
+        borderRadius: borderRadiusSection,
+      },
+      "&:hover .MuiOutlinedInput-notchedOutline": {
+        borderColor: colors.focusRing,
+      },
+      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+        borderColor: colors.focusRing,
+      },
+    },
+    inputLabelSection: {
+      paddingTop: "0",
+      "&.Mui-focused": {
         color: colors.focusRing,
       },
     },

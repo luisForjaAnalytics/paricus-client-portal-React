@@ -102,8 +102,24 @@ export const FinancialsView = () => {
   // Derived state from RTK Query
   const clientBreakdowns = allClientsData?.clientBreakdowns || [];
   const overallStats = allClientsData?.overallStats || null;
+
+  // For BPO Admin: collect ALL invoices from allClientsData instead of using selectedFolder
+  const allInvoices = React.useMemo(() => {
+    if (isBPOAdmin && allClientsData?.clientBreakdowns) {
+      // Extract all invoices from each client breakdown
+      const invoicesArray = [];
+      allClientsData.clientBreakdowns.forEach((client) => {
+        if (client.invoices && Array.isArray(client.invoices)) {
+          invoicesArray.push(...client.invoices);
+        }
+      });
+      return invoicesArray;
+    }
+    return [];
+  }, [isBPOAdmin, allClientsData]);
+
   const invoices = isBPOAdmin
-    ? clientInvoicesData?.invoices || []
+    ? allInvoices
     : myInvoicesData?.invoices || [];
   const arStats = clientInvoicesData?.stats || null;
   const clientStats = myInvoicesData?.stats || null;
@@ -286,25 +302,30 @@ export const FinancialsView = () => {
       if (downloadUrl) {
         showNotification("success", "Downloading invoice...");
 
-        // Fetch the file as a blob to force download
-        const response = await fetch(downloadUrl);
-        const blob = await response.blob();
+        try {
+          // Fetch the file as a blob to force download
+          const response = await fetch(downloadUrl);
+          const blob = await response.blob();
 
-        // Create a blob URL
-        const blobUrl = window.URL.createObjectURL(blob);
+          // Create a blob URL
+          const blobUrl = window.URL.createObjectURL(blob);
 
-        // Create a temporary anchor element to trigger download
-        const link = document.createElement('a');
-        link.href = blobUrl;
-        link.download = invoice.fileName || 'invoice.pdf';
-        document.body.appendChild(link);
-        link.click();
+          // Create a temporary anchor element to trigger download
+          const link = document.createElement('a');
+          link.href = blobUrl;
+          link.download = invoice.fileName || 'invoice.pdf';
+          document.body.appendChild(link);
+          link.click();
 
-        // Cleanup
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(blobUrl);
+          // Cleanup
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(blobUrl);
 
-        showNotification("success", "Download completed");
+          showNotification("success", "Download completed");
+        } catch (err) {
+          console.log(`ERROR downloadInvoice fetch/blob: ${err}`);
+          throw err;
+        }
 
         // Log the download invoice action
         try {

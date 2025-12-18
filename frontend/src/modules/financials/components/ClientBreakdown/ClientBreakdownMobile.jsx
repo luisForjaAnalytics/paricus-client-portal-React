@@ -26,7 +26,6 @@ function Row({
   client,
   selectedFolder,
   formatCurrency,
-  selectClient,
   invoices,
   isAdmin,
   formatDate,
@@ -42,7 +41,9 @@ function Row({
   const isSelected = selectedFolder === client.folder;
 
   const handleRowClick = () => {
-    selectClient(client.folder);
+    // Note: We don't call selectClient here anymore because all invoices
+    // are already loaded in the invoices prop from FinancialsView
+    setOpen(!open);
   };
 
   // Helper to convert client name to folder format (e.g., "IM Telecom" -> "im-telecom")
@@ -235,7 +236,6 @@ Row.propTypes = {
   }).isRequired,
   selectedFolder: PropTypes.string,
   formatCurrency: PropTypes.func.isRequired,
-  selectClient: PropTypes.func.isRequired,
   invoices: PropTypes.array.isRequired,
   isAdmin: PropTypes.bool.isRequired,
   formatDate: PropTypes.func.isRequired,
@@ -252,7 +252,6 @@ export const ClientBreakdownMobile = ({
   clientBreakdowns,
   selectedFolder,
   formatCurrency,
-  selectClient,
   invoices,
   isAdmin,
   formatDate,
@@ -305,7 +304,6 @@ export const ClientBreakdownMobile = ({
               client={client}
               selectedFolder={selectedFolder}
               formatCurrency={formatCurrency}
-              selectClient={selectClient}
               invoices={invoices}
               isAdmin={isAdmin}
               formatDate={formatDate}
@@ -351,7 +349,6 @@ ClientBreakdownMobile.propTypes = {
   ).isRequired,
   selectedFolder: PropTypes.string,
   formatCurrency: PropTypes.func.isRequired,
-  selectClient: PropTypes.func.isRequired,
   invoices: PropTypes.array.isRequired,
   isAdmin: PropTypes.bool.isRequired,
   formatDate: PropTypes.func.isRequired,

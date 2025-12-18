@@ -16,9 +16,9 @@ import {
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import {
-  buttonIconNoLabel,
   colors,
   filterStyles,
+  buttonIconNoLabel,
 } from "../../../../common/styles/styles";
 
 export const AdvancedFilters = ({
@@ -31,7 +31,14 @@ export const AdvancedFilters = ({
 }) => {
   const { t } = useTranslation();
 
-  const eventTypes = ["CREATE", "UPDATE", "DELETE", "LOGIN", "LOGOUT", "AUDIO_PLAYBACK"];
+  const eventTypes = [
+    "CREATE",
+    "UPDATE",
+    "DELETE",
+    "LOGIN",
+    "LOGOUT",
+    "AUDIO_PLAYBACK",
+  ];
   const statuses = ["SUCCESS", "FAILURE", "WARNING"];
 
   return (
@@ -41,245 +48,250 @@ export const AdvancedFilters = ({
         flexDirection: "row",
         flexWrap: "wrap",
         margin: "0.5rem 0 -0.5rem 0",
-        gap: 2,
+        gap: 1,
+        paddingLeft: "0.4rem",
+        alignItems: "center",
       }}
     >
-      {/* Event ID */}
-      <Box sx={{ minWidth: "150px" }}>
-        <TextField
-          fullWidth
-          label={t("userManagement.logs.eventId")}
-          placeholder="Search by Event ID..."
-          value={filters.eventId || ""}
-          onChange={(e) =>
-            setFilters((prev) => ({
-              ...prev,
-              eventId: e.target.value,
-            }))
-          }
-          sx={filterStyles?.inputFilter}
-        />
-      </Box>
-
-      {/* User ID */}
-      <Box sx={{ minWidth: "120px" }}>
-        <TextField
-          fullWidth
-          label={t("userManagement.logs.userId")}
-          placeholder="User ID..."
-          value={filters.userId || ""}
-          onChange={(e) =>
-            setFilters((prev) => ({
-              ...prev,
-              userId: e.target.value,
-            }))
-          }
-          sx={filterStyles?.inputFilter}
-        />
-      </Box>
-
-      {/* Event Type */}
-      <Box sx={{ minWidth: "150px" }}>
-        <FormControl
-          sx={{
-            width: "100%",
-            "& .MuiSelect-select": {
-              display: "flex",
-              alignItems: "center",
-            },
-            "& .MuiOutlinedInput-root": {
-              height: "2.6rem",
-            },
-            "& .MuiInputLabel-root": {
-              top: "-0.4rem",
-              "&.Mui-focused": {
-                color: colors.focusRing,
-              },
-              "&.MuiInputLabel-shrink": {
-                top: "0",
-              },
-            },
-            "& .MuiSelect-icon": {
-              color: `${colors.textIcon} !important`,
-            },
-            "& .MuiSelect-iconOutlined": {
-              color: `${colors.textIcon} !important`,
-            },
-          }}
-        >
-          <InputLabel
-            id="event-type-label"
-            sx={filterStyles?.multiOptionFilter?.inputLabelSection}
-          >
-            {t("userManagement.logs.eventType")}
-          </InputLabel>
-          <Select
-            labelId="event-type-label"
-            id="event-type-select"
-            value={filters.eventType || ""}
+      <Box sx={filterStyles?.boxFilterbyGroup}>
+        {/* Event ID */}
+        <Box sx={{ minWidth: "150px" }}>
+          <TextField
+            fullWidth
+            label={t("userManagement.logs.eventId")}
+            placeholder="Search by Event ID..."
+            value={filters.eventId || ""}
             onChange={(e) =>
               setFilters((prev) => ({
                 ...prev,
-                eventType: e.target.value,
+                eventId: e.target.value,
               }))
             }
-            sx={filterStyles?.multiOptionFilter?.selectSection}
-            label={t("userManagement.logs.eventType")}
-          >
-            <MenuItem value="">All Types</MenuItem>
-            {eventTypes.map((type) => (
-              <MenuItem key={type} value={type}>
-                {type}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Box>
+            sx={filterStyles?.inputFilter}
+          />
+        </Box>
 
-      {/* Entity */}
-      <Box sx={{ minWidth: "120px" }}>
-        <TextField
-          fullWidth
-          label={t("userManagement.logs.entity")}
-          placeholder="Entity..."
-          value={filters.entity || ""}
-          onChange={(e) =>
-            setFilters((prev) => ({
-              ...prev,
-              entity: e.target.value,
-            }))
-          }
-          sx={filterStyles?.inputFilter}
-        />
-      </Box>
-
-      {/* Description */}
-      <Box sx={{ minWidth: "200px" }}>
-        <TextField
-          fullWidth
-          label={t("userManagement.logs.description")}
-          placeholder="Search description..."
-          value={filters.description || ""}
-          onChange={(e) =>
-            setFilters((prev) => ({
-              ...prev,
-              description: e.target.value,
-            }))
-          }
-          sx={filterStyles?.inputFilter}
-        />
-      </Box>
-
-      {/* IP Address */}
-      <Box sx={{ minWidth: "150px" }}>
-        <TextField
-          fullWidth
-          label={t("userManagement.logs.ipAddress")}
-          placeholder="IP Address..."
-          value={filters.ipAddress || ""}
-          onChange={(e) =>
-            setFilters((prev) => ({
-              ...prev,
-              ipAddress: e.target.value,
-            }))
-          }
-          sx={filterStyles?.inputFilter}
-        />
-      </Box>
-
-      {/* Status */}
-      <Box sx={{ minWidth: "140px" }}>
-        <FormControl
-          sx={{
-            width: "100%",
-            "& .MuiSelect-select": {
-              display: "flex",
-              alignItems: "center",
-            },
-            "& .MuiOutlinedInput-root": {
-              height: "2.6rem",
-            },
-            "& .MuiInputLabel-root": {
-              top: "-0.4rem",
-              "&.Mui-focused": {
-                color: colors.focusRing,
-              },
-              "&.MuiInputLabel-shrink": {
-                top: "0",
-              },
-            },
-            "& .MuiSelect-icon": {
-              color: `${colors.textIcon} !important`,
-            },
-            "& .MuiSelect-iconOutlined": {
-              color: `${colors.textIcon} !important`,
-            },
-          }}
-        >
-          <InputLabel
-            id="status-label"
-            sx={filterStyles?.multiOptionFilter?.inputLabelSection}
-          >
-            {t("userManagement.logs.status")}
-          </InputLabel>
-          <Select
-            labelId="status-label"
-            id="status-select"
-            value={filters.status || ""}
+        {/* Timestamp */}
+        <Box sx={{ minWidth: "150px" }}>
+          <TextField
+            fullWidth
+            label={t("userManagement.logs.timestamp")}
+            type="date"
+            InputLabelProps={{ shrink: true }}
+            value={filters.timestamp || ""}
             onChange={(e) =>
               setFilters((prev) => ({
                 ...prev,
-                status: e.target.value,
+                timestamp: e.target.value,
               }))
             }
-            sx={filterStyles?.multiOptionFilter?.selectSection}
-            label={t("userManagement.logs.status")}
+            sx={filterStyles?.inputFilter}
+          />
+        </Box>
+      </Box>
+
+      <Box sx={filterStyles?.boxFilterbyGroup}>
+        {/* User ID */}
+        <Box sx={{ minWidth: "100px" }}>
+          <TextField
+            fullWidth
+            label={t("userManagement.logs.userId")}
+            placeholder="User ID..."
+            value={filters.userId || ""}
+            onChange={(e) =>
+              setFilters((prev) => ({
+                ...prev,
+                userId: e.target.value,
+              }))
+            }
+            sx={filterStyles?.inputFilter}
+          />
+        </Box>
+
+        {/* Event Type */}
+        <Box sx={{ minWidth: "150px" }}>
+          <FormControl
+            sx={{
+              width: "100%",
+              "& .MuiSelect-select": {
+                display: "flex",
+                alignItems: "center",
+              },
+              "& .MuiOutlinedInput-root": {
+                height: "2.6rem",
+              },
+              "& .MuiInputLabel-root": {
+                top: "-0.4rem",
+                "&.Mui-focused": {
+                  color: colors.focusRing,
+                },
+                "&.MuiInputLabel-shrink": {
+                  top: "0",
+                },
+              },
+              "& .MuiSelect-icon": {
+                color: `${colors.textIcon} !important`,
+              },
+              "& .MuiSelect-iconOutlined": {
+                color: `${colors.textIcon} !important`,
+              },
+            }}
           >
-            <MenuItem value="">All Statuses</MenuItem>
-            {statuses.map((status) => (
-              <MenuItem key={status} value={status}>
-                {status}
+            <InputLabel
+              id="event-type-label"
+              sx={filterStyles?.multiOptionFilter?.inputLabelSection}
+            >
+              {t("userManagement.logs.eventType")}
+            </InputLabel>
+            <Select
+              labelId="event-type-label"
+              id="event-type-select"
+              value={filters.eventType || ""}
+              onChange={(e) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  eventType: e.target.value,
+                }))
+              }
+              sx={filterStyles?.multiOptionFilter?.selectSection}
+              label={t("userManagement.logs.eventType")}
+            >
+              <MenuItem value="">All Types</MenuItem>
+              {eventTypes.map((type) => (
+                <MenuItem key={type} value={type}>
+                  {type}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
+      </Box>
+
+      <Box sx={filterStyles?.boxFilterbyGroup}>
+        {/* Entity */}
+        <Box sx={{ minWidth: "120px" }}>
+          <TextField
+            fullWidth
+            label={t("userManagement.logs.entity")}
+            placeholder="Entity..."
+            value={filters.entity || ""}
+            onChange={(e) =>
+              setFilters((prev) => ({
+                ...prev,
+                entity: e.target.value,
+              }))
+            }
+            sx={filterStyles?.inputFilter}
+          />
+        </Box>
+
+        {/* Description */}
+        <Box sx={{ minWidth: "200px" }}>
+          <TextField
+            fullWidth
+            label={t("userManagement.logs.description")}
+            placeholder="Search description..."
+            value={filters.description || ""}
+            onChange={(e) =>
+              setFilters((prev) => ({
+                ...prev,
+                description: e.target.value,
+              }))
+            }
+            sx={filterStyles?.inputFilter}
+          />
+        </Box>
+      </Box>
+
+      <Box sx={filterStyles?.boxFilterbyGroup}>
+        {/* IP Address */}
+        <Box sx={{ minWidth: "150px" }}>
+          <TextField
+            fullWidth
+            label={t("userManagement.logs.ipAddress")}
+            placeholder="IP Address..."
+            value={filters.ipAddress || ""}
+            onChange={(e) =>
+              setFilters((prev) => ({
+                ...prev,
+                ipAddress: e.target.value,
+              }))
+            }
+            sx={filterStyles?.inputFilter}
+          />
+        </Box>
+        {/* Status */}
+        <Box sx={{ minWidth: "140px" }}>
+          <FormControl
+            fullWidth
+            sx={{
+              "& .MuiSelect-select": {
+                display: "flex",
+                alignItems: "center",
+              },
+              "& .MuiOutlinedInput-root": {
+                height: "2.6rem",
+              },
+              "& .MuiInputLabel-root": {
+                top: "-0.4rem",
+                "&.Mui-focused": {
+                  color: colors.focusRing,
+                },
+                "&.MuiInputLabel-shrink": {
+                  top: "0",
+                },
+              },
+              "& .MuiSelect-icon": {
+                color: `${colors.textIcon} !important`,
+              },
+              "& .MuiSelect-iconOutlined": {
+                color: `${colors.textIcon} !important`,
+              },
+            }}
+          >
+            <InputLabel
+              id="status-label"
+              sx={filterStyles?.multiOptionFilter?.inputLabelSection}
+            >
+              {t("userManagement.logs.status")}
+            </InputLabel>
+            <Select
+              labelId="status-label"
+              id="status-select"
+              value={filters.status || ""}
+              label={t("userManagement.logs.status")}
+              onChange={(e) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  status: e.target.value,
+                }))
+              }
+              sx={filterStyles?.multiOptionFilter?.selectSection}
+            >
+              <MenuItem value="">
+                <em>All Statuses</em>
               </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+              {statuses.map((status) => (
+                <MenuItem key={status} value={status}>
+                  {status}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
       </Box>
 
-      {/* Timestamp */}
-      <Box sx={{ minWidth: "150px" }}>
-        <TextField
-          fullWidth
-          label={t("userManagement.logs.timestamp")}
-          type="date"
-          InputLabelProps={{ shrink: true }}
-          value={filters.timestamp || ""}
-          onChange={(e) =>
-            setFilters((prev) => ({
-              ...prev,
-              timestamp: e.target.value,
-            }))
-          }
-          sx={filterStyles?.inputFilter}
-        />
-      </Box>
-
-      {/* Action Buttons */}
       <Box
         sx={{
           display: "flex",
           flexDirection: "row",
-          gap: 2,
+          gap: 1,
           marginTop: "-0.5rem",
         }}
       >
+        {/* Action Buttons as Box Items */}
         <Box sx={{ marginTop: "0.5rem" }}>
-          <Tooltip
-            title={
-              loading
-                ? "Loading..."
-                : "Search"
-            }
-          >
+          <Tooltip title={loading ? t("common.loading") : t("common.search")}>
             <span>
               <IconButton
                 onClick={() => refetch()}
@@ -297,7 +309,7 @@ export const AdvancedFilters = ({
         </Box>
 
         <Box sx={{ marginTop: "0.5rem" }}>
-          <Tooltip title="Clear all filters">
+          <Tooltip title={t("common.clear")}>
             <IconButton onClick={clearFilters} sx={buttonIconNoLabel}>
               <FilterListOffIcon
                 fontSize="small"

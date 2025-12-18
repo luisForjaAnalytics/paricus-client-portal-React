@@ -109,7 +109,7 @@ export const invoicesApi = createApi({
     getDownloadUrl: builder.query({
       query: ({ clientFolder, fileName }) => `/download/${clientFolder}/${fileName}`,
     }),
-    // Get all clients data (admin - loads all folders and stats)
+    // Get all clients data (admin - loads all folders, stats, and invoices)
     getAllClientsData: builder.query({
       async queryFn(_arg, _queryApi, _extraOptions, baseQuery) {
         try {
@@ -119,59 +119,66 @@ export const invoicesApi = createApi({
 
           const folders = foldersResponse.data.folders || [];
 
-          // Get stats for each folder
-          const statsPromises = folders.map((folder) =>
-            baseQuery(`/stats/${folder}`)
-              .then((res) => ({
+          // Get both stats and invoices for each folder in parallel
+          const clientDataPromises = folders.map(async (folder) => {
+            try {
+              const [statsRes, invoicesRes] = await Promise.all([
+                baseQuery(`/stats/${folder}`),
+                baseQuery(`/client/${folder}`)
+              ]);
+
+              return {
                 folder,
                 folderDisplay: folder
                   .split("-")
                   .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
                   .join(" "),
                 hasAccess: true,
-                ...res.data.stats,
-              }))
-              .catch((err) => {
-                if (err.status === 404) {
-                  console.warn(`Client folder ${folder} not properly configured`);
-                  return null;
-                }
-                return {
-                  folder,
-                  folderDisplay: folder
-                    .split("-")
-                    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                    .join(" "),
-                  hasAccess: true,
-                  totalRevenue: 0,
-                  outstandingBalance: 0,
-                  overdueAmount: 0,
-                  totalInvoices: 0,
-                  paidCount: 0,
-                  unpaidCount: 0,
-                  overdueCount: 0,
-                };
-              })
-          );
+                ...statsRes.data.stats,
+                invoices: invoicesRes.data?.invoices || [],
+              };
+            } catch (err) {
+              if (err.status === 404) {
+                console.warn(`Client folder ${folder} not properly configured`);
+                return null;
+              }
+              return {
+                folder,
+                folderDisplay: folder
+                  .split("-")
+                  .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                  .join(" "),
+                hasAccess: true,
+                totalRevenue: 0,
+                outstandingBalance: 0,
+                overdueAmount: 0,
+                totalInvoices: 0,
+                paidCount: 0,
+                unpaidCount: 0,
+                overdueCount: 0,
+                invoices: [],
+              };
+            }
+          });
 
-          const allStats = await Promise.all(statsPromises);
-          const validStats = allStats.filter((stat) => stat !== null);
+          const allClientData = await Promise.all(clientDataPromises);
+          const validClientData = allClientData.filter((client) => client !== null);
 
           const overall = {
-            totalRevenue: validStats.reduce((sum, client) => sum + (client.totalRevenue || 0), 0),
-            outstandingBalance: validStats.reduce((sum, client) => sum + (client.outstandingBalance || 0), 0),
-            overdueAmount: validStats.reduce((sum, client) => sum + (client.overdueAmount || 0), 0),
-            totalClients: validStats.length,
-            totalInvoices: validStats.reduce((sum, client) => sum + (client.totalInvoices || 0), 0),
-            totalPaidInvoices: validStats.reduce((sum, client) => sum + (client.paidCount || 0), 0),
-            totalUnpaidInvoices: validStats.reduce((sum, client) => sum + (client.unpaidCount || 0), 0),
-            totalOverdueInvoices: validStats.reduce((sum, client) => sum + (client.overdueCount || 0), 0),
+            totalRevenue: validClientData.reduce((sum, client) => sum + (client.totalRevenue || 0), 0),
+            outstandingBalance: validClientData.reduce((sum, client) => sum + (client.outstandingBalance || 0), 0),
+            overdueAmount: validClientData.reduce((sum, client) => sum + (client.overdueAmount || 0), 0),
+            totalClients: validClientData.length,
+            totalInvoices: validClientData.reduce((sum, client) => sum + (client.totalInvoices || 0), 0),
+            totalPaidInvoices: validClientData.reduce((sum, client) => sum + (client.paidCount || 0), 0),
+            totalUnpaidInvoices: validClientData.reduce((sum, client) => sum + (client.unpaidCount || 0), 0),
+            totalOverdueInvoices: validClientData.reduce((sum, client) => sum + (client.overdueCount || 0), 0),
           };
 
           return {
             data: {
               folders,
-              clientBreakdowns: validStats,
+              clientBreakdowns: validClientData,
               overallStats: overall,
             },
           };

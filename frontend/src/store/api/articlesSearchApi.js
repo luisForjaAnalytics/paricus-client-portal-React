@@ -1,9 +1,9 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-export const articlesApi = createApi({
-  reducerPath: "articlesApi",
+export const articlesSearchApi = createApi({
+  reducerPath: "articlesSearchApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "https://api.test.intranet.paricus.com/api/v1/external",
+    baseUrl: `${import.meta.env.VITE_INTRANET_API_URL}`,
     prepareHeaders: (headers) => {
       // API Key para autenticación externa
       headers.set("X-API-Key", `${import.meta.env.VITE_API_KEY}`);
@@ -33,4 +33,4 @@ export const {
   useLazyGetArticleByIdQuery,
   useGetAllArticlesQuery,
   useLazyGetAllArticlesQuery,
-} = articlesApi;
+} = articlesSearchApi;

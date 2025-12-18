@@ -36,6 +36,22 @@ export const AdvancedFilters = ({
         gap: 2,
       }}
     >
+
+            <Box>
+        <TextField
+          fullWidth
+          label={t("knowledgeBase.filters.search")}
+          placeholder={t("knowledgeBase.filters.search")}
+          value={filters.articleName || ""}
+          onChange={(e) =>
+            setFilters((prev) => ({
+              ...prev,
+              articleName: e.target.value,
+            }))
+          }
+          sx={filterStyles?.inputFilter}
+        />
+      </Box>
       <Box>
         <TextField
           fullWidth

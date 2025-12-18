@@ -3,7 +3,16 @@ import { NavBarOptions } from "./components";
 import { Outlet, useOutletContext } from "react-router-dom";
 
 export const UserManagementView = () => {
-  const { setTitleState } = useOutletContext();
+  let setTitleState;
+  try {
+    const context = useOutletContext();
+    setTitleState = context?.setTitleState;
+    if (!setTitleState) {
+      console.log("ERROR UserManagementView: setTitleState not found in context");
+    }
+  } catch (err) {
+    console.log(`ERROR UserManagementView useOutletContext: ${err}`);
+  }
 
   return (
     <Box sx={{ width: "100%" }}>

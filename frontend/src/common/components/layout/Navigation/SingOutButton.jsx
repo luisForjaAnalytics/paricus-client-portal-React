@@ -9,9 +9,13 @@ export const SingOutButton = () => {
   const [logout] = useLogoutMutation();
   const navigate = useNavigate();
 
-  const handleMenuOption = () => {
-    logout();
-    navigate(`/login`, { replace: true });
+  const handleMenuOption = async () => {
+    try {
+      await logout();
+      navigate(`/login`, { replace: true });
+    } catch (err) {
+      console.log(`ERROR handleMenuOption: ${err}`);
+    }
   };
   const { t } = useTranslation();
   return (

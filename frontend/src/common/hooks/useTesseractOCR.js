@@ -14,30 +14,35 @@ export const useTesseractOCR =()=> {
   const [error, setError] = useState(null);
 
   const extractImagesFromPDF = useCallback(async (file) => {
-    const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
 
-    const images = [];
+      const images = [];
 
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i);
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
 
-      // Render page to canvas
-      const viewport = page.getViewport({ scale: 2 });
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
+        // Render page to canvas
+        const viewport = page.getViewport({ scale: 2 });
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
 
-      canvas.width = viewport.width;
-      canvas.height = viewport.height;
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
 
-      await page.render({ canvasContext: ctx, viewport }).promise;
+        await page.render({ canvasContext: ctx, viewport }).promise;
 
-      // Convert to PNG dataURL
-      const imgData = canvas.toDataURL("image/png");
-      images.push(imgData);
+        // Convert to PNG dataURL
+        const imgData = canvas.toDataURL("image/png");
+        images.push(imgData);
+      }
+
+      return images;
+    } catch (err) {
+      console.log(`ERROR extractImagesFromPDF: ${err}`);
+      throw err;
     }
-
-    return images;
   }, []);
 
   const runOcr = useCallback(async (file) => {

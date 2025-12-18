@@ -1,10 +1,7 @@
 import { useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
 import {
   Box,
   Button,
-  Card,
-  CardContent,
   Chip,
   FormControl,
   IconButton,
@@ -22,14 +19,18 @@ import {
   Edit as EditIcon,
   Block as BlockIcon,
   Search as SearchIcon,
+  FilterList as FilterListIcon,
 } from "@mui/icons-material";
 import {
   primaryIconButton,
   colors,
   typography,
   card,
+  filterStyles,
 } from "../../../../common/styles/styles";
 import PropTypes from "prop-types";
+import { FilterButton } from "../FilterButton/FilterButton";
+import { useTranslation } from "react-i18next";
 
 export const ClientsTabDesktop = ({
   clients,
@@ -44,6 +45,9 @@ export const ClientsTabDesktop = ({
   // State for filters
   const [selectedStatus, setSelectedStatus] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+
+  // State for advanced filters visibility
+  const [isOpen, setIsOpen] = useState(false);
 
   // Filter clients based on status and search query
   const filteredClients = useMemo(() => {
@@ -85,7 +89,7 @@ export const ClientsTabDesktop = ({
         align: "left",
         headerAlign: "center",
         renderCell: (params) => (
-          <Typography variant="body2" fontWeight={500} sx={{ margin: '1rem' }}>
+          <Typography variant="body2" fontWeight={500} sx={{ margin: "1rem" }}>
             {params.value}
           </Typography>
         ),
@@ -98,7 +102,11 @@ export const ClientsTabDesktop = ({
         headerAlign: "center",
         renderCell: (params) => (
           <Chip
-            label={params.row.isProspect ? t("clients.table.prospect") : t("clients.table.client")}
+            label={
+              params.row.isProspect
+                ? t("clients.table.prospect")
+                : t("clients.table.client")
+            }
             color={params.row.isProspect ? "warning" : "primary"}
             size="small"
           />
@@ -178,63 +186,49 @@ export const ClientsTabDesktop = ({
   );
 
   // Transform clients data for DataGrid
-  const rows = useMemo(
-    () => {
-      try {
-        return filteredClients.map((client) => ({
-          id: client.id,
-          name: client.name,
-          isProspect: client.isProspect,
-          isActive: client.isActive,
-          userCount: client.userCount || client._count?.users || 0,
-          roleCount: client.roleCount || client._count?.roles || 0,
-          createdAt: client.createdAt,
-          original: client, // Keep original object for actions
-        }));
-      } catch (err) {
-        console.log(`ERROR rows: ${err}`);
-        return [];
-      }
-    },
-    [filteredClients]
-  );
+  const rows = useMemo(() => {
+    try {
+      return filteredClients.map((client) => ({
+        id: client.id,
+        name: client.name,
+        isProspect: client.isProspect,
+        isActive: client.isActive,
+        userCount: client.userCount || client._count?.users || 0,
+        roleCount: client.roleCount || client._count?.roles || 0,
+        createdAt: client.createdAt,
+        original: client, // Keep original object for actions
+      }));
+    } catch (err) {
+      console.log(`ERROR rows: ${err}`);
+      return [];
+    }
+  }, [filteredClients]);
 
-  return (
-    <Box sx={{ px: 3 }}>
-      {/* Filter Section - Desktop Only */}
-      <Card
-        sx={{
-          display: { xs: "none", md: "block" },
-          mb: 3,
-          padding: "0 2rem 0 2rem",
-        }}
-      >
-        <CardContent>
+  // Toolbar component with filters
+  const ClientsToolbar = useMemo(() => {
+    return () => (
+      <>
+        {isOpen && (
           <Box
             sx={{
+              padding: "1rem 2rem",
               display: "flex",
+              justifyContent: "center",
               alignItems: "center",
-              justifyContent: "space-between",
-              gap: 2,
+              backgroundColor: colors.subSectionBackground,
+              borderBottom: `1px solid ${colors.subSectionBorder}`,
             }}
           >
-            <Box sx={{ display: "flex", gap: 2, flex: 1 }}>
-              <FormControl sx={{ minWidth: 250 }}>
-                <InputLabel>{t("clients.filterByStatus")}</InputLabel>
-                <Select
-                  value={selectedStatus}
-                  onChange={(e) => setSelectedStatus(e.target.value)}
-                  label={t("clients.filterByStatus")}
-                >
-                  <MenuItem value="">{t("clients.allClients")}</MenuItem>
-                  <MenuItem value="active">{t("common.active")}</MenuItem>
-                  <MenuItem value="inactive">{t("common.inactive")}</MenuItem>
-                  <MenuItem value="client">{t("clients.clientsOnly")}</MenuItem>
-                  <MenuItem value="prospect">{t("clients.prospectsOnly")}</MenuItem>
-                </Select>
-              </FormControl>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+                width: "100%",
+              }}
+            >
               <TextField
-                sx={{ minWidth: 300 }}
+                sx={filterStyles?.inputFilter}
                 label={t("clients.searchClients")}
                 placeholder={t("clients.searchPlaceholder")}
                 value={searchQuery}
@@ -247,20 +241,36 @@ export const ClientsTabDesktop = ({
                   ),
                 }}
               />
+              <FormControl sx={filterStyles?.formControlStyleCUR}>
+                <InputLabel
+                  sx={filterStyles?.multiOptionFilter?.inputLabelSection}
+                >
+                  {t("clients.filterByStatus")}
+                </InputLabel>
+                <Select
+                  value={selectedStatus}
+                  onChange={(e) => setSelectedStatus(e.target.value)}
+                  label={t("clients.filterByStatus")}
+                  sx={filterStyles?.multiOptionFilter?.selectSection}
+                >
+                  <MenuItem value="">{t("clients.allClients")}</MenuItem>
+                  <MenuItem value="active">{t("common.active")}</MenuItem>
+                  <MenuItem value="inactive">{t("common.inactive")}</MenuItem>
+                  <MenuItem value="client">{t("clients.clientsOnly")}</MenuItem>
+                  <MenuItem value="prospect">
+                    {t("clients.prospectsOnly")}
+                  </MenuItem>
+                </Select>
+              </FormControl>
             </Box>
-            <Button
-              variant="contained"
-              color="primary"
-              startIcon={<AddIcon />}
-              onClick={onAddClick}
-              sx={primaryIconButton}
-            >
-              {t("clients.addClient")}
-            </Button>
           </Box>
-        </CardContent>
-      </Card>
+        )}
+      </>
+    );
+  }, [isOpen, selectedStatus, searchQuery, t]);
 
+  return (
+    <Box sx={{ px: 3 }}>
       {/* Data Table - Desktop Only */}
       <Box
         sx={{
@@ -269,10 +279,39 @@ export const ClientsTabDesktop = ({
           width: "100%",
         }}
       >
+        {/* Action Buttons */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "flex-end",
+            marginBottom: 1,
+            marginRight: 2,
+            gap: 1,
+          }}
+        >
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+            onClick={onAddClick}
+            sx={primaryIconButton}
+          >
+            {t("clients.addClient")}
+          </Button>
+          {/* filter Button */}
+          <FilterButton
+            folderName={"clients.filters"}
+            isOpen={isOpen}
+            setIsOpen={setIsOpen}
+          />
+        </Box>
+
         <DataGrid
           rows={rows}
           columns={columns}
           loading={isLoading}
+          slots={{ toolbar: ClientsToolbar }}
+          showToolbar
           pageSizeOptions={[10, 25, 50, 100]}
           initialState={{
             pagination: {
@@ -307,6 +346,16 @@ export const ClientsTabDesktop = ({
             },
             "& .MuiDataGrid-filler": {
               backgroundColor: `${colors.background} !important`,
+              width: "0 !important",
+              minWidth: "0 !important",
+              maxWidth: "0 !important",
+            },
+            "& .MuiDataGrid-scrollbarFiller": {
+              display: "none !important",
+            },
+            "& .MuiDataGrid-scrollbar--vertical": {
+              position: "absolute",
+              right: 0,
             },
             "& .MuiDataGrid-cell": {
               borderBottom: `1px solid ${colors.border}`,

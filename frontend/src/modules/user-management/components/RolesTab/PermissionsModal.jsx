@@ -15,6 +15,7 @@ import {
   primaryIconButton,
   titlesTypography,
   outlinedIconButton,
+  modalCard,
 } from "../../../../common/styles/styles";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
@@ -192,10 +193,7 @@ export const PermissionsModal = ({
       maxWidth="md"
       slotProps={{
         paper: {
-          sx: {
-            borderRadius: "1.5rem",
-            overflow: "hidden",
-          },
+          sx: modalCard?.dialogueSection
         },
       }}
     >

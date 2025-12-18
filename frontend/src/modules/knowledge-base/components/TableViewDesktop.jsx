@@ -1,18 +1,15 @@
 import { useMemo, useState } from "react";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid, Toolbar } from "@mui/x-data-grid";
 import {
   Box,
   IconButton,
-  TextField,
-  InputAdornment,
-  Card,
-  CardContent,
   Typography,
+  Tooltip,
 } from "@mui/material";
 import {
   Edit as EditIcon,
   Visibility as VisibilityIcon,
-  Search as SearchIcon,
+  FilterList as FilterListIcon,
 } from "@mui/icons-material";
 import {
   useGetAllArticlesQuery,
@@ -20,6 +17,7 @@ import {
 } from "../../../store/api/articlesApi";
 import { colors, typography, card } from "../../../common/styles/styles";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { TableViewMobil } from "./TableViewMobil";
 import AdvancedFilters from "./AdvancedFilters";
 
@@ -112,6 +110,7 @@ const dataStructure = (data) => {
 };
 
 export const TableView = () => {
+  const { t } = useTranslation();
   const { data = [], isLoading, isError, refetch } = useGetAllArticlesQuery();
 
   const [getArticleById] = useLazyGetArticleByIdQuery();
@@ -120,6 +119,9 @@ export const TableView = () => {
     synopsis: "",
     updatedAt: "",
   });
+
+  // State for advanced filters visibility
+  const [isOpen, setIsOpen] = useState(false);
 
   const navigate = useNavigate();
 
@@ -185,24 +187,19 @@ export const TableView = () => {
     []
   );
 
-  return (
-    <Box sx={{ width: "100%" }}>
-      {/* Search Filter */}
-      <Card
-        sx={{
-          display: { xs: "none", md: "flex" },
-          padding: "0 2rem 0 2rem",
-          mb: 3,
-          width: { md: "95%", lg: "100%" },
-          borderRadius: "0.5rem",
-        }}
-      >
-        <CardContent>
+  // Toolbar component for Knowledge Base with filter button
+  const KnowledgeBaseToolbar = useMemo(() => {
+    return () => (
+      <>
+        {isOpen && (
           <Box
             sx={{
+              padding: "1rem 2rem",
               display: "flex",
+              justifyContent: "center",
               alignItems: "center",
-              justifyContent: "flex-start",
+              backgroundColor: colors.subSectionBackground,
+              borderBottom: `1px solid ${colors.subSectionBorder}`,
             }}
           >
             <AdvancedFilters
@@ -214,9 +211,13 @@ export const TableView = () => {
               clearFilters={clearFilters}
             />
           </Box>
-        </CardContent>
-      </Card>
+        )}
+      </>
+    );
+  }, [isOpen, filters, isLoading]);
 
+  return (
+    <Box sx={{ width: "100%" }}>
       {/* Articles Table */}
       <Box
         sx={{
@@ -225,10 +226,34 @@ export const TableView = () => {
           width: { md: "95%", lg: "100%" },
         }}
       >
+        {/* Filter Button */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "flex-end",
+            marginBottom: 1,
+            marginRight: 2,
+          }}
+        >
+          <Tooltip title={t("knowledgeBase.filtersButton")}>
+            <IconButton
+              onClick={() => setIsOpen(!isOpen)}
+              size="medium"
+              sx={{
+                backgroundColor: colors?.backgroundOpenSubSection,
+              }}
+            >
+              <FilterListIcon fontSize="medium" />
+            </IconButton>
+          </Tooltip>
+        </Box>
+
         <DataGrid
           rows={rows}
           columns={columns}
           loading={isLoading}
+          slots={{ toolbar: KnowledgeBaseToolbar }}
+          showToolbar
           pageSizeOptions={[10, 25, 50, 100]}
           initialState={{
             pagination: {
@@ -236,6 +261,7 @@ export const TableView = () => {
             },
           }}
           sortingOrder={["asc", "desc"]}
+          disableRowSelectionOnClick
           sx={{
             ...card,
             padding: "0 0 0 0",
@@ -286,6 +312,15 @@ export const TableView = () => {
               color: colors.textPrimary,
             },
             "& .MuiDataGrid-cell:focus": {
+              outline: "none",
+            },
+            "& .MuiDataGrid-cell:focus-within": {
+              outline: "none",
+            },
+            "& .MuiDataGrid-columnHeader:focus": {
+              outline: "none",
+            },
+            "& .MuiDataGrid-columnHeader:focus-within": {
               outline: "none",
             },
             // Row hover effect

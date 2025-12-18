@@ -10,10 +10,17 @@ import {
   InputAdornment,
   CircularProgress,
   Alert,
+  Tooltip,
+  IconButton,
 } from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
-import { Search as SearchIcon } from "@mui/icons-material";
-import { colors, typography, card } from "../../../../common/styles/styles";
+import { DataGrid, Toolbar } from "@mui/x-data-grid";
+import FilterListIcon from "@mui/icons-material/FilterList";
+import {
+  colors,
+  typography,
+  card,
+  titlesTypography,
+} from "../../../../common/styles/styles";
 import { useTranslation } from "react-i18next";
 import { useGetLogsQuery } from "../../../../store/api/logsApi";
 import { useDispatch } from "react-redux";
@@ -40,6 +47,9 @@ export const LogsView = () => {
     status: "",
     timestamp: "",
   });
+
+  // State for advanced filters visibility
+  const [isOpen, setIsOpen] = useState(false);
 
   // Fetch logs from backend
   const { data, isLoading, error, refetch } = useGetLogsQuery({
@@ -104,7 +114,9 @@ export const LogsView = () => {
         : true;
 
       const matchesDescription = filters.description
-        ? log.description?.toLowerCase().includes(filters.description.toLowerCase())
+        ? log.description
+            ?.toLowerCase()
+            .includes(filters.description.toLowerCase())
         : true;
 
       const matchesIpAddress = filters.ipAddress
@@ -304,24 +316,19 @@ export const LogsView = () => {
     [t, formatTimestamp, getEventTypeColor, cleanIpAddress, getStatusColor]
   );
 
-  return (
-    <Box sx={{ px: 3 }}>
-      {/* Header with Search */}
-      <Card
-        sx={{
-          display: { xs: "none", md: "block" },
-          padding: "0 2rem 0 2rem",
-          mb: 3,
-          width: "100%",
-        }}
-      >
-        <CardContent>
+  // Toolbar component for logs table with filter button
+  const LogsToolbar = useMemo(() => {
+    return () => (
+      <>
+        {isOpen && (
           <Box
             sx={{
+              padding: "0.2rem 0 1rem 0",
               display: "flex",
+              justifyContent: "center",
               alignItems: "center",
-              justifyContent: "space-between",
-              gap: 2,
+              backgroundColor: colors.subSectionBackground,
+              borderBottom: `1px solid ${colors.subSectionBorder}`,
             }}
           >
             <AdvancedFilters
@@ -333,9 +340,13 @@ export const LogsView = () => {
               clearFilters={clearFilters}
             />
           </Box>
-        </CardContent>
-      </Card>
+        )}
+      </>
+    );
+  }, [t, totalRows, isOpen, filters, isLoading]);
 
+  return (
+    <Box sx={{ px: 3 }}>
       {/* Error Alert */}
       {error && (
         <Alert severity="error" sx={{ mb: 3 }}>
@@ -354,10 +365,33 @@ export const LogsView = () => {
           width: "100%",
         }}
       >
+        {" "}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "flex-end",
+            marginBottom: 1,
+            marginRight: 2,
+          }}
+        >
+          <Tooltip title={t("userManagement.logs.filters")}>
+            <IconButton
+              onClick={() => setIsOpen(!isOpen)}
+              size="small"
+              sx={{
+                backgroundColor: colors?.backgroundOpenSubSection,
+              }}
+            >
+              <FilterListIcon fontSize="medium" />
+            </IconButton>
+          </Tooltip>
+        </Box>
         <DataGrid
           rows={logs}
           columns={columns}
           loading={isLoading}
+          slots={{ toolbar: LogsToolbar }}
+          showToolbar
           rowCount={totalRows}
           paginationMode="server"
           paginationModel={paginationModel}
@@ -392,6 +426,16 @@ export const LogsView = () => {
             },
             "& .MuiDataGrid-filler": {
               backgroundColor: `${colors.background} !important`,
+              width: "0 !important",
+              minWidth: "0 !important",
+              maxWidth: "0 !important",
+            },
+            "& .MuiDataGrid-scrollbarFiller": {
+              display: "none !important",
+            },
+            "& .MuiDataGrid-scrollbar--vertical": {
+              position: "absolute",
+              right: 0,
             },
             "& .MuiDataGrid-cell": {
               borderBottom: `1px solid ${colors.border}`,

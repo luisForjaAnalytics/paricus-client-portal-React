@@ -44,7 +44,10 @@
       "Bash(docker:*)",
       "Bash(npx prisma migrate dev:*)",
       "Bash(tasklist:*)",
-      "Bash(git merge:*)"
+      "Bash(git merge:*)",
+      "Bash(for style in \"secondaryButton\" \"secondaryIconButton\" \"shadowedIconButton\" \"primaryDropdownButton\" \"reportsCardSelected\" \"searchInput\" \"textInput\")",
+      "Bash(do echo \"=== $style ===\")",
+      "Bash(if exist dist rmdir /s /q dist)"
     ],
     "deny": [],
     "ask": []

@@ -2,8 +2,6 @@ import React, { useState, useEffect, useMemo } from "react";
 import {
   Box,
   Button,
-  Card,
-  CardContent,
   Chip,
   Dialog,
   DialogActions,
@@ -22,7 +20,7 @@ import {
   InputAdornment,
   Tooltip,
 } from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid, Toolbar } from "@mui/x-data-grid";
 import {
   Add as AddIcon,
   Edit as EditIcon,
@@ -30,6 +28,7 @@ import {
   Block as BlockIcon,
   CheckCircle as CheckCircleIcon,
   Close as CloseIcon,
+  FilterList as FilterListIcon,
 } from "@mui/icons-material";
 import {
   useGetUsersQuery,
@@ -46,9 +45,11 @@ import {
   typography,
   statusBadges,
   card,
+  filterStyles,
 } from "../../../../common/styles/styles";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
+import { FilterButton } from "../FilterButton/FilterButton";
 
 export const UsersTabDesktop = () => {
   const { t } = useTranslation();
@@ -72,6 +73,9 @@ export const UsersTabDesktop = () => {
   const [selectedClient, setSelectedClient] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
+  // State for advanced filters visibility
+  const [isOpen, setIsOpen] = useState(false);
+
   const saving = creating || updating;
 
   // Form data
@@ -94,7 +98,10 @@ export const UsersTabDesktop = () => {
   // Computed values
   const clientOptions = useMemo(() => {
     try {
-      return clients.map((client) => ({ title: client.name, value: client.id }));
+      return clients.map((client) => ({
+        title: client.name,
+        value: client.id,
+      }));
     } catch (err) {
       console.log(`ERROR clientOptions: ${err}`);
       return [];
@@ -118,7 +125,9 @@ export const UsersTabDesktop = () => {
 
       // For Client Admins, only show users from their company
       if (isClientAdmin && authUser?.clientId) {
-        filtered = filtered.filter((user) => user.clientId === authUser.clientId);
+        filtered = filtered.filter(
+          (user) => user.clientId === authUser.clientId
+        );
       }
 
       // For BPO Admins, use the selected client filter
@@ -247,7 +256,10 @@ export const UsersTabDesktop = () => {
       closeDialog();
     } catch (error) {
       console.error("Error saving user:", error);
-      showNotification(error.data?.error || t("users.messages.saveFailed"), "error");
+      showNotification(
+        error.data?.error || t("users.messages.saveFailed"),
+        "error"
+      );
     }
   };
 
@@ -259,7 +271,9 @@ export const UsersTabDesktop = () => {
       }).unwrap();
 
       showNotification(
-        !user.isActive ? t("users.messages.userActivated") : t("users.messages.userDeactivated"),
+        !user.isActive
+          ? t("users.messages.userActivated")
+          : t("users.messages.userDeactivated"),
         "success"
       );
     } catch (error) {
@@ -365,7 +379,9 @@ export const UsersTabDesktop = () => {
         headerAlign: "center",
         renderCell: (params) => (
           <Chip
-            label={params.value ? t("users.table.active") : t("users.table.inactive")}
+            label={
+              params.value ? t("users.table.active") : t("users.table.inactive")
+            }
             color={params.value ? "success" : "error"}
             size="small"
           />
@@ -399,7 +415,11 @@ export const UsersTabDesktop = () => {
               </IconButton>
             </Tooltip>
             <Tooltip
-              title={params.row.is_active ? t("users.actions.deactivateUser") : t("users.actions.activateUser")}
+              title={
+                params.row.is_active
+                  ? t("users.actions.deactivateUser")
+                  : t("users.actions.activateUser")
+              }
             >
               <IconButton
                 size="small"
@@ -425,7 +445,8 @@ export const UsersTabDesktop = () => {
       return filteredUsers.map((user) => ({
         id: user.id,
         name:
-          `${user.firstName || ""} ${user.lastName || ""}`.trim() || t("common.na"),
+          `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
+          t("common.na"),
         email: user.email,
         client_name: user.client?.name || t("common.na"),
         role_name: user.role?.roleName,
@@ -439,46 +460,31 @@ export const UsersTabDesktop = () => {
     }
   }, [filteredUsers, t]);
 
-  return (
-    <Box sx={{ px: 3 }}>
-      {/* Filter Section - Desktop Only */}
-      <Card
-        sx={{
-          display: { xs: "none", md: "block" },
-          mb: 3,
-          padding: "0 2rem 0 2rem",
-        }}
-      >
-        <CardContent>
+  // Toolbar component with filters
+  const UsersToolbar = useMemo(() => {
+    return () => (
+      <>
+        {isOpen && (
           <Box
             sx={{
+              padding: "1rem 2rem",
               display: "flex",
+              justifyContent: "center",
               alignItems: "center",
-              justifyContent: "space-between",
-              gap: 2,
+              backgroundColor: colors.subSectionBackground,
+              borderBottom: `1px solid ${colors.subSectionBorder}`,
             }}
           >
-            <Box sx={{ display: "flex", gap: 2, flex: 1 }}>
-              {/* Only show client filter for BPO Admins */}
-              {isBPOAdmin && (
-                <FormControl sx={{ minWidth: 250 }}>
-                  <InputLabel>{t("users.filterByClient")}</InputLabel>
-                  <Select
-                    value={selectedClient}
-                    onChange={(e) => setSelectedClient(e.target.value)}
-                    label={t("users.filterByClient")}
-                  >
-                    <MenuItem value="">{t("users.allClients")}</MenuItem>
-                    {clientOptions.map((client) => (
-                      <MenuItem key={client.value} value={client.value}>
-                        {client.title}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              )}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+                width: "100%",
+              }}
+            >
               <TextField
-                sx={{ minWidth: 300 }}
+                sx={filterStyles?.inputFilter}
                 label={t("users.searchLabel")}
                 placeholder={t("users.searchPlaceholder")}
                 value={searchQuery}
@@ -491,20 +497,39 @@ export const UsersTabDesktop = () => {
                   ),
                 }}
               />
-            </Box>
-            <Button
-              variant="contained"
-              color="primary"
-              startIcon={<AddIcon />}
-              onClick={openAddDialog}
-              sx={primaryIconButton}
-            >
-              {t("users.addNewUser")}
-            </Button>
-          </Box>
-        </CardContent>
-      </Card>
 
+              {/* Only show client filter for BPO Admins */}
+              {isBPOAdmin && (
+                <FormControl sx={filterStyles?.formControlStyleCUR}>
+                  <InputLabel
+                    sx={filterStyles?.multiOptionFilter?.inputLabelSection}
+                  >
+                    {t("users.filterByClient")}
+                  </InputLabel>
+                  <Select
+                    value={selectedClient}
+                    onChange={(e) => setSelectedClient(e.target.value)}
+                    label={t("users.filterByClient")}
+                    sx={filterStyles?.multiOptionFilter?.selectSection}
+                  >
+                    <MenuItem value="">{t("users.allClients")}</MenuItem>
+                    {clientOptions.map((client) => (
+                      <MenuItem key={client.value} value={client.value}>
+                        {client.title}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              )}
+            </Box>
+          </Box>
+        )}
+      </>
+    );
+  }, [isOpen, isBPOAdmin, selectedClient, searchQuery, clientOptions, t]);
+
+  return (
+    <Box sx={{ px: 3 }}>
       {/* Users Data Table - Desktop Only */}
       <Box
         sx={{
@@ -513,10 +538,40 @@ export const UsersTabDesktop = () => {
           width: "100%",
         }}
       >
+        {/* Action Buttons */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "flex-end",
+            marginBottom: 1,
+            marginRight: 2,
+            gap: 1,
+          }}
+        >
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+            onClick={openAddDialog}
+            sx={primaryIconButton}
+          >
+            {t("users.addNewUser")}
+          </Button>
+
+          {/* filter Button */}
+          <FilterButton
+            folderName="users.filters"
+            isOpen={isOpen}
+            setIsOpen={setIsOpen}
+          />
+        </Box>
+
         <DataGrid
           rows={rows}
           columns={columns}
           loading={loading}
+          slots={{ toolbar: UsersToolbar }}
+          showToolbar
           pageSizeOptions={[10, 25, 50, 100]}
           initialState={{
             pagination: {
@@ -527,36 +582,46 @@ export const UsersTabDesktop = () => {
           sx={{
             ...card,
             padding: "0 0 0 0",
-            border: `1px solid ${colors.border}`, // border-gray-200
+            border: `1px solid ${colors.border}`,
             "& .MuiDataGrid-columnHeaders": {
-              backgroundColor: `${colors.background} !important`, // bg-gray-50
+              backgroundColor: `${colors.background} !important`,
               borderBottom: `2px solid ${colors.border}`,
             },
             "& .MuiDataGrid-columnHeader": {
-              backgroundColor: `${colors.background} !important`, // bg-gray-50
+              backgroundColor: `${colors.background} !important`,
             },
             "& .MuiDataGrid-columnHeaderTitle": {
-              fontWeight: typography.fontWeight.bold, // font-bold
+              fontWeight: typography.fontWeight.bold,
               textTransform: "uppercase",
-              fontSize: typography.fontSize.tableHeader, // text-xs (12px)
+              fontSize: typography.fontSize.tableHeader,
               fontFamily: typography.fontFamily,
-              color: colors.textMuted, // text-gray-500
-              letterSpacing: "0.05em", // tracking-wider
+              color: colors.textMuted,
+              letterSpacing: "0.05em",
             },
             "& .MuiDataGrid-sortIcon": {
               color: colors.primary,
             },
             "& .MuiDataGrid-columnHeader--sorted": {
-              backgroundColor: `${colors.primaryLight} !important`, // bg-green-100 when sorted
+              backgroundColor: `${colors.primaryLight} !important`,
             },
             "& .MuiDataGrid-filler": {
-              backgroundColor: `${colors.background} !important`, // bg-gray-50
+              backgroundColor: `${colors.background} !important`,
+              width: "0 !important",
+              minWidth: "0 !important",
+              maxWidth: "0 !important",
+            },
+            "& .MuiDataGrid-scrollbarFiller": {
+              display: "none !important",
+            },
+            "& .MuiDataGrid-scrollbar--vertical": {
+              position: "absolute",
+              right: 0,
             },
             "& .MuiDataGrid-cell": {
-              borderBottom: `1px solid ${colors.border}`, // border-gray-200
-              fontSize: typography.fontSize.body, // text-sm (14px)
+              borderBottom: `1px solid ${colors.border}`,
+              fontSize: typography.fontSize.body,
               fontFamily: typography.fontFamily,
-              color: colors.textPrimary, // text-gray-900
+              color: colors.textPrimary,
             },
             "& .MuiDataGrid-cell:focus": {
               outline: "none",
@@ -571,7 +636,7 @@ export const UsersTabDesktop = () => {
               outline: "none",
             },
             "& .MuiDataGrid-row:hover": {
-              backgroundColor: colors.background, // hover:bg-gray-50
+              backgroundColor: colors.background,
             },
           }}
         />
@@ -643,7 +708,9 @@ export const UsersTabDesktop = () => {
                       }
                       label={t("users.form.client")}
                     >
-                      <MenuItem value="">{t("users.form.selectClient")}</MenuItem>
+                      <MenuItem value="">
+                        {t("users.form.selectClient")}
+                      </MenuItem>
                       {clientOptions.map((client) => (
                         <MenuItem key={client.value} value={client.value}>
                           {client.title}

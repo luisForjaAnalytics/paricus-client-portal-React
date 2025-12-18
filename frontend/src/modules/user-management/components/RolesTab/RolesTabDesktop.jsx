@@ -2,8 +2,6 @@ import { useState, useMemo } from "react";
 import {
   Box,
   Button,
-  Card,
-  CardContent,
   Chip,
   Dialog,
   DialogActions,
@@ -22,7 +20,7 @@ import {
   Tooltip,
   InputAdornment,
 } from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid, Toolbar } from "@mui/x-data-grid";
 import {
   Add as AddIcon,
   Edit as EditIcon,
@@ -30,6 +28,7 @@ import {
   Delete as DeleteIcon,
   Shield as ShieldIcon,
   Search as SearchIcon,
+  FilterList as FilterListIcon,
 } from "@mui/icons-material";
 import {
   useGetRolesQuery,
@@ -48,10 +47,12 @@ import {
   colors,
   typography,
   card,
+  filterStyles,
 } from "../../../../common/styles/styles";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import { PermissionsModal } from "./PermissionsModal";
+import { FilterButton } from "../FilterButton/FilterButton";
 
 export const RolesTabDesktop = () => {
   const { t } = useTranslation();
@@ -85,6 +86,9 @@ export const RolesTabDesktop = () => {
   const [selectedClient, setSelectedClient] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPermissions, setSelectedPermissions] = useState([]);
+
+  // State for advanced filters visibility
+  const [isOpen, setIsOpen] = useState(false);
 
   // Form state
   const [roleForm, setRoleForm] = useState({
@@ -212,7 +216,9 @@ export const RolesTabDesktop = () => {
       closeDialog();
     } catch (error) {
       const errorMessage =
-        error.data?.error || error.data?.message || t("roles.messages.roleSaveFailed");
+        error.data?.error ||
+        error.data?.message ||
+        t("roles.messages.roleSaveFailed");
       showNotification(errorMessage, "error");
     }
   };
@@ -232,7 +238,8 @@ export const RolesTabDesktop = () => {
       showNotification(t("roles.messages.permissionsUpdated"), "success");
       closePermissionsDialog();
     } catch (error) {
-      const errorMessage = error.data?.error || t("roles.messages.permissionsUpdateFailed");
+      const errorMessage =
+        error.data?.error || t("roles.messages.permissionsUpdateFailed");
       showNotification(errorMessage, "error");
     }
   };
@@ -253,7 +260,8 @@ export const RolesTabDesktop = () => {
       setDeleteDialog(false);
       setRoleToDelete(null);
     } catch (error) {
-      const errorMessage = error.data?.error || t("roles.messages.roleDeleteFailed");
+      const errorMessage =
+        error.data?.error || t("roles.messages.roleDeleteFailed");
       showNotification(errorMessage, "error");
     }
   };
@@ -273,7 +281,9 @@ export const RolesTabDesktop = () => {
   const isFormValid = () => {
     try {
       return (
-        roleForm.role_name && roleForm.role_name.length >= 2 && roleForm.client_id
+        roleForm.role_name &&
+        roleForm.role_name.length >= 2 &&
+        roleForm.client_id
       );
     } catch (err) {
       console.log(`ERROR isFormValid: ${err}`);
@@ -317,7 +327,9 @@ export const RolesTabDesktop = () => {
 
       // Filter by client
       if (selectedClient) {
-        filtered = filtered.filter((role) => (role.clientId || role.client_id) === selectedClient);
+        filtered = filtered.filter(
+          (role) => (role.clientId || role.client_id) === selectedClient
+        );
       }
 
       // Filter by search query (role name or description)
@@ -451,64 +463,52 @@ export const RolesTabDesktop = () => {
   );
 
   // Transform roles data for DataGrid
-  const rows = useMemo(
-    () => {
-      try {
-        return filteredRoles.map((role) => ({
-          id: role.id,
-          role_name: role.roleName || role.role_name,
-          description: role.description,
-          client_name: role.clientName || role.client_name,
-          permissions_count: role.permissions?.length || role.permissions_count || role.userCount || 0,
-          created_at: role.createdAt || role.created_at,
-          original: role, // Keep original object for actions
-        }));
-      } catch (err) {
-        console.log(`ERROR rows: ${err}`);
-        return [];
-      }
-    },
-    [filteredRoles]
-  );
+  const rows = useMemo(() => {
+    try {
+      return filteredRoles.map((role) => ({
+        id: role.id,
+        role_name: role.roleName || role.role_name,
+        description: role.description,
+        client_name: role.clientName || role.client_name,
+        permissions_count:
+          role.permissions?.length ||
+          role.permissions_count ||
+          role.userCount ||
+          0,
+        created_at: role.createdAt || role.created_at,
+        original: role, // Keep original object for actions
+      }));
+    } catch (err) {
+      console.log(`ERROR rows: ${err}`);
+      return [];
+    }
+  }, [filteredRoles]);
 
-  return (
-    <Box sx={{ px: 3 }}>
-      <Card
-        sx={{
-          display: { xs: "none", md: "block" },
-          padding: "0 2rem 0 2rem",
-          mb: 3,
-        }}
-      >
-        <CardContent>
+  // Toolbar component with filters
+  const RolesToolbar = useMemo(() => {
+    return () => (
+      <>
+        {isOpen && (
           <Box
             sx={{
+              padding: "1rem 2rem",
               display: "flex",
+              justifyContent: "center",
               alignItems: "center",
-              justifyContent: "space-between",
-              gap: 2,
+              backgroundColor: colors.subSectionBackground,
+              borderBottom: `1px solid ${colors.subSectionBorder}`,
             }}
           >
-            <Box sx={{ display: "flex", gap: 2, flex: 1 }}>
-              {isBPOAdmin && (
-                <FormControl sx={{ minWidth: 250 }}>
-                  <InputLabel>{t("roles.filterByClient")}</InputLabel>
-                  <Select
-                    value={selectedClient}
-                    label={t("roles.filterByClient")}
-                    onChange={(e) => setSelectedClient(e.target.value)}
-                  >
-                    <MenuItem value="">{t("roles.allClients")}</MenuItem>
-                    {clients.map((client) => (
-                      <MenuItem key={client.id} value={client.id}>
-                        {client.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              )}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+                width: "100%",
+              }}
+            >
               <TextField
-                sx={{ minWidth: 300 }}
+                sx={filterStyles?.inputFilter}
                 label={t("roles.searchLabel")}
                 placeholder={t("roles.searchPlaceholder")}
                 value={searchQuery}
@@ -521,20 +521,38 @@ export const RolesTabDesktop = () => {
                   ),
                 }}
               />
-            </Box>
-            <Button
-              variant="contained"
-              color="primary"
-              startIcon={<AddIcon />}
-              onClick={openAddDialog}
-              sx={primaryIconButton}
-            >
-              {t("roles.addRole")}
-            </Button>
-          </Box>
-        </CardContent>
-      </Card>
 
+              {isBPOAdmin && (
+                <FormControl sx={filterStyles?.formControlStyleCUR}>
+                  <InputLabel
+                    sx={filterStyles?.multiOptionFilter?.inputLabelSection}
+                  >
+                    {t("roles.filterByClient")}
+                  </InputLabel>
+                  <Select
+                    value={selectedClient}
+                    label={t("roles.filterByClient")}
+                    onChange={(e) => setSelectedClient(e.target.value)}
+                    sx={filterStyles?.multiOptionFilter?.selectSection}
+                  >
+                    <MenuItem value="">{t("roles.allClients")}</MenuItem>
+                    {clients.map((client) => (
+                      <MenuItem key={client.id} value={client.id}>
+                        {client.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              )}
+            </Box>
+          </Box>
+        )}
+      </>
+    );
+  }, [isOpen, isBPOAdmin, selectedClient, searchQuery, clients, t]);
+
+  return (
+    <Box sx={{ px: 3 }}>
       {/* Roles Table - Desktop Only */}
       <Box
         sx={{
@@ -543,10 +561,40 @@ export const RolesTabDesktop = () => {
           width: "100%",
         }}
       >
+        {/* Action Buttons */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "flex-end",
+            marginBottom: 1,
+            marginRight: 2,
+            gap: 1,
+          }}
+        >
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+            onClick={openAddDialog}
+            sx={primaryIconButton}
+          >
+            {t("roles.addRole")}
+          </Button>
+
+          {/* filter Button */}
+          <FilterButton
+            folderName="roles.filters"
+            isOpen={isOpen}
+            setIsOpen={setIsOpen}
+          />
+        </Box>
+
         <DataGrid
           rows={rows}
           columns={columns}
           loading={isLoading}
+          slots={{ toolbar: RolesToolbar }}
+          showToolbar
           pageSizeOptions={[10, 25, 50, 100]}
           initialState={{
             pagination: {
@@ -581,6 +629,16 @@ export const RolesTabDesktop = () => {
             },
             "& .MuiDataGrid-filler": {
               backgroundColor: `${colors.background} !important`,
+              width: "0 !important",
+              minWidth: "0 !important",
+              maxWidth: "0 !important",
+            },
+            "& .MuiDataGrid-scrollbarFiller": {
+              display: "none !important",
+            },
+            "& .MuiDataGrid-scrollbar--vertical": {
+              position: "absolute",
+              right: 0,
             },
             "& .MuiDataGrid-cell": {
               borderBottom: `1px solid ${colors.border}`,
@@ -609,7 +667,9 @@ export const RolesTabDesktop = () => {
 
       {/* Add/Edit Role Dialog */}
       <Dialog open={dialog} onClose={closeDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>{editingRole ? t("roles.editRole") : t("roles.addRole")}</DialogTitle>
+        <DialogTitle>
+          {editingRole ? t("roles.editRole") : t("roles.addRole")}
+        </DialogTitle>
         <DialogContent dividers>
           <TextField
             label={t("roles.form.roleName")}
@@ -697,7 +757,8 @@ export const RolesTabDesktop = () => {
         <DialogTitle>{t("roles.confirmDelete")}</DialogTitle>
         <DialogContent>
           <Typography>
-            {t("roles.deleteWarning")} "{roleToDelete?.role_name}"? {t("roles.deleteWarningContinue")}
+            {t("roles.deleteWarning")} "{roleToDelete?.role_name}"?{" "}
+            {t("roles.deleteWarningContinue")}
           </Typography>
         </DialogContent>
         <DialogActions>
