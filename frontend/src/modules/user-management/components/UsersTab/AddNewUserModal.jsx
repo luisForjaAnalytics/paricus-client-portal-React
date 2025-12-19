@@ -1,0 +1,225 @@
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
+  Button,
+  IconButton,
+  Box,
+  Typography,
+  Snackbar,
+  Alert,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Grid,
+} from "@mui/material";
+import { Close as CloseIcon } from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
+import {
+  primaryButton,
+  outlinedButton,
+  modalCard,
+  titlesTypography,
+  primaryIconButton,
+} from "../../../../common/styles/styles";
+
+export const AddNewUserModal = ({
+  dialog,
+  editingUser,
+  userForm,
+  setUserForm,
+  closeDialog,
+  saveUser,
+  saving,
+  isFormValid,
+  notification,
+  handleCloseNotification,
+  clientOptions,
+  roleOptions,
+  isBPOAdmin,
+  handleClientChange,
+}) => {
+  const { t } = useTranslation();
+
+  return (
+    <>
+      {/* Add/Edit User Dialog */}
+      <Dialog
+        open={dialog}
+        onClose={closeDialog}
+        slotProps={{
+          paper: {
+            sx: modalCard?.dialogSection,
+          },
+        }}
+      >
+        <DialogTitle>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Typography
+              sx={{
+                ...titlesTypography?.primaryTitle,
+                textAlign: "center",
+              }}
+            >
+              {editingUser ? t("users.editUser") : t("users.addNewUser")}
+            </Typography>
+          </Box>
+        </DialogTitle>
+
+        <DialogContent dividers>
+          <Box>
+            <Box sx={modalCard?.boxModalStyle?.boxManagementModal}>
+              <TextField
+                fullWidth
+                required
+                label={t("users.form.firstName")}
+                value={userForm.first_name}
+                sx={modalCard?.inputSection}
+                onChange={(e) =>
+                  setUserForm({ ...userForm, first_name: e.target.value })
+                }
+              />
+
+              <TextField
+                fullWidth
+                required
+                label={t("users.form.lastName")}
+                value={userForm.last_name}
+                sx={modalCard?.inputSection}
+                onChange={(e) =>
+                  setUserForm({ ...userForm, last_name: e.target.value })
+                }
+              />
+            </Box>
+            <Box sx={modalCard?.boxModalStyle?.boxManagementModal}>
+              <TextField
+                fullWidth
+                required
+                type="email"
+                label={t("users.form.email")}
+                value={userForm.email}
+                sx={modalCard?.inputSection}
+                onChange={(e) =>
+                  setUserForm({ ...userForm, email: e.target.value })
+                }
+              />
+
+              {!editingUser && (
+                <TextField
+                  fullWidth
+                  required
+                  type="password"
+                  label={t("users.form.password")}
+                  value={userForm.password}
+                  sx={modalCard?.inputSection}
+                  onChange={(e) =>
+                    setUserForm({ ...userForm, password: e.target.value })
+                  }
+                />
+              )}
+            </Box>
+            <Box sx={modalCard?.boxModalStyle?.boxManagementModal}>
+              {isBPOAdmin && (
+                <FormControl fullWidth required>
+                  <InputLabel
+                    sx={modalCard?.multiOptionFilter?.inputLabelSection}
+                  >
+                    {t("users.form.client")}
+                  </InputLabel>
+                  <Select
+                    value={userForm.client_id || ""}
+                    onChange={(e) => handleClientChange(e.target.value || null)}
+                    label={t("users.form.client")}
+                    sx={modalCard?.multiOptionFilter?.selectSection}
+                  >
+                    <MenuItem value="">{t("users.form.selectClient")}</MenuItem>
+                    {clientOptions.map((client) => (
+                      <MenuItem key={client.value} value={client.value}>
+                        {client.title}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              )}
+
+              <FormControl fullWidth disabled={!userForm.client_id}>
+                <InputLabel
+                  sx={modalCard?.multiOptionFilter?.inputLabelSection}
+                >
+                  {t("users.form.role")}
+                </InputLabel>
+                <Select
+                  value={userForm.role_id || ""}
+                  onChange={(e) =>
+                    setUserForm({
+                      ...userForm,
+                      role_id: e.target.value || null,
+                    })
+                  }
+                  label={t("users.form.role")}
+                  sx={modalCard?.multiOptionFilter?.selectSection}
+                >
+                  <MenuItem value="">
+                    {!userForm.client_id
+                      ? t("users.form.selectClientFirst")
+                      : roleOptions.length === 0
+                      ? t("users.form.noRolesAvailable")
+                      : t("users.form.selectRole")}
+                  </MenuItem>
+                  {roleOptions.map((role) => (
+                    <MenuItem key={role.value} value={role.value}>
+                      {role.title}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+          </Box>
+        </DialogContent>
+        <DialogActions
+          sx={{
+            margin: "0 0 1rem 0",
+            justifyContent: "center",
+          }}
+        >
+          <Button
+            onClick={saveUser}
+            variant="contained"
+            disabled={saving || !isFormValid}
+            sx={{...primaryIconButton, width:'20%'}}
+          >
+            {saving ? t("common.saving") : t("common.save")}
+          </Button>
+          <Button onClick={closeDialog} sx={outlinedButton}>
+            {t("common.cancel")}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Notifications */}
+      <Snackbar
+        open={notification.open}
+        autoHideDuration={6000}
+        onClose={handleCloseNotification}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          onClose={handleCloseNotification}
+          severity={notification.severity}
+          variant="filled"
+        >
+          {notification.message}
+        </Alert>
+      </Snackbar>
+    </>
+  );
+};

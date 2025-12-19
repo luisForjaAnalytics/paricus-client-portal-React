@@ -13,24 +13,17 @@ export const articlesSearchApi = createApi({
   tagTypes: ["Articles"],
   endpoints: (builder) => ({
     // Obtener artículo por ID
-    getArticleById: builder.query({
-      query: (articleId) => `/articles/PA_US_1/${articleId}`,
-      providesTags: (result, error, articleId) => [
-        { type: "Articles", id: articleId },
+    getArticleSearch: builder.query({
+      query: (articleSearch) => `/articles/PA_US_1?search=${articleSearch}`,
+      providesTags: (result, error, articleSearch) => [
+        { type: "Articles", id: articleSearch },
       ],
     }),
 
-    // Obtener todos los artículos (si el endpoint lo soporta)
-    getAllArticles: builder.query({
-      query: () => "/articles/PA_US_1",
-      providesTags: ["Articles"],
-    }),
   }),
 });
 
 export const {
-  useGetArticleByIdQuery,
-  useLazyGetArticleByIdQuery,
-  useGetAllArticlesQuery,
-  useLazyGetAllArticlesQuery,
+  useGetArticleSearchQuery,
+  useLazyGetArticleSearchQuery,
 } = articlesSearchApi;

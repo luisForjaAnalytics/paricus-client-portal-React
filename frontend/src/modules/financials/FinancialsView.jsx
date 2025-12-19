@@ -43,6 +43,7 @@ import { useSelector } from "react-redux";
 import { ClientSummary } from "./components/ClientSummary";
 import { ClientBreakdown } from "./components/ClientBreakdown";
 import { InvoicesTable } from "./components/InvoicesTable";
+import { EditInvoiceModal } from "./components/EditInvoiceModal";
 import {
   primaryButton,
   outlinedButton,
@@ -710,202 +711,15 @@ export const FinancialsView = () => {
           )}
 
           {/* Edit Invoice Modal */}
-          <Dialog
-            open={showEditInvoiceModal}
-            onClose={() => setShowEditInvoiceModal(false)}
-            maxWidth="md"
-            fullWidth
-          >
-            <form onSubmit={handleSaveInvoiceEdit}>
-              <DialogTitle>Edit Invoice</DialogTitle>
-              <DialogContent>
-                <Grid container spacing={2} sx={{ mt: 1 }}>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      fullWidth
-                      label="Invoice Number"
-                      value={editInvoiceForm.invoiceNumber}
-                      disabled
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      fullWidth
-                      label="Title"
-                      value={editInvoiceForm.title}
-                      onChange={(e) =>
-                        setEditInvoiceForm((prev) => ({
-                          ...prev,
-                          title: e.target.value,
-                        }))
-                      }
-                      required
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      fullWidth
-                      label="Amount"
-                      type="number"
-                      inputProps={{ step: 0.01, min: 0 }}
-                      value={editInvoiceForm.amount}
-                      onChange={(e) =>
-                        setEditInvoiceForm((prev) => ({
-                          ...prev,
-                          amount: parseFloat(e.target.value),
-                        }))
-                      }
-                      required
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <FormControl fullWidth>
-                      <InputLabel>Currency</InputLabel>
-                      <Select
-                        value={editInvoiceForm.currency}
-                        onChange={(e) =>
-                          setEditInvoiceForm((prev) => ({
-                            ...prev,
-                            currency: e.target.value,
-                          }))
-                        }
-                        label="Currency"
-                      >
-                        <MenuItem value="USD">USD</MenuItem>
-                        <MenuItem value="EUR">EUR</MenuItem>
-                        <MenuItem value="GBP">GBP</MenuItem>
-                        <MenuItem value="MXN">MXN</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <FormControl fullWidth>
-                      <InputLabel>Status</InputLabel>
-                      <Select
-                        value={editInvoiceForm.status}
-                        onChange={(e) =>
-                          setEditInvoiceForm((prev) => ({
-                            ...prev,
-                            status: e.target.value,
-                          }))
-                        }
-                        label="Status"
-                      >
-                        <MenuItem value="draft">Draft</MenuItem>
-                        <MenuItem value="sent">Sent</MenuItem>
-                        <MenuItem value="viewed">Viewed</MenuItem>
-                        <MenuItem value="paid">Paid</MenuItem>
-                        <MenuItem value="overdue">Overdue</MenuItem>
-                        <MenuItem value="cancelled">Cancelled</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <FormControl fullWidth>
-                      <InputLabel>Payment Method</InputLabel>
-                      <Select
-                        value={editInvoiceForm.paymentMethod}
-                        onChange={(e) =>
-                          setEditInvoiceForm((prev) => ({
-                            ...prev,
-                            paymentMethod: e.target.value,
-                          }))
-                        }
-                        label="Payment Method"
-                      >
-                        <MenuItem value="">Not Set</MenuItem>
-                        <MenuItem value="credit_card">Credit Card</MenuItem>
-                        <MenuItem value="bank_transfer">Bank Transfer</MenuItem>
-                        <MenuItem value="check">Check</MenuItem>
-                        <MenuItem value="cash">Cash</MenuItem>
-                        <MenuItem value="other">Other</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      fullWidth
-                      label="Issued Date"
-                      type="date"
-                      value={editInvoiceForm.issuedDate}
-                      onChange={(e) =>
-                        setEditInvoiceForm((prev) => ({
-                          ...prev,
-                          issuedDate: e.target.value,
-                        }))
-                      }
-                      InputLabelProps={{ shrink: true }}
-                      required
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      fullWidth
-                      label="Due Date"
-                      type="date"
-                      value={editInvoiceForm.dueDate}
-                      onChange={(e) =>
-                        setEditInvoiceForm((prev) => ({
-                          ...prev,
-                          dueDate: e.target.value,
-                        }))
-                      }
-                      InputLabelProps={{ shrink: true }}
-                      required
-                    />
-                  </Grid>
-                  {editInvoiceForm.status === "paid" && (
-                    <Grid item xs={12}>
-                      <TextField
-                        fullWidth
-                        label="Paid Date"
-                        type="date"
-                        value={editInvoiceForm.paidDate}
-                        onChange={(e) =>
-                          setEditInvoiceForm((prev) => ({
-                            ...prev,
-                            paidDate: e.target.value,
-                          }))
-                        }
-                        InputLabelProps={{ shrink: true }}
-                        helperText="Leave empty to auto-set to today"
-                      />
-                    </Grid>
-                  )}
-                </Grid>
-              </DialogContent>
-              <DialogActions
-                sx={{ justifyContent: "space-between", px: 3, pb: 2 }}
-              >
-                {editInvoiceForm.status !== "paid" && (
-                  <Button
-                    variant="contained"
-                    color="success"
-                    onClick={markAsPaid}
-                    sx={primaryButton}
-                  >
-                    Mark as Paid
-                  </Button>
-                )}
-                <Box sx={{ ml: "auto" }}>
-                  <Button
-                    onClick={() => setShowEditInvoiceModal(false)}
-                    sx={{ ...outlinedButton, mr: 1 }}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    disabled={savingInvoiceEdit}
-                    sx={primaryButton}
-                  >
-                    {savingInvoiceEdit ? "Saving..." : "Save Changes"}
-                  </Button>
-                </Box>
-              </DialogActions>
-            </form>
-          </Dialog>
+          <EditInvoiceModal
+            showEditInvoiceModal={showEditInvoiceModal}
+            editInvoiceForm={editInvoiceForm}
+            setEditInvoiceForm={setEditInvoiceForm}
+            handleSaveInvoiceEdit={handleSaveInvoiceEdit}
+            setShowEditInvoiceModal={setShowEditInvoiceModal}
+            savingInvoiceEdit={savingInvoiceEdit}
+            markAsPaid={markAsPaid}
+          />
 
           {/* Notification Snackbar */}
           <Snackbar

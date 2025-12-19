@@ -552,25 +552,29 @@ export const filterStyles = {
     },
   },
   //Company filter Audio Recording //
-  companyFilter: {
-    selectSection: {
-      "& .MuiOutlinedInput-notchedOutline": {
-        //backgroundColor: colors.surface,
-        borderColor: colors.textMuted,
-        borderRadius: "3rem",
-      },
-      "&:hover .MuiOutlinedInput-notchedOutline": {
-        borderColor: colors.focusRing,
-      },
-      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-        borderColor: colors.focusRing,
-      },
+  formControlSection: {
+    width: "10rem",
+    "& .MuiSelect-select": {
+      display: "flex",
+      alignItems: "center",
     },
-    inputLabelSection: {
-      paddingTop: "0",
-      "&.Mui-focused.MuiInputLabel-animated": {
+    "& .MuiOutlinedInput-root": {
+      height: "2.6rem",
+    },
+    "& .MuiInputLabel-root": {
+      top: "-0.4rem",
+      "&.Mui-focused": {
         color: colors.focusRing,
       },
+      "&.MuiInputLabel-shrink": {
+        top: "0",
+      },
+    },
+    "& .MuiSelect-icon": {
+      color: `${colors.textIcon} !important`,
+    },
+    "& .MuiSelect-iconOutlined": {
+      color: `${colors.textIcon} !important`,
     },
   },
 };
@@ -585,10 +589,16 @@ export const modalCard = {
   dialogSection: {
     borderRadius: "1.5rem",
     overflow: "hidden",
-    width:'auto'
+    width: "auto",
   },
   //Box style
   boxModalStyle: {
+    boxManagementModal: {
+      display: "flex",
+      flexDirection: "row",
+      gap: 1.5,
+      margin: "0 0 1rem 0",
+    },
     boxUploadInvoiceModal: {
       display: "flex",
       flexDirection: "row",
@@ -629,7 +639,7 @@ export const modalCard = {
     },
   },
 
-    //Input Description style
+  //Input Description style
   inputDescriptionSection: {
     "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
       borderColor: colors.focusRing,
@@ -637,7 +647,7 @@ export const modalCard = {
     "& .MuiOutlinedInput-root": {
       backgroundColor: colors.surface,
       borderRadius: borderRadiusSection,
-      height: "5.5rem",
+      height: "6rem",
       "&.Mui-focused fieldset": {
         borderColor: colors.focusRing,
       },

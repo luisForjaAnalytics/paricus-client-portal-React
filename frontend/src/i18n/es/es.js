@@ -17,7 +17,7 @@ export default {
     usersManagement: "Administrador de Usuarios",
     roleManagement: "Administrador de Roles",
     logs: "Registros",
-    myProfile: "My Profile",
+    myProfile: "Mi Perfil",
   },
 
   // Tooltips de navegación (cuando el sidebar está colapsado)
@@ -60,7 +60,7 @@ export default {
   language: {
     label: "Idioma",
     es: "Español",
-    en: "Ingles",
+    en: "Inglés",
   },
   //Users Management
   userManagement: {
@@ -104,13 +104,15 @@ export default {
     databaseNotConfiguredMessage:
       "Las credenciales de SQL Server no están configuradas. Por favor configure los ajustes de MSSQL en el archivo .env.",
 
+    // Filters
+    filters: "Filtros",
+
     // Quick Filters
     quickFilter: {
       label: "Compañía:",
       clearCompanyFilter: "Limpiar Filtro de Compañía",
       company: "Compañía",
       allCompanies: "Todas las Compañías",
-      filters: "Filtros",
       audio: "Audio:",
       withAudio: "Con Audio",
       withoutAudio: "Sin Audio",
@@ -210,7 +212,8 @@ export default {
       editInvoice: "Editar Factura",
       download: "Descargar",
       delete: "Eliminar",
-       view: "Ver Factura"
+      view: "Ver Factura",
+      markAsPaid: "Marcar como Pagada",
     },
 
     // Modal de Enlace de Pago
@@ -535,6 +538,7 @@ export default {
       issuedDate: "Fecha de Emisión",
       dueDate: "Fecha de Vencimiento",
       paidDate: "Fecha de Pago",
+      paidDateHelper: "Fecha en que se recibió el pago (opcional)",
       description: "Descripción",
       descriptionOptional: "Descripción (Opcional)",
       descriptionPlaceholder: "Agregue notas o descripción para esta factura",
@@ -744,28 +748,5 @@ export default {
       loading: "Cargando...",
       clearAll: "Limpiar Todos los Filtros",
     },
-  },
-
-  // Permission
-  permission: {
-    admin_audio_recordings: "Administrar grabaciones de audio",
-    admin_clients: "Administrar clientes",
-    admin_dashboard_config: "Configurar panel de administración",
-    admin_invoices: "Administrar facturas",
-    admin_reports: "Administrar reportes",
-    admin_roles: "Administrar roles",
-    admin_users: "Administrar usuarios",
-    create_kb_articles: "Crear artículos de la base de conocimiento",
-    download_audio_files: "Descargar archivos de audio",
-    download_invoices: "Descargar facturas",
-    download_reports: "Descargar reportes",
-    edit_kb_articles: "Editar artículos de la base de conocimiento",
-    pay_invoices: "Pagar facturas",
-    view_dashboard: "Ver panel",
-    view_financials: "Ver información financiera",
-    view_interactions: "Ver interacciones",
-    view_invoices: "Ver facturas",
-    view_knowledge_base: "Ver base de conocimiento",
-    view_reporting: "Ver reportes",
   },
 };

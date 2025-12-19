@@ -2,40 +2,17 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from "react"
 import {
   Box,
   Button,
-  Card,
-  CardContent,
-  Chip,
   Alert,
-  FormControl,
-  Grid,
   IconButton,
-  InputLabel,
-  MenuItem,
   Paper,
-  Select,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
   Typography,
-  CircularProgress,
-  Pagination,
   Slider,
   Tooltip,
-  ButtonGroup,
   Collapse,
-  LinearProgress,
   Divider,
 } from "@mui/material";
 import {
-  Search as SearchIcon,
-  Clear as ClearIcon,
   PlayArrow as PlayArrowIcon,
-  Stop as StopIcon,
-  Download as DownloadIcon,
   Close as CloseIcon,
   Pause as PauseIcon,
   FastRewind as FastRewindIcon,
@@ -55,11 +32,10 @@ import {
 import { useCreateLogMutation } from "../../store/api/logsApi";
 import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next"; // ADDED: i18n support
-import { QuickFilters } from "./components/QuickFilters";
 import { QuickFiltersMobile } from "./components/QuickFilters/QuickFiltersMobile.jsx";
-import { AdvancedFilters } from "./components/AdvancedFilters/AdvancedFilters.jsx";
 import { TableView } from "./components/TableView/TableView.jsx";
 import { typography } from "../../common/styles/styles.js";
+import { FilterButton } from "./components/FilterButton/FilterButton.jsx";
 
 export const AudioRecordingsView = () => {
   const { t } = useTranslation(); // ADDED: Translation hook
@@ -166,6 +142,7 @@ export const AudioRecordingsView = () => {
   const [dbConfigured, setDbConfigured] = useState(true);
   const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
   const [loadingAudioUrl, setLoadingAudioUrl] = useState(null);
+  const [isOpen, setIsOpen] = useState(false);
   const audioUrlCache = useRef(new Map());
   const audioPlayer = useRef(null);
 
@@ -610,6 +587,23 @@ export const AudioRecordingsView = () => {
         </Alert>
       )}
 
+      {/* Filter Button */}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "flex-end",
+          alignItems: "center",
+            marginBottom: 1,
+            marginRight: 2,
+        }}
+      >
+        <FilterButton
+          folderName="audioRecordings.filters"
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+        />
+      </Box>
+
       {/* Audio Recordings Table */}
       <TableView
         dataViewInfo={recordings}
@@ -634,6 +628,8 @@ export const AudioRecordingsView = () => {
         callTypes={callTypes}
         setCompanyFilter={setCompanyFilter}
         setAudioFilter={setAudioFilter}
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
       />
 
       {/* Mobile-Friendly Collapsible Table */}

@@ -193,7 +193,7 @@ export const PermissionsModal = ({
       maxWidth="md"
       slotProps={{
         paper: {
-          sx: modalCard?.dialogueSection
+          sx: modalCard?.dialogSection
         },
       }}
     >

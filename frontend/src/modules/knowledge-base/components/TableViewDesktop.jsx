@@ -1,11 +1,6 @@
 import { useMemo, useState } from "react";
 import { DataGrid, Toolbar } from "@mui/x-data-grid";
-import {
-  Box,
-  IconButton,
-  Typography,
-  Tooltip,
-} from "@mui/material";
+import { Box, IconButton, Typography, Tooltip } from "@mui/material";
 import {
   Edit as EditIcon,
   Visibility as VisibilityIcon,
@@ -142,11 +137,15 @@ export const TableView = () => {
 
     return data.filter((article) => {
       const matchesName = filters.articleName
-        ? article.article_name?.toLowerCase().includes(filters.articleName.toLowerCase())
+        ? article.article_name
+            ?.toLowerCase()
+            .includes(filters.articleName.toLowerCase())
         : true;
 
       const matchesSynopsis = filters.synopsis
-        ? article.article_synopsis?.toLowerCase().includes(filters.synopsis.toLowerCase())
+        ? article.article_synopsis
+            ?.toLowerCase()
+            .includes(filters.synopsis.toLowerCase())
         : true;
 
       const matchesDate = filters.updatedAt
@@ -196,8 +195,7 @@ export const TableView = () => {
             sx={{
               padding: "1rem 2rem",
               display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
+              justifyContent: "left",
               backgroundColor: colors.subSectionBackground,
               borderBottom: `1px solid ${colors.subSectionBorder}`,
             }}

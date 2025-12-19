@@ -18,6 +18,10 @@ import { useTranslation } from "react-i18next";
 import {
   primaryButton,
   outlinedButton,
+  modalCard,
+  titlesTypography,
+  colors,
+  primaryIconButton,
 } from "../../../../common/styles/styles";
 
 export const AddNewClientModal = ({
@@ -34,6 +38,7 @@ export const AddNewClientModal = ({
   confirmDeactivation,
   snackbar,
   setClientForm,
+  setShowConfirmDialog
 }) => {
   const { t } = useTranslation();
   return (
@@ -42,26 +47,33 @@ export const AddNewClientModal = ({
       <Dialog
         open={showCreateDialog}
         onClose={handleCloseDialog}
-        maxWidth="sm"
-        fullWidth
+        slotProps={{
+          paper: {
+            sx: modalCard?.dialogSection,
+          },
+        }}
       >
         <DialogTitle>
           <Box
             sx={{
               display: "flex",
-              justifyContent: "space-between",
+              justifyContent: "center",
               alignItems: "center",
             }}
           >
-            <Typography variant="h6">
+            <Typography
+              sx={{
+                ...titlesTypography?.primaryTitle,
+                textAlign: "center",
+              }}
+            >
               {editingClient ? t("clients.editClient") : t("clients.addClient")}
             </Typography>
-            <IconButton onClick={handleCloseDialog} size="small">
-              <CloseIcon />
-            </IconButton>
           </Box>
         </DialogTitle>
+
         <DialogContent dividers>
+          
           <TextField
             label={t("clients.form.clientName")}
             required
@@ -70,7 +82,7 @@ export const AddNewClientModal = ({
             onChange={(e) =>
               setClientForm({ ...clientForm, name: e.target.value })
             }
-            sx={{ mb: 3 }}
+            sx={modalCard?.inputSection}
           />
           <FormControlLabel
             control={
@@ -79,10 +91,15 @@ export const AddNewClientModal = ({
                 onChange={(e) =>
                   setClientForm({ ...clientForm, isProspect: e.target.checked })
                 }
+                sx={{
+                  "&.Mui-checked": {
+                    color: colors.primary,
+                  },
+                }}
               />
             }
             label={t("clients.form.isProspect")}
-            sx={{ mb: 2, display: "block" }}
+            sx={{ margin: "1rem 0 0 0rem", display: "block" }}
           />
           {editingClient && (
             <FormControlLabel
@@ -92,24 +109,34 @@ export const AddNewClientModal = ({
                   onChange={(e) =>
                     setClientForm({ ...clientForm, isActive: e.target.checked })
                   }
+                  sx={{
+                    "&.Mui-checked": {
+                      color: colors.primary,
+                    },
+                  }}
                 />
               }
               label={t("clients.form.active")}
-              sx={{ display: "block" }}
+              sx={{ margin: "1rem 0 0 0rem", display: "block" }}
             />
           )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog} sx={outlinedButton}>
-            {t("common.cancel")}
-          </Button>
+        <DialogActions
+          sx={{
+            margin: "0 0 0 0",
+            justifyContent: "center",
+          }}
+        >
           <Button
             variant="contained"
             onClick={handleSave}
             disabled={isSaving || !isFormValid()}
-            sx={primaryButton}
+            sx={{...primaryIconButton, width:'20%'}}
           >
             {isSaving ? t("common.saving") : t("common.save")}
+          </Button>
+          <Button onClick={handleCloseDialog} sx={outlinedButton}>
+            {t("common.cancel")}
           </Button>
         </DialogActions>
       </Dialog>

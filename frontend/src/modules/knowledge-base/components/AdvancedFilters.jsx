@@ -9,6 +9,7 @@ import {
 import {
   Search as SearchIcon,
   FilterListOff as FilterListOffIcon,
+  ForkLeft,
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import {
@@ -16,6 +17,11 @@ import {
   colors,
   filterStyles,
 } from "../../../common/styles/styles";
+import {
+  useGetArticleSearchQuery,
+  useLazyGetArticleSearchQuery,
+} from "../../../store/api/articlesSearchApi";
+import { useState } from "react";
 
 export const AdvancedFilters = ({
   filters,
@@ -26,6 +32,20 @@ export const AdvancedFilters = ({
   clearFilters,
 }) => {
   const { t } = useTranslation();
+  //const [searchData, setSearchData] = useState("");
+  // const { data, isLoading, isFetching, isError, error } =
+  //   useGetArticleSearchQuery("Call Center");
+  const [getArticleSearch] = useLazyGetArticleSearchQuery();
+
+  const handleEditClick = async (articleId) => {
+    try {
+      const data = await getArticleSearch("Lifeline Plan").unwrap();
+      console.log(data);
+      //navigate(`/app/knowledge-base/editorView/${articleId}`);
+    } catch (error) {
+      console.error("Error fetching article:", error);
+    }
+  };
 
   return (
     <Box
@@ -36,19 +56,19 @@ export const AdvancedFilters = ({
         gap: 2,
       }}
     >
-
-            <Box>
+      <Box>
         <TextField
           fullWidth
           label={t("knowledgeBase.filters.search")}
           placeholder={t("knowledgeBase.filters.search")}
           value={filters.articleName || ""}
-          onChange={(e) =>
-            setFilters((prev) => ({
-              ...prev,
-              articleName: e.target.value,
-            }))
-          }
+          // onChange={(e) =>
+          //   setFilters((prev) => ({
+          //     ...prev,
+          //     articleName: e.target.value,
+          //   }))
+          // }
+          onChange={(e) => handleEditClick(e.target.value)}
           sx={filterStyles?.inputFilter}
         />
       </Box>

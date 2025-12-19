@@ -17,11 +17,6 @@ import {
   TablePagination,
   Collapse,
   Tooltip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
 } from "@mui/material";
 import {
   Folder as FolderIcon,
@@ -33,10 +28,10 @@ import {
   Upload as UploadIcon,
   Download as DownloadIcon,
   Delete as DeleteIcon,
-  Close as CloseIcon,
   Description as DescriptionIcon,
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
+import { UploadReportModal } from "./UploadReportModal";
 import {
   card,
   colors,
@@ -167,6 +162,7 @@ export const ClientFolders = ({
           >
             {t("reportsManagement.clientFolders.title")}
           </Typography>
+
           <Stack direction="row" spacing={2}>
             <Button
               variant="contained"
@@ -223,7 +219,9 @@ export const ClientFolders = ({
         >
           {t("reportsManagement.clientFolders.title")}
         </Typography>
-        <Stack direction="row" spacing={2}>
+
+        {/* Acction bottons */}
+        {/* <Stack direction="row" spacing={2}>
           <Button
             variant="contained"
             color="success"
@@ -246,7 +244,7 @@ export const ClientFolders = ({
               ? t("reportsManagement.clientFolders.loading")
               : t("reportsManagement.clientFolders.refreshFolders")}
           </Button>
-        </Stack>
+        </Stack> */}
       </Box>
 
       <TableContainer
@@ -393,21 +391,11 @@ export const ClientFolders = ({
                           <Box
                             sx={{
                               display: "flex",
-                              justifyContent: "space-between",
+                              justifyContent: "flex-end",
                               alignItems: "center",
                               mb: 2,
                             }}
                           >
-                            <Typography
-                              variant="h6"
-                              sx={{
-                                fontWeight: typography.fontWeight.semibold,
-                                fontFamily: typography.fontFamily,
-                                marginLeft: "0.5rem",
-                              }}
-                            >
-                              {t("reportsManagement.clientFolders.reportsFor")}
-                            </Typography>
                             <Stack direction="row" spacing={1}>
                               <Button
                                 variant="contained"
@@ -629,114 +617,17 @@ export const ClientFolders = ({
       />
 
       {/* Upload Modal */}
-      <Dialog
-        open={!!showUploadModal}
-        onClose={() => setShowUploadModal(null)}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <Typography variant="h6">
-              {t("reportsManagement.upload.title")}
-            </Typography>
-            <IconButton onClick={() => setShowUploadModal(null)} size="small">
-              <CloseIcon />
-            </IconButton>
-          </Box>
-        </DialogTitle>
-        <DialogContent dividers>
-          <Stack spacing={3}>
-            <TextField
-              label={t("reportsManagement.upload.clientFolder")}
-              value={selectedFolderForUpload || ""}
-              slotProps={{ input: { readOnly: true } }}
-              fullWidth
-              disabled
-            />
-
-            <TextField
-              label={t("reportsManagement.upload.reportName")}
-              placeholder={t("reportsManagement.upload.reportNamePlaceholder")}
-              value={uploadForm.reportName}
-              onChange={(e) =>
-                setUploadForm({ ...uploadForm, reportName: e.target.value })
-              }
-              fullWidth
-            />
-
-            <TextField
-              label={t("reportsManagement.upload.description")}
-              placeholder={t("reportsManagement.upload.descriptionPlaceholder")}
-              value={uploadForm.description}
-              onChange={(e) =>
-                setUploadForm({ ...uploadForm, description: e.target.value })
-              }
-              multiline
-              rows={3}
-              fullWidth
-            />
-
-            <Box>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".pdf"
-                onChange={handleFileSelect}
-                style={{ display: "none" }}
-                id="file-upload"
-              />
-              <label htmlFor="file-upload">
-                <Button
-                  variant="outlined"
-                  component="span"
-                  startIcon={<UploadIcon />}
-                  fullWidth
-                  sx={outlinedIconButton}
-                >
-                  {uploadForm.file
-                    ? uploadForm.file.name
-                    : t("reportsManagement.upload.chooseFile")}
-                </Button>
-              </label>
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                sx={{ mt: 1, display: "block" }}
-              >
-                {t("reportsManagement.upload.fileRestriction")}
-              </Typography>
-            </Box>
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => setShowUploadModal(null)}
-            sx={outlinedIconButton}
-          >
-            {t("reportsManagement.upload.cancel")}
-          </Button>
-          <Button
-            variant="contained"
-            onClick={handleUploadReport}
-            disabled={uploading || !uploadForm.file}
-            startIcon={
-              uploading ? <CircularProgress size={20} /> : <UploadIcon />
-            }
-            sx={primaryIconButton}
-          >
-            {uploading
-              ? t("reportsManagement.upload.uploading")
-              : t("reportsManagement.upload.upload")}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <UploadReportModal
+        showUploadModal={showUploadModal}
+        setShowUploadModal={setShowUploadModal}
+        uploadForm={uploadForm}
+        setUploadForm={setUploadForm}
+        handleFileSelect={handleFileSelect}
+        handleUploadReport={handleUploadReport}
+        uploading={uploading}
+        fileInputRef={fileInputRef}
+        selectedFolderForUpload={selectedFolderForUpload}
+      />
     </Box>
   );
 };

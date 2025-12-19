@@ -428,22 +428,11 @@ export const ClientBreakdownDesktop = ({
                         <Box
                           sx={{
                             display: "flex",
-                            justifyContent: "space-between",
+                            justifyContent: "flex-end",
                             alignItems: "center",
                             mb: 2,
                           }}
                         >
-                          <Typography
-                            variant="h6"
-                            sx={{
-                              fontWeight: typography.fontWeight.semibold,
-                              fontFamily: typography.fontFamily,
-                              marginLeft: "0.5rem",
-                            }}
-                          >
-                            {/* {client.folderDisplay}{" "} */}
-                            {t("financials.clientBreakdown.invoicesTitle")}
-                          </Typography>
                           {isAdmin && (
                             <UploadInvoiceButton
                               selectedFolder={client.folder}

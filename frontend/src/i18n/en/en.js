@@ -105,13 +105,15 @@ export default {
     databaseNotConfiguredMessage:
       "SQL Server credentials are not set. Please configure MSSQL settings in the .env file.",
 
+    // Filters
+    filters: "Filters",
+
     // Quick Filters
     quickFilter: {
       label: "Company Filter:",
       clearCompanyFilter: "Clear Company Filter",
       company: "Company",
       allCompanies: "All Companies",
-      filters: "Filters",
       audio: "Audio:",
       withAudio: "With Audio",
       withoutAudio: "Without Audio",
@@ -211,7 +213,8 @@ export default {
       editInvoice: "Edit Invoice",
       download: "Download",
       delete: "Delete",
-      view: "View Invoice"
+      view: "View Invoice",
+      markAsPaid: "Mark as Paid",
     },
 
     // Payment Link Modal
@@ -535,6 +538,7 @@ export default {
       issuedDate: "Issued Date",
       dueDate: "Due Date",
       paidDate: "Paid Date",
+      paidDateHelper: "Date when payment was received (optional)",
       description: "Description",
       descriptionOptional: "Description (Optional)",
       descriptionPlaceholder: "Add notes or description for this invoice",
@@ -742,28 +746,5 @@ export default {
       loading: "Loading...",
       clearAll: "Clear All Filters",
     },
-  },
-
-  // Permission
-  permission: {
-    admin_audio_recordings: "Admin audio recordings",
-    admin_clients: "Admin clients",
-    admin_dashboard_config: "Admin dashboard configuration",
-    admin_invoices: "Admin invoices",
-    admin_reports: "Admin reports",
-    admin_roles: "Admin roles",
-    admin_users: "Admin users",
-    create_kb_articles: "Create knowledge base articles",
-    download_audio_files: "Download audio files",
-    download_invoices: "Download invoices",
-    download_reports: "Download reports",
-    edit_kb_articles: "Edit knowledge base articles",
-    pay_invoices: "Pay invoices",
-    view_dashboard: "View dashboard",
-    view_financials: "View financials",
-    view_interactions: "View interactions",
-    view_invoices: "View invoices",
-    view_knowledge_base: "View knowledge base",
-    view_reporting: "View reporting",
   },
 };

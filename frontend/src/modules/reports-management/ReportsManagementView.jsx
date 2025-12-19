@@ -22,6 +22,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { Add as AddIcon, Close as CloseIcon } from "@mui/icons-material";
 import { ClientFolders } from "./components/ClientFolders";
+import { ManageAccessModal } from "./components/ManageAccessModal";
 import {
   useGetClientFoldersQuery,
   useGetClientReportsQuery,
@@ -432,164 +433,19 @@ export const ReportsManagementView = () => {
       </Box>
 
       {/* Folder Access Management Modal */}
-      <Dialog
-        open={showFolderAccessModal}
-        onClose={() => setShowFolderAccessModal(false)}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <Typography variant="h6">{t("reportsManagement.folderAccess.title")}</Typography>
-            <IconButton
-              onClick={() => setShowFolderAccessModal(false)}
-              size="small"
-            >
-              <CloseIcon />
-            </IconButton>
-          </Box>
-        </DialogTitle>
-        <DialogContent dividers>
-          {/* Grant Access Form */}
-          <Paper variant="outlined" sx={{ p: 3, mb: 3, bgcolor: "grey.50" }}>
-            <Typography variant="subtitle1" fontWeight="600" gutterBottom>
-              {t("reportsManagement.folderAccess.grantTitle")}
-            </Typography>
-            <Grid container spacing={2} alignItems="flex-end">
-              <Grid item xs={12} md={5}>
-                <FormControl fullWidth>
-                  <InputLabel>{t("reportsManagement.folderAccess.client")}</InputLabel>
-                  <Select
-                    value={accessForm.clientId}
-                    onChange={(e) =>
-                      setAccessForm({ ...accessForm, clientId: e.target.value })
-                    }
-                    label={t("reportsManagement.folderAccess.client")}
-                  >
-                    <MenuItem value="">{t("reportsManagement.folderAccess.selectClient")}</MenuItem>
-                    {clients.map((client) => (
-                      <MenuItem key={client.id} value={client.id}>
-                        {client.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} md={5}>
-                <FormControl fullWidth>
-                  <InputLabel>{t("reportsManagement.folderAccess.folder")}</InputLabel>
-                  <Select
-                    value={accessForm.folderName}
-                    onChange={(e) =>
-                      setAccessForm({
-                        ...accessForm,
-                        folderName: e.target.value,
-                      })
-                    }
-                    label={t("reportsManagement.folderAccess.folder")}
-                  >
-                    <MenuItem value="">{t("reportsManagement.folderAccess.selectFolder")}</MenuItem>
-                    {clientFolders.map((folder) => (
-                      <MenuItem key={folder} value={folder}>
-                        {folder}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} md={2}>
-                <Button
-                  variant="contained"
-                  onClick={handleGrantFolderAccess}
-                  disabled={
-                    !accessForm.clientId ||
-                    !accessForm.folderName ||
-                    grantingAccess
-                  }
-                  fullWidth
-                  startIcon={
-                    grantingAccess ? (
-                      <CircularProgress size={20} />
-                    ) : (
-                      <AddIcon />
-                    )
-                  }
-                  sx={primaryIconButton}
-                >
-                  {grantingAccess ? t("reportsManagement.folderAccess.granting") : t("reportsManagement.folderAccess.grantButton")}
-                </Button>
-              </Grid>
-            </Grid>
-          </Paper>
-
-          {/* Current Access List */}
-          <Typography variant="subtitle1" fontWeight="600" gutterBottom>
-            {t("reportsManagement.folderAccess.currentTitle")}
-          </Typography>
-
-          {loadingAccess ? (
-            <Box sx={{ textAlign: "center", py: 4 }}>
-              <CircularProgress />
-              <Typography sx={{ mt: 2 }}>
-                {t("reportsManagement.folderAccess.loadingPermissions")}
-              </Typography>
-            </Box>
-          ) : folderAccess.length === 0 ? (
-            <Box sx={{ textAlign: "center", py: 4 }}>
-              <Typography color="text.secondary">
-                {t("reportsManagement.folderAccess.noPermissions")}
-              </Typography>
-            </Box>
-          ) : (
-            <Stack spacing={2}>
-              {folderAccess.map((access) => (
-                <Paper
-                  key={`${access.clientId}-${access.folderName}`}
-                  variant="outlined"
-                  sx={{ p: 2 }}
-                >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Box>
-                      <Typography variant="subtitle2" fontWeight="600">
-                        {access.client.name}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {t("reportsManagement.folderAccess.accessTo")} {access.folderName}
-                      </Typography>
-                    </Box>
-                    <Button
-                      variant="outlined"
-                      color="error"
-                      size="small"
-                      onClick={() =>
-                        handleRevokeFolderAccess(
-                          access.clientId,
-                          access.folderName
-                        )
-                      }
-                      sx={outlinedButton}
-                    >
-                      {t("reportsManagement.folderAccess.revokeButton")}
-                    </Button>
-                  </Box>
-                </Paper>
-              ))}
-            </Stack>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* <ManageAccessModal
+        showFolderAccessModal={showFolderAccessModal}
+        setShowFolderAccessModal={setShowFolderAccessModal}
+        accessForm={accessForm}
+        setAccessForm={setAccessForm}
+        clients={clients}
+        clientFolders={clientFolders}
+        handleGrantFolderAccess={handleGrantFolderAccess}
+        grantingAccess={grantingAccess}
+        loadingAccess={loadingAccess}
+        folderAccess={folderAccess}
+        handleRevokeFolderAccess={handleRevokeFolderAccess}
+      /> */}
 
       {/* Notification Snackbar */}
       <Snackbar

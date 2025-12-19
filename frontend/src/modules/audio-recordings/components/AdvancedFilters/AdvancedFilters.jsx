@@ -22,6 +22,7 @@ import {
   filterStyles,
   outlinedButton,
 } from "../../../../common/styles/styles";
+import { useSelector } from "react-redux";
 
 export const AdvancedFilters = ({
   filters,
@@ -32,7 +33,14 @@ export const AdvancedFilters = ({
   loading,
   clearFilters,
   callTypes,
+  setCompanyFilter,
+  companies,
 }) => {
+  // Auth store
+  const authUser = useSelector((state) => state.auth.user);
+
+  // Computed values
+  const isBPOAdmin = authUser?.permissions?.includes("admin_invoices");
   const { t } = useTranslation();
 
   return (
@@ -40,7 +48,7 @@ export const AdvancedFilters = ({
       sx={{
         display: "flex",
         flexDirection: "row",
-        margin: "0.5rem 0 -0.5rem 0",
+        margin: "0.5rem 0.5rem -0.5rem 0.5rem",
         gap: 2,
       }}
     >
@@ -62,33 +70,35 @@ export const AdvancedFilters = ({
         />
       </Box>
       <Box>
-        <FormControl
-          sx={{
-            width: "10rem",
-            "& .MuiSelect-select": {
-              display: "flex",
-              alignItems: "center",
-            },
-            "& .MuiOutlinedInput-root": {
-              height: "2.6rem",
-            },
-            "& .MuiInputLabel-root": {
-              top: "-0.4rem",
-              "&.Mui-focused": {
-                color: colors.focusRing,
-              },
-              "&.MuiInputLabel-shrink": {
-                top: "0",
-              },
-            },
-            "& .MuiSelect-icon": {
-              color: `${colors.textIcon} !important`,
-            },
-            "& .MuiSelect-iconOutlined": {
-              color: `${colors.textIcon} !important`,
-            },
-          }}
-        >
+        {isBPOAdmin && (
+          <FormControl sx={filterStyles?.formControlSection}>
+            <InputLabel
+              id="company-filter-label"
+              sx={filterStyles?.multiOptionFilter?.inputLabelSection}
+            >
+              {t("audioRecordings.quickFilter.company")}
+            </InputLabel>
+            <Select
+              labelId="company-filter-label"
+              value={filters.company || ""}
+              onChange={(e) => setCompanyFilter(e.target.value || null)}
+              label={t("audioRecordings.quickFilter.company")}
+              sx={filterStyles?.multiOptionFilter?.selectSection}
+            >
+              <MenuItem value="">
+                <em>{t("audioRecordings.quickFilter.allCompanies")}</em>
+              </MenuItem>
+              {companies.map((company, index) => (
+                <MenuItem key={index} value={company.name}>
+                  {company.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        )}
+      </Box>
+      <Box>
+        <FormControl sx={filterStyles?.formControlSection}>
           <InputLabel
             id="call-type-label"
             sx={filterStyles?.multiOptionFilter?.inputLabelSection}

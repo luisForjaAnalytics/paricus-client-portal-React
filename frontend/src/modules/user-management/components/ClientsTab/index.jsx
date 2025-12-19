@@ -181,6 +181,7 @@ export const ClientsTab = () => {
     handleCloseDialog,
     handleSave,
     setClientForm,
+    setShowConfirmDialog,
     onAddClick: () => setShowCreateDialog(true),
   };
 

@@ -1,14 +1,8 @@
 import * as React from "react";
 import PropTypes from "prop-types";
-import { DataGrid, Toolbar } from "@mui/x-data-grid";
+import { DataGrid} from "@mui/x-data-grid";
 import Tooltip from "@mui/material/Tooltip";
-import {
-  Box,
-  IconButton,
-  CircularProgress,
-  Chip,
-  Typography,
-} from "@mui/material";
+import { Box, IconButton, CircularProgress, Chip } from "@mui/material";
 import {
   PlayArrow as PlayArrowIcon,
   Stop as StopIcon,
@@ -19,14 +13,7 @@ import SupportAgentIcon from "@mui/icons-material/SupportAgent";
 import { useTranslation } from "react-i18next";
 import { AdvancedFilters } from "../AdvancedFilters/AdvancedFilters";
 import { companies } from "../AdvancedFilters/company.js";
-import {
-  colors,
-  typography,
-  card,
-  titlesTypography,
-} from "../../../../common/styles/styles";
-import { CompanyFilter } from "../CompanyFilter/CompanyFilter.jsx";
-import { useSelector } from "react-redux";
+import { colors, typography, card } from "../../../../common/styles/styles";
 
 // Function to create columns with audio playback handlers
 const createColumns = (
@@ -256,103 +243,47 @@ export const TableView = ({
   callTypes,
   setCompanyFilter,
   setAudioFilter,
+  isOpen,
+  setIsOpen,
 }) => {
   const { t } = useTranslation();
-
-  // State for advanced filters visibility
-  const [isOpen, setIsOpen] = React.useState(false);
 
   // Wrapper component for AdvancedFilters to work as DataGrid toolbar
   // Memoized to prevent unnecessary re-renders
   const AdvancedFiltersToolbar = React.useMemo(() => {
     return () => {
-      // Auth store
-      const authUser = useSelector((state) => state.auth.user);
-
-      // Computed values
-      const isBPOAdmin = authUser?.permissions?.includes("admin_invoices");
+      if (!isOpen) return null;
 
       return (
-        <>
-          <Toolbar
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              width: "100%",
-              marginTop: "0.6rem",
-            }}
-          >
-            <Box
-              sx={{
-                marginLeft: 6,
-                marginBottom: 2,
-              }}
-            >
-              <Typography
-                sx={{
-                  ...titlesTypography.primaryTitle,
-                  marginBottom: "-0.2rem",
-                }}
-              >
-                {t("audioRecordings.results.title")}
-              </Typography>
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                sx={{ lineHeight: 1 }}
-              >
-                {totalCount} {t("audioRecordings.results.totalRecordings")}
-              </Typography>
-            </Box>
-
-            {isBPOAdmin && (
-              <CompanyFilter
-                setCompanyFilter={setCompanyFilter}
-                filters={filters}
-                companies={companies}
-                isOpen={isOpen}
-                setIsOpen={setIsOpen}
-              />
-            )}
-          </Toolbar>
-
-          {isOpen && (
-            <Box
-              sx={{
-                padding: "0.2rem 0 1rem 0",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                backgroundColor: colors.subSectionBackground,
-                borderBottom: `1px solid ${colors.subSectionBorder}`,
-                //borderTop: `0.5px solid ${colors.subSectionBorder}`,
-              }}
-            >
-              <AdvancedFilters
-                filters={filters}
-                refetch={refetch}
-                setFilters={setFilters}
-                setLoadCallTypes={setLoadCallTypes}
-                isDebouncing={isDebouncing}
-                loading={loading}
-                clearFilters={clearFilters}
-                callTypes={callTypes}
-                setCompanyFilter={setCompanyFilter}
-                setAudioFilter={setAudioFilter}
-              />
-            </Box>
-          )}
-        </>
+        <Box
+          sx={{
+            padding: "0.2rem 0 1rem 0",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: colors.subSectionBackground,
+            borderBottom: `1px solid ${colors.subSectionBorder}`,
+          }}
+        >
+          <AdvancedFilters
+            filters={filters}
+            refetch={refetch}
+            setFilters={setFilters}
+            setLoadCallTypes={setLoadCallTypes}
+            isDebouncing={isDebouncing}
+            loading={loading}
+            clearFilters={clearFilters}
+            callTypes={callTypes}
+            setCompanyFilter={setCompanyFilter}
+            setAudioFilter={setAudioFilter}
+            companies={companies}
+          />
+        </Box>
       );
     };
   }, [
-    t,
-    totalCount,
-    setCompanyFilter,
     filters,
     isOpen,
-    setIsOpen,
     refetch,
     setFilters,
     setLoadCallTypes,
@@ -437,7 +368,7 @@ export const TableView = ({
         //disableRowSelectionOnClick
         sx={{
           ...card,
-          padding: "1rem 0 0 0",
+          padding: "0 0 0 0",
           border: `1px solid ${colors.border}`, // border-gray-200
           // Header styles - bg-gray-50
           "& .MuiDataGrid-columnHeaders": {
@@ -549,6 +480,8 @@ TableView.propTypes = {
   callTypes: PropTypes.arrayOf(PropTypes.string).isRequired,
   setCompanyFilter: PropTypes.func.isRequired,
   setAudioFilter: PropTypes.func.isRequired,
+  isOpen: PropTypes.bool.isRequired,
+  setIsOpen: PropTypes.func.isRequired,
 };
 
 TableView.defaultProps = {

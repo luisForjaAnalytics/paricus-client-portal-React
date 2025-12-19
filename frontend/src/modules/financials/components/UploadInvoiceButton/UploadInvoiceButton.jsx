@@ -170,11 +170,10 @@ export const UploadInvoiceButton = ({ selectedFolder, onSuccess, onError }) => {
       <Dialog
         open={showUploadModal}
         onClose={() => !ocrLoading && handleCancelModal()}
-        //maxWidth="md"
         fullWidth
         slotProps={{
           paper: {
-            sx: modalCard.dialogSection,
+            sx: modalCard?.dialogSection,
           },
         }}
       >
@@ -229,7 +228,7 @@ export const UploadInvoiceButton = ({ selectedFolder, onSuccess, onError }) => {
                   component="label"
                   fullWidth
                   disabled={ocrLoading}
-                  sx={{ ...outlinedIconButton, height: "auto", width: "52%" }}
+                  sx={{ ...outlinedIconButton, height: "auto", width: "54%" }}
                   startIcon={ocrLoading ? <CircularProgress size={20} /> : null}
                 >
                   {ocrLoading
