@@ -15,12 +15,10 @@ import {
   FilterListOff as FilterListOffIcon,
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
-import { QuickFilters } from "../QuickFilters";
 import {
   buttonIconNoLabel,
   colors,
   filterStyles,
-  outlinedButton,
 } from "../../../../common/styles/styles";
 import { useSelector } from "react-redux";
 

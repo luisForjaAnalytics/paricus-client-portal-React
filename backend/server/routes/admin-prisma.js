@@ -269,15 +269,21 @@ router.get('/users', requireAdminUsers, validateClientQuery, async (req, res) =>
       users: users.map(user => ({
         id: user.id,
         email: user.email,
-        first_name: user.firstName,
-        last_name: user.lastName,
-        is_active: user.isActive,
-        client_id: user.clientId,
-        client_name: user.client?.name || 'Paricus (Super Admin)',
-        role_id: user.roleId,
-        role_name: user.role?.roleName,
-        created_at: user.createdAt,
-        last_login: user.lastLogin
+        firstName: user.firstName,
+        lastName: user.lastName,
+        isActive: user.isActive,
+        clientId: user.clientId,
+        client: user.client ? {
+          id: user.client.id,
+          name: user.client.name
+        } : null,
+        roleId: user.roleId,
+        role: user.role ? {
+          id: user.role.id,
+          roleName: user.role.roleName
+        } : null,
+        createdAt: user.createdAt,
+        lastLogin: user.lastLogin
       }))
     });
   } catch (error) {

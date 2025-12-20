@@ -2,9 +2,11 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+
+// Import environment configuration
+import config from './config/environment.js';
 
 // Import routes
 import authRoutes from './routes/auth-prisma.js';
@@ -21,13 +23,11 @@ import { validateCSRFToken, getCSRFToken } from './middleware/csrf.js';
 // Import database
 import { initializePrisma, disconnectPrisma } from './database/prisma.js';
 
-dotenv.config();
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = config.port;
 
 // CORS Configuration - Must be FIRST
 const corsOptions = {
@@ -35,17 +35,14 @@ const corsOptions = {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
 
-    const allowedOrigins = [
-      'http://localhost:5174',
-      'http://localhost:5173',
-      'http://127.0.0.1:5174',
-      'http://127.0.0.1:5173'
-    ];
+    // Obtener orígenes permitidos desde la configuración
+    const allowedOrigins = config.clientUrl.split(',').map(url => url.trim());
 
-    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
+    if (allowedOrigins.indexOf(origin) !== -1 || config.isDevelopment) {
       callback(null, true);
     } else {
       console.log('❌ CORS blocked origin:', origin);
+      console.log('   Allowed origins:', allowedOrigins);
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -67,7 +64,7 @@ app.use((req, res, next) => {
 
 // Enhanced security middleware
 app.use(helmet({
-  contentSecurityPolicy: process.env.NODE_ENV === 'production' ? {
+  contentSecurityPolicy: config.isProduction ? {
     directives: {
       defaultSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
@@ -83,7 +80,7 @@ app.use(helmet({
   } : false, // Disable CSP in development to avoid CORS issues
   crossOriginEmbedderPolicy: false, // Allow embedding for development
   crossOriginResourcePolicy: { policy: "cross-origin" },
-  hsts: process.env.NODE_ENV === 'production' ? {
+  hsts: config.isProduction ? {
     maxAge: 31536000,
     includeSubDomains: true,
     preload: true
@@ -94,7 +91,7 @@ app.use(helmet({
 }));
 
 // Additional security headers (only in production to avoid CORS conflicts)
-if (process.env.NODE_ENV === 'production') {
+if (config.isProduction) {
   app.use((req, res, next) => {
     // Prevent clickjacking
     res.setHeader('X-Frame-Options', 'DENY');
@@ -132,15 +129,15 @@ const createRateLimiter = (windowMs, max, message, skipSuccessfulRequests = fals
 
 // General API rate limiting - disabled for development
 const generalLimiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 900000, // 15 minutes
-  max: parseInt(process.env.RATE_LIMIT_MAX) || 10000, // Very high limit
+  windowMs: config.security.rateLimitWindowMs,
+  max: config.security.rateLimitMax,
   message: { error: 'Too many requests from this IP, please try again later.' },
   standardHeaders: true,
   legacyHeaders: false,
   handler: (req, res) => {
     res.status(429).json({
       error: 'Too many requests from this IP, please try again later.',
-      retryAfter: Math.round((parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 900000) / 1000)
+      retryAfter: Math.round(config.security.rateLimitWindowMs / 1000)
     });
   }
 });
@@ -149,7 +146,7 @@ app.use('/api', generalLimiter);
 // Authentication rate limiting (stricter) - very high limit for development
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: parseInt(process.env.AUTH_RATE_LIMIT_MAX) || 1000, // Very high limit
+  max: config.security.authRateLimitMax,
   message: { error: 'Too many authentication attempts, please try again later.' },
   standardHeaders: true,
   legacyHeaders: false,
@@ -230,9 +227,9 @@ app.get('/api/health', (req, res) => {
 });
 
 // Serve static files in production
-if (process.env.NODE_ENV === 'production') {
+if (config.isProduction) {
   app.use(express.static(join(__dirname, '../dist')));
-  
+
   app.get('*', (req, res) => {
     res.sendFile(join(__dirname, '../dist/index.html'));
   });
@@ -252,7 +249,7 @@ app.use((err, req, res, next) => {
   });
 
   // Don't leak error details in production
-  const isDevelopment = process.env.NODE_ENV === 'development';
+  const isDevelopment = config.isDevelopment;
   
   // Handle specific error types
   if (err.name === 'ValidationError') {
@@ -296,20 +293,31 @@ async function startServer() {
     console.log('Database initialized successfully');
 
     app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-      console.log(`Environment: ${process.env.NODE_ENV}`);
-      console.log(`\nMockup Credentials:`);
-      console.log(`\nBPO Administration:`);
-      console.log(`   Admin: admin@paricus.com / admin123!`);
-      console.log(`\nFlex Mobile:`);
-      console.log(`   Admin: admin@flexmobile.com / flex123!`);
-      console.log(`   User:  user@flexmobile.com / flexuser123!`);
-      console.log(`\nIM Telecom:`);
-      console.log(`   Admin: admin@imtelecom.com / imtelecom123!`);
-      console.log(`   User:  user@imtelecom.com / imuser123!`);
-      console.log(`\nNorth American Local:`);
-      console.log(`   Admin: admin@northamericanlocal.com / northam123!`);
-      console.log(`   User:  user@northamericanlocal.com / naluser123!`);
+      console.log('\n' + '='.repeat(60));
+      console.log('🚀 SERVER STARTED SUCCESSFULLY');
+      console.log('='.repeat(60));
+      console.log(`📦 Environment: ${config.nodeEnv.toUpperCase()}`);
+      console.log(`🌐 Port: ${PORT}`);
+      console.log(`🔗 Client URL: ${config.clientUrl}`);
+      console.log(`💾 Storage Mode: ${config.storageMode.toUpperCase()}`);
+      console.log(`🗄️  Database: ${config.databaseUrl}`);
+      console.log('='.repeat(60));
+
+      if (config.isDevelopment) {
+        console.log(`\n🔑 MOCKUP CREDENTIALS:`);
+        console.log(`\n   BPO Administration:`);
+        console.log(`   └─ Admin: admin@paricus.com / admin123!`);
+        console.log(`\n   Flex Mobile:`);
+        console.log(`   ├─ Admin: admin@flexmobile.com / flex123!`);
+        console.log(`   └─ User:  user@flexmobile.com / flexuser123!`);
+        console.log(`\n   IM Telecom:`);
+        console.log(`   ├─ Admin: admin@imtelecom.com / imtelecom123!`);
+        console.log(`   └─ User:  user@imtelecom.com / imuser123!`);
+        console.log(`\n   North American Local:`);
+        console.log(`   ├─ Admin: admin@northamericanlocal.com / northam123!`);
+        console.log(`   └─ User:  user@northamericanlocal.com / naluser123!`);
+        console.log('\n' + '='.repeat(60) + '\n');
+      }
     });
   } catch (error) {
     console.error('Failed to start server:', error);

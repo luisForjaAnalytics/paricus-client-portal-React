@@ -175,7 +175,7 @@ router.get('/', authenticateToken, async (req, res) => {
     console.log(`[AUDIO-RECORDINGS] Total request time: ${totalDuration}ms`);
 
     res.json({
-      data: recordings,
+      recordings: recordings,
       pagination: {
         page: pageNum,
         limit: limitNum,
@@ -363,7 +363,7 @@ router.get('/:interactionId', authenticateToken, checkAudioRecordingsPermission,
 router.get('/filters/agents', authenticateToken, checkAudioRecordingsPermission, async (req, res) => {
   try {
     const agents = await getAgentNames();
-    res.json({ data: agents });
+    res.json({ agents: agents });
   } catch (error) {
     console.error('Error fetching agent names:', error);
     res.status(500).json({
@@ -380,7 +380,7 @@ router.get('/filters/agents', authenticateToken, checkAudioRecordingsPermission,
 router.get('/filters/call-types', authenticateToken, checkAudioRecordingsPermission, async (req, res) => {
   try {
     const callTypes = await getCallTypes();
-    res.json({ data: callTypes });
+    res.json({ callTypes: callTypes });
   } catch (error) {
     console.error('Error fetching call types:', error);
     res.status(500).json({
@@ -402,7 +402,7 @@ router.get('/filters/tags', authenticateToken, checkAudioRecordingsPermission, a
       tag: tag,
       company_name: getCompanyNameFromTags(tag)
     }));
-    res.json({ data: tagsWithCompanies });
+    res.json({ tags: tagsWithCompanies });
   } catch (error) {
     console.error('Error fetching tags:', error);
     res.status(500).json({

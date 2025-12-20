@@ -259,7 +259,7 @@ export const TableView = ({
           sx={{
             padding: "0.2rem 0 1rem 0",
             display: "flex",
-            justifyContent: "center",
+            justifyContent: "left",
             alignItems: "center",
             backgroundColor: colors.subSectionBackground,
             borderBottom: `1px solid ${colors.subSectionBorder}`,

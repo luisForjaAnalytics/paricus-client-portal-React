@@ -1,14 +1,24 @@
 import { S3Client, GetObjectCommand, PutObjectCommand, ListObjectsV2Command, DeleteObjectCommand, HeadObjectCommand, CopyObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import * as localStorage from './local-storage.js';
+import config from '../config/environment.js';
 
 // Check if S3 credentials are configured
 const isS3Configured = () => {
+  // Check if credentials exist and are not placeholder values
+  const hasValidAccessKey = config.aws.accessKeyId &&
+    !config.aws.accessKeyId.includes('your_') &&
+    !config.aws.accessKeyId.includes('optional');
+
+  const hasValidSecretKey = config.aws.secretAccessKey &&
+    !config.aws.secretAccessKey.includes('your_') &&
+    !config.aws.secretAccessKey.includes('optional');
+
   return !!(
-    process.env.AWS_REGION &&
-    process.env.AWS_ACCESS_KEY_ID &&
-    process.env.AWS_SECRET_ACCESS_KEY &&
-    process.env.S3_BUCKET_NAME
+    config.aws.region &&
+    hasValidAccessKey &&
+    hasValidSecretKey &&
+    config.aws.bucketName
   );
 };
 
@@ -17,22 +27,22 @@ let s3Client = null;
 if (isS3Configured()) {
   try {
     s3Client = new S3Client({
-      region: process.env.AWS_REGION,
+      region: config.aws.region,
       credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+        accessKeyId: config.aws.accessKeyId,
+        secretAccessKey: config.aws.secretAccessKey,
       },
     });
-    console.log('S3 client configured successfully');
+    console.log('✅ S3 client configured successfully');
   } catch (error) {
-    console.warn('WARNING: Failed to initialize S3 client:', error.message);
+    console.warn('⚠️  WARNING: Failed to initialize S3 client:', error.message);
   }
 } else {
-  console.warn('WARNING: S3 credentials not configured. File storage features will be disabled.');
-  console.warn('Set AWS_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and S3_BUCKET_NAME in .env');
+  console.warn('⚠️  WARNING: S3 credentials not configured. File storage features will be disabled.');
+  console.warn('   Set AWS credentials in .env file');
 }
 
-const BUCKET_NAME = process.env.S3_BUCKET_NAME || 'paricus-reports';
+const BUCKET_NAME = config.aws.bucketName || 'paricus-reports';
 const TALKDESK_RECORDINGS_BUCKET = process.env.TALKDESK_RECORDINGS_BUCKET || 'talkdesk-recordings-historical';
 const URL_EXPIRATION = 300; // 5 minutes in seconds
 const AUDIO_URL_EXPIRATION = 3600; // 1 hour for audio files (larger files need more time)
@@ -100,9 +110,12 @@ export async function generateUploadUrl(key, contentType, bucket = BUCKET_NAME) 
  * @returns {Promise<Array>} - Array of client folder names
  */
 export async function listClientFolders() {
+  console.log('[listClientFolders] s3Client:', s3Client ? 'configured' : 'not configured');
   if (!s3Client) {
-    console.warn('S3 client not configured, returning empty folder list');
-    return [];
+    console.log('[listClientFolders] Using local storage');
+    const folders = await localStorage.listLocalClientFolders();
+    console.log('[listClientFolders] Found folders:', folders);
+    return folders;
   }
 
   try {
@@ -134,8 +147,16 @@ export async function listClientFolders() {
  */
 export async function listClientReports(clientFolderName) {
   if (!s3Client) {
-    console.warn('S3 client not configured, returning empty reports list');
-    return [];
+    console.log('S3 client not configured, using local storage');
+    const prefix = `client-access-reports/${clientFolderName}/bi-reports/`;
+    const files = await localStorage.listLocalFiles(prefix);
+    return files.filter(f => f.key.endsWith('.pdf')).map(f => ({
+      key: f.key,
+      name: f.fileName,
+      size: f.size,
+      lastModified: f.lastModified,
+      downloadUrl: null
+    }));
   }
 
   try {

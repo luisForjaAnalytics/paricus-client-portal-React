@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { prisma } from '../database/prisma.js';
 import { getCachedUser, cacheUser, invalidateUserSession } from './cache.js';
+import config from '../config/environment.js';
 
 export const authenticateToken = async (req, res, next) => {
   const authHeader = req.headers['authorization'];
@@ -11,7 +12,7 @@ export const authenticateToken = async (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, config.jwtSecret);
     
     // Try to get user from cache first
     let user = getCachedUser(decoded.userId);

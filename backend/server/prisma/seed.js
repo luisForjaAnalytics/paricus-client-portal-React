@@ -84,6 +84,10 @@ async function main() {
       permissionName: "pay_invoices",
       description: "Access payment links for invoices",
     },
+    {
+      permissionName: "view_tickets",
+      description: "View and manage support tickets",
+    },
   ];
 
   console.log("Creating permissions...");
@@ -295,6 +299,7 @@ async function main() {
     "edit_kb_articles",
     "view_invoices",
     "pay_invoices",
+    "view_tickets",
     "admin_users",
     "admin_roles",
     "admin_reports",
@@ -305,6 +310,7 @@ async function main() {
     "view_interactions",
     "view_knowledge_base",
     "view_reporting",
+    "view_tickets",
   ];
 
   // Function to assign permissions to a role
@@ -496,17 +502,21 @@ async function main() {
   // Create mockup users
   console.log("👥 Creating mockup users...");
 
-  // BPO Admin user (Super Admin - clientId: null)
+  // BPO Admin user (Super Admin - associated with BPO Administration client)
   const bpoAdminPassword = await bcrypt.hash("admin123!", 12);
   await prisma.user.upsert({
     where: { email: "admin@paricus.com" },
-    update: {},
+    update: {
+      clientId: bpoClient.id, // Update to BPO Administration client
+      roleId: bpoAdminRole.id,
+      passwordHash: bpoAdminPassword,
+    },
     create: {
       email: "admin@paricus.com",
       passwordHash: bpoAdminPassword,
       firstName: "System",
       lastName: "Administrator",
-      clientId: null, // Super admin - no client association
+      clientId: bpoClient.id, // BPO Administration client
       roleId: bpoAdminRole.id,
       isActive: true,
     },

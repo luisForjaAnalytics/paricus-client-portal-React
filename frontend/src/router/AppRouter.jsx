@@ -32,6 +32,7 @@ import {
 import { ErrorView } from "../modules/error";
 import { ArticleView } from "../modules/knowledge-base/components/ArticleView";
 import LoginView from "../common/components/layout/Login";
+import { TicketsViewDesktop } from "../modules/tickets";
 
 const router = createBrowserRouter(
   [
@@ -84,7 +85,9 @@ const router = createBrowserRouter(
             {
               path: "editorView/:articleId",
               element: (
-                <ProtectedRoute anyPermissions={["create_kb_articles", "edit_kb_articles"]}>
+                <ProtectedRoute
+                  anyPermissions={["create_kb_articles", "edit_kb_articles"]}
+                >
                   <CKEditor />
                 </ProtectedRoute>
               ),
@@ -94,6 +97,14 @@ const router = createBrowserRouter(
               element: <ArticleView />,
             },
           ],
+        },
+        {
+          path: "tickets",
+          element: (
+            <ProtectedRoute requiredPermission="view_tickets">
+              <TicketsViewDesktop />
+            </ProtectedRoute>
+          ),
         },
         {
           path: "financial",

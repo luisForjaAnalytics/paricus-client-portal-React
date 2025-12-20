@@ -12,12 +12,41 @@ router.get('/',
   authenticateToken,
   async (req, res) => {
     try {
-      // Check if user is super admin (clientId === null)
-      if (req.user.clientId !== null) {
+      console.log('[LOGS API] Request from user:', req.user.id);
+
+      // Check if user has permissions to view logs
+      // Allow BPO Admin users (from BPO Administration client) or users with admin permissions
+      const user = await prisma.user.findUnique({
+        where: { id: req.user.id },
+        include: {
+          client: true,
+          role: {
+            include: {
+              rolePermissions: {
+                include: {
+                  permission: true
+                }
+              }
+            }
+          }
+        }
+      });
+
+      console.log('[LOGS API] User client:', user?.client?.name);
+
+      // Check if user is BPO Admin (from BPO Administration client)
+      const isBPOAdmin = user?.client?.name === 'BPO Administration';
+
+      console.log('[LOGS API] Is BPO Admin?', isBPOAdmin);
+
+      if (!isBPOAdmin) {
+        console.log('[LOGS API] Access DENIED');
         return res.status(403).json({
-          error: 'Access denied. Only super administrators can view logs.'
+          error: 'Access denied. Only BPO administrators can view logs.'
         });
       }
+
+      console.log('[LOGS API] Access GRANTED');
 
       const {
         page = 1,
@@ -63,8 +92,12 @@ router.get('/',
         where.status = status;
       }
 
+      console.log('[LOGS API] Query params:', { page, limit, sortBy, sortOrder });
+
       // Get total count
       const totalCount = await prisma.log.count({ where });
+
+      console.log('[LOGS API] Total count:', totalCount);
 
       // Get logs with pagination
       const logs = await prisma.log.findMany({
@@ -75,6 +108,8 @@ router.get('/',
           [sortBy]: sortOrder.toLowerCase()
         }
       });
+
+      console.log('[LOGS API] Returning', logs.length, 'logs');
 
       res.json({
         logs: logs,
@@ -101,10 +136,17 @@ router.get('/:id',
   authenticateToken,
   async (req, res) => {
     try {
-      // Check if user is super admin
-      if (req.user.clientId !== null) {
+      // Check if user is BPO Admin
+      const user = await prisma.user.findUnique({
+        where: { id: req.user.id },
+        include: { client: true }
+      });
+
+      const isBPOAdmin = user?.client?.name === 'BPO Administration';
+
+      if (!isBPOAdmin) {
         return res.status(403).json({
-          error: 'Access denied. Only super administrators can view logs.'
+          error: 'Access denied. Only BPO administrators can view logs.'
         });
       }
 
@@ -180,10 +222,17 @@ router.delete('/:id',
   authenticateToken,
   async (req, res) => {
     try {
-      // Check if user is super admin
-      if (req.user.clientId !== null) {
+      // Check if user is BPO Admin
+      const user = await prisma.user.findUnique({
+        where: { id: req.user.id },
+        include: { client: true }
+      });
+
+      const isBPOAdmin = user?.client?.name === 'BPO Administration';
+
+      if (!isBPOAdmin) {
         return res.status(403).json({
-          error: 'Access denied. Only super administrators can delete logs.'
+          error: 'Access denied. Only BPO administrators can delete logs.'
         });
       }
 

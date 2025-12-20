@@ -40,7 +40,7 @@ router.use(authenticateToken);
 router.get('/client-folders', async (req, res) => {
   try {
     // Check admin permission
-    if (!req.user.permissions?.includes('admin_clients')) {
+    if (!req.user.permissions?.includes('admin_reports')) {
       return res.status(403).json({ error: 'Admin access required' });
     }
 
@@ -76,7 +76,7 @@ router.get('/client/:clientFolder', [
     const { clientFolder } = req.params;
 
     // Check permissions: Admin can see all, clients need view_reporting permission and can only see their assigned folders
-    if (!req.user.permissions?.includes('admin_clients')) {
+    if (!req.user.permissions?.includes('admin_reports')) {
       // Check if user has permission to view reports
       if (!req.user.permissions?.includes('view_reporting')) {
         return res.status(403).json({ error: 'Permission denied. You need view_reporting permission to access reports.' });
@@ -134,7 +134,7 @@ router.post('/upload/:clientFolder', [
 ], upload.single('file'), async (req, res) => {
   try {
     // Check admin permission
-    if (!req.user.permissions?.includes('admin_clients')) {
+    if (!req.user.permissions?.includes('admin_reports')) {
       return res.status(403).json({ error: 'Admin access required' });
     }
 
@@ -242,7 +242,7 @@ router.get('/download/:clientFolder/:fileName', [
     const { clientFolder, fileName } = req.params;
 
     // Check permissions (same logic as listing reports)
-    if (!req.user.permissions?.includes('admin_clients')) {
+    if (!req.user.permissions?.includes('admin_reports')) {
       // Check if user has permission to view reports
       if (!req.user.permissions?.includes('view_reporting')) {
         return res.status(403).json({ error: 'Permission denied. You need view_reporting permission to download reports.' });
@@ -294,7 +294,7 @@ router.delete('/:clientFolder/:fileName', [
 ], async (req, res) => {
   try {
     // Check admin permission
-    if (!req.user.permissions?.includes('admin_clients')) {
+    if (!req.user.permissions?.includes('admin_reports')) {
       return res.status(403).json({ error: 'Admin access required' });
     }
 
@@ -344,7 +344,7 @@ router.delete('/:clientFolder/:fileName', [
 router.get('/client-folder-access', async (req, res) => {
   try {
     // Check admin permission
-    if (!req.user.permissions?.includes('admin_clients')) {
+    if (!req.user.permissions?.includes('admin_reports')) {
       return res.status(403).json({ error: 'Admin access required' });
     }
 
@@ -379,7 +379,7 @@ router.post('/client-folder-access', [
 ], async (req, res) => {
   try {
     // Check admin permission
-    if (!req.user.permissions?.includes('admin_clients')) {
+    if (!req.user.permissions?.includes('admin_reports')) {
       return res.status(403).json({ error: 'Admin access required' });
     }
 
@@ -439,7 +439,7 @@ router.delete('/client-folder-access/:clientId/:folderName', [
 ], async (req, res) => {
   try {
     // Check admin permission
-    if (!req.user.permissions?.includes('admin_clients')) {
+    if (!req.user.permissions?.includes('admin_reports')) {
       return res.status(403).json({ error: 'Admin access required' });
     }
 
@@ -480,7 +480,7 @@ router.delete('/client-folder-access/:clientId/:folderName', [
 router.get('/client-folders-accessible', async (req, res) => {
   try {
     // Check if user has permission to view reports
-    if (!req.user.permissions?.includes('view_reporting') && !req.user.permissions?.includes('admin_clients')) {
+    if (!req.user.permissions?.includes('view_reporting') && !req.user.permissions?.includes('admin_reports')) {
       return res.status(403).json({ error: 'Permission denied. You need view_reporting permission to access reports.' });
     }
 

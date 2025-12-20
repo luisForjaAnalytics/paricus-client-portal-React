@@ -88,7 +88,8 @@ export default {
       errorLoading: "Error al cargar registros",
       unknownError: "Error desconocido",
       searchLabel: "Buscar Registros",
-      searchPlaceholder: "Buscar por ID, usuario, evento, entidad, descripción o estado...",
+      searchPlaceholder:
+        "Buscar por ID, usuario, evento, entidad, descripción o estado...",
     },
   },
 
@@ -507,6 +508,8 @@ export default {
     editInvoice: "Editar Factura",
     uploadNewInvoice: "Subir Nueva Factura",
     markAsPaid: "Marcar como Pagada",
+    disclaimer:
+      "La información cargada automáticamente puede requerir verificación. Revise los datos antes de confirmar la factura.",
     stats: {
       totalRevenue: "Ingresos Totales",
       outstandingBalance: "Saldo Pendiente",
@@ -747,6 +750,49 @@ export default {
       search: "Buscar",
       loading: "Cargando...",
       clearAll: "Limpiar Todos los Filtros",
+    },
+  },
+  tickets: {
+    sectionTitle: "Tickets",
+    filters: "Filtros",
+    table: {
+      ticketId: "ID de Ticket",
+      lastUpdate: "Última Actualización",
+      subject: "Asunto",
+      from: "De",
+      assignedTo: "Asignado a",
+      priority: "Prioridad",
+      actions: "Acciones",
+      status: "Estado",
+    },
+    createNewTicket: {
+      createNewTicket: "Crear Nuevo Ticket",
+      subject: {
+        label: "Asunto",
+        placeholderMsg: "Asunto del ticket",
+        requiredMsg: "El campo asunto es requerido.",
+      },
+
+      priority: {
+        label: "Prioridad",
+        requiredMsg: "El campo prioridad es requerido.",
+        level: {
+          hight: "Alta",
+          medium: "Media",
+          low: "Baja",
+        },
+      },
+      assignedTo: {
+        label: "Asignado a",
+        requiredMsg: "El campo Asignado a es requerido.",
+      },
+      description: {
+        label: "Descripción",
+        placeholderMsg: "Agregar notas o descripción para este Ticket",
+        requiredMsg: "El campo descripción es requerido.",
+      },
+      from: "De",
+      submit: "Enviar",
     },
   },
 };

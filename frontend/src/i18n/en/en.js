@@ -89,7 +89,8 @@ export default {
       errorLoading: "Error loading logs",
       unknownError: "Unknown error",
       searchLabel: "Search Logs",
-      searchPlaceholder: "Search by ID, user, event, entity, description, or status...",
+      searchPlaceholder:
+        "Search by ID, user, event, entity, description, or status...",
     },
   },
 
@@ -507,6 +508,8 @@ export default {
     editInvoice: "Edit Invoice",
     uploadNewInvoice: "Upload New Invoice",
     markAsPaid: "Mark as Paid",
+    disclaimer:
+      "The information loaded automatically may require verification. Please review the data before confirming the invoice.",
     stats: {
       totalRevenue: "Total Revenue",
       outstandingBalance: "Outstanding Balance",
@@ -636,7 +639,8 @@ export default {
     clientFolders: {
       title: "Client Folders",
       noFoldersFound: "No client folders found",
-      noFoldersMessage: "Create folders in your S3 bucket: client-access-reports/your-client-name/",
+      noFoldersMessage:
+        "Create folders in your S3 bucket: client-access-reports/your-client-name/",
       manageAccess: "Manage Access",
       refreshFolders: "Refresh Folders",
       loading: "Loading...",
@@ -662,7 +666,8 @@ export default {
       grantError: "Failed to grant folder access",
       revokeSuccess: "Folder access revoked successfully",
       revokeError: "Failed to revoke folder access",
-      confirmRevoke: "Are you sure you want to revoke access to \"{folderName}\" for this client?",
+      confirmRevoke:
+        'Are you sure you want to revoke access to "{folderName}" for this client?',
     },
     reports: {
       title: "Reports for {folder}",
@@ -696,7 +701,7 @@ export default {
       uploadError: "Failed to upload report",
       deleteSuccess: "Report deleted successfully",
       deleteError: "Failed to delete report",
-      confirmDelete: "Are you sure you want to delete \"{reportName}\"?",
+      confirmDelete: 'Are you sure you want to delete "{reportName}"?',
       downloadError: "Failed to generate download link",
     },
     fileSize: {
@@ -745,6 +750,49 @@ export default {
       search: "Search",
       loading: "Loading...",
       clearAll: "Clear All Filters",
+    },
+  },
+  tickets: {
+    sectionTitle: "Tickets",
+    filters: "Filters",
+    table: {
+      ticketId: "Ticket ID",
+      lastUpdate: "Last Update",
+      subject: "Subject",
+      from: "From",
+      assignedTo: "Assigned To",
+      priority: "Priority",
+      actions: "Actions",
+      status: "Status",
+    },
+    createNewTicket: {
+      createNewTicket: "Create New Ticket",
+      subject: {
+        label: "Subject",
+        placeholderMsg: "Ticket subject",
+        requiredMsg: "The subject field is required.",
+      },
+
+      priority: {
+        label: "Priority",
+        requiredMsg: "The Priority field is required.",
+        level: {
+          hight: "hight",
+          medium: "medium",
+          low: "low",
+        },
+      },
+      assignedTo: {
+        label: "Assigned To",
+        requiredMsg: "The Assigned To field is required.",
+      },
+      description: {
+        label: "Description",
+        placeholderMsg: "Add notes or description for this Ticket",
+        requiredMsg: "The description field is required.",
+      },
+      from: "From",
+      submit: "Submit",
     },
   },
 };

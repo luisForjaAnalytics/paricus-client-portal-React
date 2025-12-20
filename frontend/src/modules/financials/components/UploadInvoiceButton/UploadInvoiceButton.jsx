@@ -75,11 +75,14 @@ export const UploadInvoiceButton = ({ selectedFolder, onSuccess, onError }) => {
       const extractedData = parseInvoiceData(text);
 
       // Actualizar el formulario solo con los campos que se encontraron
-      if (extractedData.invoiceName) setValue("invoiceName", extractedData.invoiceName);
+      if (extractedData.invoiceName)
+        setValue("invoiceName", extractedData.invoiceName);
       if (extractedData.amount > 0) setValue("amount", extractedData.amount);
-      if (extractedData.issuedDate) setValue("issuedDate", extractedData.issuedDate);
+      if (extractedData.issuedDate)
+        setValue("issuedDate", extractedData.issuedDate);
       if (extractedData.dueDate) setValue("dueDate", extractedData.dueDate);
-      if (extractedData.description) setValue("description", extractedData.description);
+      if (extractedData.description)
+        setValue("description", extractedData.description);
     }
   }, [text, ocrLoading, setValue]);
 
@@ -187,6 +190,13 @@ export const UploadInvoiceButton = ({ selectedFolder, onSuccess, onError }) => {
             >
               {t("financials.uploadNewInvoice")}
             </Typography>
+            <Typography
+              variant="caption"
+              color="warning.main"
+              sx={{ px: 5, pt: 2, display: "block" }}
+            >
+              {t("financials.disclaimer")}
+            </Typography>
           </DialogTitle>
           <DialogContent dividers>
             {/* Indicador de progreso OCR */}
@@ -211,7 +221,9 @@ export const UploadInvoiceButton = ({ selectedFolder, onSuccess, onError }) => {
                 <Controller
                   name="invoiceName"
                   control={control}
-                  rules={{ required: t("financials.messages.invoiceNameRequired") }}
+                  rules={{
+                    required: t("financials.messages.invoiceNameRequired"),
+                  }}
                   render={({ field }) => (
                     <TextField
                       {...field}
@@ -219,7 +231,7 @@ export const UploadInvoiceButton = ({ selectedFolder, onSuccess, onError }) => {
                       placeholder="e.g., March_2024_Services"
                       error={!!errors.invoiceName}
                       helperText={errors.invoiceName?.message}
-                      sx={modalCard?.inputSection}
+                      sx={{...modalCard?.inputSection, width: "50%"}}
                     />
                   )}
                 />
@@ -228,7 +240,7 @@ export const UploadInvoiceButton = ({ selectedFolder, onSuccess, onError }) => {
                   component="label"
                   fullWidth
                   disabled={ocrLoading}
-                  sx={{ ...outlinedIconButton, height: "auto", width: "54%" }}
+                  sx={{ ...outlinedIconButton, height: "auto", width: "50%" }}
                   startIcon={ocrLoading ? <CircularProgress size={20} /> : null}
                 >
                   {ocrLoading
@@ -310,7 +322,9 @@ export const UploadInvoiceButton = ({ selectedFolder, onSuccess, onError }) => {
                 <Controller
                   name="issuedDate"
                   control={control}
-                  rules={{ required: t("financials.messages.issuedDateRequired") }}
+                  rules={{
+                    required: t("financials.messages.issuedDateRequired"),
+                  }}
                   render={({ field }) => (
                     <TextField
                       {...field}

@@ -446,6 +446,69 @@ export const table = {
   },
 };
 
+// ================================================
+// TABLE DATAGRID STYLES
+// ================================================
+export const dataGridTable = {
+  ...card,
+  padding: "0 0 0 0",
+  border: `1px solid ${colors.border}`,
+  "& .MuiDataGrid-columnHeaders": {
+    backgroundColor: `${colors.background} !important`,
+    borderBottom: `2px solid ${colors.border}`,
+  },
+  "& .MuiDataGrid-columnHeader": {
+    backgroundColor: `${colors.background} !important`,
+  },
+  "& .MuiDataGrid-columnHeaderTitle": {
+    fontWeight: typography.fontWeight.bold,
+    textTransform: "uppercase",
+    fontSize: typography.fontSize.tableHeader,
+    fontFamily: typography.fontFamily,
+    color: colors.textMuted,
+    letterSpacing: "0.05em",
+  },
+  "& .MuiDataGrid-sortIcon": {
+    color: colors.primary,
+  },
+  "& .MuiDataGrid-columnHeader--sorted": {
+    backgroundColor: `${colors.primaryLight} !important`,
+  },
+  "& .MuiDataGrid-filler": {
+    backgroundColor: `${colors.background} !important`,
+    width: "0 !important",
+    minWidth: "0 !important",
+    maxWidth: "0 !important",
+  },
+  "& .MuiDataGrid-scrollbarFiller": {
+    display: "none !important",
+  },
+  "& .MuiDataGrid-scrollbar--vertical": {
+    position: "absolute",
+    right: 0,
+  },
+  "& .MuiDataGrid-cell": {
+    borderBottom: `1px solid ${colors.border}`,
+    fontSize: typography.fontSize.body,
+    fontFamily: typography.fontFamily,
+    color: colors.textPrimary,
+  },
+  "& .MuiDataGrid-cell:focus": {
+    outline: "none",
+  },
+  "& .MuiDataGrid-cell:focus-within": {
+    outline: "none",
+  },
+  "& .MuiDataGrid-columnHeader:focus": {
+    outline: "none",
+  },
+  "& .MuiDataGrid-columnHeader:focus-within": {
+    outline: "none",
+  },
+  "& .MuiDataGrid-row:hover": {
+    backgroundColor: colors.background,
+  },
+};
 // ========================================
 // Titles Text styles
 // ========================================
@@ -599,6 +662,8 @@ export const modalCard = {
       gap: 1.5,
       margin: "0 0 1rem 0",
     },
+
+    //upload invouces
     boxUploadInvoiceModal: {
       display: "flex",
       flexDirection: "row",
@@ -614,7 +679,45 @@ export const modalCard = {
       },
     },
   },
+  //Create New Ticket Style
+  createNewTiketStyle: {
 
+    dialogTicketSection: {
+      borderRadius: "1.5rem",
+      overflow: "hidden",
+      width: "30rem",
+    },
+    boxTicketModal: {
+      display: "flex",
+      flexDirection: "row",
+      gap: 1.5,
+      margin: "0 0 1rem 0",
+    },
+
+    //Description section
+    inputDescriptionSection: {
+      "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+        borderColor: colors.focusRing,
+      },
+      "& .MuiOutlinedInput-root": {
+        backgroundColor: colors.surface,
+        borderRadius: borderRadiusSection,
+        height: "15rem",
+        "&.Mui-focused fieldset": {
+          borderColor: colors.focusRing,
+        },
+      },
+      "& .MuiInputLabel-root": {
+        top: "-0.4rem",
+        "&.Mui-focused": {
+          color: colors.focusRing,
+        },
+        "&.MuiInputLabel-shrink": {
+          top: "0",
+        },
+      },
+    },
+  },
   //Input style
   inputSection: {
     "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {

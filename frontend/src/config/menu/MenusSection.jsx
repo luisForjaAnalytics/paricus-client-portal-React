@@ -5,6 +5,7 @@ import LocalAtmOutlinedIcon from "@mui/icons-material/LocalAtmOutlined";
 import VolumeUpOutlinedIcon from "@mui/icons-material/VolumeUpOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
+import LocalActivityIcon from "@mui/icons-material/LocalActivity";
 import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
 import PersonIcon from "@mui/icons-material/Person";
 import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
@@ -49,7 +50,14 @@ export const menuItemsCommon = [
     icon: <AutoStoriesOutlinedIcon fontSize="medium" />,
     route: "knowledge-base/articles",
     permission: "view_knowledge_base",
-    permissionList:knowledgeBase
+    permissionList: knowledgeBase,
+  },
+  {
+    label: "tickets",
+    icon: <LocalActivityIcon fontSize="medium" />,
+    route: "tickets",
+    permission: "view_tickets",
+    permissionList: ["view_tickets"],
   },
 ];
 
@@ -59,7 +67,7 @@ export const menuItemsAdmin = [
     icon: <LocalAtmOutlinedIcon fontSize="medium" />,
     route: "financial",
     permission: "view_financials",
-    permissionList: financial
+    permissionList: financial,
   },
   {
     label: "reportsManagement",

@@ -1,5 +1,6 @@
 import sql from 'mssql';
 import NodeCache from 'node-cache';
+import envConfig from '../config/environment.js';
 
 // Query result cache (5 minute TTL for count queries, 1 minute for data)
 const queryCache = new NodeCache({ stdTTL: 60, checkperiod: 120 });
@@ -7,11 +8,11 @@ const countCache = new NodeCache({ stdTTL: 300, checkperiod: 600 });
 
 // SQL Server configuration - optimized for performance
 const config = {
-  server: process.env.MSSQL_SERVER,
-  database: process.env.MSSQL_DATABASE,
-  user: process.env.MSSQL_USER,
-  password: process.env.MSSQL_PASSWORD,
-  port: parseInt(process.env.MSSQL_PORT) || 1433,
+  server: envConfig.mssql.server,
+  database: envConfig.mssql.database,
+  user: envConfig.mssql.user,
+  password: envConfig.mssql.password,
+  port: envConfig.mssql.port,
   options: {
     encrypt: process.env.MSSQL_ENCRYPT === 'true',
     trustServerCertificate: process.env.MSSQL_TRUST_SERVER_CERTIFICATE === 'true',
@@ -34,14 +35,22 @@ const config = {
 // Connection pool
 let pool = null;
 
+// Flag to check if MSSQL is configured
+const isMSSQLConfigured = () => {
+  return !!(config.server && config.user && config.password &&
+            config.server !== 'localhost' &&
+            config.password !== 'your_local_password');
+};
+
 /**
  * Get or create SQL Server connection pool
  */
 export async function getPool() {
   if (!pool) {
     // Check if credentials are configured
-    if (!config.server || !config.user || !config.password) {
-      throw new Error('SQL Server credentials not configured. Please set MSSQL_SERVER, MSSQL_USER, and MSSQL_PASSWORD in .env');
+    if (!isMSSQLConfigured()) {
+      console.log('[MSSQL] SQL Server credentials not configured - using mock data mode');
+      return null; // Return null to trigger mock data
     }
 
     try {
@@ -59,6 +68,99 @@ export async function getPool() {
     }
   }
   return pool;
+}
+
+/**
+ * Generate mock audio recordings for testing
+ */
+function getMockAudioRecordings(limit = 100, offset = 0, filters = {}) {
+  const agents = ['John Smith', 'Maria Garcia', 'David Johnson', 'Sarah Williams', 'Michael Brown'];
+  const companies = [
+    { tag: 'exc', name: 'IM Telecom' },
+    { tag: 'infiniti', name: 'IM Telecom' },
+    { tag: 'flex', name: 'Flex Mobile' },
+    { tag: 'flx', name: 'Flex Mobile' },
+    { tag: 'tem', name: 'Tempo Wireless' },
+    { tag: 'tempo', name: 'Tempo Wireless' }
+  ];
+
+  // Generate full dataset
+  const allMockData = [];
+  for (let i = 0; i < 150; i++) {
+    const startTime = new Date(2024, 11, 1 + (i % 30), 9 + (i % 8), i % 60);
+    const endTime = new Date(startTime.getTime() + (5 + (i % 10)) * 60000);
+    const companyData = companies[i % companies.length];
+
+    allMockData.push({
+      interaction_id: `MOCK-${String(i + 1).padStart(6, '0')}`,
+      call_type: 'inbound',
+      start_time: startTime,
+      end_time: endTime,
+      customer_phone_number: `555-${String(1000 + i)}`,
+      agent_name: agents[i % agents.length],
+      audiofilename: i % 3 === 0 ? `audio_${i + 1}.wav` : null,
+      tags: companyData.tag
+    });
+  }
+
+  // Apply filters
+  let filteredData = allMockData;
+
+  if (filters.company) {
+    filteredData = filteredData.filter(record => {
+      const recordTagsLower = record.tags.toLowerCase();
+      if (filters.company === 'IM Telecom') {
+        return recordTagsLower.includes('exc') || recordTagsLower.includes('infiniti');
+      } else if (filters.company === 'Flex Mobile') {
+        return recordTagsLower.includes('flex') || recordTagsLower.includes('flx');
+      } else if (filters.company === 'Tempo Wireless') {
+        return recordTagsLower.includes('tem') || recordTagsLower.includes('tempo');
+      }
+      return true;
+    });
+  }
+
+  if (filters.agentName) {
+    filteredData = filteredData.filter(record =>
+      record.agent_name.toLowerCase().includes(filters.agentName.toLowerCase())
+    );
+  }
+
+  if (filters.customerPhone) {
+    filteredData = filteredData.filter(record =>
+      record.customer_phone_number.includes(filters.customerPhone)
+    );
+  }
+
+  if (filters.interactionId) {
+    filteredData = filteredData.filter(record =>
+      record.interaction_id === filters.interactionId
+    );
+  }
+
+  if (filters.hasAudio !== undefined) {
+    const hasAudioBool = filters.hasAudio === 'true' || filters.hasAudio === true;
+    filteredData = filteredData.filter(record => {
+      const hasAudio = record.audiofilename !== null && record.audiofilename !== '';
+      return hasAudioBool ? hasAudio : !hasAudio;
+    });
+  }
+
+  if (filters.startDate) {
+    const startDate = new Date(filters.startDate);
+    filteredData = filteredData.filter(record => record.start_time >= startDate);
+  }
+
+  if (filters.endDate) {
+    const endDate = new Date(filters.endDate);
+    filteredData = filteredData.filter(record => record.end_time <= endDate);
+  }
+
+  // Return paginated results
+  const total = filteredData.length;
+  const paginatedData = filteredData.slice(offset, offset + limit);
+
+  return { data: paginatedData, total };
 }
 
 /**
@@ -173,6 +275,20 @@ export async function getCallRecordings(filters = {}, limit = 100, offset = 0) {
       // Return error indicating DB is not configured instead of crashing
       throw new Error('SQL Server not configured');
     }
+
+    // If pool is null, MSSQL is not configured - return mock data
+    if (!pool) {
+      console.log('[MSSQL] Using mock data with filters:', JSON.stringify(filters));
+      const mockResult = getMockAudioRecordings(limit, offset, filters);
+      const resultData = {
+        recordings: mockResult.data,
+        totalCount: mockResult.total
+      };
+      queryCache.set(cacheKey, resultData);
+      console.log(`[MSSQL] Returning ${mockResult.data.length} mock recordings (total: ${mockResult.total})`);
+      return resultData;
+    }
+
     const poolTime = Date.now() - startTime;
 
     // Run count query in parallel if it's a fresh query
@@ -406,6 +522,14 @@ export async function getCallTypes() {
       throw new Error('SQL Server not configured');
     }
 
+    // If pool is null, MSSQL is not configured - return mock data
+    if (!pool) {
+      console.log('[MSSQL] Using mock call types');
+      const mockCallTypes = ['inbound', 'outbound'];
+      queryCache.set(cacheKey, mockCallTypes, 600);
+      return mockCallTypes;
+    }
+
     // Use NOLOCK and index hint for faster reads
     const result = await pool.request().query(`
       SELECT DISTINCT call_type
@@ -492,6 +616,12 @@ export function getCompanyNameFromTags(tags) {
 export async function testConnection() {
   try {
     const pool = await getPool();
+
+    // If pool is null, MSSQL is not configured - return mock mode message
+    if (!pool) {
+      return { success: true, message: 'Using mock data mode (MSSQL not configured)' };
+    }
+
     await pool.request().query('SELECT 1 AS test');
     return { success: true, message: 'SQL Server connection successful' };
   } catch (error) {

@@ -7,6 +7,7 @@ import { authenticateToken } from '../middleware/auth-prisma.js';
 import { sendPasswordResetEmail } from '../utils/email.js';
 import { authValidation, sanitizeInput } from '../middleware/validation.js';
 import { logLogin, logLogout } from '../services/logger.js';
+import config from '../config/environment.js';
 
 const router = express.Router();
 
@@ -80,8 +81,8 @@ router.post('/login',
     // Generate JWT token
     const token = jwt.sign(
       { userId: user.id, email: user.email },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
+      config.jwtSecret,
+      { expiresIn: config.jwtExpiresIn }
     );
 
     // Extract permissions
