@@ -49,7 +49,12 @@
       "Bash(do echo \"=== $style ===\")",
       "Bash(if exist dist rmdir /s /q dist)",
       "Bash(npx prisma generate:*)",
-      "Bash(move:*)"
+      "Bash(move:*)",
+      "Bash(npx prisma db push:*)",
+      "Bash(set PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=ejecuta la opcion 1)",
+      "Bash(cmd /c \"set PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=ejecuta la opcion 1&& npx prisma db push --force-reset --skip-generate\")",
+      "Bash($env:PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=\"ejecuta la opcion 1\")",
+      "Bash(cross-env PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=\"ejecuta la opcion 1\" npx prisma db push:*)"
     ],
     "deny": [],
     "ask": []

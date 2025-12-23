@@ -36,6 +36,7 @@ import { QuickFiltersMobile } from "./components/QuickFilters/QuickFiltersMobile
 import { TableView } from "./components/TableView/TableView.jsx";
 import { typography } from "../../common/styles/styles.js";
 import { FilterButton } from "./components/FilterButton/FilterButton.jsx";
+import { formatDateTime } from "../../common/utils/formatDateTime.jsx";
 
 export const AudioRecordingsView = () => {
   const { t } = useTranslation(); // ADDED: Translation hook
@@ -518,22 +519,6 @@ export const AudioRecordingsView = () => {
     // Disabled for performance
   }, []);
 
-  const formatDateTime = (dateString) => {
-    try {
-      if (!dateString) return "N/A";
-      const date = new Date(dateString);
-      return new Intl.DateTimeFormat("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      }).format(date);
-    } catch (err) {
-      console.error(`ERROR: formatDateTime - ${err.message}`, err);
-      return "N/A";
-    }
-  };
 
   const getCallTypeColor = (callType) => {
     const types = {

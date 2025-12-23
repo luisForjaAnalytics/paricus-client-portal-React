@@ -55,7 +55,7 @@ export const menuItemsCommon = [
   {
     label: "tickets",
     icon: <LocalActivityIcon fontSize="medium" />,
-    route: "tickets",
+    route: "tickets/ticketTable",
     permission: "view_tickets",
     permissionList: ["view_tickets"],
   },

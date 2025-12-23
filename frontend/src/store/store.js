@@ -9,6 +9,7 @@ import { profileApi } from "./api/profileApi";
 import { articlesApi } from "./api/articlesApi";
 import { logsApi } from "./api/logsApi";
 import { articlesSearchApi } from "./api/articlesSearchApi";
+import { ticketsApi } from "./api/ticketsApi";
 
 // Middleware to clear RTK Query cache on logout
 const resetCacheMiddleware = (storeAPI) => (next) => (action) => {
@@ -27,6 +28,7 @@ const resetCacheMiddleware = (storeAPI) => (next) => (action) => {
     storeAPI.dispatch(logsApi.util.resetApiState());
     storeAPI.dispatch(authApi.util.resetApiState());
     storeAPI.dispatch(articlesSearchApi.util.resetApiState());
+    storeAPI.dispatch(ticketsApi.util.resetApiState());
   }
 
   return next(action);
@@ -44,6 +46,7 @@ export const store = configureStore({
     [articlesApi.reducerPath]: articlesApi.reducer,
     [articlesSearchApi.reducerPath]: articlesSearchApi.reducer,
     [logsApi.reducerPath]: logsApi.reducer,
+    [ticketsApi.reducerPath]: ticketsApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -56,6 +59,7 @@ export const store = configureStore({
       profileApi.middleware,
       articlesApi.middleware,
       articlesSearchApi.middleware,
-      logsApi.middleware
+      logsApi.middleware,
+      ticketsApi.middleware
     ),
 });

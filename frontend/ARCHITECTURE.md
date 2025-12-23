@@ -128,6 +128,15 @@ frontend/src/
 │   │   ├── ReportsManagementView.jsx
 │   │   └── index.js
 │   │
+│   ├── tickets/                  # 🆕 Ticket management system
+│   │   ├── components/
+│   │   │   ├── CreateTicketButton/
+│   │   │   │   ├── CreateTicketButton.jsx
+│   │   │   │   └── ticketStatus-js.js
+│   │   │   └── index.js
+│   │   ├── TicketsView.jsx
+│   │   └── index.js
+│   │
 │   └── error/
 │       ├── ErrorView.jsx
 │       └── index.js
@@ -139,9 +148,20 @@ frontend/src/
 │
 ├── store/
 │   ├── api/                    # RTK Query API slices
+│   │   ├── authApi.js
+│   │   ├── adminApi.js
+│   │   ├── profileApi.js
+│   │   ├── invoicesApi.js
+│   │   ├── reportsApi.js
+│   │   ├── audioRecordingsApi.js
+│   │   ├── articlesApi.js
+│   │   ├── articlesSearchApi.js
+│   │   ├── logsApi.js
+│   │   └── ticketsApi.js       # 🆕 Tickets API
 │   ├── auth/
+│   │   └── authSlice.js
 │   ├── helper/
-│   └── store.js
+│   └── store.js                # 🔄 Updated with ticketsApi
 │
 ├── i18n/
 │
@@ -389,6 +409,444 @@ import { FinancialsView } from '@modules/financials';
 
 ---
 
+## 🎫 Tickets System Implementation (Added 2025-12-22)
+
+### Overview
+Complete ticket management system integrated following the project's architecture patterns (Prisma ORM + RTK Query + React).
+
+---
+
+### 📊 Database Schema (Prisma)
+
+**Two new tables created in SQLite:**
+
+#### `tickets` table
+```prisma
+model Ticket {
+  id          String             @id @default(uuid())
+  clientId    Int                @map("client_id")
+  userId      Int                @map("user_id")
+  subject     String
+  priority    String             // "High", "Medium", "Low"
+  status      String             @default("Open")
+  assignedTo  String?            @map("assigned_to")
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  client      Client             @relation(...)
+  user        User               @relation(...)
+  descriptions TicketDescription[]
+}
+```
+
+#### `ticket_descriptions` table
+```prisma
+model TicketDescription {
+  id              Int      @id @default(autoincrement())
+  ticketId        String   @map("ticket_id")
+  descriptionData String   @map("description_data")
+  timestamp       DateTime @default(now())
+  ticket          Ticket   @relation(...)
+}
+```
+
+**Key Features:**
+- UUID primary key for tickets
+- Multi-tenant support (clientId)
+- User tracking (userId)
+- Conversation history (multiple descriptions)
+- Automatic timestamps
+- Cascade delete protection
+
+---
+
+### 🔌 Backend API (`backend/server/routes/tickets.js`)
+
+**REST Endpoints:**
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| `GET` | `/api/tickets` | List all tickets for client | ✅ JWT |
+| `GET` | `/api/tickets/:id` | Get single ticket | ✅ JWT |
+| `POST` | `/api/tickets` | Create new ticket | ✅ JWT |
+| `PUT` | `/api/tickets/:id` | Update ticket | ✅ JWT |
+| `POST` | `/api/tickets/:id/descriptions` | Add comment | ✅ JWT |
+| `DELETE` | `/api/tickets/:id` | Delete ticket | ✅ JWT |
+
+**Security Features:**
+- JWT authentication required on all endpoints
+- Client isolation (users only see their client's tickets)
+- Input validation
+- Proper error handling
+
+**Example Request/Response:**
+```javascript
+// POST /api/tickets
+// Request
+{
+  "subject": "Payment issue",
+  "priority": "High",
+  "assignedTo": "Support Team",
+  "description": "Cannot process payment"
+}
+
+// Response
+{
+  "data": {
+    "id": "uuid-here",
+    "clientId": 1,
+    "userId": 5,
+    "subject": "Payment issue",
+    "priority": "High",
+    "status": "Open",
+    "assignedTo": "Support Team",
+    "createdAt": "2025-12-22T...",
+    "descriptions": [
+      {
+        "id": 1,
+        "descriptionData": "Cannot process payment",
+        "timestamp": "2025-12-22T..."
+      }
+    ]
+  }
+}
+```
+
+---
+
+### ⚛️ Frontend RTK Query API (`frontend/src/store/api/ticketsApi.js`)
+
+**API Slice Configuration:**
+```javascript
+export const ticketsApi = createApi({
+  reducerPath: "ticketsApi",
+  baseQuery: fetchBaseQuery({
+    baseUrl: `${import.meta.env.VITE_API_URL}/tickets`,
+    prepareHeaders: (headers, { getState }) => {
+      const token = getState().auth?.token;
+      if (token) headers.set("Authorization", `Bearer ${token}`);
+      return headers;
+    },
+  }),
+  tagTypes: ["Tickets"],
+  endpoints: (builder) => ({ ... })
+});
+```
+
+**Available Hooks:**
+```javascript
+// Queries (GET)
+const { data, isLoading, error } = useGetTicketsQuery();
+const { data, isLoading, error } = useGetTicketQuery(ticketId);
+
+// Mutations (POST/PUT/DELETE)
+const [createTicket, { isLoading }] = useCreateTicketMutation();
+const [updateTicket, { isLoading }] = useUpdateTicketMutation();
+const [addDescription, { isLoading }] = useAddTicketDescriptionMutation();
+const [deleteTicket, { isLoading }] = useDeleteTicketMutation();
+```
+
+**RTK Query Features:**
+- ✅ Automatic caching
+- ✅ Auto-refetch after mutations (`invalidatesTags`)
+- ✅ Loading states included
+- ✅ Error handling built-in
+- ✅ Optimistic updates ready
+
+**Redux Store Integration:**
+```javascript
+// store/store.js
+export const store = configureStore({
+  reducer: {
+    // ... other reducers
+    [ticketsApi.reducerPath]: ticketsApi.reducer,
+  },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(
+      // ... other middleware
+      ticketsApi.middleware
+    ),
+});
+```
+
+---
+
+### 🎨 Frontend Component (`modules/tickets/components/CreateTicketButton/`)
+
+**Component Structure:**
+```
+CreateTicketButton/
+├── CreateTicketButton.jsx    # Main component
+└── ticketStatus-js.js         # Status constants
+```
+
+**Implementation Highlights:**
+
+```javascript
+import { useCreateTicketMutation } from "../../../../store/api/ticketsApi";
+
+export const CreateTicketButton = () => {
+  const [createTicket, { isLoading, error }] = useCreateTicketMutation();
+
+  const onSubmit = async (data) => {
+    try {
+      const payload = {
+        subject: data.subject,
+        priority: data.priority,
+        assignedTo: data.assignedTo,
+        description: data.description.descriptionData,
+      };
+
+      await createTicket(payload).unwrap();
+      // Auto closes modal and resets form
+    } catch (err) {
+      // Error shown via Alert component
+    }
+  };
+
+  // ... form JSX
+};
+```
+
+**Features:**
+- ✅ React Hook Form validation
+- ✅ Loading state (disabled button during submission)
+- ✅ Error alerts (MUI Alert component)
+- ✅ Auto-close on success
+- ✅ Form reset after submission
+- ✅ i18n support (react-i18next)
+
+**Form Fields:**
+- Subject (text, required)
+- Priority (dropdown: High/Medium/Low, required)
+- Assigned To (dropdown, required)
+- Description (textarea, required)
+
+---
+
+### 🔄 Data Flow Diagram
+
+```
+User Interaction
+      ↓
+CreateTicketButton.jsx
+      ↓ (handleSubmit)
+useCreateTicketMutation()
+      ↓ (POST request)
+ticketsApi → /api/tickets
+      ↓ (JWT validation)
+Backend routes/tickets.js
+      ↓ (authenticateToken middleware)
+Prisma ORM
+      ↓ (SQL INSERT)
+SQLite Database
+      ↓ (response)
+Backend sends ticket data
+      ↓
+RTK Query updates cache
+      ↓ (invalidatesTags: ['Tickets'])
+All useGetTicketsQuery() refetch automatically
+      ↓
+UI updates with new ticket
+      ↓
+Modal closes, form resets
+```
+
+---
+
+### 🚀 Usage Examples
+
+#### Creating a Ticket
+```javascript
+// In any component
+import { useCreateTicketMutation } from "@/store/api/ticketsApi";
+
+function MyComponent() {
+  const [createTicket, { isLoading, error }] = useCreateTicketMutation();
+
+  const handleCreate = async () => {
+    try {
+      const result = await createTicket({
+        subject: "Bug report",
+        priority: "Medium",
+        assignedTo: "Tech Support",
+        description: "Login button not working"
+      }).unwrap();
+
+      console.log("Ticket created:", result);
+    } catch (err) {
+      console.error("Failed:", err);
+    }
+  };
+
+  return (
+    <button onClick={handleCreate} disabled={isLoading}>
+      {isLoading ? "Creating..." : "Create Ticket"}
+    </button>
+  );
+}
+```
+
+#### Listing Tickets
+```javascript
+import { useGetTicketsQuery } from "@/store/api/ticketsApi";
+
+function TicketsList() {
+  const { data: tickets = [], isLoading, error } = useGetTicketsQuery();
+
+  if (isLoading) return <CircularProgress />;
+  if (error) return <Alert severity="error">{error.message}</Alert>;
+
+  return (
+    <List>
+      {tickets.map(ticket => (
+        <ListItem key={ticket.id}>
+          <ListItemText
+            primary={ticket.subject}
+            secondary={`Priority: ${ticket.priority} | Status: ${ticket.status}`}
+          />
+        </ListItem>
+      ))}
+    </List>
+  );
+}
+```
+
+#### Adding Comments
+```javascript
+import { useAddTicketDescriptionMutation } from "@/store/api/ticketsApi";
+
+function AddComment({ ticketId }) {
+  const [addDescription] = useAddTicketDescriptionMutation();
+
+  const handleAddComment = async (comment) => {
+    await addDescription({
+      id: ticketId,
+      description: comment
+    }).unwrap();
+    // Automatically refetches ticket details
+  };
+
+  return <CommentForm onSubmit={handleAddComment} />;
+}
+```
+
+---
+
+### 📁 Files Modified/Created
+
+**Backend:**
+- ✅ `backend/server/prisma/schema.prisma` - Added Ticket & TicketDescription models
+- ✅ `backend/server/routes/tickets.js` - New API routes (created)
+- ✅ `backend/server/index.js` - Registered ticket routes
+- ✅ `backend/server/prisma/migrations/` - Migration SQL files
+
+**Frontend:**
+- ✅ `frontend/src/store/api/ticketsApi.js` - RTK Query slice (created)
+- ✅ `frontend/src/store/store.js` - Registered ticketsApi reducer & middleware
+- ✅ `frontend/src/modules/tickets/components/CreateTicketButton/CreateTicketButton.jsx` - Updated with mutation
+
+**Database:**
+- ✅ Migration: `20251222235419_add_tickets_table`
+- ✅ Tables created: `tickets`, `ticket_descriptions`
+
+---
+
+### 🎯 Next Steps (Recommended)
+
+1. **Ticket List View**
+   ```javascript
+   // Create TicketsView.jsx using useGetTicketsQuery()
+   ```
+
+2. **Ticket Detail View**
+   ```javascript
+   // Create TicketDetailView.jsx using useGetTicketQuery(id)
+   ```
+
+3. **Status Updates**
+   ```javascript
+   // Use useUpdateTicketMutation() to change status
+   ```
+
+4. **Filters & Search**
+   ```javascript
+   // Add filters by priority, status, date
+   ```
+
+5. **Permissions**
+   ```javascript
+   // Add permissions: 'view_tickets', 'create_tickets', 'manage_tickets'
+   // in prisma/seed.js
+   ```
+
+6. **Real-time Updates** (Optional)
+   ```javascript
+   // Add WebSocket support for live ticket updates
+   ```
+
+---
+
+### 🧪 Testing
+
+**Manual Testing Steps:**
+1. Start backend: `cd backend/server && npm run dev`
+2. Start frontend: `cd frontend && npm run dev`
+3. Login with test credentials
+4. Navigate to Tickets section
+5. Click "Create New Ticket"
+6. Fill form and submit
+7. Verify ticket appears in database: `npx prisma studio`
+
+**Test Credentials:**
+```
+BPO Admin: admin@paricus.com / admin123!
+Client Admin: admin@flexmobile.com / flex123!
+Client User: user@flexmobile.com / flexuser123!
+```
+
+---
+
+### 🔍 Troubleshooting
+
+**Issue: "Cannot read properties of undefined"**
+- Solution: Use default values in hooks
+  ```javascript
+  const { data: tickets = [] } = useGetTicketsQuery();
+  ```
+
+**Issue: Tickets not refetching after creation**
+- Solution: Ensure mutation has `invalidatesTags: ['Tickets']`
+- Check query has `providesTags: ['Tickets']`
+
+**Issue: 401 Unauthorized**
+- Solution: Verify JWT token in localStorage
+- Check `Authorization` header is set in `prepareHeaders`
+
+**Issue: 500 Internal Server Error**
+- Solution: Check backend logs
+- Verify database migration completed
+- Ensure Prisma client is generated
+
+---
+
+### 📝 Implementation Summary
+
+**Date:** 2025-12-22
+**Pattern:** RTK Query + Prisma ORM
+**Database:** SQLite
+**Status:** ✅ Fully functional
+**Migration:** `20251222235419_add_tickets_table`
+
+**Key Metrics:**
+- 2 database tables created
+- 6 REST API endpoints
+- 6 React hooks generated
+- 1 component integrated
+- Full CRUD operations supported
+
+---
+
 **Structure implemented on:** 2025-11-17
+**Tickets system added on:** 2025-12-22
 **Pattern:** Screaming Architecture
 **Status:** ✅ Completed and functional

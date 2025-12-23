@@ -777,9 +777,9 @@ export default {
         label: "Priority",
         requiredMsg: "The Priority field is required.",
         level: {
-          hight: "hight",
-          medium: "medium",
-          low: "low",
+          high: "High",
+          medium: "Medium",
+          low: "Low",
         },
       },
       assignedTo: {

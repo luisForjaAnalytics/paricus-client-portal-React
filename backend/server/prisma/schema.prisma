@@ -20,6 +20,7 @@ model Client {
   knowledgeBase    KnowledgeBase[]
   folderAccess     ClientFolderAccess[]
   invoices         Invoice[]
+  tickets          Ticket[]
 
   @@index([isActive])
   @@index([isProspect])
@@ -73,6 +74,7 @@ model User {
   role                 Role?           @relation(fields: [roleId], references: [id], onDelete: SetNull)
   client               Client?         @relation(fields: [clientId], references: [id], onDelete: Cascade)
   knowledgeBase        KnowledgeBase[]
+  tickets              Ticket[]
 
   @@index([email])
   @@index([clientId])
@@ -207,4 +209,38 @@ model Log {
   @@index([status])
   @@index([ipAddress])
   @@map("logs")
+}
+
+model Ticket {
+  id          String             @id @default(uuid())
+  clientId    Int                @map("client_id")
+  userId      Int                @map("user_id")
+  subject     String
+  priority    String             // "High", "Medium", "Low"
+  status      String             @default("Open") // "Open", "In Progress", "Resolved", "Closed"
+  assignedTo  String?            @map("assigned_to")
+  createdAt   DateTime           @default(now()) @map("created_at")
+  updatedAt   DateTime           @default(now()) @updatedAt @map("updated_at")
+  client      Client             @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  descriptions TicketDescription[]
+
+  @@index([clientId])
+  @@index([userId])
+  @@index([status])
+  @@index([priority])
+  @@index([createdAt])
+  @@map("tickets")
+}
+
+model TicketDescription {
+  id              Int      @id @default(autoincrement())
+  ticketId        String   @map("ticket_id")
+  descriptionData String   @map("description_data")
+  timestamp       DateTime @default(now())
+  ticket          Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@index([timestamp])
+  @@map("ticket_descriptions")
 }

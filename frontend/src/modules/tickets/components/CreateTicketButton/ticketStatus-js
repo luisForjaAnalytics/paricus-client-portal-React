@@ -1,0 +1,14 @@
+export const TICKET_STATUS = {
+  OPEN: "OPEN",
+  IN_PROGRESS: "IN_PROGRESS",
+  COMPLETED: "COMPLETED",
+  CANCELLED: "CANCELLED",
+  PENDING: "PENDING",
+  CLOSE: "CLOSE",
+};
+
+export const PRIORITY_STATUS = {
+  LOW: "LOW",
+  MEDIUM: "MEDIUM",
+  HIGH: "HIGH",
+};

@@ -777,7 +777,7 @@ export default {
         label: "Prioridad",
         requiredMsg: "El campo prioridad es requerido.",
         level: {
-          hight: "Alta",
+          high: "Alta",
           medium: "Media",
           low: "Baja",
         },

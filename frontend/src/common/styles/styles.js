@@ -681,7 +681,6 @@ export const modalCard = {
   },
   //Create New Ticket Style
   createNewTiketStyle: {
-
     dialogTicketSection: {
       borderRadius: "1.5rem",
       overflow: "hidden",
@@ -702,7 +701,7 @@ export const modalCard = {
       "& .MuiOutlinedInput-root": {
         backgroundColor: colors.surface,
         borderRadius: borderRadiusSection,
-        height: "15rem",
+        paddingBottom: "10rem",
         "&.Mui-focused fieldset": {
           borderColor: colors.focusRing,
         },
@@ -750,7 +749,7 @@ export const modalCard = {
     "& .MuiOutlinedInput-root": {
       backgroundColor: colors.surface,
       borderRadius: borderRadiusSection,
-      height: "6rem",
+      paddingBottom: "3rem",
       "&.Mui-focused fieldset": {
         borderColor: colors.focusRing,
       },

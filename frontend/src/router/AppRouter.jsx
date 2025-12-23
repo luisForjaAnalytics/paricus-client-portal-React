@@ -32,7 +32,11 @@ import {
 import { ErrorView } from "../modules/error";
 import { ArticleView } from "../modules/knowledge-base/components/ArticleView";
 import LoginView from "../common/components/layout/Login";
-import { TicketsViewDesktop } from "../modules/tickets";
+import {
+  TicketsView,
+  TicketsViewDesktop,
+  TicketViewDetails,
+} from "../modules/tickets";
 
 const router = createBrowserRouter(
   [
@@ -102,9 +106,19 @@ const router = createBrowserRouter(
           path: "tickets",
           element: (
             <ProtectedRoute requiredPermission="view_tickets">
-              <TicketsViewDesktop />
+              <TicketsView />
             </ProtectedRoute>
           ),
+          children: [
+            {
+              path: "ticketTable",
+              element: <TicketsViewDesktop />,
+            },
+            {
+              path: "ticketTable/:ticketId",
+              element: <TicketViewDetails />,
+            },
+          ],
         },
         {
           path: "financial",
