@@ -47,6 +47,9 @@ export const AddNewRoleModal = ({
 }) => {
   const { t } = useTranslation();
 
+  const MAX_CHARACTERS = 500;
+  const isOverLimit = roleForm.description?.length > MAX_CHARACTERS;
+
   return (
     <>
       {/* Add/Edit Role Dialog */}
@@ -113,6 +116,14 @@ export const AddNewRoleModal = ({
               onChange={(e) =>
                 setRoleForm({ ...roleForm, description: e.target.value })
               }
+              error={isOverLimit}
+              helperText={
+                isOverLimit
+                  ? t("roles.form.maxCharactersError", {
+                      max: MAX_CHARACTERS,
+                    })
+                  : `${roleForm.description?.length || 0}/${MAX_CHARACTERS}`
+              }
               sx={modalCard?.inputDescriptionSection}
             />
             {isBPOAdmin && (
@@ -152,7 +163,7 @@ export const AddNewRoleModal = ({
           <Button
             variant="contained"
             onClick={saveRole}
-            disabled={isSaving || !isFormValid()}
+            disabled={isSaving || !isFormValid() || isOverLimit}
             sx={{ ...primaryIconButton, width: "6rem" }}
           >
             {isSaving ? t("common.saving") : t("common.save")}

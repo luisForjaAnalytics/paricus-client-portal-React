@@ -1,9 +1,4 @@
 export default {
-  // Brand
-  brand: {
-    name: "PARICUS",
-  },
-
   // Navigation - Sidebar
   navigation: {
     dashboard: "Dashboard",
@@ -22,21 +17,8 @@ export default {
 
   // Navigation tooltips (when sidebar is collapsed)
   tooltips: {
-    dashboard: "Dashboard",
-    reporting: "Reporting",
-    audioRetrieval: "Audio Retrieval",
     knowledgeBase: "Knowledge Base",
-    financial: "Financial",
-    reportsManagement: "Reports Management",
-    userManagement: "Management",
-    collapseMenu: "Collapse menu",
-    expandMenu: "Expand menu",
     myProfile: "My Profile",
-  },
-
-  // Sidebar control buttons
-  sidebar: {
-    collapse: "Collapse",
   },
 
   // Header
@@ -46,33 +28,23 @@ export default {
 
   // User dropdown
   userDropdown: {
-    defaultUser: "User",
-    myProfile: "My Profile",
-    userManagement: "User Management",
     signOut: "Sign out",
   },
 
-  // Alt text
-  altText: {
-    userAvatar: "User avatar",
-  },
   // language
   language: {
-    label: "language",
     es: "Spanish",
     en: "English",
   },
 
   //Users Management
   userManagement: {
-    clients: { label: "Clients", title: "Client Management" },
-    users: { label: "Users", title: "User Management" },
+    clients: { title: "Client Management" },
+    users: { title: "User Management" },
     rolesPermissions: {
-      label: "Roles & Permissions",
       title: "Role Management",
     },
     logs: {
-      label: "Logs",
       title: "Logs",
       totalLogs: "total logs",
       filters: "Filters",
@@ -266,21 +238,13 @@ export default {
     yes: "Yes",
     no: "No",
     select: "Select",
-    tryAgain: "Try Again",
-    backToHome: "Back to Home",
-    goHome: "Go Home",
     noResults: "No results found",
     perPage: "Per page",
     showing: "Showing",
     of: "of",
     items: "items",
-    required: "Required",
-    optional: "Optional",
     updating: "Updating...",
     update: "Update",
-    na: "N/A",
-    unknown: "Unknown",
-    invalidDate: "Invalid Date",
   },
 
   // Login
@@ -408,6 +372,7 @@ export default {
       client: "Client",
       roleNameMinLength: "Role name must be at least 2 characters",
       permissionsTitle: "Select which permissions this role should have:",
+      maxCharactersError: "Maximum {{max}} characters allowed",
     },
     actions: {
       edit: "Edit role",
@@ -531,8 +496,6 @@ export default {
     noInvoicesClient: "Invoices will appear here when available",
     uploadSomeInvoices: "Upload some PDF invoices for this client",
     form: {
-      invoiceNumber: "Invoice Number",
-      title: "Title",
       amount: "Amount",
       currency: "Currency",
       status: "Status",
@@ -574,6 +537,7 @@ export default {
         cash: "Cash",
         other: "Other",
       },
+      maxCharactersError: "Maximum {{max}} characters allowed",
     },
     messages: {
       invoiceUpdated: "Invoice updated successfully",
@@ -703,6 +667,7 @@ export default {
       deleteError: "Failed to delete report",
       confirmDelete: 'Are you sure you want to delete "{reportName}"?',
       downloadError: "Failed to generate download link",
+      maxCharactersError: "Maximum {{max}} characters allowed",
     },
     fileSize: {
       bytes: "Bytes",
@@ -757,7 +722,7 @@ export default {
     filters: "Filters",
     table: {
       ticketId: "Ticket ID",
-      lastUpdate: "Last Update",
+      updatedAt: "Last Update",
       subject: "Subject",
       from: "From",
       assignedTo: "Assigned To",
@@ -790,9 +755,28 @@ export default {
         label: "Description",
         placeholderMsg: "Add notes or description for this Ticket",
         requiredMsg: "The description field is required.",
+        maxCharactersError: "Maximum {{max}} characters allowed",
       },
       from: "From",
       submit: "Submit",
+    },
+    ticketView: {
+      status: "Status",
+      priority: "Priority",
+      department: "Department",
+      createdAt: "Created Date",
+      user: "Name",
+      userId: "User Id",
+      email: "Email",
+      phone: "Phone",
+      assignedTo: "Assigned To",
+      slaPlan: "SLA Plan",
+      dueDate: "Due Date",
+      updatedAt: "Last Update",
+      description: "Description",
+      maxCharactersError: "Maximum {{max}} characters allowed",
+      subject: "Subject",
+      from: "From",
     },
   },
 };

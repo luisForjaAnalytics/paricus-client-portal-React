@@ -43,6 +43,8 @@ export const UploadInvoiceButton = ({ selectedFolder, onSuccess, onError }) => {
     reset: resetOcr,
   } = useTesseractOCR();
 
+  const MAX_CHARACTERS = 500;
+
   // React Hook Form
   const {
     control,
@@ -68,6 +70,8 @@ export const UploadInvoiceButton = ({ selectedFolder, onSuccess, onError }) => {
   });
 
   const watchedFile = watch("file");
+  const watchedDescription = watch("description");
+  const isOverLimit = watchedDescription?.length > MAX_CHARACTERS;
 
   // Procesar el texto OCR cuando esté disponible
   useEffect(() => {
@@ -459,6 +463,14 @@ export const UploadInvoiceButton = ({ selectedFolder, onSuccess, onError }) => {
                       multiline
                       rows={3}
                       placeholder={t("financials.form.descriptionPlaceholder")}
+                      error={isOverLimit}
+                      helperText={
+                        isOverLimit
+                          ? t("financials.form.maxCharactersError", {
+                              max: MAX_CHARACTERS,
+                            })
+                          : `${field.value?.length || 0}/${MAX_CHARACTERS}`
+                      }
                       sx={modalCard?.inputDescriptionSection}
                     />
                   )}
@@ -490,7 +502,7 @@ export const UploadInvoiceButton = ({ selectedFolder, onSuccess, onError }) => {
             <Button
               type="submit"
               variant="contained"
-              disabled={uploading || ocrLoading || !isValid}
+              disabled={uploading || ocrLoading || !isValid || isOverLimit}
               sx={primaryIconButton}
             >
               {uploading

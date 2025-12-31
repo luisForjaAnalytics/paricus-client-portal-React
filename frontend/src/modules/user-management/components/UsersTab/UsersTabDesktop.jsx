@@ -13,7 +13,6 @@ import {
   InputAdornment,
   Tooltip,
 } from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
 import {
   Add as AddIcon,
   Edit as EditIcon,
@@ -24,12 +23,11 @@ import {
 import {
   primaryIconButton,
   colors,
-  typography,
-  card,
   filterStyles,
 } from "../../../../common/styles/styles";
 import { useTranslation } from "react-i18next";
 import { FilterButton } from "../FilterButton/FilterButton";
+import { UniversalDataGrid, useDataGridColumns } from "../../../../common/components/ui/UniversalDataGrid";
 
 export const UsersTabDesktop = ({
   users,
@@ -50,123 +48,95 @@ export const UsersTabDesktop = ({
   const { t } = useTranslation();
 
   // DataGrid columns
-  const columns = useMemo(
-    () => [
-      {
-        field: "name",
-        headerName: t("users.table.name"),
-        flex: 1,
-        align: "left",
-        headerAlign: "center",
-        renderCell: (params) => (
-          <Typography
-            variant="body2"
-            fontWeight="medium"
-            sx={{ margin: "1rem" }}
-          >
-            {params.value || t("common.na")}
-          </Typography>
-        ),
-      },
-      {
-        field: "email",
-        headerName: t("users.table.email"),
-        flex: 1,
-        align: "left",
-        headerAlign: "center",
-      },
-      {
-        field: "client_name",
-        headerName: t("users.table.client"),
-        flex: 1,
-        align: "left",
-        headerAlign: "center",
-      },
-      {
-        field: "role_name",
-        headerName: t("users.table.role"),
-        flex: 1,
-        align: "center",
-        headerAlign: "center",
-        renderCell: (params) =>
-          params.value ? (
-            <Chip label={params.value} color="primary" size="small" />
-          ) : (
-            <Chip
-              label={t("users.table.noRoleAssigned")}
-              color="default"
-              size="small"
-              variant="outlined"
-            />
-          ),
-      },
-      {
-        field: "is_active",
-        headerName: t("users.table.status"),
-        flex: 1,
-        align: "center",
-        headerAlign: "center",
-        renderCell: (params) => (
+  const columns = useDataGridColumns([
+    {
+      field: "name",
+      headerNameKey: "users.table.name",
+      flex: 1,
+      align: "left",
+      renderCell: (params) => (
+        <Typography variant="body2" fontWeight="medium" sx={{ margin: "1rem" }}>
+          {params.value || t("common.na")}
+        </Typography>
+      ),
+    },
+    {
+      field: "email",
+      headerNameKey: "users.table.email",
+      flex: 1,
+      align: "left",
+    },
+    {
+      field: "client_name",
+      headerNameKey: "users.table.client",
+      flex: 1,
+      align: "left",
+    },
+    {
+      field: "role_name",
+      headerNameKey: "users.table.role",
+      flex: 1,
+      renderCell: (params) =>
+        params.value ? (
+          <Chip label={params.value} color="primary" size="small" />
+        ) : (
           <Chip
-            label={
-              params.value ? t("users.table.active") : t("users.table.inactive")
-            }
-            color={params.value ? "success" : "error"}
+            label={t("users.table.noRoleAssigned")}
+            color="default"
             size="small"
+            variant="outlined"
           />
         ),
-      },
-      {
-        field: "created_at",
-        headerName: t("users.table.created"),
-        flex: 1,
-        align: "center",
-        headerAlign: "center",
-        valueFormatter: (value) => formatDate(value),
-      },
-      {
-        field: "actions",
-        headerName: t("users.table.actions"),
-        flex: 1,
-        align: "center",
-        headerAlign: "center",
-        sortable: false,
-        filterable: false,
-        disableColumnMenu: true,
-        renderCell: (params) => (
-          <Box sx={{ display: "flex", gap: 0.5, justifyContent: "center" }}>
-            <Tooltip title={t("users.actions.editUser")}>
-              <IconButton
-                size="small"
-                onClick={() => openEditDialog(params.row.original)}
-              >
-                <EditIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-            <Tooltip
-              title={
-                params.row.is_active
-                  ? t("users.actions.deactivateUser")
-                  : t("users.actions.activateUser")
-              }
-            >
-              <IconButton
-                size="small"
-                onClick={() => toggleUserStatus(params.row.original)}
-              >
-                {params.row.is_active ? (
-                  <BlockIcon fontSize="small" />
-                ) : (
-                  <CheckCircleIcon fontSize="small" />
-                )}
-              </IconButton>
-            </Tooltip>
-          </Box>
-        ),
-      },
-    ],
-    [t]
-  );
+    },
+    {
+      field: "is_active",
+      headerNameKey: "users.table.status",
+      flex: 1,
+      renderCell: (params) => (
+        <Chip
+          label={params.value ? t("users.table.active") : t("users.table.inactive")}
+          color={params.value ? "success" : "error"}
+          size="small"
+        />
+      ),
+    },
+    {
+      field: "created_at",
+      headerNameKey: "users.table.created",
+      flex: 1,
+      valueFormatter: (value) => formatDate(value),
+    },
+    {
+      field: "actions",
+      headerNameKey: "users.table.actions",
+      flex: 1,
+      sortable: false,
+      renderCell: (params) => (
+        <Box sx={{ display: "flex", gap: 0.5, justifyContent: "center" }}>
+          <Tooltip title={t("users.actions.editUser")}>
+            <IconButton size="small" onClick={() => openEditDialog(params.row.original)}>
+              <EditIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip
+            title={
+              params.row.is_active
+                ? t("users.actions.deactivateUser")
+                : t("users.actions.activateUser")
+            }
+          >
+            <IconButton size="small" onClick={() => toggleUserStatus(params.row.original)}>
+              {params.row.is_active ? (
+                <BlockIcon fontSize="small" />
+              ) : (
+                <CheckCircleIcon fontSize="small" />
+              )}
+            </IconButton>
+          </Tooltip>
+        </Box>
+      ),
+    },
+  ]);
 
   // Transform users data for DataGrid
   const rows = useMemo(() => {
@@ -295,79 +265,13 @@ export const UsersTabDesktop = ({
           />
         </Box>
 
-        <DataGrid
+        <UniversalDataGrid
           rows={rows}
           columns={columns}
           loading={loading}
-          slots={{ toolbar: UsersToolbar }}
-          showToolbar
+          emptyMessage={t("users.noUsersFound") || "No users found"}
           pageSizeOptions={[10, 25, 50, 100]}
-          initialState={{
-            pagination: {
-              paginationModel: { pageSize: 10, page: 0 },
-            },
-          }}
-          disableRowSelectionOnClick
-          sx={{
-            ...card,
-            padding: "0 0 0 0",
-            border: `1px solid ${colors.border}`,
-            "& .MuiDataGrid-columnHeaders": {
-              backgroundColor: `${colors.background} !important`,
-              borderBottom: `2px solid ${colors.border}`,
-            },
-            "& .MuiDataGrid-columnHeader": {
-              backgroundColor: `${colors.background} !important`,
-            },
-            "& .MuiDataGrid-columnHeaderTitle": {
-              fontWeight: typography.fontWeight.bold,
-              textTransform: "uppercase",
-              fontSize: typography.fontSize.tableHeader,
-              fontFamily: typography.fontFamily,
-              color: colors.textMuted,
-              letterSpacing: "0.05em",
-            },
-            "& .MuiDataGrid-sortIcon": {
-              color: colors.primary,
-            },
-            "& .MuiDataGrid-columnHeader--sorted": {
-              backgroundColor: `${colors.primaryLight} !important`,
-            },
-            "& .MuiDataGrid-filler": {
-              backgroundColor: `${colors.background} !important`,
-              width: "0 !important",
-              minWidth: "0 !important",
-              maxWidth: "0 !important",
-            },
-            "& .MuiDataGrid-scrollbarFiller": {
-              display: "none !important",
-            },
-            "& .MuiDataGrid-scrollbar--vertical": {
-              position: "absolute",
-              right: 0,
-            },
-            "& .MuiDataGrid-cell": {
-              borderBottom: `1px solid ${colors.border}`,
-              fontSize: typography.fontSize.body,
-              fontFamily: typography.fontFamily,
-              color: colors.textPrimary,
-            },
-            "& .MuiDataGrid-cell:focus": {
-              outline: "none",
-            },
-            "& .MuiDataGrid-cell:focus-within": {
-              outline: "none",
-            },
-            "& .MuiDataGrid-columnHeader:focus": {
-              outline: "none",
-            },
-            "& .MuiDataGrid-columnHeader:focus-within": {
-              outline: "none",
-            },
-            "& .MuiDataGrid-row:hover": {
-              backgroundColor: colors.background,
-            },
-          }}
+          height={600}
         />
       </Box>
     </Box>

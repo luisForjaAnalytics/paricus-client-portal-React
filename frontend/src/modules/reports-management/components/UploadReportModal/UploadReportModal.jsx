@@ -32,6 +32,9 @@ export const UploadReportModal = ({
 }) => {
   const { t } = useTranslation();
 
+  const MAX_CHARACTERS = 500;
+  const isOverLimit = uploadForm.description?.length > MAX_CHARACTERS;
+
   return (
     <Dialog
       open={!!showUploadModal}
@@ -93,6 +96,14 @@ export const UploadReportModal = ({
             multiline
             rows={3}
             fullWidth
+            error={isOverLimit}
+            helperText={
+              isOverLimit
+                ? t("reportsManagement.upload.maxCharactersError", {
+                    max: MAX_CHARACTERS,
+                  })
+                : `${uploadForm.description?.length || 0}/${MAX_CHARACTERS}`
+            }
             sx={modalCard?.inputDescriptionSection}
           />
 
@@ -138,7 +149,7 @@ export const UploadReportModal = ({
         <Button
           variant="contained"
           onClick={handleUploadReport}
-          disabled={uploading || !uploadForm.file}
+          disabled={uploading || !uploadForm.file || isOverLimit}
           startIcon={
             uploading ? <CircularProgress size={20} /> : <UploadIcon />
           }

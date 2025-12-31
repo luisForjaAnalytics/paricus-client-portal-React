@@ -1,35 +1,17 @@
-import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Chip,
-  Button,
-  TextField,
-  Divider,
-  CircularProgress,
-  Alert,
-  IconButton,
-} from "@mui/material";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import SendIcon from "@mui/icons-material/Send";
+import { useParams } from "react-router-dom";
+import { Box, Typography, Divider, Alert } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import {
-  useAddTicketDescriptionMutation,
-  useGetTicketQuery,
-} from "../../../../store/api/ticketsApi";
+import { useGetTicketQuery } from "../../../../store/api/ticketsApi";
 import { formatDateTime } from "../../../../common/utils/formatDateTime";
-import { colors, typography } from "../../../../common/styles/styles";
+import { ticketStyle } from "../../../../common/styles/styles";
+import TicketInfoGrid from "./components/TicketInfoGrid";
+import { TicketHistoricalInfo } from "./components/TicketHistoricalInfo";
+import { TicketUpdateStatus } from "./components/TicketUpdateStatus";
+import { TicketAttachments } from "./components/TicketAttachments";
 
 export const TicketViewDetails = () => {
   const { t } = useTranslation();
   const { ticketId } = useParams();
-  const navigate = useNavigate();
-  const [newComment, setNewComment] = useState("");
-
-  // Fetch ticket data
   const {
     data: ticket,
     isLoading,
@@ -38,71 +20,120 @@ export const TicketViewDetails = () => {
     skip: !ticketId,
   });
 
-  // Add comment mutation
-  const [addComment, { isLoading: isAddingComment }] =
-    useAddTicketDescriptionMutation();
+  if (isLoading) return <Box>Loading...</Box>;
+  if (error) return <Alert severity="error">Error loading ticket</Alert>;
+  if (!ticket) return null;
 
-  // Handle back navigation
-  const handleBack = () => {
-    navigate("/app/tickets");
-  };
+  // Sort date
+  let sortedDescriptions = [];
+  try {
+    sortedDescriptions = [...ticket.descriptions].sort((a, b) => {
+      return new Date(b.timestamp) - new Date(a.timestamp);
+    });
+  } catch (error) {
+    console.error("Error sorting descriptions:", error);
+    sortedDescriptions = ticket.descriptions || [];
+  }
+  console.log((ticket));
 
-  // Handle add comment
-  const handleAddComment = async () => {
-    if (!newComment.trim()) return;
-
-    try {
-      await addComment({
-        id: ticketId,
-        description: newComment,
-      }).unwrap();
-      setNewComment("");
-    } catch (err) {
-      console.error("Failed to add comment:", err);
-    }
-  };
-
-  // Get priority color
-  const getPriorityColor = (priority) => {
-    switch (priority?.toLowerCase()) {
-      case "high":
-        return { bgcolor: "#ffebee", color: "#c62828" };
-      case "medium":
-        return { bgcolor: "#fff3e0", color: "#e65100" };
-      case "low":
-        return { bgcolor: "#e3f2fd", color: "#1565c0" };
-      default:
-        return { bgcolor: "#f5f5f5", color: "#757575" };
-    }
-  };
-
-  // Get status color
-  const getStatusColor = (status) => {
-    switch (status?.toLowerCase()) {
-      case "open":
-        return { bgcolor: "#e3f2fd", color: "#1976d2" };
-      case "in progress":
-        return { bgcolor: "#fff3e0", color: "#f57c00" };
-      case "resolved":
-        return { bgcolor: "#e8f5e9", color: "#388e3c" };
-      case "closed":
-        return { bgcolor: "#f5f5f5", color: "#616161" };
-      default:
-        return { bgcolor: "#f5f5f5", color: "#757575" };
-    }
-  };
+  const ticketInfo = [
+    {
+      title: "Ticket Info",
+      items: [
+        { label: "status", value: ticket.status },
+        { label: "priority", value: ticket.priority },
+        { label: "department", value: ticket.department },
+        { label: "createdDate", value: formatDateTime(ticket.createdAt) },
+      ],
+    },
+    {
+      title: "User Info",
+      items: [
+        {
+          label: "name",
+          value: `${ticket.user.firstName} ${ticket.user.lastName}`,
+        },
+        { label: "email", value: ticket.user.email },
+      ],
+    },
+    {
+      title: "Assignment",
+      items: [
+        { label: "assignedTo", value: ticket.assignedTo ?? "Unassigned" },
+        { label: "slaPlan", value: ticket.slaPlan },
+        { label: "dueDate", value: formatDateTime(ticket.dueDate) },
+      ],
+    },
+    {
+      title: "Description",
+      items: sortedDescriptions,
+    },
+  ];
 
   return (
     <Box
       sx={{
         display: "flex",
-        //justifyContent: "flex-end",
-        marginBottom: 1,
-        marginRight: 2,
-        gap: 1,
+        flexDirection: "column",
+        //height: "100vh",
+        gap: 2,
+        paddingBottom: 0,
+        pt: { xs: 2, md: 4 },
+        px: { xs: 2, md: 3 },
       }}
     >
-      data...
+      {/* HEADER */}
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+        <Typography>
+          <strong>SUBJECT:</strong> {ticket.subject}
+        </Typography>
+        <Typography>
+          <strong>TICKET:</strong> {ticket.id}
+        </Typography>
+      </Box>
+
+      <Divider sx={ticketStyle.divider} />
+
+      {/* INFO */}
+      <Box sx={ticketStyle.historicalContainer}>
+        <TicketInfoGrid
+          ticket = {ticket}
+        />
+      </Box>
+
+      <Divider sx={ticketStyle.divider} />
+
+      <Box
+        sx={{
+          flex: "0 0 25vh",
+          overflowY: "auto",
+          minHeight: 0,
+          paddingRight: 1,
+        }}
+      >
+          {/*Historical Update */}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 1,
+          }}
+        >
+          {ticketInfo[3]?.items.map((item, index) => (
+            <TicketHistoricalInfo key={index} ticketInfo={item} />
+          ))}
+        </Box>
+      </Box>
+
+      <Divider sx={ticketStyle.divider} />
+
+      {/* ATTACHMENTS */}
+      <TicketAttachments ticket={ticket} />
+
+      <Divider sx={ticketStyle.divider} />
+
+      {/* FOOTER */}
+      <TicketUpdateStatus />
     </Box>
   );
 };

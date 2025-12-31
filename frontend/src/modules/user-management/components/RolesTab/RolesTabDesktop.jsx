@@ -14,7 +14,6 @@ import {
   Typography,
   IconButton,
 } from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
 import {
   Add as AddIcon,
   Edit as EditIcon,
@@ -26,10 +25,9 @@ import {
 import {
   primaryIconButton,
   colors,
-  typography,
-  card,
   filterStyles,
 } from "../../../../common/styles/styles";
+import { UniversalDataGrid, useDataGridColumns } from "../../../../common/components/ui/UniversalDataGrid";
 import { useTranslation } from "react-i18next";
 import { PermissionsModal } from "./PermissionsModal";
 import { FilterButton } from "../FilterButton/FilterButton";
@@ -63,108 +61,94 @@ export const RolesTabDesktop = ({
   const { t } = useTranslation();
 
   // DataGrid columns
-  const columns = useMemo(
-    () => [
-      {
-        field: "role_name",
-        headerName: t("roles.table.roleName"),
-        flex: 1,
-        align: "left",
-        headerAlign: "center",
-        renderCell: (params) => (
-          <Typography variant="body2" fontWeight={500} sx={{ margin: "1rem" }}>
-            {params.value}
-          </Typography>
-        ),
-      },
-      {
-        field: "description",
-        headerName: t("roles.table.description"),
-        flex: 1,
-        align: "left",
-        headerAlign: "center",
-      },
-      {
-        field: "client_name",
-        headerName: t("roles.table.client"),
-        flex: 1,
-        align: "left",
-        headerAlign: "center",
-        renderCell: (params) => (
-          <Chip
-            label={params.value}
-            color="primary"
-            variant="outlined"
-            size="small"
-          />
-        ),
-      },
-      {
-        field: "permissions_count",
-        headerName: t("roles.table.permissions"),
-        flex: 1,
-        align: "center",
-        headerAlign: "center",
-        renderCell: (params) => (
-          <Badge badgeContent={params.value || 0} color="info">
-            <ShieldIcon color="action" />
-          </Badge>
-        ),
-      },
-      {
-        field: "created_at",
-        headerName: t("roles.table.created"),
-        flex: 1,
-        align: "center",
-        headerAlign: "center",
-        valueFormatter: (value) => formatDate(value),
-      },
-      {
-        field: "actions",
-        headerName: t("roles.table.actions"),
-        flex: 1,
-        align: "center",
-        headerAlign: "center",
-        sortable: false,
-        filterable: false,
-        disableColumnMenu: true,
-        renderCell: (params) => (
-          <Box sx={{ display: "flex", gap: 0.5, justifyContent: "center" }}>
-            <Tooltip title={t("roles.actions.edit")}>
+  const columns = useDataGridColumns([
+    {
+      field: "role_name",
+      headerNameKey: "roles.table.roleName",
+      flex: 1,
+      align: "left",
+      renderCell: (params) => (
+        <Typography variant="body2" fontWeight={500} sx={{ margin: "1rem" }}>
+          {params.value}
+        </Typography>
+      ),
+    },
+    {
+      field: "description",
+      headerNameKey: "roles.table.description",
+      flex: 1,
+      align: "left",
+    },
+    {
+      field: "client_name",
+      headerNameKey: "roles.table.client",
+      flex: 1,
+      align: "left",
+      renderCell: (params) => (
+        <Chip
+          label={params.value}
+          color="primary"
+          variant="outlined"
+          size="small"
+        />
+      ),
+    },
+    {
+      field: "permissions_count",
+      headerNameKey: "roles.table.permissions",
+      flex: 1,
+      renderCell: (params) => (
+        <Badge badgeContent={params.value || 0} color="info">
+          <ShieldIcon color="action" />
+        </Badge>
+      ),
+    },
+    {
+      field: "created_at",
+      headerNameKey: "roles.table.created",
+      flex: 1,
+      valueFormatter: (value) => formatDate(value),
+    },
+    {
+      field: "actions",
+      headerNameKey: "roles.table.actions",
+      flex: 1,
+      sortable: false,
+      renderCell: (params) => (
+        <Box sx={{ display: "flex", gap: 0.5, justifyContent: "center" }}>
+          <Tooltip title={t("roles.actions.edit")}>
+            <IconButton
+              size="small"
+              onClick={() => openEditDialog(params.row.original)}
+            >
+              <EditIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title={t("roles.actions.configurePermissions")}>
+            <IconButton
+              size="small"
+              color="success"
+              onClick={() => openPermissionsDialog(params.row.original)}
+            >
+              <SecurityIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title={t("roles.actions.delete")}>
+            <span>
               <IconButton
                 size="small"
-                onClick={() => openEditDialog(params.row.original)}
+                color="error"
+                onClick={() => confirmDelete(params.row.original)}
+                disabled={isProtectedRole(params.row.role_name)}
               >
-                <EditIcon fontSize="small" />
+                <DeleteIcon fontSize="small" />
               </IconButton>
-            </Tooltip>
-            <Tooltip title={t("roles.actions.configurePermissions")}>
-              <IconButton
-                size="small"
-                color="success"
-                onClick={() => openPermissionsDialog(params.row.original)}
-              >
-                <SecurityIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title={t("roles.actions.delete")}>
-              <span>
-                <IconButton
-                  size="small"
-                  color="error"
-                  onClick={() => confirmDelete(params.row.original)}
-                  disabled={isProtectedRole(params.row.role_name)}
-                >
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-              </span>
-            </Tooltip>
-          </Box>
-        ),
-      },
-    ],
-    [t, openEditDialog, openPermissionsDialog, confirmDelete, formatDate]
-  );
+            </span>
+          </Tooltip>
+        </Box>
+      ),
+    },
+  ]);
 
   // Transform roles data for DataGrid
   const rows = useMemo(() => {
@@ -293,79 +277,14 @@ export const RolesTabDesktop = ({
           />
         </Box>
 
-        <DataGrid
+        <UniversalDataGrid
           rows={rows}
           columns={columns}
           loading={isLoading}
+          emptyMessage={t("roles.noRolesFound") || "No roles found"}
           slots={{ toolbar: RolesToolbar }}
-          showToolbar
           pageSizeOptions={[10, 25, 50, 100]}
-          initialState={{
-            pagination: {
-              paginationModel: { pageSize: 10, page: 0 },
-            },
-          }}
-          disableRowSelectionOnClick
-          sx={{
-            ...card,
-            padding: "0 0 0 0",
-            border: `1px solid ${colors.border}`,
-            "& .MuiDataGrid-columnHeaders": {
-              backgroundColor: `${colors.background} !important`,
-              borderBottom: `2px solid ${colors.border}`,
-            },
-            "& .MuiDataGrid-columnHeader": {
-              backgroundColor: `${colors.background} !important`,
-            },
-            "& .MuiDataGrid-columnHeaderTitle": {
-              fontWeight: typography.fontWeight.bold,
-              textTransform: "uppercase",
-              fontSize: typography.fontSize.tableHeader,
-              fontFamily: typography.fontFamily,
-              color: colors.textMuted,
-              letterSpacing: "0.05em",
-            },
-            "& .MuiDataGrid-sortIcon": {
-              color: colors.primary,
-            },
-            "& .MuiDataGrid-columnHeader--sorted": {
-              backgroundColor: `${colors.primaryLight} !important`,
-            },
-            "& .MuiDataGrid-filler": {
-              backgroundColor: `${colors.background} !important`,
-              width: "0 !important",
-              minWidth: "0 !important",
-              maxWidth: "0 !important",
-            },
-            "& .MuiDataGrid-scrollbarFiller": {
-              display: "none !important",
-            },
-            "& .MuiDataGrid-scrollbar--vertical": {
-              position: "absolute",
-              right: 0,
-            },
-            "& .MuiDataGrid-cell": {
-              borderBottom: `1px solid ${colors.border}`,
-              fontSize: typography.fontSize.body,
-              fontFamily: typography.fontFamily,
-              color: colors.textPrimary,
-            },
-            "& .MuiDataGrid-cell:focus": {
-              outline: "none",
-            },
-            "& .MuiDataGrid-cell:focus-within": {
-              outline: "none",
-            },
-            "& .MuiDataGrid-columnHeader:focus": {
-              outline: "none",
-            },
-            "& .MuiDataGrid-columnHeader:focus-within": {
-              outline: "none",
-            },
-            "& .MuiDataGrid-row:hover": {
-              backgroundColor: colors.background,
-            },
-          }}
+          height={600}
         />
       </Box>
 

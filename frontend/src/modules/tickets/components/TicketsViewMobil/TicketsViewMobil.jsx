@@ -351,29 +351,4 @@ export const TicketsViewMobil = ({
   );
 };
 
-LogsViewMobile.propTypes = {
-  logs: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      timestamp: PropTypes.string.isRequired,
-      userId: PropTypes.number.isRequired,
-      eventType: PropTypes.string.isRequired,
-      entity: PropTypes.string.isRequired,
-      description: PropTypes.string.isRequired,
-      ipAddress: PropTypes.string,
-      status: PropTypes.string.isRequired,
-    })
-  ),
-  isLoading: PropTypes.bool,
-  error: PropTypes.object,
-  formatTimestamp: PropTypes.func.isRequired,
-  getEventTypeColor: PropTypes.func.isRequired,
-  getStatusColor: PropTypes.func.isRequired,
-  cleanIpAddress: PropTypes.func.isRequired,
-};
 
-LogsViewMobile.defaultProps = {
-  logs: [],
-  isLoading: false,
-  error: null,
-};

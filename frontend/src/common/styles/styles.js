@@ -2,6 +2,8 @@
 // DESIGN SYSTEM - STYLES
 // ========================================
 
+import { Margin } from "@mui/icons-material";
+
 // ========================================
 // FONT FAMILY
 // ========================================
@@ -28,7 +30,8 @@ export const colors = {
 
   //Nav Bar
   navBarColor: "#22c55ee8",
-
+  // Tickets Historical Section Divider
+  dividerColor: "#59cc835e",
   // Neutral colors (Grays - from Tailwind)
   background: "#F9FAFB", // bg-gray-50 - Page background
   surface: "#FFFFFF", // bg-white - Card background
@@ -646,6 +649,7 @@ export const filterStyles = {
 //  Modal styles
 // ========================================
 //Main border Radious
+const actionButtons = "10rem";
 const borderRadiusSection = "1.5rem";
 export const modalCard = {
   //Dialogue main style
@@ -793,4 +797,80 @@ export const modalCard = {
       },
     },
   },
+};
+
+// ========================================
+//  Ticket section styles
+// ========================================
+export const ticketStyle = {
+  // Typography variants (simplified from nested structure)
+  typography: {
+    fontSize: typography.fontSize.body,
+    fontFamily: typography.fontFamily,
+    color: colors.textPrimary,
+  },
+  typographyLabel: {
+    fontSize: typography.fontSize.sm,
+    fontFamily: typography.fontFamily,
+    color: colors.textSecondary,
+    fontWeight: 600,
+  },
+  typographyBold: {
+    fontSize: typography.fontSize.body,
+    fontFamily: typography.fontFamily,
+    color: colors.textPrimary,
+    fontWeight: 600,
+  },
+
+  //Container for historical descriptions
+  historicalContainer: {
+    padding: "1rem 0 1rem 2rem", // p-5 (20px)
+    backgroundColor: colors.surface,
+    borderRadius: borderRadiusSection,
+    boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+    border: `1px solid ${colors.border}`,
+    overflow: "hidden",
+    transition: "border 1000ms ",
+    "&:hover": {
+      border: `1px solid ${colors.focusRing}`,
+    },
+  },
+
+  // Historical description container (simplified from historicalDescription.textInfo.box)
+  historicalDescriptionBox: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 0,
+    width: "100%",
+  },
+
+  divider: {
+    border: `0.2px solid ${colors.dividerColor}`,
+  },
+
+  //Description section
+  inputDescriptionSection: {
+    "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+      borderColor: colors.focusRing,
+    },
+    "& .MuiOutlinedInput-root": {
+      backgroundColor: colors.surface,
+      borderRadius: borderRadiusSection,
+      paddingBottom: "4rem",
+      "&.Mui-focused fieldset": {
+        borderColor: colors.focusRing,
+      },
+    },
+    "& .MuiInputLabel-root": {
+      top: "-0.4rem",
+      "&.Mui-focused": {
+        color: colors.focusRing,
+      },
+      "&.MuiInputLabel-shrink": {
+        top: "0",
+      },
+    },
+  },
+  updateButton: { ...primaryIconButton, width: actionButtons },
+  cancelButton: { ...outlinedButton, width: actionButtons },
 };

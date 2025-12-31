@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { DataGrid, Toolbar } from "@mui/x-data-grid";
 import { Box, IconButton, Typography, Tooltip } from "@mui/material";
 import {
   Edit as EditIcon,
@@ -10,77 +9,13 @@ import {
   useGetAllArticlesQuery,
   useLazyGetArticleByIdQuery,
 } from "../../../store/api/articlesApi";
-import { colors, typography, card } from "../../../common/styles/styles";
+import { colors } from "../../../common/styles/styles";
+import { UniversalDataGrid, useDataGridColumns } from "../../../common/components/ui/UniversalDataGrid";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { TableViewMobil } from "./TableViewMobil";
 import AdvancedFilters from "./AdvancedFilters";
-
-const createColumns = (handleEditClick, handleViewClick) => [
-  {
-    field: "article_name",
-    headerName: "Article Name",
-    width: 300,
-    flex: 1,
-    align: "left",
-    headerAlign: "center",
-    sortable: true,
-    renderCell: (params) => (
-      <Typography variant="body2" fontWeight="medium" sx={{ margin: "1rem" }}>
-        {params.value || "N/A"}
-      </Typography>
-    ),
-  },
-  {
-    field: "article_synopsis",
-    headerName: "Article Synopsis",
-    width: 400,
-    flex: 2,
-    align: "center",
-    headerAlign: "center",
-    sortable: true,
-  },
-  {
-    field: "updated_at",
-    headerName: "Updated At",
-    width: 200,
-    flex: 1,
-    align: "center",
-    headerAlign: "center",
-    sortable: true,
-  },
-
-  {
-    field: "actions",
-    headerName: "Actions",
-    width: 150,
-    align: "center",
-    headerAlign: "center",
-    sortable: false,
-    renderCell: (params) => (
-      <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
-        <IconButton
-          onClick={() => handleEditClick(params.id)}
-          size="small"
-          aria-label="edit"
-          color="primary"
-        >
-          <EditIcon />
-        </IconButton>
-        <IconButton
-          onClick={() => handleViewClick(params.id)}
-          size="small"
-          aria-label="view"
-          sx={{
-            color: colors.primary,
-          }}
-        >
-          <VisibilityIcon />
-        </IconButton>
-      </Box>
-    ),
-  },
-];
+import { formatDateTime } from "../../../common/utils/formatDateTime";
 
 const dataStructure = (data) => {
   try {
@@ -92,7 +27,7 @@ const dataStructure = (data) => {
           id: item?.article_id || "N/A",
           article_name: item?.article_name || "N/A",
           article_synopsis: item?.article_synopsis || "N/A",
-          updated_at: item?.updated_at || "N/A",
+          updated_at: formatDateTime(item?.updated_at) || "N/A",
         };
       } catch (itemError) {
         console.error(`Error processing article at index ${index}:`, itemError);
@@ -181,10 +116,60 @@ export const TableView = () => {
     }
   };
 
-  const columns = useMemo(
-    () => createColumns(handleEditClick, handleViewClick),
-    []
-  );
+  const columns = useDataGridColumns([
+    {
+      field: "article_name",
+      headerNameKey: "knowledgeBase.table.articleName",
+      width: 300,
+      flex: 1,
+      align: "left",
+      renderCell: (params) => (
+        <Typography variant="body2" fontWeight="medium" sx={{ margin: "1rem" }}>
+          {params.value || "N/A"}
+        </Typography>
+      ),
+    },
+    {
+      field: "article_synopsis",
+      headerNameKey: "knowledgeBase.table.synopsis",
+      width: 400,
+      flex: 2,
+    },
+    {
+      field: "updated_at",
+      headerNameKey: "knowledgeBase.table.updatedAt",
+      width: 200,
+      flex: 1,
+    },
+    {
+      field: "actions",
+      headerNameKey: "knowledgeBase.table.actions",
+      width: 150,
+      sortable: false,
+      renderCell: (params) => (
+        <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
+          <Tooltip title={t("knowledgeBase.actions.edit")}>
+            <IconButton
+              onClick={() => handleEditClick(params.id)}
+              size="small"
+              color="primary"
+            >
+              <EditIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title={t("knowledgeBase.actions.view")}>
+            <IconButton
+              onClick={() => handleViewClick(params.id)}
+              size="small"
+              sx={{ color: colors.primary }}
+            >
+              <VisibilityIcon />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      ),
+    },
+  ]);
 
   // Toolbar component for Knowledge Base with filter button
   const KnowledgeBaseToolbar = useMemo(() => {
@@ -246,86 +231,14 @@ export const TableView = () => {
           </Tooltip>
         </Box>
 
-        <DataGrid
+        <UniversalDataGrid
           rows={rows}
           columns={columns}
           loading={isLoading}
+          emptyMessage={t("knowledgeBase.noArticlesFound") || "No articles found"}
           slots={{ toolbar: KnowledgeBaseToolbar }}
-          showToolbar
           pageSizeOptions={[10, 25, 50, 100]}
-          initialState={{
-            pagination: {
-              paginationModel: { pageSize: 10, page: 0 },
-            },
-          }}
-          sortingOrder={["asc", "desc"]}
-          disableRowSelectionOnClick
-          sx={{
-            ...card,
-            padding: "0 0 0 0",
-            border: `1px solid ${colors.border}`,
-            // Header styles
-            "& .MuiDataGrid-columnHeaders": {
-              backgroundColor: `${colors.background} !important`,
-              borderBottom: `2px solid ${colors.border}`,
-            },
-            "& .MuiDataGrid-columnHeader": {
-              backgroundColor: `${colors.background} !important`,
-            },
-            "& .MuiDataGrid-columnHeaderTitle": {
-              fontWeight: typography.fontWeight.bold,
-              textTransform: "uppercase",
-              fontSize: typography.fontSize.tableHeader,
-              fontFamily: typography.fontFamily,
-              color: colors.textMuted,
-              letterSpacing: "0.05em",
-            },
-            // Sorting icons
-            "& .MuiDataGrid-sortIcon": {
-              color: colors.primary,
-            },
-            "& .MuiDataGrid-columnHeader--sorted": {
-              backgroundColor: `${colors.primaryLight} !important`,
-            },
-            // Filler column
-            "& .MuiDataGrid-filler": {
-              backgroundColor: `${colors.background} !important`,
-              width: "0 !important",
-              minWidth: "0 !important",
-              maxWidth: "0 !important",
-            },
-            // Scrollbar
-            "& .MuiDataGrid-scrollbarFiller": {
-              display: "none !important",
-            },
-            "& .MuiDataGrid-scrollbar--vertical": {
-              position: "absolute",
-              right: 0,
-            },
-            // Cell styles
-            "& .MuiDataGrid-cell": {
-              borderBottom: `1px solid ${colors.border}`,
-              fontSize: typography.fontSize.body,
-              fontFamily: typography.fontFamily,
-              color: colors.textPrimary,
-            },
-            "& .MuiDataGrid-cell:focus": {
-              outline: "none",
-            },
-            "& .MuiDataGrid-cell:focus-within": {
-              outline: "none",
-            },
-            "& .MuiDataGrid-columnHeader:focus": {
-              outline: "none",
-            },
-            "& .MuiDataGrid-columnHeader:focus-within": {
-              outline: "none",
-            },
-            // Row hover effect
-            "& .MuiDataGrid-row:hover": {
-              backgroundColor: colors.background,
-            },
-          }}
+          height={600}
         />
       </Box>
 

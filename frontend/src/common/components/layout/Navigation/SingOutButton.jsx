@@ -12,7 +12,7 @@ export const SingOutButton = () => {
   const handleMenuOption = async () => {
     try {
       await logout();
-      navigate(`/login`, { replace: true });
+      navigate(`/login`,{ replace: true });
     } catch (err) {
       console.log(`ERROR handleMenuOption: ${err}`);
     }

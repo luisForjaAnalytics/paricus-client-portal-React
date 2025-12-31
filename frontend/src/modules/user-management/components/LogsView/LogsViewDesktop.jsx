@@ -2,25 +2,17 @@ import { useState, useMemo, useEffect } from "react";
 import PropTypes from "prop-types";
 import {
   Box,
-  Card,
-  CardContent,
   Chip,
   Typography,
-  TextField,
-  InputAdornment,
-  CircularProgress,
   Alert,
   Tooltip,
   IconButton,
 } from "@mui/material";
-import { DataGrid, Toolbar } from "@mui/x-data-grid";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import {
   colors,
-  typography,
-  card,
-  titlesTypography,
 } from "../../../../common/styles/styles";
+import { UniversalDataGrid, useDataGridColumns } from "../../../../common/components/ui/UniversalDataGrid";
 import { useTranslation } from "react-i18next";
 import { useGetLogsQuery } from "../../../../store/api/logsApi";
 import { useDispatch } from "react-redux";
@@ -223,98 +215,80 @@ export const LogsView = () => {
   };
 
   // DataGrid columns
-  const columns = useMemo(
-    () => [
-      {
-        field: "id",
-        headerName: t("userManagement.logs.eventId"),
-        width: 280,
-        align: "center",
-        headerAlign: "center",
-      },
-      {
-        field: "timestamp",
-        headerName: t("userManagement.logs.timestamp"),
-        width: 200,
-        align: "center",
-        headerAlign: "center",
-        valueFormatter: (value) => formatTimestamp(value),
-      },
-      {
-        field: "userId",
-        headerName: t("userManagement.logs.userId"),
-        width: 100,
-        align: "center",
-        headerAlign: "center",
-      },
-      {
-        field: "eventType",
-        headerName: t("userManagement.logs.eventType"),
-        width: 140,
-        align: "center",
-        headerAlign: "center",
-        renderCell: (params) => (
-          <Chip
-            label={params.value}
-            color={getEventTypeColor(params.value)}
-            size="small"
-            variant="outlined"
-            sx={{ marginTop: 0.5 }}
-          />
-        ),
-      },
-      {
-        field: "entity",
-        headerName: t("userManagement.logs.entity"),
-        width: 120,
-        align: "center",
-        headerAlign: "center",
-        renderCell: (params) => (
-          <Typography variant="body2" fontWeight={500} sx={{ marginTop: 2 }}>
-            {params.value}
-          </Typography>
-        ),
-      },
-      {
-        field: "description",
-        headerName: t("userManagement.logs.description"),
-        flex: 1,
-        minWidth: 300,
-        align: "left",
-        headerAlign: "center",
-      },
-      {
-        field: "ipAddress",
-        headerName: t("userManagement.logs.ipAddress"),
-        width: 150,
-        align: "center",
-        headerAlign: "center",
-        renderCell: (params) => (
-          <Typography
-            variant="body2"
-            sx={{ fontFamily: "monospace", marginTop: 2 }}
-          >
-            {cleanIpAddress(params.value)}
-          </Typography>
-        ),
-      },
-      {
-        field: "status",
-        headerName: t("userManagement.logs.status"),
-        width: 200,
-        align: "center",
-        headerAlign: "center",
-        renderCell: (params) => (
-          <Chip
-            label={params.value}
-            color={getStatusColor(params.value)}
-            size="small"
-          />
-        ),
-      },
-    ],
-    [t, formatTimestamp, getEventTypeColor, cleanIpAddress, getStatusColor]
-  );
+  const columns = useDataGridColumns([
+    {
+      field: "id",
+      headerNameKey: "userManagement.logs.eventId",
+      width: 280,
+    },
+    {
+      field: "timestamp",
+      headerNameKey: "userManagement.logs.timestamp",
+      width: 200,
+      valueFormatter: (value) => formatTimestamp(value),
+    },
+    {
+      field: "userId",
+      headerNameKey: "userManagement.logs.userId",
+      width: 100,
+    },
+    {
+      field: "eventType",
+      headerNameKey: "userManagement.logs.eventType",
+      width: 140,
+      renderCell: (params) => (
+        <Chip
+          label={params.value}
+          color={getEventTypeColor(params.value)}
+          size="small"
+          variant="outlined"
+          sx={{ marginTop: 0.5 }}
+        />
+      ),
+    },
+    {
+      field: "entity",
+      headerNameKey: "userManagement.logs.entity",
+      width: 120,
+      renderCell: (params) => (
+        <Typography variant="body2" fontWeight={500} sx={{ marginTop: 2 }}>
+          {params.value}
+        </Typography>
+      ),
+    },
+    {
+      field: "description",
+      headerNameKey: "userManagement.logs.description",
+      flex: 1,
+      minWidth: 300,
+      align: "left",
+    },
+    {
+      field: "ipAddress",
+      headerNameKey: "userManagement.logs.ipAddress",
+      width: 150,
+      renderCell: (params) => (
+        <Typography
+          variant="body2"
+          sx={{ fontFamily: "monospace", marginTop: 2 }}
+        >
+          {cleanIpAddress(params.value)}
+        </Typography>
+      ),
+    },
+    {
+      field: "status",
+      headerNameKey: "userManagement.logs.status",
+      width: 200,
+      renderCell: (params) => (
+        <Chip
+          label={params.value}
+          color={getStatusColor(params.value)}
+          size="small"
+        />
+      ),
+    },
+  ]);
 
   // Toolbar component for logs table with filter button
   const LogsToolbar = useMemo(() => {
@@ -386,79 +360,18 @@ export const LogsView = () => {
             </IconButton>
           </Tooltip>
         </Box>
-        <DataGrid
+        <UniversalDataGrid
           rows={logs}
           columns={columns}
           loading={isLoading}
+          emptyMessage={t("userManagement.logs.noLogsFound") || "No logs found"}
           slots={{ toolbar: LogsToolbar }}
-          showToolbar
           rowCount={totalRows}
           paginationMode="server"
           paginationModel={paginationModel}
           onPaginationModelChange={setPaginationModel}
           pageSizeOptions={[10, 25, 50, 100]}
-          disableRowSelectionOnClick
           autoHeight
-          sx={{
-            ...card,
-            padding: "0 0 0 0",
-            border: `1px solid ${colors.border}`,
-            "& .MuiDataGrid-columnHeaders": {
-              backgroundColor: `${colors.background} !important`,
-              borderBottom: `2px solid ${colors.border}`,
-            },
-            "& .MuiDataGrid-columnHeader": {
-              backgroundColor: `${colors.background} !important`,
-            },
-            "& .MuiDataGrid-columnHeaderTitle": {
-              fontWeight: typography.fontWeight.bold,
-              textTransform: "uppercase",
-              fontSize: typography.fontSize.tableHeader,
-              fontFamily: typography.fontFamily,
-              color: colors.textMuted,
-              letterSpacing: "0.05em",
-            },
-            "& .MuiDataGrid-sortIcon": {
-              color: colors.primary,
-            },
-            "& .MuiDataGrid-columnHeader--sorted": {
-              backgroundColor: `${colors.primaryLight} !important`,
-            },
-            "& .MuiDataGrid-filler": {
-              backgroundColor: `${colors.background} !important`,
-              width: "0 !important",
-              minWidth: "0 !important",
-              maxWidth: "0 !important",
-            },
-            "& .MuiDataGrid-scrollbarFiller": {
-              display: "none !important",
-            },
-            "& .MuiDataGrid-scrollbar--vertical": {
-              position: "absolute",
-              right: 0,
-            },
-            "& .MuiDataGrid-cell": {
-              borderBottom: `1px solid ${colors.border}`,
-              fontSize: typography.fontSize.body,
-              fontFamily: typography.fontFamily,
-              color: colors.textPrimary,
-            },
-            "& .MuiDataGrid-cell:focus": {
-              outline: "none",
-            },
-            "& .MuiDataGrid-cell:focus-within": {
-              outline: "none",
-            },
-            "& .MuiDataGrid-columnHeader:focus": {
-              outline: "none",
-            },
-            "& .MuiDataGrid-columnHeader:focus-within": {
-              outline: "none",
-            },
-            "& .MuiDataGrid-row:hover": {
-              backgroundColor: colors.background,
-            },
-          }}
         />
       </Box>
 

@@ -224,6 +224,7 @@ model Ticket {
   client      Client             @relation(fields: [clientId], references: [id], onDelete: Cascade)
   user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   descriptions TicketDescription[]
+  attachments TicketAttachment[]
 
   @@index([clientId])
   @@index([userId])
@@ -243,4 +244,20 @@ model TicketDescription {
   @@index([ticketId])
   @@index([timestamp])
   @@map("ticket_descriptions")
+}
+
+model TicketAttachment {
+  id         Int      @id @default(autoincrement())
+  ticketId   String   @map("ticket_id")
+  fileName   String   @map("file_name")
+  s3Key      String   @map("s3_key")
+  s3Bucket   String   @map("s3_bucket")
+  fileSize   Int?     @map("file_size")
+  mimeType   String   @map("mime_type")
+  uploadedAt DateTime @default(now()) @map("uploaded_at")
+  ticket     Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@index([uploadedAt])
+  @@map("ticket_attachments")
 }

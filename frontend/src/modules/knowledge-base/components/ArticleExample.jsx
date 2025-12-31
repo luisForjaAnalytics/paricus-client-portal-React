@@ -1,6 +1,7 @@
 import React from 'react';
-import { Box, Card, CardContent, Typography, CircularProgress, Alert } from '@mui/material';
+import { Box, Card, CardContent, CircularProgress, Alert } from '@mui/material';
 import { useGetArticleByIdQuery } from '../../../store/api/articlesApi';
+import { AppText } from '../../../common/components/ui/AppText';
 
 /**
  * Componente de ejemplo para mostrar cómo usar la API de artículos
@@ -30,28 +31,29 @@ export function ArticleExample({ articleId = "PA_US_1" }) {
   return (
     <Card>
       <CardContent>
-        <Typography variant="h5" gutterBottom>
+        <AppText variant="h2" sx={{ mb: 2 }}>
           {article?.title || 'Sin título'}
-        </Typography>
+        </AppText>
 
-        <Typography variant="body2" color="text.secondary" paragraph>
+        <AppText variant="small" color="secondary" sx={{ mb: 2, display: 'block' }}>
           ID: {articleId}
-        </Typography>
+        </AppText>
 
-        <Typography variant="body1">
+        <AppText variant="body">
           {article?.content || 'Sin contenido'}
-        </Typography>
+        </AppText>
 
         {/* Muestra todos los datos del artículo en formato JSON para depuración */}
         <Box mt={3}>
-          <Typography variant="caption" component="pre" sx={{
+          <AppText component="pre" variant="small" sx={{
             background: '#f5f5f5',
             p: 2,
             borderRadius: 1,
-            overflow: 'auto'
+            overflow: 'auto',
+            fontFamily: 'monospace',
           }}>
             {JSON.stringify(article, null, 2)}
-          </Typography>
+          </AppText>
         </Box>
       </CardContent>
     </Card>
@@ -77,7 +79,9 @@ export function ArticleLazyExample() {
       {isLoading && <CircularProgress />}
       {error && <Alert severity="error">Error: {error.message}</Alert>}
       {data && (
-        <Typography>{JSON.stringify(data, null, 2)}</Typography>
+        <AppText component="pre" variant="small" sx={{ fontFamily: 'monospace' }}>
+          {JSON.stringify(data, null, 2)}
+        </AppText>
       )}
     </Box>
   );

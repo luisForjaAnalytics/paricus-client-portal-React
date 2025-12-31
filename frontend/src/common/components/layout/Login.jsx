@@ -46,7 +46,7 @@ const LoginView = () => {
     try {
       const result = await login({ email, password }).unwrap();
       dispatch(setCredentials(result));
-      navigate("/app/dashboard");
+      navigate("/app/dashboard", { replace: true });
     } catch (error) {
       console.error("❌ Login error:", error);
       setErrorMessage(error?.data?.error || t("login.invalidCredentials"));

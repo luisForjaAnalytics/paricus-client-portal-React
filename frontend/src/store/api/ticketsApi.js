@@ -75,6 +75,44 @@ export const ticketsApi = createApi({
       }),
       invalidatesTags: ["Tickets"],
     }),
+
+    // POST /api/tickets/:id/attachments - Upload image attachment
+    uploadTicketAttachment: builder.mutation({
+      query: ({ ticketId, file }) => {
+        const formData = new FormData();
+        formData.append("image", file);
+
+        return {
+          url: `/${ticketId}/attachments`,
+          method: "POST",
+          body: formData,
+        };
+      },
+      transformResponse: (response) => response.data,
+      invalidatesTags: (result, error, { ticketId }) => [
+        "Tickets",
+        { type: "Tickets", id: ticketId },
+      ],
+    }),
+
+    // GET /api/tickets/:ticketId/attachments/:attachmentId/url - Get attachment URL
+    getAttachmentUrl: builder.query({
+      query: ({ ticketId, attachmentId }) =>
+        `/${ticketId}/attachments/${attachmentId}/url`,
+      transformResponse: (response) => response.url,
+    }),
+
+    // DELETE /api/tickets/:ticketId/attachments/:attachmentId - Delete attachment
+    deleteTicketAttachment: builder.mutation({
+      query: ({ ticketId, attachmentId }) => ({
+        url: `/${ticketId}/attachments/${attachmentId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, { ticketId }) => [
+        "Tickets",
+        { type: "Tickets", id: ticketId },
+      ],
+    }),
   }),
 });
 
@@ -85,4 +123,7 @@ export const {
   useUpdateTicketMutation,
   useAddTicketDescriptionMutation,
   useDeleteTicketMutation,
+  useUploadTicketAttachmentMutation,
+  useLazyGetAttachmentUrlQuery,
+  useDeleteTicketAttachmentMutation,
 } = ticketsApi;

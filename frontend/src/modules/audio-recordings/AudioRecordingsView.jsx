@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+  useCallback,
+} from "react";
 import {
   Box,
   Button,
@@ -36,7 +42,7 @@ import { QuickFiltersMobile } from "./components/QuickFilters/QuickFiltersMobile
 import { TableView } from "./components/TableView/TableView.jsx";
 import { typography } from "../../common/styles/styles.js";
 import { FilterButton } from "./components/FilterButton/FilterButton.jsx";
-import { formatDateTime } from "../../common/utils/formatDateTime.jsx";
+import { formatDateTime } from "../../common/utils/formatDateTime";
 
 export const AudioRecordingsView = () => {
   const { t } = useTranslation(); // ADDED: Translation hook
@@ -170,32 +176,6 @@ export const AudioRecordingsView = () => {
     return recordings.find((r) => r.interaction_id === currentlyPlaying);
   }, [recordings, currentlyPlaying]);
 
-  // DISABLED: Prefetch causes performance issues - too many simultaneous API calls
-  // useEffect(() => {
-  //   if (!loading && page < totalPages) {
-  //     const nextPageParams = {
-  //       page: page + 1,
-  //       limit: itemsPerPage,
-  //       ...debouncedFilters,
-  //     };
-  //     prefetchAudioRecordings(nextPageParams);
-  //   }
-  // }, [page, totalPages, itemsPerPage, debouncedFilters, loading, prefetchAudioRecordings]);
-
-  // DISABLED: Handler to prefetch page on hover - causes performance issues
-  // const handlePrefetchPage = (targetPage) => {
-  //   if (targetPage !== page && targetPage >= 1 && targetPage <= totalPages) {
-  //     const prefetchParams = {
-  //       page: targetPage,
-  //       limit: itemsPerPage,
-  //       ...debouncedFilters,
-  //     };
-  //     prefetchAudioRecordings(prefetchParams);
-  //   }
-  // };
-
-  // Methods
-  // Check for API errors
   React.useEffect(() => {
     if (apiError) {
       if (apiError.status === 503) {
@@ -249,99 +229,112 @@ export const AudioRecordingsView = () => {
     }
   }, []);
 
-  const toggleAudio = useCallback(async (item) => {
-    if (currentlyPlaying === item.interaction_id) {
-      stopAudio(item);
-    } else {
-      try {
-        setLoadingAudioUrl(item.interaction_id);
+  const toggleAudio = useCallback(
+    async (item) => {
+      if (currentlyPlaying === item.interaction_id) {
+        stopAudio(item);
+      } else {
+        try {
+          setLoadingAudioUrl(item.interaction_id);
 
-        // ALWAYS call the backend to register the log, even if URL is cached
-        const result = await getAudioUrl(item.interaction_id).unwrap();
-        const audioUrl = result;
+          // ALWAYS call the backend to register the log, even if URL is cached
+          const result = await getAudioUrl(item.interaction_id).unwrap();
+          const audioUrl = result;
 
-        // Update cache with the new URL
-        audioUrlCache.current.set(item.interaction_id, audioUrl);
+          // Update cache with the new URL
+          audioUrlCache.current.set(item.interaction_id, audioUrl);
 
-        if (audioPlayer.current && audioUrl) {
-          audioPlayer.current.src = audioUrl;
-          audioPlayer.current.volume = volume;
-          audioPlayer.current.playbackRate = playbackSpeed;
-          await audioPlayer.current.play();
-          setCurrentlyPlaying(item.interaction_id);
-          setIsPlaying(true);
+          if (audioPlayer.current && audioUrl) {
+            audioPlayer.current.src = audioUrl;
+            audioPlayer.current.volume = volume;
+            audioPlayer.current.playbackRate = playbackSpeed;
+            await audioPlayer.current.play();
+            setCurrentlyPlaying(item.interaction_id);
+            setIsPlaying(true);
+
+            // OPTIMIZED: Log async without blocking UI
+            createLog({
+              userId: authUser.id.toString(),
+              eventType: "PLAY",
+              entity: "AudioRecording",
+              description: `Played audio recording ${
+                item.interaction_id
+              } (Agent: ${item.agent_name || "Unknown"})`,
+              status: "SUCCESS",
+            }).catch((logErr) => {
+              console.error(
+                `ERROR: toggleAudio (createLog) - ${logErr.message}`,
+                logErr
+              );
+            });
+          }
+        } catch (err) {
+          console.error(`ERROR: toggleAudio - ${err.message}`, err);
+          setError("Failed to load audio file. Please try again.");
 
           // OPTIMIZED: Log async without blocking UI
           createLog({
             userId: authUser.id.toString(),
             eventType: "PLAY",
             entity: "AudioRecording",
-            description: `Played audio recording ${
-              item.interaction_id
-            } (Agent: ${item.agent_name || "Unknown"})`,
-            status: "SUCCESS",
+            description: `Failed to play audio recording ${item.interaction_id}`,
+            status: "FAILURE",
           }).catch((logErr) => {
             console.error(
-              `ERROR: toggleAudio (createLog) - ${logErr.message}`,
+              `ERROR: toggleAudio (createLog failure) - ${logErr.message}`,
               logErr
             );
           });
+        } finally {
+          setLoadingAudioUrl(null);
         }
-      } catch (err) {
-        console.error(`ERROR: toggleAudio - ${err.message}`, err);
-        setError("Failed to load audio file. Please try again.");
+      }
+    },
+    [
+      currentlyPlaying,
+      volume,
+      playbackSpeed,
+      getAudioUrl,
+      createLog,
+      authUser.id,
+    ]
+  );
 
-        // OPTIMIZED: Log async without blocking UI
+  const stopAudio = useCallback(
+    async (item) => {
+      // Get recording info before clearing state
+      const recordingToLog =
+        item || recordings.find((r) => r.interaction_id === currentlyPlaying);
+
+      if (audioPlayer.current) {
+        audioPlayer.current.pause();
+        audioPlayer.current.currentTime = 0;
+      }
+
+      // OPTIMIZED: Log async without blocking UI
+      if (recordingToLog && currentlyPlaying) {
         createLog({
           userId: authUser.id.toString(),
-          eventType: "PLAY",
+          eventType: "STOP",
           entity: "AudioRecording",
-          description: `Failed to play audio recording ${item.interaction_id}`,
-          status: "FAILURE",
+          description: `Stopped audio recording ${
+            recordingToLog.interaction_id
+          } (Agent: ${recordingToLog.agent_name || "Unknown"})`,
+          status: "SUCCESS",
         }).catch((logErr) => {
           console.error(
-            `ERROR: toggleAudio (createLog failure) - ${logErr.message}`,
+            `ERROR: stopAudio (createLog) - ${logErr.message}`,
             logErr
           );
         });
-      } finally {
-        setLoadingAudioUrl(null);
       }
-    }
-  }, [currentlyPlaying, volume, playbackSpeed, getAudioUrl, createLog, authUser.id]);
 
-  const stopAudio = useCallback(async (item) => {
-    // Get recording info before clearing state
-    const recordingToLog =
-      item || recordings.find((r) => r.interaction_id === currentlyPlaying);
-
-    if (audioPlayer.current) {
-      audioPlayer.current.pause();
-      audioPlayer.current.currentTime = 0;
-    }
-
-    // OPTIMIZED: Log async without blocking UI
-    if (recordingToLog && currentlyPlaying) {
-      createLog({
-        userId: authUser.id.toString(),
-        eventType: "STOP",
-        entity: "AudioRecording",
-        description: `Stopped audio recording ${
-          recordingToLog.interaction_id
-        } (Agent: ${recordingToLog.agent_name || "Unknown"})`,
-        status: "SUCCESS",
-      }).catch((logErr) => {
-        console.error(
-          `ERROR: stopAudio (createLog) - ${logErr.message}`,
-          logErr
-        );
-      });
-    }
-
-    setCurrentlyPlaying(null);
-    setIsPlaying(false);
-    setCurrentTime(0);
-  }, [recordings, currentlyPlaying, createLog, authUser.id]);
+      setCurrentlyPlaying(null);
+      setIsPlaying(false);
+      setCurrentTime(0);
+    },
+    [recordings, currentlyPlaying, createLog, authUser.id]
+  );
 
   const togglePlayPause = () => {
     try {
@@ -493,32 +486,34 @@ export const AudioRecordingsView = () => {
     }
   };
 
-  const downloadAudio = useCallback(async (item) => {
-    try {
-      setLoadingAudioUrl(item.interaction_id);
+  const downloadAudio = useCallback(
+    async (item) => {
+      try {
+        setLoadingAudioUrl(item.interaction_id);
 
-      let audioUrl = audioUrlCache.current.get(item.interaction_id);
+        let audioUrl = audioUrlCache.current.get(item.interaction_id);
 
-      if (!audioUrl) {
-        const result = await getAudioUrl(item.interaction_id).unwrap();
-        audioUrl = result;
-        audioUrlCache.current.set(item.interaction_id, audioUrl);
+        if (!audioUrl) {
+          const result = await getAudioUrl(item.interaction_id).unwrap();
+          audioUrl = result;
+          audioUrlCache.current.set(item.interaction_id, audioUrl);
+        }
+
+        window.open(audioUrl, "_blank");
+      } catch (err) {
+        console.error(`ERROR: downloadAudio - ${err.message}`, err);
+        setError("Failed to download audio file. Please try again.");
+      } finally {
+        setLoadingAudioUrl(null);
       }
-
-      window.open(audioUrl, "_blank");
-    } catch (err) {
-      console.error(`ERROR: downloadAudio - ${err.message}`, err);
-      setError("Failed to download audio file. Please try again.");
-    } finally {
-      setLoadingAudioUrl(null);
-    }
-  }, [getAudioUrl]);
+    },
+    [getAudioUrl]
+  );
 
   // DISABLED: Prefetch audio causes performance issues - too many API calls on hover
   const handlePrefetchAudio = useCallback(() => {
     // Disabled for performance
   }, []);
-
 
   const getCallTypeColor = (callType) => {
     const types = {
@@ -529,8 +524,6 @@ export const AudioRecordingsView = () => {
     };
     return types[callType?.toLowerCase()] || "default";
   };
-
-  // Note: No useEffect needed - RTK Query automatically fetches data when params change
 
   return (
     <Box sx={{ p: 3, pb: currentlyPlaying ? 15 : 3 }}>
@@ -578,8 +571,8 @@ export const AudioRecordingsView = () => {
           display: "flex",
           justifyContent: "flex-end",
           alignItems: "center",
-            marginBottom: 1,
-            marginRight: 2,
+          marginBottom: 1,
+          marginRight: 2,
         }}
       >
         <FilterButton

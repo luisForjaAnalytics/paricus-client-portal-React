@@ -1,9 +1,4 @@
 export default {
-  // Marca
-  brand: {
-    name: "PARICUS",
-  },
-
   // Navegación - Sidebar
   navigation: {
     dashboard: "Dashboard",
@@ -22,21 +17,8 @@ export default {
 
   // Tooltips de navegación (cuando el sidebar está colapsado)
   tooltips: {
-    dashboard: "Dashboard",
-    reporting: "Reportes",
-    audioRetrieval: "Recuperación de Audio",
     knowledgeBase: "Conocimientos",
-    financial: "Financiero",
-    reportsManagement: "Gestión de Reportes",
-    userManagement: "Gestión de Usuarios",
-    collapseMenu: "Contraer menú",
-    expandMenu: "Expandir menú",
     myProfile: "Mi Perfil",
-  },
-
-  // Botones de control del sidebar
-  sidebar: {
-    collapse: "Contraer",
   },
 
   // Header
@@ -46,32 +28,22 @@ export default {
 
   // Dropdown de usuario
   userDropdown: {
-    defaultUser: "Usuario",
-    myProfile: "Mi Perfil",
-    userManagement: "Gestión de Usuarios",
     signOut: "Cerrar Sesión",
   },
 
-  // Textos alternativos
-  altText: {
-    userAvatar: "Avatar de usuario",
-  },
   // language
   language: {
-    label: "Idioma",
     es: "Español",
     en: "Inglés",
   },
   //Users Management
   userManagement: {
-    clients: { label: "Clientes", title: "Administrador de Clientes" },
-    users: { label: "Usuarios", title: "Administrador de Usuarios" },
+    clients: { title: "Administrador de Clientes" },
+    users: { title: "Administrador de Usuarios" },
     rolesPermissions: {
-      label: "Roles y Permisos",
       title: "Roles y Permisos",
     },
     logs: {
-      label: "Registros",
       title: "Registros",
       totalLogs: "registros totales",
       filters: "Filtros",
@@ -265,21 +237,13 @@ export default {
     yes: "Sí",
     no: "No",
     select: "Seleccionar",
-    tryAgain: "Intentar de Nuevo",
-    backToHome: "Volver al Inicio",
-    goHome: "Ir al Inicio",
     noResults: "No se encontraron resultados",
     perPage: "Por página",
     showing: "Mostrando",
     of: "de",
     items: "elementos",
-    required: "Requerido",
-    optional: "Opcional",
     updating: "Actualizando...",
     update: "Actualizar",
-    na: "N/D",
-    unknown: "Desconocido",
-    invalidDate: "Fecha Inválida",
   },
 
   // Login
@@ -407,6 +371,7 @@ export default {
       client: "Cliente",
       roleNameMinLength: "El nombre del rol debe tener al menos 2 caracteres",
       permissionsTitle: "Seleccione los permisos que debe tener este rol:",
+      maxCharactersError: "Se permiten máximo {{max}} caracteres",
     },
     actions: {
       edit: "Editar rol",
@@ -531,8 +496,6 @@ export default {
     noInvoicesClient: "Las facturas aparecerán aquí cuando estén disponibles",
     uploadSomeInvoices: "Suba algunas facturas en PDF para este cliente",
     form: {
-      invoiceNumber: "Número de Factura",
-      title: "Título",
       amount: "Monto",
       currency: "Moneda",
       status: "Estado",
@@ -575,6 +538,7 @@ export default {
         cash: "Efectivo",
         other: "Otro",
       },
+      maxCharactersError: "Se permiten máximo {{max}} caracteres",
     },
     messages: {
       invoiceUpdated: "Factura actualizada exitosamente",
@@ -704,6 +668,7 @@ export default {
       deleteError: "Error al eliminar el reporte",
       confirmDelete: '¿Está seguro de que desea eliminar "{reportName}"?',
       downloadError: "Error al generar enlace de descarga",
+      maxCharactersError: "Se permiten máximo {{max}} caracteres",
     },
     fileSize: {
       bytes: "Bytes",
@@ -757,7 +722,7 @@ export default {
     filters: "Filtros",
     table: {
       ticketId: "ID de Ticket",
-      lastUpdate: "Última Actualización",
+      updatedAt: "Última Actualización",
       subject: "Asunto",
       from: "De",
       assignedTo: "Asignado a",
@@ -790,9 +755,28 @@ export default {
         label: "Descripción",
         placeholderMsg: "Agregar notas o descripción para este Ticket",
         requiredMsg: "El campo descripción es requerido.",
+        maxCharactersError: "Se permiten máximo {{max}} caracteres",
       },
       from: "De",
       submit: "Enviar",
+    },
+    ticketView: {
+      status: "Estado",
+      priority: "Prioridad",
+      department: "Departamento",
+      createdAt: "Fecha de Creación",
+      user: "Nombre",
+      userId: "Id del Usuario",
+      email: "Correo",
+      phone: "Teléfono",
+      assignedTo: "Asignado a",
+      slaPlan: "Plan SLA",
+      dueDate: "Fecha de Vencimiento",
+      updatedAt: "Última Actualización",
+      description: "Descripción",
+      maxCharactersError: "Se permiten máximo {{max}} caracteres",
+      subject: "Asunto",
+      from: "De",
     },
   },
 };

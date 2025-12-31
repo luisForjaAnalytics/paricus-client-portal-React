@@ -24,7 +24,7 @@ import {
   titlesTypography,
 } from "../../../../common/styles/styles";
 import { useCreateTicketMutation } from "../../../../store/api/ticketsApi";
-import { PRIORITY_STATUS } from "./ticketStatus-js";
+import { PRIORITY_STATUS } from "./ticketStatus";
 import { useSelector } from "react-redux";
 
 export const CreateTickeButton = ({}) => {
@@ -32,11 +32,14 @@ export const CreateTickeButton = ({}) => {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [createTicket, { isLoading, error }] = useCreateTicketMutation();
 
+  const MAX_CHARACTERS = 500;
+
   // React Hook Form
   const {
     control,
     handleSubmit,
     reset,
+    watch,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -48,6 +51,9 @@ export const CreateTickeButton = ({}) => {
       },
     },
   });
+
+  const watchedDescription = watch("description.descriptionData");
+  const isOverLimit = watchedDescription?.length > MAX_CHARACTERS;
 
   const handleCancelModal = () => {
     reset();
@@ -227,6 +233,14 @@ export const CreateTickeButton = ({}) => {
                       placeholder={t(
                         "tickets.createNewTicket.description.placeholderMsg"
                       )}
+                      error={isOverLimit}
+                      helperText={
+                        isOverLimit
+                          ? t("tickets.createNewTicket.description.maxCharactersError", {
+                              max: MAX_CHARACTERS,
+                            })
+                          : `${field.value?.length || 0}/${MAX_CHARACTERS}`
+                      }
                       sx={
                         modalCard?.createNewTiketStyle?.inputDescriptionSection
                       }
@@ -246,7 +260,7 @@ export const CreateTickeButton = ({}) => {
               type="submit"
               variant="contained"
               sx={primaryIconButton}
-              disabled={isLoading}
+              disabled={isLoading || isOverLimit}
             >
               {isLoading
                 ? t("common.loading") || "Loading..."

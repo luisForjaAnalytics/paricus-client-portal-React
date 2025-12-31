@@ -1,12 +1,12 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Box, Card, CardContent, Typography } from "@mui/material";
+import { Box, Card, CardContent } from "@mui/material";
 import {
   summaryCard,
   colors,
-  typography,
   spacing,
 } from "../../../../common/styles/styles";
+import { AppText } from "../../../../common/components/ui/AppText";
 
 export const ClientSummaryCard = ({ payload, formatCurrency }) => {
   return (
@@ -39,36 +39,16 @@ export const ClientSummaryCard = ({ payload, formatCurrency }) => {
                     mb: 1,
                   }}
                 >
-                  <Typography
-                    sx={{
-                      fontWeight: typography.fontWeight.bold,
-                      fontSize: typography.fontSize.small, // text-xs (12px)
-                      color: colors.textMuted,
-                      fontFamily: typography.fontFamily,
-                    }}
-                  >
+                  <AppText variant="smallBold" color="muted">
                     {item.label}
-                  </Typography>
+                  </AppText>
                 </Box>
-                <Typography
-                  sx={{
-                    fontSize: typography.fontSize.h2,
-                    fontWeight: typography.fontWeight.bold,
-                    fontFamily: typography.fontFamily,
-                    color: colors.textPrimary,
-                  }}
-                >
+                <AppText variant="h2" sx={{ mb: 0.5 }}>
                   {formatCurrency(item.overallStatsInfo.tp1)}
-                </Typography>
-                <Typography
-                  sx={{
-                    fontSize: typography.fontSize.small, // text-xs (12px)
-                    color: colors.textMuted,
-                    fontFamily: typography.fontFamily,
-                  }}
-                >
+                </AppText>
+                <AppText variant="small" color="muted">
                   {item.overallStatsInfo.tp2} {item.invoiceState}
-                </Typography>
+                </AppText>
               </CardContent>
             </Card>
           </Box>
