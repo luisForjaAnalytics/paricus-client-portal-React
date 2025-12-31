@@ -25,7 +25,8 @@ import {
 } from "../../../../common/styles/styles";
 import { useCreateTicketMutation } from "../../../../store/api/ticketsApi";
 import { PRIORITY_STATUS } from "./ticketStatus";
-import { useSelector } from "react-redux";
+import { TiptapEditor } from "../../../../common/components/ui/TiptapEditor";
+import "../../../../common/components/ui/TiptapEditor/tiptap-editor.css";
 
 export const CreateTickeButton = ({}) => {
   const { t } = useTranslation();
@@ -40,6 +41,7 @@ export const CreateTickeButton = ({}) => {
     handleSubmit,
     reset,
     watch,
+    setValue,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -48,12 +50,13 @@ export const CreateTickeButton = ({}) => {
       assignedTo: "",
       description: {
         descriptionData: "",
+        textLength: 0,
       },
     },
   });
 
-  const watchedDescription = watch("description.descriptionData");
-  const isOverLimit = watchedDescription?.length > MAX_CHARACTERS;
+  const watchedTextLength = watch("description.textLength");
+  const isOverLimit = watchedTextLength > MAX_CHARACTERS;
 
   const handleCancelModal = () => {
     reset();
@@ -99,7 +102,7 @@ export const CreateTickeButton = ({}) => {
         fullWidth
         slotProps={{
           paper: {
-            sx: modalCard?.createNewTiketStyle?.dialogTicketSection,
+            sx: {...modalCard?.createNewTiketStyle?.dialogTicketSection, width:'60vh'},
           },
         }}
       >
@@ -214,7 +217,7 @@ export const CreateTickeButton = ({}) => {
                 />
               </Box>
 
-              <Box sx={modalCard?.createNewTiketStyle?.boxTicketModal}>
+              <Box sx={{ ...modalCard?.createNewTiketStyle?.boxTicketModal, width: "100%", marginTop:'1rem' }}>
                 <Controller
                   name="description.descriptionData"
                   control={control}
@@ -224,26 +227,26 @@ export const CreateTickeButton = ({}) => {
                     ),
                   }}
                   render={({ field }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label={t("tickets.createNewTicket.description.label")}
-                      multiline
-                      rows={3}
+                    <TiptapEditor
+                      value={field.value}
+                      onChange={(html, textLength) => {
+                        field.onChange(html);
+                        setValue("description.textLength", textLength);
+                      }}
                       placeholder={t(
                         "tickets.createNewTicket.description.placeholderMsg"
                       )}
-                      error={isOverLimit}
+                      error={isOverLimit || !!errors.description?.descriptionData}
                       helperText={
-                        isOverLimit
+                        errors.description?.descriptionData?.message ||
+                        (isOverLimit
                           ? t("tickets.createNewTicket.description.maxCharactersError", {
                               max: MAX_CHARACTERS,
                             })
-                          : `${field.value?.length || 0}/${MAX_CHARACTERS}`
+                          : "")
                       }
-                      sx={
-                        modalCard?.createNewTiketStyle?.inputDescriptionSection
-                      }
+                      maxCharacters={MAX_CHARACTERS}
+                      fullWidth
                     />
                   )}
                 />

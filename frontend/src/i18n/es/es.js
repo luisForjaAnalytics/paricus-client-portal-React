@@ -720,9 +720,11 @@ export default {
   tickets: {
     sectionTitle: "Tickets",
     filters: "Filtros",
+    noTicketsFound: "No se encontraron tickets",
     table: {
       ticketId: "ID de Ticket",
       updatedAt: "Última Actualización",
+      lastUpdate: "Última Actualización",
       subject: "Asunto",
       from: "De",
       assignedTo: "Asignado a",
@@ -777,6 +779,8 @@ export default {
       maxCharactersError: "Se permiten máximo {{max}} caracteres",
       subject: "Asunto",
       from: "De",
+      ticketId: "Ticket",
+      attachFile: "Adjuntar Archivo",
     },
   },
 };

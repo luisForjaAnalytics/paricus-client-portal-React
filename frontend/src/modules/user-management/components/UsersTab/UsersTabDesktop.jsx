@@ -27,7 +27,10 @@ import {
 } from "../../../../common/styles/styles";
 import { useTranslation } from "react-i18next";
 import { FilterButton } from "../FilterButton/FilterButton";
-import { UniversalDataGrid, useDataGridColumns } from "../../../../common/components/ui/UniversalDataGrid";
+import {
+  UniversalDataGrid,
+  useDataGridColumns,
+} from "../../../../common/components/ui/DataGrid/UniversalDataGrid";
 
 export const UsersTabDesktop = ({
   users,
@@ -94,7 +97,9 @@ export const UsersTabDesktop = ({
       flex: 1,
       renderCell: (params) => (
         <Chip
-          label={params.value ? t("users.table.active") : t("users.table.inactive")}
+          label={
+            params.value ? t("users.table.active") : t("users.table.inactive")
+          }
           color={params.value ? "success" : "error"}
           size="small"
         />
@@ -114,7 +119,10 @@ export const UsersTabDesktop = ({
       renderCell: (params) => (
         <Box sx={{ display: "flex", gap: 0.5, justifyContent: "center" }}>
           <Tooltip title={t("users.actions.editUser")}>
-            <IconButton size="small" onClick={() => openEditDialog(params.row.original)}>
+            <IconButton
+              size="small"
+              onClick={() => openEditDialog(params.row.original)}
+            >
               <EditIcon fontSize="small" />
             </IconButton>
           </Tooltip>
@@ -125,7 +133,10 @@ export const UsersTabDesktop = ({
                 : t("users.actions.activateUser")
             }
           >
-            <IconButton size="small" onClick={() => toggleUserStatus(params.row.original)}>
+            <IconButton
+              size="small"
+              onClick={() => toggleUserStatus(params.row.original)}
+            >
               {params.row.is_active ? (
                 <BlockIcon fontSize="small" />
               ) : (
@@ -271,7 +282,6 @@ export const UsersTabDesktop = ({
           loading={loading}
           emptyMessage={t("users.noUsersFound") || "No users found"}
           pageSizeOptions={[10, 25, 50, 100]}
-          height={600}
         />
       </Box>
     </Box>

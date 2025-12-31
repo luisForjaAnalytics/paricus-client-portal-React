@@ -1,28 +1,63 @@
 import express from 'express';
 import multer from 'multer';
+import path from 'path';
+import fs from 'fs/promises';
 import { PrismaClient } from '@prisma/client';
 import { authenticateToken } from '../middleware/auth-prisma.js';
 import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import config from '../config/environment.js';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const router = express.Router();
 const prisma = new PrismaClient();
 
-// Configure S3 client
-const s3Client = new S3Client({
-  region: config.aws.region,
-  credentials: {
-    accessKeyId: config.aws.accessKeyId,
-    secretAccessKey: config.aws.secretAccessKey,
-  },
-});
-
+const STORAGE_MODE = config.storageMode || 'local';
 const BUCKET_NAME = config.aws.bucketName || 'paricus-reports';
 
-// Configure multer for image uploads (memory storage for S3)
+// Configure S3 client (only if using S3)
+let s3Client;
+if (STORAGE_MODE === 's3') {
+  s3Client = new S3Client({
+    region: config.aws.region,
+    credentials: {
+      accessKeyId: config.aws.accessKeyId,
+      secretAccessKey: config.aws.secretAccessKey,
+    },
+  });
+}
+
+// Local storage path
+const UPLOADS_DIR = path.join(__dirname, '..', 'uploads', 'tickets');
+
+// Configure multer based on storage mode
+const storage = STORAGE_MODE === 'local'
+  ? multer.diskStorage({
+      destination: async (req, file, cb) => {
+        const { id: ticketId } = req.params;
+        const { clientId } = req.user;
+        const uploadPath = path.join(UPLOADS_DIR, clientId, ticketId);
+
+        try {
+          await fs.mkdir(uploadPath, { recursive: true });
+          cb(null, uploadPath);
+        } catch (error) {
+          cb(error);
+        }
+      },
+      filename: (req, file, cb) => {
+        const timestamp = Date.now();
+        const sanitizedFileName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
+        cb(null, `${timestamp}-${sanitizedFileName}`);
+      },
+    })
+  : multer.memoryStorage();
+
 const upload = multer({
-  storage: multer.memoryStorage(),
+  storage,
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit for images
   },
@@ -298,18 +333,23 @@ router.delete('/:id', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'Ticket not found' });
     }
 
-    // Delete attachments from S3
+    // Delete attachments from storage
     if (existingTicket.attachments.length > 0) {
       await Promise.all(
         existingTicket.attachments.map(async (attachment) => {
           try {
-            const deleteCommand = new DeleteObjectCommand({
-              Bucket: attachment.s3Bucket,
-              Key: attachment.s3Key,
-            });
-            await s3Client.send(deleteCommand);
+            if (STORAGE_MODE === 's3') {
+              const deleteCommand = new DeleteObjectCommand({
+                Bucket: attachment.s3Bucket,
+                Key: attachment.s3Key,
+              });
+              await s3Client.send(deleteCommand);
+            } else {
+              const filePath = path.join(UPLOADS_DIR, attachment.s3Key);
+              await fs.unlink(filePath);
+            }
           } catch (error) {
-            console.error('Error deleting S3 file:', error);
+            console.error('Error deleting attachment file:', error);
           }
         })
       );
@@ -333,9 +373,21 @@ router.delete('/:id', authenticateToken, async (req, res) => {
  * @access  Private
  */
 router.post('/:id/attachments', authenticateToken, upload.single('image'), async (req, res) => {
+  let localFilePath = null;
+
   try {
     const { id: ticketId } = req.params;
     const { clientId } = req.user;
+
+    // Validate file first
+    if (!req.file) {
+      return res.status(400).json({ error: 'No image file provided' });
+    }
+
+    // Store local file path for cleanup if needed
+    if (STORAGE_MODE === 'local' && req.file.path) {
+      localFilePath = req.file.path;
+    }
 
     // Check if ticket exists and belongs to user's client
     const ticket = await prisma.ticket.findFirst({
@@ -343,45 +395,103 @@ router.post('/:id/attachments', authenticateToken, upload.single('image'), async
     });
 
     if (!ticket) {
+      // Clean up uploaded file if ticket doesn't exist
+      if (localFilePath) {
+        try {
+          await fs.unlink(localFilePath);
+        } catch (cleanupError) {
+          console.error('Error cleaning up file:', cleanupError);
+        }
+      }
       return res.status(404).json({ error: 'Ticket not found' });
     }
 
-    // Validate file
-    if (!req.file) {
-      return res.status(400).json({ error: 'No image file provided' });
+    let s3Key, s3Bucket;
+
+    if (STORAGE_MODE === 's3') {
+      // Generate S3 key for the image
+      const timestamp = Date.now();
+      const sanitizedFileName = req.file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
+      s3Key = `tickets/${clientId}/${ticketId}/${timestamp}-${sanitizedFileName}`;
+      s3Bucket = BUCKET_NAME;
+
+      // Upload to S3
+      const uploadCommand = new PutObjectCommand({
+        Bucket: s3Bucket,
+        Key: s3Key,
+        Body: req.file.buffer,
+        ContentType: req.file.mimetype,
+      });
+
+      await s3Client.send(uploadCommand);
+    } else {
+      // Local storage - file already saved by multer
+      // Store relative path from uploads directory
+      s3Key = path.relative(UPLOADS_DIR, req.file.path).replace(/\\/g, '/');
+      s3Bucket = 'local';
     }
 
-    // Generate S3 key for the image
-    const timestamp = Date.now();
-    const sanitizedFileName = req.file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
-    const s3Key = `tickets/${clientId}/${ticketId}/${timestamp}-${sanitizedFileName}`;
+    // Save attachment record in database with retry logic for SQLite
+    let attachment;
+    let retries = 3;
+    let lastError;
 
-    // Upload to S3
-    const uploadCommand = new PutObjectCommand({
-      Bucket: BUCKET_NAME,
-      Key: s3Key,
-      Body: req.file.buffer,
-      ContentType: req.file.mimetype,
-    });
+    while (retries > 0) {
+      try {
+        attachment = await prisma.ticketAttachment.create({
+          data: {
+            ticketId,
+            fileName: req.file.originalname,
+            s3Key,
+            s3Bucket,
+            fileSize: req.file.size,
+            mimeType: req.file.mimetype,
+          },
+        });
+        break; // Success, exit retry loop
+      } catch (dbError) {
+        lastError = dbError;
+        retries--;
 
-    await s3Client.send(uploadCommand);
+        if (retries > 0) {
+          // Wait a bit before retrying (exponential backoff)
+          await new Promise(resolve => setTimeout(resolve, 100 * (4 - retries)));
+        }
+      }
+    }
 
-    // Save attachment record in database
-    const attachment = await prisma.ticketAttachment.create({
-      data: {
-        ticketId,
-        fileName: req.file.originalname,
-        s3Key,
-        s3Bucket: BUCKET_NAME,
-        fileSize: req.file.size,
-        mimeType: req.file.mimetype,
-      },
-    });
+    if (!attachment) {
+      // Database save failed after retries
+      console.error('Failed to save attachment to database after retries:', lastError);
+
+      // Clean up uploaded file
+      if (localFilePath) {
+        try {
+          await fs.unlink(localFilePath);
+        } catch (cleanupError) {
+          console.error('Error cleaning up file:', cleanupError);
+        }
+      }
+
+      throw new Error('Failed to save attachment to database. Please try again.');
+    }
 
     res.status(201).json({ data: attachment });
   } catch (error) {
     console.error('Error uploading attachment:', error);
-    res.status(500).json({ error: error.message });
+
+    // Clean up file on error if in local mode
+    if (localFilePath) {
+      try {
+        await fs.unlink(localFilePath);
+      } catch (cleanupError) {
+        console.error('Error cleaning up file on error:', cleanupError);
+      }
+    }
+
+    res.status(500).json({
+      error: error.message || 'Failed to upload attachment. Please try again.'
+    });
   }
 });
 
@@ -416,17 +526,81 @@ router.get('/:ticketId/attachments/:attachmentId/url', authenticateToken, async 
       return res.status(404).json({ error: 'Attachment not found' });
     }
 
-    // Generate pre-signed URL
-    const command = new GetObjectCommand({
-      Bucket: attachment.s3Bucket,
-      Key: attachment.s3Key,
-    });
+    let url;
 
-    const url = await getSignedUrl(s3Client, command, { expiresIn: 3600 }); // 1 hour
+    if (STORAGE_MODE === 's3') {
+      // Generate pre-signed URL for S3
+      const command = new GetObjectCommand({
+        Bucket: attachment.s3Bucket,
+        Key: attachment.s3Key,
+      });
+
+      url = await getSignedUrl(s3Client, command, { expiresIn: 3600 }); // 1 hour
+    } else {
+      // For local storage, generate a URL to serve the file
+      url = `/api/tickets/${ticketId}/attachments/${attachmentId}/file`;
+    }
 
     res.json({ url });
   } catch (error) {
     console.error('Error generating attachment URL:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * @route   GET /api/tickets/:ticketId/attachments/:attachmentId/file
+ * @desc    Serve local attachment file
+ * @access  Private
+ */
+router.get('/:ticketId/attachments/:attachmentId/file', authenticateToken, async (req, res) => {
+  try {
+    const { ticketId, attachmentId } = req.params;
+    const { clientId } = req.user;
+
+    // Check if ticket exists and belongs to user's client
+    const ticket = await prisma.ticket.findFirst({
+      where: { id: ticketId, clientId },
+    });
+
+    if (!ticket) {
+      return res.status(404).json({ error: 'Ticket not found' });
+    }
+
+    // Get attachment
+    const attachment = await prisma.ticketAttachment.findFirst({
+      where: {
+        id: parseInt(attachmentId),
+        ticketId,
+      },
+    });
+
+    if (!attachment) {
+      return res.status(404).json({ error: 'Attachment not found' });
+    }
+
+    if (attachment.s3Bucket !== 'local') {
+      return res.status(400).json({ error: 'This endpoint is only for local files' });
+    }
+
+    // Build file path
+    const filePath = path.join(UPLOADS_DIR, attachment.s3Key);
+
+    // Check if file exists
+    try {
+      await fs.access(filePath);
+    } catch {
+      return res.status(404).json({ error: 'File not found on disk' });
+    }
+
+    // Set appropriate headers
+    res.setHeader('Content-Type', attachment.mimeType);
+    res.setHeader('Content-Disposition', `inline; filename="${attachment.fileName}"`);
+
+    // Stream the file
+    res.sendFile(filePath);
+  } catch (error) {
+    console.error('Error serving attachment file:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -462,15 +636,26 @@ router.delete('/:ticketId/attachments/:attachmentId', authenticateToken, async (
       return res.status(404).json({ error: 'Attachment not found' });
     }
 
-    // Delete from S3
-    try {
-      const deleteCommand = new DeleteObjectCommand({
-        Bucket: attachment.s3Bucket,
-        Key: attachment.s3Key,
-      });
-      await s3Client.send(deleteCommand);
-    } catch (error) {
-      console.error('Error deleting from S3:', error);
+    // Delete file based on storage mode
+    if (STORAGE_MODE === 's3') {
+      // Delete from S3
+      try {
+        const deleteCommand = new DeleteObjectCommand({
+          Bucket: attachment.s3Bucket,
+          Key: attachment.s3Key,
+        });
+        await s3Client.send(deleteCommand);
+      } catch (error) {
+        console.error('Error deleting from S3:', error);
+      }
+    } else {
+      // Delete from local storage
+      try {
+        const filePath = path.join(UPLOADS_DIR, attachment.s3Key);
+        await fs.unlink(filePath);
+      } catch (error) {
+        console.error('Error deleting local file:', error);
+      }
     }
 
     // Delete from database

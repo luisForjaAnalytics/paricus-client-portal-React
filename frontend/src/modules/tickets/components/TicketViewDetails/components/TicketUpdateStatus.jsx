@@ -1,20 +1,28 @@
 import { useState } from "react";
-import { Box, Button, TextField } from "@mui/material";
+import { Box, Button, IconButton, CircularProgress, Tooltip } from "@mui/material";
+import AttachFileIcon from "@mui/icons-material/AttachFile";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { ticketStyle } from "../../../../../common/styles/styles";
 import { useAddTicketDescriptionMutation } from "../../../../../store/api/ticketsApi";
+import { TiptapEditor } from "../../../../../common/components/ui/TiptapEditor";
+import { useTicketAttachments } from "../../../../../common/hooks/useTicketAttachments";
+import "../../../../../common/components/ui/TiptapEditor/tiptap-editor.css";
 
 export const TicketUpdateStatus = () => {
   const { t } = useTranslation();
   const { ticketId } = useParams();
   const [description, setDescription] = useState("");
+  const [textLength, setTextLength] = useState(0);
   const navigate = useNavigate();
 
   const [addDescription, { isLoading }] = useAddTicketDescriptionMutation();
 
+  // Use ticket attachments hook
+  const { isUploading, handleFileSelect } = useTicketAttachments(ticketId);
+
   const MAX_CHARACTERS = 500;
-  const isOverLimit = description.length > MAX_CHARACTERS;
+  const isOverLimit = textLength > MAX_CHARACTERS;
 
   const handleUpdate = async () => {
     if (!description.trim() || isOverLimit) return;
@@ -22,10 +30,11 @@ export const TicketUpdateStatus = () => {
     try {
       await addDescription({
         id: ticketId,
-        description: description.trim(),
+        description: description,
       }).unwrap();
       navigate("/app/tickets/ticketTable");
       setDescription("");
+      setTextLength(0);
     } catch (error) {
       console.error("Failed to add description:", error);
     }
@@ -33,7 +42,46 @@ export const TicketUpdateStatus = () => {
 
   const handleCancel = () => {
     setDescription("");
+    setTextLength(0);
   };
+
+  // Custom attachment button for the editor toolbar
+  const attachmentButton = (
+    <Tooltip title={t("tickets.ticketView.attachFile")} arrow placement="top">
+      <span>
+        <IconButton
+          component="label"
+          size="small"
+          disabled={isUploading}
+          sx={{
+            padding: "4px",
+            backgroundColor: "transparent",
+            color: "rgba(0, 0, 0, 0.54)",
+            "&:hover": {
+              backgroundColor: "rgba(0, 0, 0, 0.04)",
+            },
+            "&:disabled": {
+              color: "rgba(0, 0, 0, 0.26)",
+            },
+            minWidth: "28px",
+            minHeight: "28px",
+          }}
+        >
+          {isUploading ? (
+            <CircularProgress size={20} />
+          ) : (
+            <AttachFileIcon fontSize="small" />
+          )}
+          <input
+            type="file"
+            hidden
+            accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+            onChange={handleFileSelect}
+          />
+        </IconButton>
+      </span>
+    </Tooltip>
+  );
 
   return (
     <Box
@@ -44,21 +92,24 @@ export const TicketUpdateStatus = () => {
         gap: 2,
       }}
     >
-      <TextField
-        fullWidth
-        multiline
-        placeholder={t("tickets.createNewTicket.description.placeholderMsg")}
+      <TiptapEditor
         value={description}
-        onChange={(e) => setDescription(e.target.value)}
+        onChange={(html, length) => {
+          setDescription(html);
+          setTextLength(length);
+        }}
+        placeholder={t("tickets.createNewTicket.description.placeholderMsg")}
         error={isOverLimit}
         helperText={
           isOverLimit
             ? t("tickets.ticketView.maxCharactersError", {
                 max: MAX_CHARACTERS,
               })
-            : `${description.length}/${MAX_CHARACTERS}`
+            : ""
         }
-        sx={ticketStyle.inputDescriptionSection}
+        maxCharacters={MAX_CHARACTERS}
+        fullWidth
+        customLeftButtons={[attachmentButton]}
       />
       <Box
         sx={{

@@ -63,7 +63,7 @@ const fieldFormatters = {
 
 const TICKET_FIELDS_CONFIG = {
   subject: {
-    visible: true,
+    visible: false,
     label: "subject",
   },
   priority: {
@@ -95,8 +95,8 @@ const TICKET_FIELDS_CONFIG = {
     hideLabel: true, // Don't show the label, the formatter handles it
   },
   id: {
-    visible: false,
-    label: "id",
+    visible: true,
+    label: "ticketId",
   },
   clientId: {
     visible: false,
@@ -137,7 +137,7 @@ const TicketInfoGrid = ({ ticket }) => {
   };
 
   return (
-    <Box display="flex" flexDirection="column" gap={1}>
+    <Box display="flex" flexDirection="column" gap={1} width={350}>
       {Object.entries(TICKET_FIELDS_CONFIG)
         .filter(([, config]) => config.visible)
         .map(([key, config]) => {

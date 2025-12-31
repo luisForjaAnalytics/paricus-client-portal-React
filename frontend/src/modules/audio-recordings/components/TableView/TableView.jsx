@@ -13,7 +13,7 @@ import { useTranslation } from "react-i18next";
 import { AdvancedFilters } from "../AdvancedFilters/AdvancedFilters";
 import { companies } from "../AdvancedFilters/company.js";
 import { colors } from "../../../../common/styles/styles";
-import { UniversalDataGrid, useDataGridColumns } from "../../../../common/components/ui/UniversalDataGrid";
+import { UniversalDataGrid, useDataGridColumns } from "../../../../common/components/ui/DataGrid/UniversalDataGrid";
 
 const transformRecordings = (rowsTable, formatDate) => {
   try {

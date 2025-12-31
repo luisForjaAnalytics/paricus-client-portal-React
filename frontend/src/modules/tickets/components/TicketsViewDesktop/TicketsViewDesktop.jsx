@@ -7,7 +7,10 @@ import { useTranslation } from "react-i18next";
 import { CreateTickeButton } from "../CreateTicketButton";
 import { useGetTicketsQuery } from "../../../../store/api/ticketsApi";
 import { formatDateTime } from "../../../../common/utils/formatDateTime";
-import { UniversalDataGrid, useDataGridColumns } from "../../../../common/components/ui/UniversalDataGrid";
+import {
+  UniversalDataGrid,
+  useDataGridColumns,
+} from "../../../../common/components/ui/DataGrid/UniversalDataGrid";
 
 export const TicketsViewDesktop = () => {
   const { t } = useTranslation();
@@ -18,12 +21,14 @@ export const TicketsViewDesktop = () => {
   // Transform data for DataGrid if needed
   const rows = useMemo(() => {
     try {
-      return data.map(ticket => ({
+      return data.map((ticket) => ({
         id: ticket.id,
         lastUpdate: formatDateTime(ticket.updatedAt),
         subject: ticket.subject,
-        from: ticket.user ? `${ticket.user.firstName} ${ticket.user.lastName}` : 'Unknown',
-        assignedTo: ticket.assignedTo || 'Unassigned',
+        from: ticket.user
+          ? `${ticket.user.firstName} ${ticket.user.lastName}`
+          : "Unknown",
+        assignedTo: ticket.assignedTo || "Unassigned",
         priority: ticket.priority,
         status: ticket.status,
       }));
@@ -203,9 +208,10 @@ export const TicketsViewDesktop = () => {
           loading={isLoading}
           error={isError ? "Error loading tickets" : null}
           emptyMessage={t("tickets.noTicketsFound") || "No tickets found"}
-          onRowClick={(params) => navigate(`/app/tickets/ticketTable/${params.id}`)}
+          onRowClick={(params) =>
+            navigate(`/app/tickets/ticketTable/${params.id}`)
+          }
           pageSizeOptions={[10, 25, 50, 100]}
-          height={600}
           sx={{
             cursor: "pointer",
             "& .MuiDataGrid-row:hover": {

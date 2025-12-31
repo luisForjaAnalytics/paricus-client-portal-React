@@ -40,6 +40,7 @@ export const colors = {
   border: "#E5E7EB", // border-gray-200
   borderInput: "#D1D5DB", // border-gray-300
   borderSelected: "#374151", //"#16A34A", //"#374151", // border-gray-700
+  borderTiptapEditor: "#2c2c2c59",
   borderVariant: "#D1D5DB", // border-gray-300
   borderSoft: "#E5E7EB", // Updated to match Tailwind
 
@@ -821,7 +822,11 @@ export const ticketStyle = {
     color: colors.textPrimary,
     fontWeight: 600,
   },
-
+  typographySubject: {
+    fontSize: typography.fontSize.h1, // text-xl (20px) - Section Title
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily,
+  },
   //Container for historical descriptions
   historicalContainer: {
     padding: "1rem 0 1rem 2rem", // p-5 (20px)
@@ -873,4 +878,19 @@ export const ticketStyle = {
   },
   updateButton: { ...primaryIconButton, width: actionButtons },
   cancelButton: { ...outlinedButton, width: actionButtons },
+};
+export const tiptapEditorStyle = {
+  "& .MuiOutlinedInput-root": {
+    backgroundColor: colors.surface,
+    borderRadius: borderRadiusSection,
+    border: `1px solid ${colors.borderTiptapEditor}`,
+    transition: "border-color 0.2s ease, border-width 0.2s ease",
+    "&:hover": {
+      borderColor: colors.focusRing,
+    },
+    "&.Mui-focused": {
+      borderColor: colors.focusRing,
+      borderWidth: "2px",
+    },
+  },
 };

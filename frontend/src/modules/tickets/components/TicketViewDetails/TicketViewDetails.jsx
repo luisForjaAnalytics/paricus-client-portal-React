@@ -1,9 +1,12 @@
 import { useParams } from "react-router-dom";
-import { Box, Typography, Divider, Alert } from "@mui/material";
+import { Box, Typography, Divider, Alert, LinearProgress } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { useGetTicketQuery } from "../../../../store/api/ticketsApi";
 import { formatDateTime } from "../../../../common/utils/formatDateTime";
-import { ticketStyle } from "../../../../common/styles/styles";
+import {
+  ticketStyle,
+  titlesTypography,
+} from "../../../../common/styles/styles";
 import TicketInfoGrid from "./components/TicketInfoGrid";
 import { TicketHistoricalInfo } from "./components/TicketHistoricalInfo";
 import { TicketUpdateStatus } from "./components/TicketUpdateStatus";
@@ -16,12 +19,17 @@ export const TicketViewDetails = () => {
     data: ticket,
     isLoading,
     error,
+    isFetching,
   } = useGetTicketQuery(ticketId, {
     skip: !ticketId,
   });
 
-  if (isLoading) return <Box>Loading...</Box>;
-  if (error) return <Alert severity="error">Error loading ticket</Alert>;
+  // Show loading only on initial load, not on refetch
+  if (isLoading && !ticket) return <Box>Loading...</Box>;
+
+  // Don't show error if we're just refetching and already have data
+  if (error && !ticket) return <Alert severity="error">Error loading ticket</Alert>;
+
   if (!ticket) return null;
 
   // Sort date
@@ -34,106 +42,91 @@ export const TicketViewDetails = () => {
     console.error("Error sorting descriptions:", error);
     sortedDescriptions = ticket.descriptions || [];
   }
-  console.log((ticket));
-
-  const ticketInfo = [
-    {
-      title: "Ticket Info",
-      items: [
-        { label: "status", value: ticket.status },
-        { label: "priority", value: ticket.priority },
-        { label: "department", value: ticket.department },
-        { label: "createdDate", value: formatDateTime(ticket.createdAt) },
-      ],
-    },
-    {
-      title: "User Info",
-      items: [
-        {
-          label: "name",
-          value: `${ticket.user.firstName} ${ticket.user.lastName}`,
-        },
-        { label: "email", value: ticket.user.email },
-      ],
-    },
-    {
-      title: "Assignment",
-      items: [
-        { label: "assignedTo", value: ticket.assignedTo ?? "Unassigned" },
-        { label: "slaPlan", value: ticket.slaPlan },
-        { label: "dueDate", value: formatDateTime(ticket.dueDate) },
-      ],
-    },
-    {
-      title: "Description",
-      items: sortedDescriptions,
-    },
-  ];
+  console.log(ticket);
 
   return (
     <Box
       sx={{
+        width: "100%",
+        //height: "70%",
         display: "flex",
         flexDirection: "column",
-        //height: "100vh",
         gap: 2,
         paddingBottom: 0,
         pt: { xs: 2, md: 4 },
-        px: { xs: 2, md: 3 },
+        pl: { xs: 2, md: 3 },
+        pr: { xs: 2, md: 3 },
       }}
     >
-      {/* HEADER */}
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-        <Typography>
-          <strong>SUBJECT:</strong> {ticket.subject}
-        </Typography>
-        <Typography>
-          <strong>TICKET:</strong> {ticket.id}
+      {/* Show subtle loading indicator when refetching (e.g., after uploading image) */}
+      {isFetching && ticket && (
+        <LinearProgress sx={{ position: "absolute", top: 0, left: 0, right: 0 }} />
+      )}
+
+      {/* SUBJECT */}
+      <Box sx={{ marginBottom: "1rem" }}>
+        <Typography sx={ticketStyle.typographySubject}>
+          {ticket.subject.toUpperCase()}
         </Typography>
       </Box>
-
-      <Divider sx={ticketStyle.divider} />
-
-      {/* INFO */}
-      <Box sx={ticketStyle.historicalContainer}>
-        <TicketInfoGrid
-          ticket = {ticket}
-        />
-      </Box>
-
-      <Divider sx={ticketStyle.divider} />
-
+      {/* DESCRIPTION AND DETAILS */}
       <Box
         sx={{
-          flex: "0 0 25vh",
-          overflowY: "auto",
+          display: "flex",
+          flexDirection: "row",
+          gap: 2,
+          flex: 1,
           minHeight: 0,
-          paddingRight: 1,
+          width: "100%",
         }}
       >
-          {/*Historical Update */}
         <Box
           sx={{
             display: "flex",
             flexDirection: "column",
-            gap: 1,
+            gap: 3,
+            width:'70%',
+            minWidth: 0,
           }}
         >
-          {ticketInfo[3]?.items.map((item, index) => (
-            <TicketHistoricalInfo key={index} ticketInfo={item} />
-          ))}
+          {/*Historical Update */}
+          <Box
+            sx={{
+              maxHeight: "250px", // Altura máxima para mostrar ~4 items
+              overflowY: "auto",
+              overflowX: "hidden",
+              paddingRight: 1,
+              "&::-webkit-scrollbar": {
+                width: "8px",
+              },
+              "&::-webkit-scrollbar-track": {
+                backgroundColor: "transparent",
+              },
+              "&::-webkit-scrollbar-thumb": {
+                backgroundColor: "#888",
+                borderRadius: "4px",
+                "&:hover": {
+                  backgroundColor: "#555",
+                },
+              },
+            }}
+          >
+            <TicketHistoricalInfo ticket={ticket} />
+          </Box>
+
+          {/* FOOTER */}
+          <TicketUpdateStatus />
+        </Box>
+
+        {/* INFO */}
+        <Box
+          sx={{
+            ...ticketStyle.historicalContainer,
+          }}
+        >
+          <TicketInfoGrid ticket={ticket} />
         </Box>
       </Box>
-
-      <Divider sx={ticketStyle.divider} />
-
-      {/* ATTACHMENTS */}
-      <TicketAttachments ticket={ticket} />
-
-      <Divider sx={ticketStyle.divider} />
-
-      {/* FOOTER */}
-      <TicketUpdateStatus />
     </Box>
   );
 };

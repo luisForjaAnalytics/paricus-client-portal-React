@@ -27,7 +27,10 @@ import {
 import PropTypes from "prop-types";
 import { FilterButton } from "../FilterButton/FilterButton";
 import { useTranslation } from "react-i18next";
-import { UniversalDataGrid, useDataGridColumns } from "../../../../common/components/ui/UniversalDataGrid";
+import {
+  UniversalDataGrid,
+  useDataGridColumns,
+} from "../../../../common/components/ui/DataGrid/UniversalDataGrid";
 
 export const ClientsTabDesktop = ({
   clients,
@@ -292,7 +295,6 @@ export const ClientsTabDesktop = ({
           emptyMessage={t("clients.noClientsFound") || "No clients found"}
           slots={{ toolbar: ClientsToolbar }}
           pageSizeOptions={[10, 25, 50, 100]}
-          height={600}
         />
       </Box>
     </Box>

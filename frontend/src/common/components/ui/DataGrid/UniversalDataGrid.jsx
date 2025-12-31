@@ -50,7 +50,7 @@ export const UniversalDataGrid = ({
 
   // Sizing
   autoHeight = false,
-  height = 600,
+  height = 'auto',
 
   // Row ID
   getRowId,

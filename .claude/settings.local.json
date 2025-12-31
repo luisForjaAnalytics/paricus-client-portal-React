@@ -54,7 +54,10 @@
       "Bash(set PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=ejecuta la opcion 1)",
       "Bash(cmd /c \"set PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=ejecuta la opcion 1&& npx prisma db push --force-reset --skip-generate\")",
       "Bash($env:PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=\"ejecuta la opcion 1\")",
-      "Bash(cross-env PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=\"ejecuta la opcion 1\" npx prisma db push:*)"
+      "Bash(cross-env PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=\"ejecuta la opcion 1\" npx prisma db push:*)",
+      "Bash(npm install:*)",
+      "Bash(ping:*)",
+      "Bash(if not exist \"c:\\\\desarrollo\\\\FORJA\\\\paricus-client-portal-React\\\\backend\\\\server\\\\uploads\\\\tickets\" mkdir \"c:\\\\desarrollo\\\\FORJA\\\\paricus-client-portal-React\\\\backend\\\\server\\\\uploads\\\\tickets\")"
     ],
     "deny": [],
     "ask": []

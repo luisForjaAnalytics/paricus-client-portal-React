@@ -1,145 +1,111 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
-  Typography,
   IconButton,
   ImageList,
   ImageListItem,
   ImageListItemBar,
-  CircularProgress,
   Alert,
-  Button,
   Dialog,
   DialogContent,
   DialogActions,
+  Skeleton,
 } from "@mui/material";
 import {
-  CloudUpload as UploadIcon,
   Delete as DeleteIcon,
   Close as CloseIcon,
   Image as ImageIcon,
 } from "@mui/icons-material";
-import { useTranslation } from "react-i18next";
-import {
-  useUploadTicketAttachmentMutation,
-  useDeleteTicketAttachmentMutation,
-  useLazyGetAttachmentUrlQuery,
-} from "../../../../../store/api/ticketsApi";
+import { useTicketAttachments } from "../../../../../common/hooks/useTicketAttachments";
+import { useLazyGetAttachmentUrlQuery } from "../../../../../store/api/ticketsApi";
+
+const AttachmentThumbnail = ({ attachment, ticketId }) => {
+  const [thumbnailUrl, setThumbnailUrl] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [getUrl] = useLazyGetAttachmentUrlQuery();
+
+  useEffect(() => {
+    const loadThumbnail = async () => {
+      try {
+        const response = await getUrl({
+          ticketId,
+          attachmentId: attachment.id,
+        }).unwrap();
+
+        const url = typeof response === 'string' ? response : response.url;
+        setThumbnailUrl(url);
+        setLoading(false);
+      } catch (err) {
+        console.error('Error loading thumbnail:', err);
+        setError(true);
+        setLoading(false);
+      }
+    };
+
+    loadThumbnail();
+  }, [attachment.id, ticketId, getUrl]);
+
+  if (loading) {
+    return (
+      <Skeleton
+        variant="rectangular"
+        width="100%"
+        height={180}
+        sx={{ borderRadius: 1 }}
+      />
+    );
+  }
+
+  if (error || !thumbnailUrl) {
+    return (
+      <Box
+        sx={{
+          width: "100%",
+          height: 180,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          bgcolor: "#f5f5f5",
+          borderRadius: 1,
+        }}
+      >
+        <ImageIcon sx={{ fontSize: 60, color: "#999" }} />
+      </Box>
+    );
+  }
+
+  return (
+    <Box
+      component="img"
+      src={thumbnailUrl}
+      alt={attachment.fileName}
+      sx={{
+        width: "100%",
+        height: 180,
+        objectFit: "cover",
+        borderRadius: 1,
+      }}
+      onError={() => setError(true)}
+    />
+  );
+};
 
 export const TicketAttachments = ({ ticket }) => {
-  const { t } = useTranslation();
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [imageUrl, setImageUrl] = useState(null);
-  const [openDialog, setOpenDialog] = useState(false);
-
-  const [uploadAttachment, { isLoading: isUploading }] =
-    useUploadTicketAttachmentMutation();
-  const [deleteAttachment, { isLoading: isDeleting }] =
-    useDeleteTicketAttachmentMutation();
-  const [getAttachmentUrl] = useLazyGetAttachmentUrlQuery();
+  const {
+    isDeleting,
+    selectedImage,
+    imageUrl,
+    openDialog,
+    handleDelete,
+    handleImageClick,
+    handleCloseDialog,
+  } = useTicketAttachments(ticket?.id);
 
   const attachments = ticket?.attachments || [];
 
-  const handleFileSelect = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    // Validate file type
-    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
-    if (!allowedTypes.includes(file.type)) {
-      alert("Only image files (JPEG, PNG, GIF, WEBP) are allowed");
-      return;
-    }
-
-    // Validate file size (10MB max)
-    const maxSize = 10 * 1024 * 1024;
-    if (file.size > maxSize) {
-      alert("File size must be less than 10MB");
-      return;
-    }
-
-    try {
-      await uploadAttachment({
-        ticketId: ticket.id,
-        file,
-      }).unwrap();
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      alert("Failed to upload image");
-    }
-
-    // Reset input
-    event.target.value = "";
-  };
-
-  const handleDelete = async (attachmentId) => {
-    if (!confirm("Are you sure you want to delete this image?")) return;
-
-    try {
-      await deleteAttachment({
-        ticketId: ticket.id,
-        attachmentId,
-      }).unwrap();
-    } catch (error) {
-      console.error("Error deleting image:", error);
-      alert("Failed to delete image");
-    }
-  };
-
-  const handleImageClick = async (attachment) => {
-    try {
-      const url = await getAttachmentUrl({
-        ticketId: ticket.id,
-        attachmentId: attachment.id,
-      }).unwrap();
-
-      setImageUrl(url);
-      setSelectedImage(attachment);
-      setOpenDialog(true);
-    } catch (error) {
-      console.error("Error loading image:", error);
-      alert("Failed to load image");
-    }
-  };
-
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
-    setSelectedImage(null);
-    setImageUrl(null);
-  };
-
   return (
-    <Box sx={{ py: 2 }}>
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          mb: 2,
-        }}
-      >
-        <Typography variant="h6" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <ImageIcon />
-          Attachments ({attachments.length})
-        </Typography>
-
-        <Button
-          variant="contained"
-          component="label"
-          size="small"
-          startIcon={isUploading ? <CircularProgress size={16} /> : <UploadIcon />}
-          disabled={isUploading}
-        >
-          Upload Image
-          <input
-            type="file"
-            hidden
-            accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-            onChange={handleFileSelect}
-          />
-        </Button>
-      </Box>
-
+    <>
       {attachments.length === 0 ? (
         <Alert severity="info" sx={{ mt: 2 }}>
           No attachments yet. Upload an image to get started.
@@ -160,22 +126,12 @@ export const TicketAttachments = ({ ticket }) => {
                   opacity: 0.8,
                 },
               }}
+              onClick={() => handleImageClick(attachment)}
             >
-              <Box
-                sx={{
-                  width: "100%",
-                  height: 180,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  bgcolor: "#f5f5f5",
-                  borderRadius: 1,
-                  overflow: "hidden",
-                }}
-                onClick={() => handleImageClick(attachment)}
-              >
-                <ImageIcon sx={{ fontSize: 60, color: "#999" }} />
-              </Box>
+              <AttachmentThumbnail
+                attachment={attachment}
+                ticketId={ticket.id}
+              />
               <ImageListItemBar
                 title={attachment.fileName}
                 subtitle={`${(attachment.fileSize / 1024).toFixed(1)} KB`}
@@ -225,6 +181,6 @@ export const TicketAttachments = ({ ticket }) => {
           )}
         </DialogContent>
       </Dialog>
-    </Box>
+    </>
   );
 };

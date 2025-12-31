@@ -10,7 +10,7 @@ import {
   useLazyGetArticleByIdQuery,
 } from "../../../store/api/articlesApi";
 import { colors } from "../../../common/styles/styles";
-import { UniversalDataGrid, useDataGridColumns } from "../../../common/components/ui/UniversalDataGrid";
+import { UniversalDataGrid, useDataGridColumns } from "../../../common/components/ui/DataGrid/UniversalDataGrid";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { TableViewMobil } from "./TableViewMobil";
@@ -238,7 +238,7 @@ export const TableView = () => {
           emptyMessage={t("knowledgeBase.noArticlesFound") || "No articles found"}
           slots={{ toolbar: KnowledgeBaseToolbar }}
           pageSizeOptions={[10, 25, 50, 100]}
-          height={600}
+          height={'auto'}
         />
       </Box>
 

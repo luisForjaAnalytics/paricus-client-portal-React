@@ -12,7 +12,7 @@ import FilterListIcon from "@mui/icons-material/FilterList";
 import {
   colors,
 } from "../../../../common/styles/styles";
-import { UniversalDataGrid, useDataGridColumns } from "../../../../common/components/ui/UniversalDataGrid";
+import { UniversalDataGrid, useDataGridColumns } from "../../../../common/components/ui/DataGrid/UniversalDataGrid";
 import { useTranslation } from "react-i18next";
 import { useGetLogsQuery } from "../../../../store/api/logsApi";
 import { useDispatch } from "react-redux";

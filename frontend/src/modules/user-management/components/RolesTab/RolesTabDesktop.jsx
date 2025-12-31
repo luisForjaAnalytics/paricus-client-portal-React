@@ -27,7 +27,10 @@ import {
   colors,
   filterStyles,
 } from "../../../../common/styles/styles";
-import { UniversalDataGrid, useDataGridColumns } from "../../../../common/components/ui/UniversalDataGrid";
+import {
+  UniversalDataGrid,
+  useDataGridColumns,
+} from "../../../../common/components/ui/DataGrid/UniversalDataGrid";
 import { useTranslation } from "react-i18next";
 import { PermissionsModal } from "./PermissionsModal";
 import { FilterButton } from "../FilterButton/FilterButton";
@@ -284,7 +287,6 @@ export const RolesTabDesktop = ({
           emptyMessage={t("roles.noRolesFound") || "No roles found"}
           slots={{ toolbar: RolesToolbar }}
           pageSizeOptions={[10, 25, 50, 100]}
-          height={600}
         />
       </Box>
 
