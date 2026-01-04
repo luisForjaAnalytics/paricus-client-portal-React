@@ -1,7 +1,7 @@
-import parse from "html-react-parser";
 import { useGetArticleByIdQuery } from "../../../store/api/articlesApi";
 import { useParams } from "react-router-dom";
 import { Box } from "@mui/material";
+import { TiptapReadOnly } from "../../../common/components/ui/TiptapReadOnly/TiptapReadOnly";
 
 export const ArticleView = () => {
   const { articleId } = useParams();
@@ -95,7 +95,7 @@ export const ArticleView = () => {
             },
           }}
         >
-          {parse(html)}
+          <TiptapReadOnly content={html} />{" "}
         </Box>
       );
     } catch (err) {

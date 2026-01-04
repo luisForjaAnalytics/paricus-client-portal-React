@@ -194,12 +194,12 @@ const MenuBar = ({ editor, customLeftButtons = [] }) => {
                   sx={{
                     padding: "4px",
                     backgroundColor: button.isActive
-                      ? "#1976d2"
+                      ? "#29b85e80"
                       : "transparent",
                     color: button.isActive ? "white" : "rgba(0, 0, 0, 0.54)",
                     "&:hover": {
                       backgroundColor: button.isActive
-                        ? "#1565c0"
+                        ? "#29b85e59"
                         : "rgba(0, 0, 0, 0.04)",
                     },
                     "&:disabled": {

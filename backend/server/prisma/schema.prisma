@@ -212,18 +212,19 @@ model Log {
 }
 
 model Ticket {
-  id          String             @id @default(uuid())
-  clientId    Int                @map("client_id")
-  userId      Int                @map("user_id")
+  id          String           @id @default(uuid())
+  clientId    Int              @map("client_id")
+  userId      Int              @map("user_id")
   subject     String
-  priority    String             // "High", "Medium", "Low"
-  status      String             @default("Open") // "Open", "In Progress", "Resolved", "Closed"
-  assignedTo  String?            @map("assigned_to")
-  createdAt   DateTime           @default(now()) @map("created_at")
-  updatedAt   DateTime           @default(now()) @updatedAt @map("updated_at")
-  client      Client             @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  descriptions TicketDescription[]
+  priority    String           // "High", "Medium", "Low"
+  status      String           @default("Open") // "Open", "In Progress", "Resolved", "Closed"
+  assignedTo  String?          @map("assigned_to")
+  description String           // JSON: { descriptionData, attachmentIds: [], url }
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @default(now()) @updatedAt @map("updated_at")
+  client      Client           @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  details     TicketDetail[]
   attachments TicketAttachment[]
 
   @@index([clientId])
@@ -234,16 +235,17 @@ model Ticket {
   @@map("tickets")
 }
 
-model TicketDescription {
-  id              Int      @id @default(autoincrement())
-  ticketId        String   @map("ticket_id")
-  descriptionData String   @map("description_data")
-  timestamp       DateTime @default(now())
-  ticket          Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+model TicketDetail {
+  id          Int                    @id @default(autoincrement())
+  ticketId    String                 @map("ticket_id")
+  detailData  String                 @map("detail_data")
+  timestamp   DateTime               @default(now())
+  ticket      Ticket                 @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  attachments TicketDetailAttachment[]
 
   @@index([ticketId])
   @@index([timestamp])
-  @@map("ticket_descriptions")
+  @@map("ticket_details")
 }
 
 model TicketAttachment {
@@ -260,4 +262,20 @@ model TicketAttachment {
   @@index([ticketId])
   @@index([uploadedAt])
   @@map("ticket_attachments")
+}
+
+model TicketDetailAttachment {
+  id             Int          @id @default(autoincrement())
+  ticketDetailId Int          @map("ticket_detail_id")
+  fileName       String       @map("file_name")
+  s3Key          String       @map("s3_key")
+  s3Bucket       String       @map("s3_bucket")
+  fileSize       Int?         @map("file_size")
+  mimeType       String       @map("mime_type")
+  uploadedAt     DateTime     @default(now()) @map("uploaded_at")
+  ticketDetail   TicketDetail @relation(fields: [ticketDetailId], references: [id], onDelete: Cascade)
+
+  @@index([ticketDetailId])
+  @@index([uploadedAt])
+  @@map("ticket_detail_attachments")
 }

@@ -781,6 +781,10 @@ export default {
       from: "From",
       ticketId: "Ticket",
       attachFile: "Attach File",
+      attachments: "Attachments",
+      noUpdatesYet: "No updates yet",
+      updateSuccess: "Update added successfully",
+      imageLoadError: "Failed to load image",
     },
   },
 };

@@ -2,15 +2,10 @@ import { useParams } from "react-router-dom";
 import { Box, Typography, Divider, Alert, LinearProgress } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { useGetTicketQuery } from "../../../../store/api/ticketsApi";
-import { formatDateTime } from "../../../../common/utils/formatDateTime";
-import {
-  ticketStyle,
-  titlesTypography,
-} from "../../../../common/styles/styles";
-import TicketInfoGrid from "./components/TicketInfoGrid";
+import { ticketStyle } from "../../../../common/styles/styles";
+import TicketInfoDetails from "./components/TicketViewDetailsInfo";
 import { TicketHistoricalInfo } from "./components/TicketHistoricalInfo";
-import { TicketUpdateStatus } from "./components/TicketUpdateStatus";
-import { TicketAttachments } from "./components/TicketAttachments";
+import { TicketDescriptionInfo } from "./components/TicketDescriptionInfo";
 
 export const TicketViewDetails = () => {
   const { t } = useTranslation();
@@ -28,21 +23,21 @@ export const TicketViewDetails = () => {
   if (isLoading && !ticket) return <Box>Loading...</Box>;
 
   // Don't show error if we're just refetching and already have data
-  if (error && !ticket) return <Alert severity="error">Error loading ticket</Alert>;
+  if (error && !ticket)
+    return <Alert severity="error">Error loading ticket</Alert>;
 
   if (!ticket) return null;
 
-  // Sort date
-  let sortedDescriptions = [];
+  // Sort details by timestamp
+  let sortedDetails = [];
   try {
-    sortedDescriptions = [...ticket.descriptions].sort((a, b) => {
+    sortedDetails = [...ticket.details].sort((a, b) => {
       return new Date(b.timestamp) - new Date(a.timestamp);
     });
   } catch (error) {
-    console.error("Error sorting descriptions:", error);
-    sortedDescriptions = ticket.descriptions || [];
+    console.error("Error sorting details:", error);
+    sortedDetails = ticket.details || [];
   }
-  console.log(ticket);
 
   return (
     <Box
@@ -60,15 +55,18 @@ export const TicketViewDetails = () => {
     >
       {/* Show subtle loading indicator when refetching (e.g., after uploading image) */}
       {isFetching && ticket && (
-        <LinearProgress sx={{ position: "absolute", top: 0, left: 0, right: 0 }} />
+        <LinearProgress
+          sx={{ position: "absolute", top: 0, left: 0, right: 0 }}
+        />
       )}
 
       {/* SUBJECT */}
-      <Box sx={{ marginBottom: "1rem" }}>
+      <Box>
         <Typography sx={ticketStyle.typographySubject}>
-          {ticket.subject.toUpperCase()}
+          {ticket?.subject?.toUpperCase() || "NO SUBJECT"}
         </Typography>
       </Box>
+
       {/* DESCRIPTION AND DETAILS */}
       <Box
         sx={{
@@ -80,51 +78,32 @@ export const TicketViewDetails = () => {
           width: "100%",
         }}
       >
+        {/*Historical Update */}
+        <TicketHistoricalInfo ticket={ticket} />
+
         <Box
           sx={{
             display: "flex",
             flexDirection: "column",
-            gap: 3,
-            width:'70%',
-            minWidth: 0,
+            gap: 2,
           }}
         >
-          {/*Historical Update */}
+          {/* DESCRIPTION */}
           <Box
             sx={{
-              maxHeight: "250px", // Altura máxima para mostrar ~4 items
-              overflowY: "auto",
-              overflowX: "hidden",
-              paddingRight: 1,
-              "&::-webkit-scrollbar": {
-                width: "8px",
-              },
-              "&::-webkit-scrollbar-track": {
-                backgroundColor: "transparent",
-              },
-              "&::-webkit-scrollbar-thumb": {
-                backgroundColor: "#888",
-                borderRadius: "4px",
-                "&:hover": {
-                  backgroundColor: "#555",
-                },
-              },
+              ...ticketStyle.historicalContainer,
             }}
           >
-            <TicketHistoricalInfo ticket={ticket} />
+            <TicketDescriptionInfo ticket={ticket} />
           </Box>
 
-          {/* FOOTER */}
-          <TicketUpdateStatus />
-        </Box>
-
-        {/* INFO */}
-        <Box
-          sx={{
-            ...ticketStyle.historicalContainer,
-          }}
-        >
-          <TicketInfoGrid ticket={ticket} />
+          <Box
+            sx={{
+              ...ticketStyle.historicalContainer,
+            }}
+          >
+            <TicketInfoDetails ticket={ticket} />
+          </Box>
         </Box>
       </Box>
     </Box>

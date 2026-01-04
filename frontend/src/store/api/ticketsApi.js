@@ -53,12 +53,12 @@ export const ticketsApi = createApi({
       ],
     }),
 
-    // POST /api/tickets/:id/descriptions - Add description/comment
-    addTicketDescription: builder.mutation({
-      query: ({ id, description }) => ({
-        url: `/${id}/descriptions`,
+    // POST /api/tickets/:id/details - Add detail/update
+    addTicketDetail: builder.mutation({
+      query: ({ id, detail }) => ({
+        url: `/${id}/details`,
         method: "POST",
-        body: { description },
+        body: { detail },
       }),
       transformResponse: (response) => response.data,
       invalidatesTags: (result, error, { id }) => [
@@ -113,6 +113,44 @@ export const ticketsApi = createApi({
         { type: "Tickets", id: ticketId },
       ],
     }),
+
+    // POST /api/tickets/:ticketId/details/:detailId/attachments - Upload detail attachment
+    uploadDetailAttachment: builder.mutation({
+      query: ({ ticketId, detailId, file }) => {
+        const formData = new FormData();
+        formData.append("image", file);
+
+        return {
+          url: `/${ticketId}/details/${detailId}/attachments`,
+          method: "POST",
+          body: formData,
+        };
+      },
+      transformResponse: (response) => response.data,
+      invalidatesTags: (result, error, { ticketId }) => [
+        "Tickets",
+        { type: "Tickets", id: ticketId },
+      ],
+    }),
+
+    // GET /api/tickets/:ticketId/details/:detailId/attachments/:attachmentId/url - Get detail attachment URL
+    getDetailAttachmentUrl: builder.query({
+      query: ({ ticketId, detailId, attachmentId }) =>
+        `/${ticketId}/details/${detailId}/attachments/${attachmentId}/url`,
+      transformResponse: (response) => response.url,
+    }),
+
+    // DELETE /api/tickets/:ticketId/details/:detailId/attachments/:attachmentId - Delete detail attachment
+    deleteDetailAttachment: builder.mutation({
+      query: ({ ticketId, detailId, attachmentId }) => ({
+        url: `/${ticketId}/details/${detailId}/attachments/${attachmentId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, { ticketId }) => [
+        "Tickets",
+        { type: "Tickets", id: ticketId },
+      ],
+    }),
   }),
 });
 
@@ -121,9 +159,12 @@ export const {
   useGetTicketQuery,
   useCreateTicketMutation,
   useUpdateTicketMutation,
-  useAddTicketDescriptionMutation,
+  useAddTicketDetailMutation,
   useDeleteTicketMutation,
   useUploadTicketAttachmentMutation,
   useLazyGetAttachmentUrlQuery,
   useDeleteTicketAttachmentMutation,
+  useUploadDetailAttachmentMutation,
+  useLazyGetDetailAttachmentUrlQuery,
+  useDeleteDetailAttachmentMutation,
 } = ticketsApi;

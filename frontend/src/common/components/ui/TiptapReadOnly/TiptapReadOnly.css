@@ -1,0 +1,169 @@
+/* TiptapReadOnly - Estilos base para contenido HTML de solo lectura */
+
+.tiptap-readonly-wrapper .tiptap-readonly {
+  /* Eliminar padding por defecto de Tiptap */
+  padding: 0 !important;
+
+  /* Ajustar tamaño de fuente general */
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: inherit;
+}
+
+/* Eliminar cualquier altura mínima */
+.tiptap-readonly-wrapper .tiptap-readonly.ProseMirror {
+  min-height: unset !important;
+}
+
+/* Párrafos */
+.tiptap-readonly-wrapper .tiptap-readonly p {
+  margin: 0;
+  padding: 0;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+/* Espaciado entre párrafos múltiples */
+.tiptap-readonly-wrapper .tiptap-readonly p + p {
+  margin-top: 0.5rem;
+}
+
+/* Encabezados */
+.tiptap-readonly-wrapper .tiptap-readonly h1,
+.tiptap-readonly-wrapper .tiptap-readonly h2,
+.tiptap-readonly-wrapper .tiptap-readonly h3,
+.tiptap-readonly-wrapper .tiptap-readonly h4,
+.tiptap-readonly-wrapper .tiptap-readonly h5,
+.tiptap-readonly-wrapper .tiptap-readonly h6 {
+  margin: 0.5rem 0;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.tiptap-readonly-wrapper .tiptap-readonly h1 {
+  font-size: 1.5rem;
+}
+
+.tiptap-readonly-wrapper .tiptap-readonly h2 {
+  font-size: 1.25rem;
+}
+
+.tiptap-readonly-wrapper .tiptap-readonly h3 {
+  font-size: 1.125rem;
+}
+
+.tiptap-readonly-wrapper .tiptap-readonly h4,
+.tiptap-readonly-wrapper .tiptap-readonly h5,
+.tiptap-readonly-wrapper .tiptap-readonly h6 {
+  font-size: 1rem;
+}
+
+/* Listas */
+.tiptap-readonly-wrapper .tiptap-readonly ul,
+.tiptap-readonly-wrapper .tiptap-readonly ol {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.tiptap-readonly-wrapper .tiptap-readonly li {
+  margin: 0.25rem 0;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+/* Listas anidadas */
+.tiptap-readonly-wrapper .tiptap-readonly ul ul,
+.tiptap-readonly-wrapper .tiptap-readonly ul ol,
+.tiptap-readonly-wrapper .tiptap-readonly ol ul,
+.tiptap-readonly-wrapper .tiptap-readonly ol ol {
+  margin: 0.25rem 0;
+}
+
+/* Texto en negrita */
+.tiptap-readonly-wrapper .tiptap-readonly strong {
+  font-weight: 600;
+}
+
+/* Texto en cursiva */
+.tiptap-readonly-wrapper .tiptap-readonly em {
+  font-style: italic;
+}
+
+/* Código inline */
+.tiptap-readonly-wrapper .tiptap-readonly code {
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 0.125rem 0.25rem;
+  border-radius: 3px;
+  font-size: 0.85em;
+  font-family: 'Courier New', Consolas, Monaco, monospace;
+}
+
+/* Bloques de código */
+.tiptap-readonly-wrapper .tiptap-readonly pre {
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin: 0.75rem 0;
+  overflow-x: auto;
+}
+
+.tiptap-readonly-wrapper .tiptap-readonly pre code {
+  background-color: transparent;
+  padding: 0;
+  font-size: 0.85rem;
+}
+
+/* Citas */
+.tiptap-readonly-wrapper .tiptap-readonly blockquote {
+  border-left: 3px solid rgba(0, 0, 0, 0.2);
+  padding-left: 1rem;
+  margin: 0.75rem 0;
+  color: rgba(0, 0, 0, 0.7);
+  font-style: italic;
+}
+
+/* Línea horizontal */
+.tiptap-readonly-wrapper .tiptap-readonly hr {
+  border: none;
+  border-top: 2px solid rgba(0, 0, 0, 0.1);
+  margin: 1rem 0;
+}
+
+/* Links */
+.tiptap-readonly-wrapper .tiptap-readonly a {
+  color: #1976d2;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.tiptap-readonly-wrapper .tiptap-readonly a:hover {
+  text-decoration: underline;
+  color: #1565c0;
+}
+
+/* Tablas (si se usan) */
+.tiptap-readonly-wrapper .tiptap-readonly table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 0.75rem 0;
+}
+
+.tiptap-readonly-wrapper .tiptap-readonly th,
+.tiptap-readonly-wrapper .tiptap-readonly td {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  padding: 0.5rem;
+  text-align: left;
+}
+
+.tiptap-readonly-wrapper .tiptap-readonly th {
+  background-color: rgba(0, 0, 0, 0.04);
+  font-weight: 600;
+}
+
+/* Asegurar que el contenedor no crezca innecesariamente */
+.tiptap-readonly-wrapper {
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+}

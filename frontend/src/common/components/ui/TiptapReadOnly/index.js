@@ -1,0 +1,1 @@
+export { TiptapReadOnly } from './TiptapReadOnly';

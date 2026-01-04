@@ -1,21 +1,23 @@
 import { useState } from "react";
 import {
-  useUploadTicketAttachmentMutation,
-  useDeleteTicketAttachmentMutation,
-  useLazyGetAttachmentUrlQuery,
+  useUploadDetailAttachmentMutation,
+  useDeleteDetailAttachmentMutation,
+  useLazyGetDetailAttachmentUrlQuery,
 } from "../../store/api/ticketsApi";
 
-export const useTicketAttachments = (ticketId) => {
+export const useTicketDetailAttachments = (ticketId, detailId) => {
+  const [selectedFiles, setSelectedFiles] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);
   const [imageUrl, setImageUrl] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
 
   const [uploadAttachment, { isLoading: isUploading }] =
-    useUploadTicketAttachmentMutation();
+    useUploadDetailAttachmentMutation();
   const [deleteAttachment, { isLoading: isDeleting }] =
-    useDeleteTicketAttachmentMutation();
-  const [getAttachmentUrl] = useLazyGetAttachmentUrlQuery();
+    useDeleteDetailAttachmentMutation();
+  const [getAttachmentUrl] = useLazyGetDetailAttachmentUrlQuery();
 
+  // For collecting files before detail is created
   const handleFileSelect = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -40,18 +42,52 @@ export const useTicketAttachments = (ticketId) => {
       return;
     }
 
-    try {
-      await uploadAttachment({
-        ticketId,
-        file,
-      }).unwrap();
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      alert("Failed to upload image");
-    }
+    // Add to selected files list
+    setSelectedFiles((prev) => [...prev, file]);
 
     // Reset input
     event.target.value = "";
+  };
+
+  // Upload all selected files after detail is created
+  const uploadAllFiles = async (detailId) => {
+    console.log('🔍 uploadAllFiles called with:', { ticketId, detailId, filesCount: selectedFiles.length });
+
+    if (!ticketId || !detailId || selectedFiles.length === 0) {
+      console.log('⚠️ Validation failed:', { ticketId, detailId, filesCount: selectedFiles.length });
+      return;
+    }
+
+    const uploadPromises = selectedFiles.map((file) => {
+      console.log('📤 Uploading file:', file.name);
+      return uploadAttachment({
+        ticketId,
+        detailId,
+        file,
+      }).unwrap();
+    });
+
+    try {
+      const results = await Promise.all(uploadPromises);
+      console.log('✅ All uploads successful:', results);
+      setSelectedFiles([]); // Clear after successful upload
+    } catch (error) {
+      console.error('❌ Upload failed:', error);
+      console.error('Error details:', {
+        message: error.message,
+        status: error.status,
+        data: error.data
+      });
+      throw error;
+    }
+  };
+
+  const removeFile = (index) => {
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const clearFiles = () => {
+    setSelectedFiles([]);
   };
 
   const handleDelete = async (attachmentId) => {
@@ -60,6 +96,7 @@ export const useTicketAttachments = (ticketId) => {
     try {
       await deleteAttachment({
         ticketId,
+        detailId,
         attachmentId,
       }).unwrap();
     } catch (error) {
@@ -70,14 +107,15 @@ export const useTicketAttachments = (ticketId) => {
 
   const handleImageClick = async (attachment) => {
     try {
-      console.log('Loading image:', { ticketId, attachmentId: attachment.id });
+      console.log('Loading detail image:', { ticketId, detailId, attachmentId: attachment.id });
 
       const response = await getAttachmentUrl({
         ticketId,
+        detailId,
         attachmentId: attachment.id,
       }).unwrap();
 
-      console.log('Image URL response:', response);
+      console.log('Detail image URL response:', response);
 
       // The response is the URL string (transformed by RTK Query)
       let url = response;
@@ -92,7 +130,7 @@ export const useTicketAttachments = (ticketId) => {
         url = `${baseUrl}${url}`;
       }
 
-      console.log('Final image URL:', url);
+      console.log('Final detail image URL:', url);
 
       setImageUrl(url);
       setSelectedImage(attachment);
@@ -111,12 +149,16 @@ export const useTicketAttachments = (ticketId) => {
   };
 
   return {
+    selectedFiles,
     isUploading,
     isDeleting,
     selectedImage,
     imageUrl,
     openDialog,
     handleFileSelect,
+    uploadAllFiles,
+    removeFile,
+    clearFiles,
     handleDelete,
     handleImageClick,
     handleCloseDialog,

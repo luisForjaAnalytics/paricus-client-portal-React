@@ -1,12 +1,13 @@
 import { useState } from "react";
-import { Box, Button, IconButton, CircularProgress, Tooltip } from "@mui/material";
+import { Box, Button, IconButton, CircularProgress, Tooltip, Alert, Snackbar, Chip } from "@mui/material";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
+import CloseIcon from "@mui/icons-material/Close";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { ticketStyle } from "../../../../../common/styles/styles";
-import { useAddTicketDescriptionMutation } from "../../../../../store/api/ticketsApi";
+import { useAddTicketDetailMutation } from "../../../../../store/api/ticketsApi";
 import { TiptapEditor } from "../../../../../common/components/ui/TiptapEditor";
-import { useTicketAttachments } from "../../../../../common/hooks/useTicketAttachments";
+import { useTicketDetailAttachments } from "../../../../../common/hooks/useTicketDetailAttachments";
 import "../../../../../common/components/ui/TiptapEditor/tiptap-editor.css";
 
 export const TicketUpdateStatus = () => {
@@ -14,12 +15,21 @@ export const TicketUpdateStatus = () => {
   const { ticketId } = useParams();
   const [description, setDescription] = useState("");
   const [textLength, setTextLength] = useState(0);
+  const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(false);
   const navigate = useNavigate();
 
-  const [addDescription, { isLoading }] = useAddTicketDescriptionMutation();
+  const [addDetail, { isLoading }] = useAddTicketDetailMutation();
 
-  // Use ticket attachments hook
-  const { isUploading, handleFileSelect } = useTicketAttachments(ticketId);
+  // Use ticket detail attachments hook
+  const {
+    selectedFiles,
+    isUploading,
+    handleFileSelect,
+    uploadAllFiles,
+    removeFile,
+    clearFiles,
+  } = useTicketDetailAttachments(ticketId, null);
 
   const MAX_CHARACTERS = 500;
   const isOverLimit = textLength > MAX_CHARACTERS;
@@ -27,22 +37,78 @@ export const TicketUpdateStatus = () => {
   const handleUpdate = async () => {
     if (!description.trim() || isOverLimit) return;
 
+    // Clear previous error
+    setError(null);
+
     try {
-      await addDescription({
+      // 1. Create the detail first
+      console.log('📝 Creating detail for ticketId:', ticketId);
+      const result = await addDetail({
         id: ticketId,
-        description: description,
+        detail: description,
       }).unwrap();
-      navigate("/app/tickets/ticketTable");
+      console.log('✅ Detail created successfully:', result);
+
+      // 2. Upload attachments if any
+      if (selectedFiles.length > 0 && result?.details) {
+        // Get the newly created detail (last one in the array)
+        const newDetail = result.details[result.details.length - 1];
+        console.log('🎯 New detail to attach files to:', { detailId: newDetail.id, filesCount: selectedFiles.length });
+
+        try {
+          await uploadAllFiles(newDetail.id);
+        } catch (uploadError) {
+          console.error("Error uploading attachments:", uploadError);
+          setError("Update created but failed to upload some attachments");
+          return;
+        }
+      }
+
+      // Show success message
+      setSuccessMessage(true);
+
+      // Clear form
       setDescription("");
       setTextLength(0);
-    } catch (error) {
-      console.error("Failed to add description:", error);
+      clearFiles();
+
+      // Navigate after short delay to show success message
+      setTimeout(() => {
+        navigate("/app/tickets/ticketTable");
+      }, 1000);
+    } catch (err) {
+      console.error("Failed to add detail:", err);
+      console.error("Error details:", {
+        status: err?.status,
+        data: err?.data,
+        message: err?.message,
+        originalStatus: err?.originalStatus,
+      });
+
+      // Set user-friendly error message
+      let errorMessage = "Failed to update ticket. Please try again.";
+
+      if (err?.status === 400) {
+        errorMessage = err?.data?.error || "Invalid request. Please check your input.";
+      } else if (err?.status === 404) {
+        errorMessage = "Ticket not found. It may have been deleted.";
+      } else if (err?.status === 401) {
+        errorMessage = "Authentication failed. Please log in again.";
+      } else if (err?.data?.error) {
+        errorMessage = err.data.error;
+      } else if (err?.message) {
+        errorMessage = err.message;
+      }
+
+      setError(errorMessage);
     }
   };
 
   const handleCancel = () => {
     setDescription("");
     setTextLength(0);
+    setError(null);
+    clearFiles();
   };
 
   // Custom attachment button for the editor toolbar
@@ -92,6 +158,41 @@ export const TicketUpdateStatus = () => {
         gap: 2,
       }}
     >
+      {/* Error Alert */}
+      {error && (
+        <Alert severity="error" onClose={() => setError(null)} sx={{ width: '100%' }}>
+          {error}
+        </Alert>
+      )}
+
+      {/* Success Snackbar */}
+      <Snackbar
+        open={successMessage}
+        autoHideDuration={3000}
+        onClose={() => setSuccessMessage(false)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert severity="success" onClose={() => setSuccessMessage(false)}>
+          {t("tickets.ticketView.updateSuccess") || "Update added successfully!"}
+        </Alert>
+      </Snackbar>
+
+      {/* Selected Files Preview */}
+      {selectedFiles.length > 0 && (
+        <Box sx={{ width: '100%', display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+          {selectedFiles.map((file, index) => (
+            <Chip
+              key={index}
+              label={file.name}
+              onDelete={() => removeFile(index)}
+              deleteIcon={<CloseIcon />}
+              icon={<AttachFileIcon />}
+              size="small"
+            />
+          ))}
+        </Box>
+      )}
+
       <TiptapEditor
         value={description}
         onChange={(html, length) => {

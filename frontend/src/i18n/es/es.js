@@ -781,6 +781,10 @@ export default {
       from: "De",
       ticketId: "Ticket",
       attachFile: "Adjuntar Archivo",
+      attachments: "Archivos Adjuntos",
+      noUpdatesYet: "No hay actualizaciones aún",
+      updateSuccess: "Actualización agregada exitosamente",
+      imageLoadError: "Error al cargar imagen",
     },
   },
 };
