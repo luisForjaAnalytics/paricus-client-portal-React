@@ -1,0 +1,7 @@
+# Ignore script output logs
+*.log
+*.txt
+
+# Ignore temporary test files
+temp-*
+test-output-*

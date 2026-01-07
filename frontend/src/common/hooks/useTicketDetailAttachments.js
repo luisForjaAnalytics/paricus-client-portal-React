@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   useUploadDetailAttachmentMutation,
   useDeleteDetailAttachmentMutation,
@@ -6,6 +7,7 @@ import {
 } from "../../store/api/ticketsApi";
 
 export const useTicketDetailAttachments = (ticketId, detailId) => {
+  const { t } = useTranslation();
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);
   const [imageUrl, setImageUrl] = useState(null);
@@ -17,28 +19,56 @@ export const useTicketDetailAttachments = (ticketId, detailId) => {
     useDeleteDetailAttachmentMutation();
   const [getAttachmentUrl] = useLazyGetDetailAttachmentUrlQuery();
 
+  // Calculate total size of selected files
+  const getTotalSelectedSize = () => {
+    return selectedFiles.reduce((total, file) => total + file.size, 0);
+  };
+
   // For collecting files before detail is created
   const handleFileSelect = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
 
-    // Validate file type
+    // Validate file type - now includes PDFs and Office documents
     const allowedTypes = [
+      // Images
       "image/jpeg",
       "image/jpg",
       "image/png",
       "image/gif",
       "image/webp",
+      // PDFs
+      "application/pdf",
+      // Word documents
+      "application/msword", // .doc
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .docx
+      // Excel spreadsheets
+      "application/vnd.ms-excel", // .xls
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // .xlsx
+      // PowerPoint presentations
+      "application/vnd.ms-powerpoint", // .ppt
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation", // .pptx
     ];
+
     if (!allowedTypes.includes(file.type)) {
-      alert("Only image files (JPEG, PNG, GIF, WEBP) are allowed");
+      alert(
+        t("tickets.attachments.invalidFileType") ||
+        "Only images, PDFs, and Office documents (Word, Excel, PowerPoint) are allowed"
+      );
       return;
     }
 
-    // Validate file size (10MB max)
-    const maxSize = 10 * 1024 * 1024;
-    if (file.size > maxSize) {
-      alert("File size must be less than 10MB");
+    // Validate total size (5MB max for all files combined)
+    const MAX_TOTAL_SIZE = 5 * 1024 * 1024; // 5MB
+    const currentTotalSize = getTotalSelectedSize();
+    const newTotalSize = currentTotalSize + file.size;
+
+    if (newTotalSize > MAX_TOTAL_SIZE) {
+      const remainingMB = ((MAX_TOTAL_SIZE - currentTotalSize) / (1024 * 1024)).toFixed(2);
+      alert(
+        t("tickets.attachments.totalSizeExceeded", { remaining: remainingMB }) ||
+        `Total attachment size cannot exceed 5MB. You have ${remainingMB}MB remaining.`
+      );
       return;
     }
 

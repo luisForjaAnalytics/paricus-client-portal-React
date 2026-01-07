@@ -1,3 +1,5 @@
+import { Details } from "@mui/icons-material";
+
 export default {
   // Navegación - Sidebar
   navigation: {
@@ -785,6 +787,15 @@ export default {
       noUpdatesYet: "No hay actualizaciones aún",
       updateSuccess: "Actualización agregada exitosamente",
       imageLoadError: "Error al cargar imagen",
+      details: "Detalles",
+      changePriority: "Cambiar Prioridad",
+      changeStatus: "Cambiar Estado",
+      historical: "Historial",
+      comments: "Comentarios",
+    },
+    attachments: {
+      invalidFileType: "Solo se permiten imágenes, PDFs y documentos de Office (Word, Excel, PowerPoint)",
+      totalSizeExceeded: "El tamaño total de los archivos adjuntos no puede exceder 5MB. Te quedan {{remaining}}MB disponibles.",
     },
   },
 };

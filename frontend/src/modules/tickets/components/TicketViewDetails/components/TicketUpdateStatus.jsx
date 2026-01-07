@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { Box, Button, IconButton, CircularProgress, Tooltip, Alert, Snackbar, Chip } from "@mui/material";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import CloseIcon from "@mui/icons-material/Close";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { ticketStyle } from "../../../../../common/styles/styles";
-import { useAddTicketDetailMutation } from "../../../../../store/api/ticketsApi";
+import { useAddTicketDetailMutation, useUpdateTicketMutation } from "../../../../../store/api/ticketsApi";
 import { TiptapEditor } from "../../../../../common/components/ui/TiptapEditor";
 import { useTicketDetailAttachments } from "../../../../../common/hooks/useTicketDetailAttachments";
+import { TicketPriorityContext, TicketStatusContext } from "../TicketViewDetails";
 import "../../../../../common/components/ui/TiptapEditor/tiptap-editor.css";
 
 export const TicketUpdateStatus = () => {
@@ -18,8 +19,11 @@ export const TicketUpdateStatus = () => {
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(false);
   const navigate = useNavigate();
+  const { pendingPriority, clearPendingPriority } = useContext(TicketPriorityContext);
+  const { pendingStatus, clearPendingStatus } = useContext(TicketStatusContext);
 
   const [addDetail, { isLoading }] = useAddTicketDetailMutation();
+  const [updateTicket] = useUpdateTicketMutation();
 
   // Use ticket detail attachments hook
   const {
@@ -35,21 +39,55 @@ export const TicketUpdateStatus = () => {
   const isOverLimit = textLength > MAX_CHARACTERS;
 
   const handleUpdate = async () => {
-    if (!description.trim() || isOverLimit) return;
+    // Allow update if there's either a description, pending priority, or pending status change
+    if ((!description.trim() && !pendingPriority && !pendingStatus) || isOverLimit) return;
 
     // Clear previous error
     setError(null);
 
     try {
-      // 1. Create the detail first
-      console.log('📝 Creating detail for ticketId:', ticketId);
-      const result = await addDetail({
-        id: ticketId,
-        detail: description,
-      }).unwrap();
-      console.log('✅ Detail created successfully:', result);
+      // 1. Update priority and/or status if there are pending changes
+      const updateData = {};
 
-      // 2. Upload attachments if any
+      if (pendingPriority) {
+        console.log('🎯 Updating priority to:', pendingPriority);
+        updateData.priority = pendingPriority;
+      }
+
+      if (pendingStatus) {
+        console.log('🎯 Updating status to:', pendingStatus);
+        updateData.status = pendingStatus;
+      }
+
+      if (Object.keys(updateData).length > 0) {
+        await updateTicket({
+          id: ticketId,
+          ...updateData,
+        }).unwrap();
+
+        if (pendingPriority) {
+          clearPendingPriority();
+          console.log('✅ Priority updated successfully');
+        }
+
+        if (pendingStatus) {
+          clearPendingStatus();
+          console.log('✅ Status updated successfully');
+        }
+      }
+
+      // 2. Create the detail (only if there's a description)
+      let result = null;
+      if (description.trim()) {
+        console.log('📝 Creating detail for ticketId:', ticketId);
+        result = await addDetail({
+          id: ticketId,
+          detail: description,
+        }).unwrap();
+        console.log('✅ Detail created successfully:', result);
+      }
+
+      // 3. Upload attachments if any
       if (selectedFiles.length > 0 && result?.details) {
         // Get the newly created detail (last one in the array)
         const newDetail = result.details[result.details.length - 1];
@@ -109,6 +147,8 @@ export const TicketUpdateStatus = () => {
     setTextLength(0);
     setError(null);
     clearFiles();
+    clearPendingPriority(); // Clear pending priority change
+    clearPendingStatus(); // Clear pending status change
   };
 
   // Custom attachment button for the editor toolbar
@@ -141,7 +181,7 @@ export const TicketUpdateStatus = () => {
           <input
             type="file"
             hidden
-            accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+            accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,application/pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
             onChange={handleFileSelect}
           />
         </IconButton>
@@ -155,7 +195,24 @@ export const TicketUpdateStatus = () => {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        gap: 2,
+        //gap: 1,
+        height: "120%",
+        overflowY: "auto",
+        overflowX: "hidden",
+        paddingRight: 1,
+        "&::-webkit-scrollbar": {
+          width: "8px",
+        },
+        "&::-webkit-scrollbar-track": {
+          backgroundColor: "transparent",
+        },
+        "&::-webkit-scrollbar-thumb": {
+          backgroundColor: "#888",
+          borderRadius: "4px",
+          "&:hover": {
+            backgroundColor: "#555",
+          },
+        },
       }}
     >
       {/* Error Alert */}
@@ -222,7 +279,7 @@ export const TicketUpdateStatus = () => {
         <Button
           type="button"
           variant="contained"
-          disabled={isLoading || !description.trim() || isOverLimit}
+          disabled={isLoading || (!description.trim() && !pendingPriority && !pendingStatus) || isOverLimit}
           onClick={handleUpdate}
           sx={ticketStyle.updateButton}
         >

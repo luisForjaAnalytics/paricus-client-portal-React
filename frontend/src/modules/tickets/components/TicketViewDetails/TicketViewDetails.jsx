@@ -1,15 +1,32 @@
+import { createContext, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Box, Typography, Divider, Alert, LinearProgress } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { useGetTicketQuery } from "../../../../store/api/ticketsApi";
 import { ticketStyle } from "../../../../common/styles/styles";
 import TicketInfoDetails from "./components/TicketViewDetailsInfo";
-import { TicketHistoricalInfo } from "./components/TicketHistoricalInfo";
 import { TicketDescriptionInfo } from "./components/TicketDescriptionInfo";
+import { TicketsCoomentsText } from "./components/TicketsCoomentsText";
+
+// Context to share pending priority changes
+export const TicketPriorityContext = createContext({
+  pendingPriority: null,
+  setPendingPriority: () => {},
+  clearPendingPriority: () => {},
+});
+
+// Context to share pending status changes
+export const TicketStatusContext = createContext({
+  pendingStatus: null,
+  setPendingStatus: () => {},
+  clearPendingStatus: () => {},
+});
 
 export const TicketViewDetails = () => {
   const { t } = useTranslation();
   const { ticketId } = useParams();
+  const [pendingPriority, setPendingPriority] = useState(null);
+  const [pendingStatus, setPendingStatus] = useState(null);
   const {
     data: ticket,
     isLoading,
@@ -28,84 +45,98 @@ export const TicketViewDetails = () => {
 
   if (!ticket) return null;
 
-  // Sort details by timestamp
-  let sortedDetails = [];
-  try {
-    sortedDetails = [...ticket.details].sort((a, b) => {
-      return new Date(b.timestamp) - new Date(a.timestamp);
-    });
-  } catch (error) {
-    console.error("Error sorting details:", error);
-    sortedDetails = ticket.details || [];
-  }
+  const clearPendingPriority = () => setPendingPriority(null);
+  const clearPendingStatus = () => setPendingStatus(null);
+
+  const priorityContextValue = {
+    pendingPriority,
+    setPendingPriority,
+    clearPendingPriority,
+  };
+
+  const statusContextValue = {
+    pendingStatus,
+    setPendingStatus,
+    clearPendingStatus,
+  };
 
   return (
-    <Box
-      sx={{
-        width: "100%",
-        //height: "70%",
-        display: "flex",
-        flexDirection: "column",
-        gap: 2,
-        paddingBottom: 0,
-        pt: { xs: 2, md: 4 },
-        pl: { xs: 2, md: 3 },
-        pr: { xs: 2, md: 3 },
-      }}
-    >
-      {/* Show subtle loading indicator when refetching (e.g., after uploading image) */}
-      {isFetching && ticket && (
-        <LinearProgress
-          sx={{ position: "absolute", top: 0, left: 0, right: 0 }}
-        />
-      )}
-
-      {/* SUBJECT */}
-      <Box>
-        <Typography sx={ticketStyle.typographySubject}>
-          {ticket?.subject?.toUpperCase() || "NO SUBJECT"}
-        </Typography>
-      </Box>
-
-      {/* DESCRIPTION AND DETAILS */}
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "row",
-          gap: 2,
-          flex: 1,
-          minHeight: 0,
-          width: "100%",
-        }}
-      >
-        {/*Historical Update */}
-        <TicketHistoricalInfo ticket={ticket} />
-
+    <TicketPriorityContext.Provider value={priorityContextValue}>
+      <TicketStatusContext.Provider value={statusContextValue}>
         <Box
           sx={{
+            width: "100%",
+            height: "80vh", // Altura completa de la ventana
             display: "flex",
             flexDirection: "column",
             gap: 2,
+            paddingBottom: 2,
+            pt: { xs: 2, md: 4 },
+            pl: { xs: 2, md: 3 },
+            pr: { xs: 2, md: 3 },
           }}
         >
-          {/* DESCRIPTION */}
-          <Box
-            sx={{
-              ...ticketStyle.historicalContainer,
-            }}
-          >
-            <TicketDescriptionInfo ticket={ticket} />
+          {/* Show subtle loading indicator when refetching (e.g., after uploading image) */}
+          {isFetching && ticket && (
+            <LinearProgress
+              sx={{ position: "absolute", top: 0, left: 0, right: 0 }}
+            />
+          )}
+
+          {/* SUBJECT */}
+          <Box>
+            <Typography sx={ticketStyle.typographySubject}>
+              {ticket?.subject?.toUpperCase() || "NO SUBJECT"}
+            </Typography>
           </Box>
 
+          {/* DESCRIPTION AND DETAILS */}
           <Box
             sx={{
-              ...ticketStyle.historicalContainer,
+              ...ticketStyle.descriptioDetailBox,
+              flex: 1,
+              minHeight: 0,
             }}
           >
-            <TicketInfoDetails ticket={ticket} />
+            {/* LEFT COLUMN - Description and Tabs (Historical/Comments) */}
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                //gap: 1,
+                width: "70%",
+                minWidth: 0,
+                height: "100%",
+              }}
+            >
+              {/* DESCRIPTION */}
+              <Box
+                sx={{
+                  ...ticketStyle.descriptionSection,
+                  height: "30%",
+                }}
+              >
+                <TicketDescriptionInfo ticket={ticket} />
+              </Box>
+
+              {/* TABS - Historical and Comments */}
+              <TicketsCoomentsText ticket={ticket} />
+            </Box>
+
+            {/* RIGHT COLUMN - INFO DETAILS */}
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                width: "35%",
+                minWidth: "300px",
+              }}
+            >
+              <TicketInfoDetails ticket={ticket} />
+            </Box>
           </Box>
         </Box>
-      </Box>
-    </Box>
+      </TicketStatusContext.Provider>
+    </TicketPriorityContext.Provider>
   );
 };

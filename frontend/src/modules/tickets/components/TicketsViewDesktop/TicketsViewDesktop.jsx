@@ -28,7 +28,9 @@ export const TicketsViewDesktop = () => {
         from: ticket.user
           ? `${ticket.user.firstName} ${ticket.user.lastName}`
           : "Unknown",
-        assignedTo: ticket.assignedTo || "Unassigned",
+        assignedTo: ticket.assignedTo
+          ? `${ticket.assignedTo.firstName} ${ticket.assignedTo.lastName}`
+          : "Unassigned",
         priority: ticket.priority,
         status: ticket.status,
       }));

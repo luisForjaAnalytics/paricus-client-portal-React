@@ -151,7 +151,7 @@ export const AddNewUserModal = ({
                 </FormControl>
               )}
 
-              <FormControl fullWidth disabled={!userForm.client_id}>
+              <FormControl fullWidth disabled={!userForm.client_id} required>
                 <InputLabel
                   sx={modalCard?.multiOptionFilter?.inputLabelSection}
                 >
@@ -167,19 +167,23 @@ export const AddNewUserModal = ({
                   }
                   label={t("users.form.role")}
                   sx={modalCard?.multiOptionFilter?.selectSection}
+                  displayEmpty={false}
                 >
-                  <MenuItem value="">
-                    {!userForm.client_id
-                      ? t("users.form.selectClientFirst")
-                      : roleOptions.length === 0
-                      ? t("users.form.noRolesAvailable")
-                      : t("users.form.selectRole")}
-                  </MenuItem>
-                  {roleOptions.map((role) => (
-                    <MenuItem key={role.value} value={role.value}>
-                      {role.title}
+                  {!userForm.client_id ? (
+                    <MenuItem value="" disabled>
+                      {t("users.form.selectClientFirst")}
                     </MenuItem>
-                  ))}
+                  ) : roleOptions.length === 0 ? (
+                    <MenuItem value="" disabled>
+                      {t("users.form.noRolesAvailable")}
+                    </MenuItem>
+                  ) : (
+                    roleOptions.map((role) => (
+                      <MenuItem key={role.value} value={role.value}>
+                        {role.title}
+                      </MenuItem>
+                    ))
+                  )}
                 </Select>
               </FormControl>
             </Box>

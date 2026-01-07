@@ -12,8 +12,15 @@ export const ticketsApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Tickets"],
+  tagTypes: ["Tickets", "AssignableUsers"],
   endpoints: (builder) => ({
+    // GET /api/tickets/assignable-users - Get users that can be assigned tickets
+    getAssignableUsers: builder.query({
+      query: () => "/assignable-users",
+      transformResponse: (response) => response.data || [],
+      providesTags: ["AssignableUsers"],
+    }),
+
     // GET /api/tickets - Get all tickets for user's client
     getTickets: builder.query({
       query: () => "",
@@ -155,6 +162,7 @@ export const ticketsApi = createApi({
 });
 
 export const {
+  useGetAssignableUsersQuery,
   useGetTicketsQuery,
   useGetTicketQuery,
   useCreateTicketMutation,

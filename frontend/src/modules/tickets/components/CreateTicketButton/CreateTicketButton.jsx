@@ -14,8 +14,14 @@ import {
   Box,
   Typography,
   Alert,
+  IconButton,
+  Tooltip,
+  CircularProgress,
+  Chip,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import AttachFileIcon from "@mui/icons-material/AttachFile";
+import CloseIcon from "@mui/icons-material/Close";
 import { useTranslation } from "react-i18next";
 import {
   primaryIconButton,
@@ -23,7 +29,11 @@ import {
   modalCard,
   titlesTypography,
 } from "../../../../common/styles/styles";
-import { useCreateTicketMutation } from "../../../../store/api/ticketsApi";
+import {
+  useCreateTicketMutation,
+  useUploadTicketAttachmentMutation,
+  useGetAssignableUsersQuery
+} from "../../../../store/api/ticketsApi";
 import { PRIORITY_STATUS } from "./ticketStatus";
 import { TiptapEditor } from "../../../../common/components/ui/TiptapEditor";
 import "../../../../common/components/ui/TiptapEditor/tiptap-editor.css";
@@ -32,6 +42,10 @@ export const CreateTickeButton = ({}) => {
   const { t } = useTranslation();
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [createTicket, { isLoading, error }] = useCreateTicketMutation();
+  const [uploadAttachment] = useUploadTicketAttachmentMutation();
+  const { data: assignableUsers = [], isLoading: loadingUsers } = useGetAssignableUsersQuery();
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [isUploading, setIsUploading] = useState(false);
 
   const MAX_CHARACTERS = 500;
 
@@ -58,10 +72,68 @@ export const CreateTickeButton = ({}) => {
   const watchedTextLength = watch("description.textLength");
   const isOverLimit = watchedTextLength > MAX_CHARACTERS;
 
+  // Handle file selection
+  const handleFileSelect = (event) => {
+    const files = Array.from(event.target.files || []);
+    setSelectedFiles((prev) => [...prev, ...files]);
+    // Reset the input so the same file can be selected again if needed
+    event.target.value = "";
+  };
+
+  // Remove file from selection
+  const removeFile = (indexToRemove) => {
+    setSelectedFiles((prev) => prev.filter((_, index) => index !== indexToRemove));
+  };
+
+  // Clear all files
+  const clearFiles = () => {
+    setSelectedFiles([]);
+  };
+
   const handleCancelModal = () => {
     reset();
+    clearFiles();
     setShowUploadModal(false);
   };
+
+  // Custom attachment button for the editor toolbar
+  const attachmentButton = (
+    <Tooltip title={t("tickets.ticketView.attachFile")} arrow placement="top">
+      <span>
+        <IconButton
+          component="label"
+          size="small"
+          disabled={isUploading || isLoading}
+          sx={{
+            padding: "4px",
+            backgroundColor: "transparent",
+            color: "rgba(0, 0, 0, 0.54)",
+            "&:hover": {
+              backgroundColor: "rgba(0, 0, 0, 0.04)",
+            },
+            "&:disabled": {
+              color: "rgba(0, 0, 0, 0.26)",
+            },
+            minWidth: "28px",
+            minHeight: "28px",
+          }}
+        >
+          {isUploading ? (
+            <CircularProgress size={20} />
+          ) : (
+            <AttachFileIcon fontSize="small" />
+          )}
+          <input
+            type="file"
+            hidden
+            accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,application/pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+            onChange={handleFileSelect}
+            multiple
+          />
+        </IconButton>
+      </span>
+    </Tooltip>
+  );
 
   const onSubmit = async (data) => {
     try {
@@ -69,12 +141,37 @@ export const CreateTickeButton = ({}) => {
       const payload = {
         subject: data.subject,
         priority: data.priority,
-        assignedTo: data.assignedTo,
+        assignedToId: data.assignedTo, // Backend expects 'assignedToId'
         description: data.description.descriptionData,
       };
 
-      // Call the mutation
-      await createTicket(payload).unwrap();
+      // 1. Create the ticket
+      const result = await createTicket(payload).unwrap();
+      console.log("✅ Ticket created successfully:", result);
+
+      // 2. Upload attachments if any
+      if (selectedFiles.length > 0 && result?.id) {
+        setIsUploading(true);
+        console.log(`🎯 Uploading ${selectedFiles.length} attachments to ticket ${result.id}`);
+
+        try {
+          // Upload each file sequentially
+          for (const file of selectedFiles) {
+            await uploadAttachment({
+              ticketId: result.id,
+              file: file,
+            }).unwrap();
+            console.log(`✅ Uploaded: ${file.name}`);
+          }
+          console.log("✅ All attachments uploaded successfully");
+        } catch (uploadError) {
+          console.error("❌ Error uploading attachments:", uploadError);
+          // Don't fail the whole operation if attachments fail
+          // The ticket was already created successfully
+        } finally {
+          setIsUploading(false);
+        }
+      }
 
       // Success - reset form and close modal
       reset();
@@ -194,7 +291,7 @@ export const CreateTickeButton = ({}) => {
                     ),
                   }}
                   render={({ field }) => (
-                    <FormControl fullWidth>
+                    <FormControl fullWidth error={!!errors.assignedTo}>
                       <InputLabel
                         sx={modalCard?.multiOptionFilter?.inputLabelSection}
                       >
@@ -207,15 +304,40 @@ export const CreateTickeButton = ({}) => {
                           height: "3rem",
                         }}
                         label={t("tickets.createNewTicket.assignedTo.label")}
+                        disabled={loadingUsers}
                       >
-                        <MenuItem value="User 1">User 1</MenuItem>
-                        <MenuItem value="Admin">Admin</MenuItem>
-                        <MenuItem value="Client Admin">Client Admin</MenuItem>
+                        {assignableUsers.map((user) => (
+                          <MenuItem key={user.id} value={user.id}>
+                            {user.fullName} ({user.roleName})
+                            {user.clientName && ` - ${user.clientName}`}
+                          </MenuItem>
+                        ))}
                       </Select>
+                      {errors.assignedTo && (
+                        <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 1.5 }}>
+                          {errors.assignedTo.message}
+                        </Typography>
+                      )}
                     </FormControl>
                   )}
                 />
               </Box>
+
+              {/* Selected Files Preview */}
+              {selectedFiles.length > 0 && (
+                <Box sx={{ width: '100%', display: 'flex', flexWrap: 'wrap', gap: 1, mb: 1, px: 2 }}>
+                  {selectedFiles.map((file, index) => (
+                    <Chip
+                      key={index}
+                      label={file.name}
+                      onDelete={() => removeFile(index)}
+                      deleteIcon={<CloseIcon />}
+                      icon={<AttachFileIcon />}
+                      size="small"
+                    />
+                  ))}
+                </Box>
+              )}
 
               <Box sx={{ ...modalCard?.createNewTiketStyle?.boxTicketModal, width: "100%", marginTop:'1rem' }}>
                 <Controller
@@ -247,6 +369,7 @@ export const CreateTickeButton = ({}) => {
                       }
                       maxCharacters={MAX_CHARACTERS}
                       fullWidth
+                      customLeftButtons={[attachmentButton]}
                     />
                   )}
                 />
@@ -263,16 +386,16 @@ export const CreateTickeButton = ({}) => {
               type="submit"
               variant="contained"
               sx={primaryIconButton}
-              disabled={isLoading || isOverLimit}
+              disabled={isLoading || isUploading || isOverLimit}
             >
-              {isLoading
+              {isLoading || isUploading
                 ? t("common.loading") || "Loading..."
                 : t("tickets.createNewTicket.submit")}
             </Button>
             <Button
               onClick={handleCancelModal}
               sx={outlinedButton}
-              disabled={isLoading}
+              disabled={isLoading || isUploading}
             >
               {t("common.cancel")}
             </Button>

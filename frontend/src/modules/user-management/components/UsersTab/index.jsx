@@ -76,8 +76,8 @@ export const UsersTab = () => {
   const roleOptions = useMemo(() => {
     try {
       return roles
-        .filter((role) => role.clientId === userForm.client_id)
-        .map((role) => ({ title: role.roleName, value: role.id }));
+        .filter((role) => role.client_id === userForm.client_id)
+        .map((role) => ({ title: role.role_name, value: role.id }));
     } catch (err) {
       console.log(`ERROR roleOptions: ${err}`);
       return [];
@@ -133,6 +133,7 @@ export const UsersTab = () => {
         userForm.email &&
         emailRegex.test(userForm.email) &&
         userForm.client_id &&
+        userForm.role_id &&
         (editingUser || userForm.password)
       );
     } catch (err) {

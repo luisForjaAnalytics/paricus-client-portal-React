@@ -17,7 +17,9 @@ import AttachFileIcon from "@mui/icons-material/AttachFile";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import DescriptionIcon from "@mui/icons-material/Description";
 import { useTicketAttachments } from "../../../../../common/hooks/useTicketAttachments";
+import { ticketStyle } from "../../../../../common/styles/styles";
 import { useState } from "react";
 
 export const TicketDescriptionInfo = ({ ticket }) => {
@@ -27,24 +29,16 @@ export const TicketDescriptionInfo = ({ ticket }) => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [imageErrors, setImageErrors] = useState({});
 
-  const {
-    handleDelete,
-    isDeleting,
-  } = useTicketAttachments(ticket?.id);
+  const { handleDelete, isDeleting } = useTicketAttachments(ticket?.id);
 
-  // Helper function to build image URL with token
-  // Backend already provides the URL path, we just add the base URL and token
   const getImageUrl = (attachment) => {
     try {
       if (!attachment?.url || !token) return null;
-
-      const baseUrl = import.meta.env.VITE_API_URL.replace('/api', '');
+      const baseUrl = import.meta.env.VITE_API_URL.replace("/api", "");
       const fullUrl = `${baseUrl}${attachment.url}`;
-
-      // Add token as query parameter for authentication
       return `${fullUrl}?token=${encodeURIComponent(token)}`;
     } catch (error) {
-      console.error('Error building image URL:', error);
+      console.error("Error building image URL:", error);
       return null;
     }
   };
@@ -58,16 +52,15 @@ export const TicketDescriptionInfo = ({ ticket }) => {
   };
 
   const handleImageError = (attachmentId) => {
-    console.error(`Failed to load image for attachment ${attachmentId}`);
-    setImageErrors(prev => ({ ...prev, [attachmentId]: true }));
+    console.error(`Failed to load image ${attachmentId}`);
+    setImageErrors((prev) => ({ ...prev, [attachmentId]: true }));
   };
 
   const handleImageLoad = (attachmentId) => {
-    // Clear error state if image loads successfully
-    setImageErrors(prev => {
-      const newErrors = { ...prev };
-      delete newErrors[attachmentId];
-      return newErrors;
+    setImageErrors((prev) => {
+      const next = { ...prev };
+      delete next[attachmentId];
+      return next;
     });
   };
 
@@ -79,19 +72,16 @@ export const TicketDescriptionInfo = ({ ticket }) => {
     );
   }
 
-  // Safely parse description - handle both object and JSON string
   let descriptionData;
   try {
     if (typeof ticket.description === "string") {
-      // If it's a JSON string, parse it
       const parsed = JSON.parse(ticket.description);
       descriptionData = parsed?.descriptionData;
     } else if (typeof ticket.description === "object") {
-      // If it's already an object, use it directly
       descriptionData = ticket.description?.descriptionData;
     }
   } catch (error) {
-    console.error("Error parsing ticket description:", error);
+    console.error("Error parsing description:", error);
     descriptionData = null;
   }
 
@@ -107,30 +97,23 @@ export const TicketDescriptionInfo = ({ ticket }) => {
 
   return (
     <>
-      <Box display="flex" flexDirection="column" gap={2}>
-        {/* Description */}
-        <Box>
-          <TicketText variant="bold">
-            {t("tickets.ticketView.description")}:
-          </TicketText>
-          <Box mt={1}>
-            <TiptapReadOnly content={descriptionData} />
-          </Box>
+      <Box display="flex" flexDirection="column">
+        <Box sx={ticketStyle.descriptionTitle}>
+          <DescriptionIcon sx={ticketStyle.descriptionIcon} />
+          {t("tickets.ticketView.description").toUpperCase()}
         </Box>
 
-        {/* Attachments */}
+        <Box sx={ticketStyle.descriptionContent}>
+          <TiptapReadOnly content={descriptionData} />
+        </Box>
+
         {attachments.length > 0 && (
           <Box>
-            <TicketText variant="bold">
-              {t("tickets.ticketView.attachments")}:
-            </TicketText>
-            <Box
-              mt={1}
-              display="flex"
-              flexDirection="row"
-              gap={2}
-              flexWrap="wrap"
-            >
+            <Box sx={ticketStyle.attachmentsTitle}>
+              {t("tickets.ticketView.attachments").toUpperCase()}
+            </Box>
+
+            <Box display="flex" flexDirection="row" gap={1} flexWrap="wrap">
               {attachments.map((attachment) => {
                 const imageUrl = getImageUrl(attachment);
                 const hasError = imageErrors[attachment.id];
@@ -139,24 +122,30 @@ export const TicketDescriptionInfo = ({ ticket }) => {
                   <Card
                     key={attachment.id}
                     sx={{
-                      width: 120,
+                      width: 70,
+                      height: 70,
+                      overflow: "hidden",
+                      borderRadius: 1,
                       position: "relative",
-                      "&:hover .delete-button": {
-                        opacity: 1,
-                      },
+                      "&:hover .delete-button": { opacity: 1 },
                     }}
                   >
                     <CardActionArea
                       onClick={() => handleImageClick(attachment)}
                       disabled={isDeleting}
+                      sx={{
+                        width: "100%",
+                        height: "100%",
+                      }}
                     >
                       {imageUrl && !hasError ? (
                         <CardMedia
                           component="img"
-                          height="120"
                           image={imageUrl}
                           alt={attachment.fileName}
                           sx={{
+                            width: "100%",
+                            height: "100%",
                             objectFit: "cover",
                           }}
                           onError={() => handleImageError(attachment.id)}
@@ -165,25 +154,22 @@ export const TicketDescriptionInfo = ({ ticket }) => {
                       ) : (
                         <Box
                           sx={{
-                            height: 120,
+                            width: "100%",
+                            height: "100%",
                             display: "flex",
-                            flexDirection: "column",
                             alignItems: "center",
                             justifyContent: "center",
+                            flexDirection: "column",
                             backgroundColor: "action.hover",
-                            gap: 0.5,
                           }}
                         >
                           {hasError ? (
                             <>
-                              <ErrorOutlineIcon fontSize="large" color="error" />
-                              <TicketText
-                                sx={{
-                                  fontSize: "0.65rem",
-                                  textAlign: "center",
-                                  px: 0.5,
-                                }}
-                              >
+                              <ErrorOutlineIcon
+                                fontSize="large"
+                                color="error"
+                              />
+                              <TicketText sx={{ fontSize: "0.65rem" }}>
                                 {t("tickets.ticketView.imageLoadError")}
                               </TicketText>
                             </>
@@ -194,7 +180,6 @@ export const TicketDescriptionInfo = ({ ticket }) => {
                       )}
                     </CardActionArea>
 
-                    {/* Delete button overlay */}
                     <IconButton
                       className="delete-button"
                       onClick={(e) => {
@@ -206,13 +191,10 @@ export const TicketDescriptionInfo = ({ ticket }) => {
                         position: "absolute",
                         top: 4,
                         right: 4,
-                        backgroundColor: "rgba(0, 0, 0, 0.6)",
+                        backgroundColor: "rgba(0,0,0,0.6)",
                         color: "white",
                         opacity: 0,
-                        transition: "opacity 0.2s",
-                        "&:hover": {
-                          backgroundColor: "rgba(0, 0, 0, 0.8)",
-                        },
+                        transition: "opacity .2s",
                         padding: "4px",
                       }}
                       size="small"
@@ -227,7 +209,6 @@ export const TicketDescriptionInfo = ({ ticket }) => {
         )}
       </Box>
 
-      {/* Image Preview Dialog */}
       <Dialog
         open={!!selectedImage}
         onClose={handleCloseDialog}
@@ -239,7 +220,16 @@ export const TicketDescriptionInfo = ({ ticket }) => {
             <CloseIcon />
           </IconButton>
         </DialogActions>
-        <DialogContent sx={{ p: 2, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}>
+
+        <DialogContent
+          sx={{
+            p: 2,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: 300,
+          }}
+        >
           {selectedImage && (
             <>
               {imageErrors[selectedImage.id] ? (

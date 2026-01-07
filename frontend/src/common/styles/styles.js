@@ -43,7 +43,10 @@ export const colors = {
   borderTiptapEditor: "#2c2c2c59",
   borderVariant: "#D1D5DB", // border-gray-300
   borderSoft: "#E5E7EB", // Updated to match Tailwind
-
+  // ticket Sections
+  datailsTitleColor: "#16A34A",
+  detailsBackgroundColor: "#4ee78611",
+  detailsBorderColor: "#16A34A",
   // Text colors (from Tailwind)
   textPrimary: "#111827", // text-gray-900
   textSecondary: "#374151", // text-gray-700
@@ -827,14 +830,180 @@ export const ticketStyle = {
     fontWeight: typography.fontWeight.bold,
     fontFamily: typography.fontFamily,
   },
+
+  /* DESCRIPTION AND DETAILS */
+  descriptioDetailBox: {
+    display: "flex",
+    flexDirection: "row",
+    backgroundColor: colors.drawer,
+    borderRadius: "1rem",
+    gap: 2,
+    flex: 1,
+    minHeight: 0,
+    width: "100%",
+    alignItems: "stretch",
+  },
+
+  // Description section
+
+  descriptionSection: {
+    backgroundColor: colors.detailsBackgroundColor,
+    padding: "1.5rem 1.5rem 1.5rem 1rem",
+    borderRadius: "12px",
+    border: `0.1rem solid rgba(20, 177, 77, 0.2)`,
+    margin: "1rem 0 0rem 1rem",
+    overflowY: "auto",
+  },
+
+  // Description title (DESCRIPTION with icon)
+  descriptionTitle: {
+    display: "flex",
+    alignItems: "center",
+    gap: "0.5rem",
+    marginBottom: "0.75rem",
+    fontSize: "0.75rem", // 12px
+    fontWeight: 600,
+    letterSpacing: "0.05em",
+    textTransform: "uppercase",
+    color: colors.datailsTitleColor, // Verde oscuro como en financial section
+  },
+
+  // Description icon
+  descriptionIcon: {
+    fontSize: "1rem",
+    color: colors.datailsTitleColor,
+  },
+
+  // Description content box
+  descriptionContent: {
+    fontSize: "0.875rem", // 14px
+    lineHeight: "1.6",
+    color: colors.textSecondary,
+    marginBottom: "0.5rem",
+  },
+
+  // Attachments section
+  attachmentsSection: {
+    marginTop: "1.5rem",
+  },
+
+  attachmentsTitle: {
+    fontSize: "0.625rem", // 10px
+    fontWeight: 700,
+    letterSpacing: "0.1em",
+    textTransform: "uppercase",
+    color: colors.textMuted,
+    marginBottom: "0.75rem",
+  },
+
+  // Attachment thumbnail container
+  attachmentThumbnail: {
+    width: "80px",
+    height: "80px",
+    borderRadius: "8px",
+    overflow: "hidden",
+    border: `1px solid ${colors.border}`,
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+    "&:hover": {
+      borderColor: colors.focusRing,
+      boxShadow: "0 2px 8px rgba(22, 163, 74, 0.15)",
+    },
+  },
+
+  // Ticket Details Section (right sidebar)
+  ticketDetailsContainer: {
+    backgroundColor: "#f8f9fab2", // Gris claro de fondo
+    padding: "1.5rem",
+    height: "100%", // Toma todo el alto disponible
+    overflow: "auto", // Scroll si el contenido excede
+  },
+
+  // Ticket details title (TICKET DETAILS with icon)
+  ticketDetailsTitle: {
+    display: "flex",
+    alignItems: "center",
+    gap: "0.5rem",
+    marginBottom: "0.75rem",
+    fontSize: "0.75rem", // 12px
+    fontWeight: 600,
+    letterSpacing: "0.05em",
+    textTransform: "uppercase",
+    color: colors.textSecondary, // Diferente color que description
+  },
+
+  // Ticket details icon
+  ticketDetailsIcon: {
+    fontSize: "1rem",
+    color: colors.textSecondary,
+  },
+
+  // Individual detail row
+  ticketDetailRow: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "0.25rem",
+    marginBottom: "1rem",
+  },
+
+  // Detail label (Status, Priority, etc.)
+  ticketDetailLabel: {
+    fontSize: "0.75rem", // 12px
+    fontWeight: 700,
+    letterSpacing: "0.05em",
+    color: colors.textMuted,
+  },
+
+  // Detail value
+  ticketDetailValue: {
+    fontSize: "0.875rem", // 14px
+    fontWeight: 400,
+    color: colors.textPrimary,
+    fontFamily: "'Inter', sans-serif",
+  },
+
+  // Name field in ticket details (bold)
+  ticketDetailName: {
+    fontSize: "0.875rem", // 14px
+    fontWeight: 600,
+    color: colors.textPrimary,
+    fontFamily: "'Inter', sans-serif",
+    marginBottom: "0.25rem",
+  },
+
+  // Email field in ticket details (lighter, smaller)
+  ticketDetailEmail: {
+    fontSize: "0.75rem", // 12px
+    fontWeight: 400,
+    color: colors.textMuted,
+    fontFamily: "'Inter', sans-serif",
+  },
+
+  //Container for historical title and date
+  historicalContainerTitleDate: {
+    padding: "1rem 0 1rem 0rem", // p-5 (20px)
+    backgroundColor: "transparent",
+    borderRadius: borderRadiusSection,
+    //boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+    //border: `1px solid ${colors.border}`,
+    overflow: "visible",
+    flexShrink: 0, // Prevent items from shrinking
+    // transition: "border 1000ms ",
+    // "&:hover": {
+    //   border: `1px solid ${colors.focusRing}`,
+    // },
+  },
+
+
   //Container for historical descriptions
   historicalContainer: {
-    padding: "1rem 0 1rem 2rem", // p-5 (20px)
-    backgroundColor: colors.surface,
-    borderRadius: borderRadiusSection,
+    padding: "0rem 0 1rem 1rem", // p-5 (20px)
+    backgroundColor: '  #f1f1f179',
+    borderRadius: '1rem',
     boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
     border: `1px solid ${colors.border}`,
-    overflow: "hidden",
+    overflow: "visible",
+    flexShrink: 0, 
     transition: "border 1000ms ",
     "&:hover": {
       border: `1px solid ${colors.focusRing}`,
@@ -847,6 +1016,7 @@ export const ticketStyle = {
     flexDirection: "column",
     gap: 0,
     width: "100%",
+    paddingLeft: "2.5rem",
   },
 
   divider: {
@@ -890,7 +1060,7 @@ export const tiptapEditorStyle = {
     },
     "&.Mui-focused": {
       borderColor: colors.focusRing,
-      borderWidth: "2px",
+      //borderWidth: "2px",
     },
   },
 };

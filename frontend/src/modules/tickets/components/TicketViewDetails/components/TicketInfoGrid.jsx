@@ -1,7 +1,32 @@
 import { Box } from "@mui/material";
+import LocalOfferIcon from "@mui/icons-material/LocalOffer";
+import FlagIcon from "@mui/icons-material/Flag";
+import PermIdentityIcon from "@mui/icons-material/PermIdentity";
+import GppGoodIcon from "@mui/icons-material/GppGood";
+import EmailIcon from "@mui/icons-material/Email";
+import BookmarkIcon from "@mui/icons-material/Bookmark";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { useTranslation } from "react-i18next";
 import { formatDateTime } from "../../../../../common/utils/formatDateTime";
 import { TicketText } from "../../../../../common/components/ui/TicketText";
+import { ticketStyle } from "../../../../../common/styles/styles";
+
+// Icon mapping for each field
+const fieldIcons = {
+  status: LocalOfferIcon,
+  priority: FlagIcon,
+  assignedTo: PermIdentityIcon,
+  from: GppGoodIcon,
+  email: EmailIcon,
+  id: BookmarkIcon,
+  createdAt: AccessTimeIcon,
+};
+
+// Helper function to capitalize first letter only
+const capitalizeFirst = (str) => {
+  if (!str) return str;
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+};
 
 // Formatters for specific field types
 const fieldFormatters = {
@@ -17,12 +42,28 @@ const fieldFormatters = {
       if (name && email) {
         return (
           <Box display="flex" flexDirection="column" gap={1}>
-            <TicketText>
-              <strong>Name:</strong> {name}
-            </TicketText>
-            <TicketText>
-              <strong>Email:</strong> {email}
-            </TicketText>
+            {/* FROM label with icon and name */}
+            <Box sx={ticketStyle.ticketDetailRow}>
+              <Box sx={{...ticketStyle.ticketDetailLabel, display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+                <GppGoodIcon sx={{ fontSize: '1rem' }} />
+                From
+              </Box>
+              <Box sx={{...ticketStyle.ticketDetailValue, paddingLeft: '1.5rem'}}>
+                <Box sx={ticketStyle.ticketDetailName}>
+                  {name}
+                </Box>
+              </Box>
+            </Box>
+            {/* Email row */}
+            <Box sx={ticketStyle.ticketDetailRow}>
+              <Box sx={{...ticketStyle.ticketDetailLabel, display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+                <EmailIcon sx={{ fontSize: '1rem' }} />
+                Email
+              </Box>
+              <Box sx={{...ticketStyle.ticketDetailValue, paddingLeft: '1.5rem'}}>
+                {email}
+              </Box>
+            </Box>
           </Box>
         );
       }
@@ -40,6 +81,19 @@ const fieldFormatters = {
       ? `${ticket.user.firstName} ${ticket.user.lastName}`
       : ticket.user.firstName || ticket.user.lastName || "Unknown";
     return name;
+  },
+
+  // Format "assignedTo" field - extracts name from assignedTo object
+  assignedTo: (value, ticket) => {
+    if (!ticket?.assignedTo) return "Unassigned";
+    const name = ticket.assignedTo.firstName && ticket.assignedTo.lastName
+      ? `${ticket.assignedTo.firstName} ${ticket.assignedTo.lastName}`
+      : ticket.assignedTo.firstName || ticket.assignedTo.lastName || "Unknown";
+    return (
+      <Box sx={ticketStyle.ticketDetailName}>
+        {name}
+      </Box>
+    );
   },
 
   // Format dates to readable format
@@ -77,6 +131,7 @@ const TICKET_FIELDS_CONFIG = {
   assignedTo: {
     visible: true,
     label: "assignedTo",
+    formatter: "assignedTo",
   },
   from: {
     visible: true,
@@ -90,9 +145,9 @@ const TICKET_FIELDS_CONFIG = {
   },
   user: {
     visible: true,
-    label: "user",
+    label: "from",
     formatter: "user", // Use the user formatter
-    hideLabel: true, // Don't show the label, the formatter handles it
+    hideLabel: false,
   },
   id: {
     visible: true,
@@ -151,10 +206,13 @@ const TicketInfoGrid = ({ ticket }) => {
           }
 
           // Otherwise, show label + value
+          const IconComponent = fieldIcons[key];
+
           return (
             <Box key={key} display="flex" gap={0.5}>
-              <TicketText variant="bold">
-                {t(`tickets.ticketView.${config.label}`)}:
+              <TicketText variant="bold" sx={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+                {IconComponent && <IconComponent sx={{ fontSize: '1rem' }} />}
+                {capitalizeFirst(t(`tickets.ticketView.${config.label}`))}:
               </TicketText>
               <TicketText>
                 {formatValue(ticket[key], config)}

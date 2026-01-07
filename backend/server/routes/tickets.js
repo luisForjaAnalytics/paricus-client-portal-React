@@ -62,15 +62,33 @@ const storage = STORAGE_MODE === 'local'
 const upload = multer({
   storage,
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB limit for images
+    fileSize: 5 * 1024 * 1024, // 5MB limit per file
   },
   fileFilter: (req, file, cb) => {
-    // Allow common image formats
-    const allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    // Allow images, PDFs, and Office documents
+    const allowedMimeTypes = [
+      // Images
+      'image/jpeg',
+      'image/jpg',
+      'image/png',
+      'image/gif',
+      'image/webp',
+      // PDFs
+      'application/pdf',
+      // Word documents
+      'application/msword', // .doc
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+      // Excel spreadsheets
+      'application/vnd.ms-excel', // .xls
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+      // PowerPoint presentations
+      'application/vnd.ms-powerpoint', // .ppt
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation', // .pptx
+    ];
     if (allowedMimeTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('Only image files (JPEG, PNG, GIF, WEBP) are allowed'), false);
+      cb(new Error('Only images, PDFs, and Office documents (Word, Excel, PowerPoint) are allowed'), false);
     }
   }
 });
@@ -137,10 +155,33 @@ function processTicketWithUrls(ticket) {
  */
 router.get('/', authenticateToken, async (req, res) => {
   try {
-    const { clientId, id: userId } = req.user;  // Fix: req.user.id not req.user.userId
+    const { clientId, id: userId, permissions } = req.user;
+
+    // Determine user role and build where clause
+    const isBPOAdmin = permissions?.includes('admin_clients');
+    const isClientAdmin = permissions?.includes('view_invoices') && !isBPOAdmin;
+
+    let whereClause = {};
+
+    if (isBPOAdmin) {
+      // BPO Admin: Can see ALL tickets from all clients
+      whereClause = {};
+    } else if (isClientAdmin) {
+      // Client Admin: Can see all tickets from their client company
+      whereClause = { clientId };
+    } else {
+      // Client User: Can only see tickets assigned to them
+      whereClause = {
+        clientId,
+        OR: [
+          { userId }, // Tickets they created
+          { assignedToId: userId }, // Tickets assigned to them
+        ],
+      };
+    }
 
     const tickets = await prisma.ticket.findMany({
-      where: { clientId },
+      where: whereClause,
       include: {
         details: {
           orderBy: { timestamp: 'asc' },
@@ -154,6 +195,14 @@ router.get('/', authenticateToken, async (req, res) => {
           orderBy: { uploadedAt: 'desc' },
         },
         user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
+        assignedTo: {
           select: {
             id: true,
             firstName: true,
@@ -176,6 +225,91 @@ router.get('/', authenticateToken, async (req, res) => {
 });
 
 /**
+ * @route   GET /api/tickets/assignable-users
+ * @desc    Get list of users that can be assigned tickets
+ * @access  Private
+ */
+router.get('/assignable-users', authenticateToken, async (req, res) => {
+  try {
+    const { clientId, permissions } = req.user;
+
+    const isBPOAdmin = permissions?.includes('admin_clients');
+
+    let users;
+
+    if (isBPOAdmin) {
+      // BPO Admin: Can assign to anyone in any client
+      users = await prisma.user.findMany({
+        where: {
+          isActive: true,
+        },
+        include: {
+          client: {
+            select: {
+              id: true,
+              name: true,
+            }
+          },
+          role: {
+            select: {
+              id: true,
+              roleName: true,
+            }
+          }
+        },
+        orderBy: [
+          { clientId: 'asc' },
+          { firstName: 'asc' },
+        ]
+      });
+    } else {
+      // Client users: Can only assign to users within their own client
+      users = await prisma.user.findMany({
+        where: {
+          clientId: clientId,
+          isActive: true,
+        },
+        include: {
+          client: {
+            select: {
+              id: true,
+              name: true,
+            }
+          },
+          role: {
+            select: {
+              id: true,
+              roleName: true,
+            }
+          }
+        },
+        orderBy: [
+          { firstName: 'asc' },
+        ]
+      });
+    }
+
+    // Format response
+    const formattedUsers = users.map(user => ({
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      fullName: `${user.firstName} ${user.lastName}`,
+      clientId: user.clientId,
+      clientName: user.client?.name,
+      roleId: user.roleId,
+      roleName: user.role?.roleName,
+    }));
+
+    res.json({ data: formattedUsers });
+  } catch (error) {
+    console.error('Error fetching assignable users:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
  * @route   GET /api/tickets/:id
  * @desc    Get a single ticket by ID
  * @access  Private
@@ -183,13 +317,38 @@ router.get('/', authenticateToken, async (req, res) => {
 router.get('/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
-    const { clientId } = req.user;
+    const { clientId, id: userId, permissions } = req.user;
+
+    // Determine user role
+    const isBPOAdmin = permissions?.includes('admin_clients');
+    const isClientAdmin = permissions?.includes('view_invoices') && !isBPOAdmin;
+
+    // Build where clause based on role
+    let whereClause = { id };
+
+    if (isBPOAdmin) {
+      // BPO Admin: Can see any ticket
+      whereClause = { id };
+    } else if (isClientAdmin) {
+      // Client Admin: Can see tickets from their client company
+      whereClause = {
+        id,
+        clientId,
+      };
+    } else {
+      // Client User: Can only see tickets they created or are assigned to
+      whereClause = {
+        id,
+        clientId,
+        OR: [
+          { userId },
+          { assignedToId: userId },
+        ],
+      };
+    }
 
     const ticket = await prisma.ticket.findFirst({
-      where: {
-        id,
-        clientId, // Ensure user can only access their client's tickets
-      },
+      where: whereClause,
       include: {
         details: {
           orderBy: { timestamp: 'asc' },
@@ -210,11 +369,19 @@ router.get('/:id', authenticateToken, async (req, res) => {
             email: true,
           },
         },
+        assignedTo: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
       },
     });
 
     if (!ticket) {
-      return res.status(404).json({ error: 'Ticket not found' });
+      return res.status(404).json({ error: 'Ticket not found or access denied' });
     }
 
     // Process ticket: parse description and add URLs to attachments
@@ -234,8 +401,8 @@ router.get('/:id', authenticateToken, async (req, res) => {
  */
 router.post('/', authenticateToken, async (req, res) => {
   try {
-    const { clientId, id: userId } = req.user;  // Fix: req.user.id not req.user.userId
-    const { subject, priority, assignedTo, description } = req.body;
+    const { clientId, id: userId, permissions } = req.user;
+    const { subject, priority, assignedToId, description } = req.body;
 
     // Validation
     if (!subject || !priority || !description) {
@@ -244,10 +411,38 @@ router.post('/', authenticateToken, async (req, res) => {
       });
     }
 
+    const isBPOAdmin = permissions?.includes('admin_clients');
+
+    // Validate assignedToId if provided
+    if (assignedToId) {
+      // Build where clause based on user role
+      const whereClause = {
+        id: parseInt(assignedToId),
+        isActive: true,
+      };
+
+      // If not BPO Admin, restrict to same client
+      if (!isBPOAdmin) {
+        whereClause.clientId = clientId;
+      }
+
+      const assignedUser = await prisma.user.findFirst({
+        where: whereClause,
+      });
+
+      if (!assignedUser) {
+        return res.status(400).json({
+          error: isBPOAdmin
+            ? 'Invalid assigned user'
+            : 'Invalid assigned user or user not from your organization',
+        });
+      }
+    }
+
     // Create description JSON object
     const descriptionJson = JSON.stringify({
       descriptionData: description,
-      attachmentIds: [], // Changed from attachmentId to attachmentIds (array)
+      attachmentIds: [],
       url: null,
     });
 
@@ -258,13 +453,21 @@ router.post('/', authenticateToken, async (req, res) => {
         userId,
         subject,
         priority,
-        assignedTo,
+        assignedToId: assignedToId ? parseInt(assignedToId) : null,
         status: 'Open',
         description: descriptionJson,
       },
       include: {
         details: true,
         user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
+        assignedTo: {
           select: {
             id: true,
             firstName: true,
@@ -296,32 +499,98 @@ router.post('/', authenticateToken, async (req, res) => {
 router.put('/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
-    const { clientId } = req.user;
-    const { subject, priority, status, assignedTo } = req.body;
+    const { clientId, id: userId, permissions } = req.user;
+    const { subject, priority, status, assignedToId } = req.body;
 
-    // Check if ticket exists and belongs to user's client
+    // Determine user role
+    const isBPOAdmin = permissions?.includes('admin_clients');
+    const isClientAdmin = permissions?.includes('view_invoices') && !isBPOAdmin;
+
+    // Build where clause based on role (same logic as GET endpoint)
+    let whereClause = { id };
+
+    if (isBPOAdmin) {
+      // BPO Admin: Can update any ticket
+      whereClause = { id };
+    } else if (isClientAdmin) {
+      // Client Admin: Can update tickets from their client company
+      whereClause = {
+        id,
+        clientId,
+      };
+    } else {
+      // Client User: Can only update tickets they created or are assigned to
+      whereClause = {
+        id,
+        clientId,
+        OR: [
+          { userId },
+          { assignedToId: userId },
+        ],
+      };
+    }
+
+    // Check if ticket exists and user has access to it
     const existingTicket = await prisma.ticket.findFirst({
-      where: { id, clientId },
+      where: whereClause,
     });
 
     if (!existingTicket) {
       return res.status(404).json({ error: 'Ticket not found' });
     }
 
+    // Validate assignedToId if provided
+    if (assignedToId !== undefined && assignedToId !== null) {
+      // Build where clause based on user role
+      const assignedUserWhereClause = {
+        id: parseInt(assignedToId),
+        isActive: true,
+      };
+
+      // If not BPO Admin, restrict to same client
+      if (!isBPOAdmin) {
+        assignedUserWhereClause.clientId = clientId;
+      }
+
+      const assignedUser = await prisma.user.findFirst({
+        where: assignedUserWhereClause,
+      });
+
+      if (!assignedUser) {
+        return res.status(400).json({
+          error: isBPOAdmin
+            ? 'Invalid assigned user'
+            : 'Invalid assigned user or user not from your organization',
+        });
+      }
+    }
+
+    // Build update data
+    const updateData = {};
+    if (subject !== undefined) updateData.subject = subject;
+    if (priority !== undefined) updateData.priority = priority;
+    if (status !== undefined) updateData.status = status;
+    if (assignedToId !== undefined) {
+      updateData.assignedToId = assignedToId ? parseInt(assignedToId) : null;
+    }
+
     // Update ticket
     const ticket = await prisma.ticket.update({
       where: { id },
-      data: {
-        subject,
-        priority,
-        status,
-        assignedTo,
-      },
+      data: updateData,
       include: {
         details: {
           orderBy: { timestamp: 'asc' },
         },
         user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
+        assignedTo: {
           select: {
             id: true,
             firstName: true,
@@ -353,23 +622,51 @@ router.put('/:id', authenticateToken, async (req, res) => {
 router.post('/:id/details', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
-    const { clientId } = req.user;
+    const { clientId, id: userId, permissions } = req.user;
     const { detail } = req.body;
 
-    console.log('📝 Adding ticket detail:', { ticketId: id, clientId, hasDetail: !!detail });
+    console.log('📝 Adding ticket detail:', { ticketId: id, clientId, userId, hasDetail: !!detail });
 
     if (!detail) {
       console.error('❌ Detail validation failed: Detail is required');
       return res.status(400).json({ error: 'Detail is required' });
     }
 
-    // Check if ticket exists and belongs to user's client
+    // Determine user role
+    const isBPOAdmin = permissions?.includes('admin_clients');
+    const isClientAdmin = permissions?.includes('view_invoices') && !isBPOAdmin;
+
+    // Build where clause based on role (same logic as GET endpoint)
+    let whereClause = { id };
+
+    if (isBPOAdmin) {
+      // BPO Admin: Can update any ticket
+      whereClause = { id };
+    } else if (isClientAdmin) {
+      // Client Admin: Can update tickets from their client company
+      whereClause = {
+        id,
+        clientId,
+      };
+    } else {
+      // Client User: Can only update tickets they created or are assigned to
+      whereClause = {
+        id,
+        clientId,
+        OR: [
+          { userId },
+          { assignedToId: userId },
+        ],
+      };
+    }
+
+    // Check if ticket exists and user has access to it
     const existingTicket = await prisma.ticket.findFirst({
-      where: { id, clientId },
+      where: whereClause,
     });
 
     if (!existingTicket) {
-      console.error('❌ Ticket not found:', { ticketId: id, clientId });
+      console.error('❌ Ticket not found or access denied:', { ticketId: id, clientId, userId });
       return res.status(404).json({ error: 'Ticket not found' });
     }
 
@@ -431,11 +728,39 @@ router.post('/:id/details', authenticateToken, async (req, res) => {
 router.delete('/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
-    const { clientId } = req.user;
+    const { clientId, id: userId, permissions } = req.user;
 
-    // Check if ticket exists and belongs to user's client
+    // Determine user role
+    const isBPOAdmin = permissions?.includes('admin_clients');
+    const isClientAdmin = permissions?.includes('view_invoices') && !isBPOAdmin;
+
+    // Build where clause based on role (same logic as GET endpoint)
+    let whereClause = { id };
+
+    if (isBPOAdmin) {
+      // BPO Admin: Can delete any ticket
+      whereClause = { id };
+    } else if (isClientAdmin) {
+      // Client Admin: Can delete tickets from their client company
+      whereClause = {
+        id,
+        clientId,
+      };
+    } else {
+      // Client User: Can only delete tickets they created or are assigned to
+      whereClause = {
+        id,
+        clientId,
+        OR: [
+          { userId },
+          { assignedToId: userId },
+        ],
+      };
+    }
+
+    // Check if ticket exists and user has access to it
     const existingTicket = await prisma.ticket.findFirst({
-      where: { id, clientId },
+      where: whereClause,
       include: { attachments: true },
     });
 
@@ -502,9 +827,9 @@ router.post('/:id/attachments', authenticateToken, (req, res, next) => {
 
   try {
     const { id: ticketId } = req.params;
-    const { clientId } = req.user;
+    const { clientId, id: userId, permissions } = req.user;
 
-    console.log('📎 Upload attachment request:', { ticketId, clientId, hasFile: !!req.file });
+    console.log('📎 Upload attachment request:', { ticketId, clientId, userId, hasFile: !!req.file });
 
     // Validate file first
     if (!req.file) {
@@ -524,14 +849,42 @@ router.post('/:id/attachments', authenticateToken, (req, res, next) => {
       localFilePath = req.file.path;
     }
 
-    // Check if ticket exists and belongs to user's client
-    console.log('🔍 Looking for ticket:', { ticketId, clientId });
+    // Determine user role
+    const isBPOAdmin = permissions?.includes('admin_clients');
+    const isClientAdmin = permissions?.includes('view_invoices') && !isBPOAdmin;
+
+    // Build where clause based on role (same logic as other endpoints)
+    let whereClause = { id: ticketId };
+
+    if (isBPOAdmin) {
+      // BPO Admin: Can upload to any ticket
+      whereClause = { id: ticketId };
+    } else if (isClientAdmin) {
+      // Client Admin: Can upload to tickets from their client company
+      whereClause = {
+        id: ticketId,
+        clientId,
+      };
+    } else {
+      // Client User: Can only upload to tickets they created or are assigned to
+      whereClause = {
+        id: ticketId,
+        clientId,
+        OR: [
+          { userId },
+          { assignedToId: userId },
+        ],
+      };
+    }
+
+    // Check if ticket exists and user has access to it
+    console.log('🔍 Looking for ticket:', { ticketId, clientId, userId });
     const ticket = await prisma.ticket.findFirst({
-      where: { id: ticketId, clientId },
+      where: whereClause,
     });
 
     if (!ticket) {
-      console.error('❌ Ticket not found:', { ticketId, clientId });
+      console.error('❌ Ticket not found or access denied:', { ticketId, clientId, userId });
       // Clean up uploaded file if ticket doesn't exist
       if (localFilePath) {
         try {
@@ -789,11 +1142,39 @@ router.get('/:ticketId/attachments/:attachmentId/file', authenticateTokenFlexibl
 router.delete('/:ticketId/attachments/:attachmentId', authenticateToken, async (req, res) => {
   try {
     const { ticketId, attachmentId } = req.params;
-    const { clientId } = req.user;
+    const { clientId, id: userId, permissions } = req.user;
 
-    // Check if ticket exists and belongs to user's client
+    // Determine user role
+    const isBPOAdmin = permissions?.includes('admin_clients');
+    const isClientAdmin = permissions?.includes('view_invoices') && !isBPOAdmin;
+
+    // Build where clause based on role (same logic as other endpoints)
+    let whereClause = { id: ticketId };
+
+    if (isBPOAdmin) {
+      // BPO Admin: Can delete attachments from any ticket
+      whereClause = { id: ticketId };
+    } else if (isClientAdmin) {
+      // Client Admin: Can delete attachments from tickets in their client company
+      whereClause = {
+        id: ticketId,
+        clientId,
+      };
+    } else {
+      // Client User: Can only delete attachments from tickets they created or are assigned to
+      whereClause = {
+        id: ticketId,
+        clientId,
+        OR: [
+          { userId },
+          { assignedToId: userId },
+        ],
+      };
+    }
+
+    // Check if ticket exists and user has access to it
     const ticket = await prisma.ticket.findFirst({
-      where: { id: ticketId, clientId },
+      where: whereClause,
     });
 
     if (!ticket) {
@@ -854,21 +1235,49 @@ router.delete('/:ticketId/attachments/:attachmentId', authenticateToken, async (
 router.post('/:ticketId/details/:detailId/attachments', authenticateToken, upload.single('image'), async (req, res) => {
   try {
     const { ticketId, detailId } = req.params;
-    const { clientId } = req.user;
+    const { clientId, id: userId, permissions } = req.user;
 
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
     // SECURITY: Validate file size (additional check beyond multer)
-    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
     if (req.file.size > MAX_FILE_SIZE) {
-      return res.status(400).json({ error: 'File size exceeds 10MB limit' });
+      return res.status(400).json({ error: 'File size exceeds 5MB limit' });
     }
 
-    // Check if ticket exists and belongs to user's client
+    // Determine user role
+    const isBPOAdmin = permissions?.includes('admin_clients');
+    const isClientAdmin = permissions?.includes('view_invoices') && !isBPOAdmin;
+
+    // Build where clause based on role (same logic as other endpoints)
+    let whereClause = { id: ticketId };
+
+    if (isBPOAdmin) {
+      // BPO Admin: Can upload to any ticket
+      whereClause = { id: ticketId };
+    } else if (isClientAdmin) {
+      // Client Admin: Can upload to tickets from their client company
+      whereClause = {
+        id: ticketId,
+        clientId,
+      };
+    } else {
+      // Client User: Can only upload to tickets they created or are assigned to
+      whereClause = {
+        id: ticketId,
+        clientId,
+        OR: [
+          { userId },
+          { assignedToId: userId },
+        ],
+      };
+    }
+
+    // Check if ticket exists and user has access to it
     const ticket = await prisma.ticket.findFirst({
-      where: { id: ticketId, clientId },
+      where: whereClause,
     });
 
     if (!ticket) {
@@ -1094,11 +1503,39 @@ router.get('/:ticketId/details/:detailId/attachments/:attachmentId/file', authen
 router.delete('/:ticketId/details/:detailId/attachments/:attachmentId', authenticateToken, async (req, res) => {
   try {
     const { ticketId, detailId, attachmentId } = req.params;
-    const { clientId } = req.user;
+    const { clientId, id: userId, permissions } = req.user;
 
-    // Check if ticket exists and belongs to user's client
+    // Determine user role
+    const isBPOAdmin = permissions?.includes('admin_clients');
+    const isClientAdmin = permissions?.includes('view_invoices') && !isBPOAdmin;
+
+    // Build where clause based on role (same logic as other endpoints)
+    let whereClause = { id: ticketId };
+
+    if (isBPOAdmin) {
+      // BPO Admin: Can delete detail attachments from any ticket
+      whereClause = { id: ticketId };
+    } else if (isClientAdmin) {
+      // Client Admin: Can delete detail attachments from tickets in their client company
+      whereClause = {
+        id: ticketId,
+        clientId,
+      };
+    } else {
+      // Client User: Can only delete detail attachments from tickets they created or are assigned to
+      whereClause = {
+        id: ticketId,
+        clientId,
+        OR: [
+          { userId },
+          { assignedToId: userId },
+        ],
+      };
+    }
+
+    // Check if ticket exists and user has access to it
     const ticket = await prisma.ticket.findFirst({
-      where: { id: ticketId, clientId },
+      where: whereClause,
     });
 
     if (!ticket) {

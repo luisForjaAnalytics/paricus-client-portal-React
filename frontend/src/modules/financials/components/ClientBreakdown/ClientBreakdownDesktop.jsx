@@ -29,6 +29,7 @@ import {
 import { InvoicesTableDesktop } from "../InvoicesTable/InvoicesTableDesktop";
 import { UploadInvoiceButton } from "../UploadInvoiceButton/UploadInvoiceButton";
 import { useTranslation } from "react-i18next";
+import { GetInitialsAvatar } from "../../../../common/components/ui/GetInitialsAvatar/GetInitialsAvatar";
 
 export const ClientBreakdownDesktop = ({
   clientBreakdowns,
@@ -335,7 +336,11 @@ export const ClientBreakdownDesktop = ({
                     </IconButton>
                   </TableCell>
                   <TableCell>
-                    <Box
+                    <GetInitialsAvatar
+                      userName={client.folderDisplay}
+                      variant={""}
+                    />
+                    {/* <Box
                       sx={{
                         display: "flex",
                         alignItems: "center",
@@ -357,7 +362,7 @@ export const ClientBreakdownDesktop = ({
                       <Typography variant="body2" fontWeight={500}>
                         {client.folderDisplay}
                       </Typography>
-                    </Box>
+                    </Box> */}
                   </TableCell>
                   <TableCell align="center">
                     <Typography

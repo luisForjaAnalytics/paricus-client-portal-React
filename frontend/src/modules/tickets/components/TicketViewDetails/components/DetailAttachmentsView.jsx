@@ -9,6 +9,7 @@ import {
   DialogContent,
   DialogActions,
   Alert,
+  Typography,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
@@ -16,8 +17,60 @@ import AttachFileIcon from "@mui/icons-material/AttachFile";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import {
+  Image as ImageIcon,
+  PictureAsPdf as PdfIcon,
+  Description as WordIcon,
+  TableChart as ExcelIcon,
+  Slideshow as PowerPointIcon,
+  InsertDriveFile as FileIcon,
+} from "@mui/icons-material";
 import { useTicketDetailAttachments } from "../../../../../common/hooks/useTicketDetailAttachments";
 import { TicketText } from "../../../../../common/components/ui/TicketText";
+
+// Helper function to check if file is an image
+const isImageFile = (mimeType) => {
+  try {
+    return mimeType?.startsWith('image/') || false;
+  } catch (error) {
+    console.error('Error checking if file is image:', error);
+    return false;
+  }
+};
+
+// Helper function to get file icon based on mime type
+const getFileIcon = (mimeType, size = "medium") => {
+  try {
+    const iconSize = size === "small" ? 40 : 60;
+
+    if (mimeType?.startsWith('image/')) {
+      return <ImageIcon sx={{ fontSize: iconSize, color: "#999" }} />;
+    }
+
+    switch (mimeType) {
+      case 'application/pdf':
+        return <PdfIcon sx={{ fontSize: iconSize, color: "#D32F2F" }} />;
+
+      case 'application/msword':
+      case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+        return <WordIcon sx={{ fontSize: iconSize, color: "#2B579A" }} />;
+
+      case 'application/vnd.ms-excel':
+      case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+        return <ExcelIcon sx={{ fontSize: iconSize, color: "#217346" }} />;
+
+      case 'application/vnd.ms-powerpoint':
+      case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
+        return <PowerPointIcon sx={{ fontSize: iconSize, color: "#D24726" }} />;
+
+      default:
+        return <FileIcon sx={{ fontSize: iconSize, color: "#999" }} />;
+    }
+  } catch (error) {
+    console.error('Error getting file icon:', error);
+    return <FileIcon sx={{ fontSize: iconSize, color: "#999" }} />;
+  }
+};
 
 export const DetailAttachmentsView = ({ ticketId, detail }) => {
   const { t } = useTranslation();
@@ -33,9 +86,8 @@ export const DetailAttachmentsView = ({ ticketId, detail }) => {
 
   const attachments = detail?.attachments || [];
 
-  // Helper function to build image URL with token
-  // Backend already provides the URL path, we just add the base URL and token
-  const getImageUrl = (attachment) => {
+  // Helper function to build file URL with token
+  const getFileUrl = (attachment) => {
     try {
       if (!attachment?.url || !token) return null;
 
@@ -45,13 +97,32 @@ export const DetailAttachmentsView = ({ ticketId, detail }) => {
       // Add token as query parameter for authentication
       return `${fullUrl}?token=${encodeURIComponent(token)}`;
     } catch (error) {
-      console.error('Error building image URL:', error);
+      console.error('Error building file URL:', error);
       return null;
     }
   };
 
-  const handleImageClick = (attachment) => {
-    setSelectedImage(attachment);
+  const handleAttachmentClick = (attachment) => {
+    try {
+      if (!attachment) {
+        console.error('Missing attachment data');
+        return;
+      }
+
+      // For images, show preview dialog
+      if (isImageFile(attachment.mimeType)) {
+        setSelectedImage(attachment);
+      } else {
+        // For non-images (PDFs, Office docs), download the file
+        const url = getFileUrl(attachment);
+        if (url) {
+          window.open(url, '_blank');
+        }
+      }
+    } catch (error) {
+      console.error('Error handling attachment click:', error);
+      alert('Failed to open file. Please try again.');
+    }
   };
 
   const handleCloseDialog = () => {
@@ -78,8 +149,9 @@ export const DetailAttachmentsView = ({ ticketId, detail }) => {
     <>
       <Box mt={1} display="flex" flexDirection="row" gap={2} flexWrap="wrap">
         {attachments.map((attachment) => {
-          const imageUrl = getImageUrl(attachment);
+          const fileUrl = getFileUrl(attachment);
           const hasError = imageErrors[attachment.id];
+          const isImage = isImageFile(attachment.mimeType);
 
           return (
             <Card
@@ -93,14 +165,14 @@ export const DetailAttachmentsView = ({ ticketId, detail }) => {
               }}
             >
               <CardActionArea
-                onClick={() => handleImageClick(attachment)}
+                onClick={() => handleAttachmentClick(attachment)}
                 disabled={isDeleting}
               >
-                {imageUrl && !hasError ? (
+                {isImage && fileUrl && !hasError ? (
                   <CardMedia
                     component="img"
                     height="80"
-                    image={imageUrl}
+                    image={fileUrl}
                     alt={attachment.fileName}
                     sx={{
                       objectFit: "cover",
@@ -116,7 +188,7 @@ export const DetailAttachmentsView = ({ ticketId, detail }) => {
                       flexDirection: "column",
                       alignItems: "center",
                       justifyContent: "center",
-                      backgroundColor: "action.hover",
+                      backgroundColor: isImage ? "action.hover" : "#f5f5f5",
                       gap: 0.3,
                     }}
                   >
@@ -134,7 +206,23 @@ export const DetailAttachmentsView = ({ ticketId, detail }) => {
                         </TicketText>
                       </>
                     ) : (
-                      <AttachFileIcon fontSize="small" />
+                      <>
+                        {getFileIcon(attachment.mimeType, "small")}
+                        <Typography
+                          sx={{
+                            fontSize: "0.5rem",
+                            textAlign: "center",
+                            px: 0.3,
+                            mt: 0.3,
+                            maxWidth: "100%",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {attachment.fileName?.split('.').pop()?.toUpperCase()}
+                        </Typography>
+                      </>
                     )}
                   </Box>
                 )}
@@ -204,7 +292,7 @@ export const DetailAttachmentsView = ({ ticketId, detail }) => {
               ) : (
                 <CardMedia
                   component="img"
-                  image={getImageUrl(selectedImage)}
+                  image={getFileUrl(selectedImage)}
                   alt={selectedImage.fileName}
                   sx={{
                     width: "100%",

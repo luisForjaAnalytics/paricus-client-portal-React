@@ -7,7 +7,11 @@
   "scripts": {
     "dev": "node index.js",
     "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "script:seed-tickets": "node prisma/scripts/seed-tickets.js",
+    "script:check-tickets": "node prisma/scripts/checkTickets.js",
+    "script:test-add-detail": "node prisma/scripts/test-add-detail.js",
+    "script:test-ticket-data": "node prisma/scripts/test-ticket-data.js"
   },
   "keywords": [],
   "author": "",
