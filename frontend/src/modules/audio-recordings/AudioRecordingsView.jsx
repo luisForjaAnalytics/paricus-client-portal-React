@@ -61,7 +61,6 @@ export const AudioRecordingsView = () => {
     hasAudio: "true", // MODIFIED: Default filter to show only recordings with audio on component mount. Change to null to show all recordings by default, or "false" to show only recordings without audio.
   });
 
-  // Debounced filters - Used for API calls (500ms delay)
   const [debouncedFilters, setDebouncedFilters] = useState(filters);
   const [isDebouncing, setIsDebouncing] = useState(false);
 
@@ -80,7 +79,6 @@ export const AudioRecordingsView = () => {
       endDate: filters.endDate,
     };
 
-    // Only show debouncing indicator for text input changes
     const hasTextInput =
       filters.interactionId || filters.customerPhone || filters.agentName;
     if (hasTextInput) {
@@ -93,7 +91,7 @@ export const AudioRecordingsView = () => {
         ...textFields,
       }));
       setIsDebouncing(false);
-    }, 500); // Wait 500ms after user stops typing
+    }, 500);
 
     return () => {
       clearTimeout(timer);
@@ -107,6 +105,16 @@ export const AudioRecordingsView = () => {
     filters.startDate,
     filters.endDate,
   ]);
+
+  // Update company filter immediately (no debounce)
+  useEffect(() => {
+    setDebouncedFilters((prev) => ({ ...prev, company: filters.company }));
+  }, [filters.company]);
+
+  // Update hasAudio filter immediately (no debounce)
+  useEffect(() => {
+    setDebouncedFilters((prev) => ({ ...prev, hasAudio: filters.hasAudio }));
+  }, [filters.hasAudio]);
 
   // RTK Query hooks
   const {
@@ -212,7 +220,7 @@ export const AudioRecordingsView = () => {
   const setCompanyFilter = useCallback((company) => {
     try {
       setFilters((prev) => ({ ...prev, company }));
-      setDebouncedFilters((prev) => ({ ...prev, company })); // Apply immediately without debounce
+      // Company filter is applied immediately via useEffect
       setPage(1);
     } catch (err) {
       console.error(`ERROR: setCompanyFilter - ${err.message}`, err);
@@ -222,7 +230,7 @@ export const AudioRecordingsView = () => {
   const setAudioFilter = useCallback((hasAudio) => {
     try {
       setFilters((prev) => ({ ...prev, hasAudio }));
-      setDebouncedFilters((prev) => ({ ...prev, hasAudio })); // Apply immediately without debounce
+      // Audio filter is applied immediately via useEffect
       setPage(1);
     } catch (err) {
       console.error(`ERROR: setAudioFilter - ${err.message}`, err);

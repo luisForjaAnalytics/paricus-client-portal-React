@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import { Box, Typography, Alert, CircularProgress } from "@mui/material";
 import { useTranslation } from "react-i18next";
+import PropTypes from "prop-types";
 import { dataGridTable } from "../../../styles/styles";
 
 /**
@@ -57,6 +58,10 @@ export const UniversalDataGrid = ({
 
   // Styling
   sx = {},
+
+  // Slots (for custom components like toolbar)
+  slots,
+  slotProps,
 
   // Additional DataGrid props
   ...dataGridProps
@@ -176,9 +181,35 @@ export const UniversalDataGrid = ({
           ...sx,
         }}
         {...dataGridProps}
+        slots={slots}
+        slotProps={slotProps}
       />
     </Box>
   );
+};
+
+UniversalDataGrid.propTypes = {
+  rows: PropTypes.array,
+  columns: PropTypes.array,
+  loading: PropTypes.bool,
+  error: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
+  emptyMessage: PropTypes.string,
+  onRowClick: PropTypes.func,
+  onSelectionChange: PropTypes.func,
+  paginationModel: PropTypes.shape({
+    page: PropTypes.number.isRequired,
+    pageSize: PropTypes.number.isRequired,
+  }),
+  onPaginationModelChange: PropTypes.func,
+  pageSizeOptions: PropTypes.arrayOf(PropTypes.number),
+  checkboxSelection: PropTypes.bool,
+  disableRowSelectionOnClick: PropTypes.bool,
+  autoHeight: PropTypes.bool,
+  height: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  getRowId: PropTypes.func,
+  sx: PropTypes.object,
+  slots: PropTypes.object,
+  slotProps: PropTypes.object,
 };
 
 /**

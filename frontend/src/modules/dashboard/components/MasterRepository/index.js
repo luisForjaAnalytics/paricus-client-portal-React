@@ -1,0 +1,1 @@
+export { MasterRepository } from "./MasterRepository";

@@ -71,17 +71,27 @@ export async function getPool() {
 }
 
 /**
+ * Generate UUID-like ID
+ */
+function generateUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+/**
  * Generate mock audio recordings for testing
  */
 function getMockAudioRecordings(limit = 100, offset = 0, filters = {}) {
   const agents = ['John Smith', 'Maria Garcia', 'David Johnson', 'Sarah Williams', 'Michael Brown'];
+
+  // Only 3 main companies with their tags
   const companies = [
     { tag: 'exc', name: 'IM Telecom' },
-    { tag: 'infiniti', name: 'IM Telecom' },
     { tag: 'flex', name: 'Flex Mobile' },
-    { tag: 'flx', name: 'Flex Mobile' },
-    { tag: 'tem', name: 'Tempo Wireless' },
-    { tag: 'tempo', name: 'Tempo Wireless' }
+    { tag: 'tem', name: 'Tempo Wireless' }
   ];
 
   // Generate full dataset
@@ -89,17 +99,20 @@ function getMockAudioRecordings(limit = 100, offset = 0, filters = {}) {
   for (let i = 0; i < 150; i++) {
     const startTime = new Date(2024, 11, 1 + (i % 30), 9 + (i % 8), i % 60);
     const endTime = new Date(startTime.getTime() + (5 + (i % 10)) * 60000);
-    const companyData = companies[i % companies.length];
+
+    // Randomly assign one of the 3 companies
+    const companyData = companies[Math.floor(Math.random() * companies.length)];
 
     allMockData.push({
-      interaction_id: `MOCK-${String(i + 1).padStart(6, '0')}`,
+      interaction_id: generateUUID(),
       call_type: 'inbound',
       start_time: startTime,
       end_time: endTime,
       customer_phone_number: `555-${String(1000 + i)}`,
       agent_name: agents[i % agents.length],
-      audiofilename: i % 3 === 0 ? `audio_${i + 1}.wav` : null,
-      tags: companyData.tag
+      audiofilename: i % 3 === 0 ? `audio_${generateUUID()}.wav` : null,
+      tags: companyData.tag,
+      company: companyData.name
     });
   }
 
@@ -306,7 +319,8 @@ export async function getCallRecordings(filters = {}, limit = 100, offset = 0) {
         customer_phone_number,
         agent_name,
         audiofilename,
-        tags
+        tags,
+        company
       FROM calls_report WITH (NOLOCK)
       WHERE call_type = 'inbound'
         AND (tags NOT LIKE '%test%' AND tags NOT LIKE '%demo%')

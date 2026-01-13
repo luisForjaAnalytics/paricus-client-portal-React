@@ -171,34 +171,6 @@ export const TableView = () => {
     },
   ]);
 
-  // Toolbar component for Knowledge Base with filter button
-  const KnowledgeBaseToolbar = useMemo(() => {
-    return () => (
-      <>
-        {isOpen && (
-          <Box
-            sx={{
-              padding: "1rem 2rem",
-              display: "flex",
-              justifyContent: "left",
-              backgroundColor: colors.subSectionBackground,
-              borderBottom: `1px solid ${colors.subSectionBorder}`,
-            }}
-          >
-            <AdvancedFilters
-              filters={filters}
-              setFilters={setFilters}
-              refetch={refetch}
-              isDebouncing={false}
-              loading={isLoading}
-              clearFilters={clearFilters}
-            />
-          </Box>
-        )}
-      </>
-    );
-  }, [isOpen, filters, isLoading]);
-
   return (
     <Box sx={{ width: "100%" }}>
       {/* Articles Table */}
@@ -231,12 +203,34 @@ export const TableView = () => {
           </Tooltip>
         </Box>
 
+        {/* Advanced Filters - Rendered outside DataGrid */}
+        {isOpen && (
+          <Box
+            sx={{
+              padding: "1rem 2rem",
+              display: "flex",
+              justifyContent: "left",
+              backgroundColor: colors.subSectionBackground,
+              borderBottom: `1px solid ${colors.subSectionBorder}`,
+              marginBottom: 1,
+            }}
+          >
+            <AdvancedFilters
+              filters={filters}
+              setFilters={setFilters}
+              refetch={refetch}
+              isDebouncing={false}
+              loading={isLoading}
+              clearFilters={clearFilters}
+            />
+          </Box>
+        )}
+
         <UniversalDataGrid
           rows={rows}
           columns={columns}
           loading={isLoading}
           emptyMessage={t("knowledgeBase.noArticlesFound") || "No articles found"}
-          slots={{ toolbar: KnowledgeBaseToolbar }}
           pageSizeOptions={[10, 25, 50, 100]}
           height={'auto'}
         />

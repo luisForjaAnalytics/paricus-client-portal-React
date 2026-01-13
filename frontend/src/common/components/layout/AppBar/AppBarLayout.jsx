@@ -11,6 +11,7 @@ import Menu from "@mui/material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import MoreIcon from "@mui/icons-material/MoreVert";
+import PropTypes from "prop-types";
 import { AvatarButton } from "./AvatarButton";
 import { useTranslation } from "react-i18next";
 import LanguageMenu from "./LanguageMenu";
@@ -255,4 +256,9 @@ export const AppBarLayout = ({ titleState, setTitleState }) => {
       {renderMenu}
     </Box>
   );
+};
+
+AppBarLayout.propTypes = {
+  titleState: PropTypes.string.isRequired,
+  setTitleState: PropTypes.func.isRequired,
 };

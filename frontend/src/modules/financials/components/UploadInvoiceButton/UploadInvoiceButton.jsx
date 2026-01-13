@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import { Upload as UploadIcon } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
+import PropTypes from "prop-types";
 import { useUploadInvoiceMutation } from "../../../../store/api/invoicesApi";
 import { useTesseractOCR } from "../../../../common/hooks/useTesseractOCR";
 import { parseInvoiceData } from "../../../../common/utils/invoiceParser";
@@ -521,6 +522,12 @@ export const UploadInvoiceButton = ({ selectedFolder, onSuccess, onError }) => {
       </Dialog>
     </>
   );
+};
+
+UploadInvoiceButton.propTypes = {
+  selectedFolder: PropTypes.string.isRequired,
+  onSuccess: PropTypes.func.isRequired,
+  onError: PropTypes.func.isRequired,
 };
 
 export default UploadInvoiceButton;

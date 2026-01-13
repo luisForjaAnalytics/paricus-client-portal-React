@@ -11,17 +11,81 @@ import {
   UniversalDataGrid,
   useDataGridColumns,
 } from "../../../../common/components/ui/DataGrid/UniversalDataGrid";
+import { TicketAdvancedFilters } from "../AdvancedFilters/TicketAdvancedFilters";
 
 export const TicketsViewDesktop = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
-  const { data = [], isLoading, isError } = useGetTicketsQuery();
+  const { data = [], isLoading, isError, refetch } = useGetTicketsQuery();
+
+  // Filters state
+  const [filters, setFilters] = useState({
+    subject: "",
+    from: "",
+    assignedTo: "",
+    priority: "",
+    status: "",
+    lastUpdate: "",
+  });
+
+  // Clear all filters
+  const clearFilters = () => {
+    setFilters({
+      subject: "",
+      from: "",
+      assignedTo: "",
+      priority: "",
+      status: "",
+      lastUpdate: "",
+    });
+  };
+
+  // Filter tickets based on advanced filters
+  const filteredTickets = useMemo(() => {
+    if (!filters.subject && !filters.from && !filters.assignedTo && !filters.priority && !filters.status && !filters.lastUpdate) {
+      return data;
+    }
+
+    return data.filter((ticket) => {
+      const matchesSubject = filters.subject
+        ? ticket.subject?.toLowerCase().includes(filters.subject.toLowerCase())
+        : true;
+
+      const fromName = ticket.user
+        ? `${ticket.user.firstName} ${ticket.user.lastName}`.toLowerCase()
+        : "unknown";
+      const matchesFrom = filters.from
+        ? fromName.includes(filters.from.toLowerCase())
+        : true;
+
+      const assignedToName = ticket.assignedTo
+        ? `${ticket.assignedTo.firstName} ${ticket.assignedTo.lastName}`.toLowerCase()
+        : "unassigned";
+      const matchesAssignedTo = filters.assignedTo
+        ? assignedToName.includes(filters.assignedTo.toLowerCase())
+        : true;
+
+      const matchesPriority = filters.priority
+        ? ticket.priority?.toLowerCase() === filters.priority.toLowerCase()
+        : true;
+
+      const matchesStatus = filters.status
+        ? ticket.status?.toLowerCase() === filters.status.toLowerCase()
+        : true;
+
+      const matchesLastUpdate = filters.lastUpdate
+        ? formatDateTime(ticket.updatedAt)?.startsWith(filters.lastUpdate)
+        : true;
+
+      return matchesSubject && matchesFrom && matchesAssignedTo && matchesPriority && matchesStatus && matchesLastUpdate;
+    });
+  }, [data, filters]);
 
   // Transform data for DataGrid if needed
   const rows = useMemo(() => {
     try {
-      return data.map((ticket) => ({
+      return filteredTickets.map((ticket) => ({
         id: ticket.id,
         lastUpdate: formatDateTime(ticket.updatedAt),
         subject: ticket.subject,
@@ -38,7 +102,7 @@ export const TicketsViewDesktop = () => {
       console.error("Error transforming ticket data:", error);
       return [];
     }
-  }, [data]);
+  }, [filteredTickets]);
 
   // Helper function for priority styles
   const getPriorityStyles = (priority) => {
@@ -139,35 +203,6 @@ export const TicketsViewDesktop = () => {
     },
   ]);
 
-  // Toolbar component for logs table with filter button
-  const LogsToolbar = useMemo(() => {
-    return () => (
-      <>
-        {isOpen && (
-          <Box
-            sx={{
-              padding: "0.2rem 0 1rem 0",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: colors.subSectionBackground,
-              borderBottom: `1px solid ${colors.subSectionBorder}`,
-            }}
-          >
-            {/* <AdvancedFilters
-              filters={filters}
-              setFilters={setFilters}
-              refetch={refetch}
-              isDebouncing={false}
-              loading={isLoading}
-              clearFilters={clearFilters}
-            /> */}
-          </Box>
-        )}
-      </>
-    );
-  }); // [t, totalRows, isOpen, filters, isLoading]);
-
   return (
     <Box sx={{ width: "100%" }}>
       {/* Action Buttons - Create Ticket and Filter */}
@@ -196,6 +231,30 @@ export const TicketsViewDesktop = () => {
         </Tooltip>
       </Box>
 
+      {/* Advanced Filters - Rendered outside DataGrid */}
+      {isOpen && (
+        <Box
+          sx={{
+            padding: "0.2rem 0 1rem 0",
+            display: { xs: "none", md: "flex" },
+            justifyContent: "left",
+            alignItems: "center",
+            backgroundColor: colors.subSectionBackground,
+            borderBottom: `1px solid ${colors.subSectionBorder}`,
+            marginBottom: 1,
+          }}
+        >
+          <TicketAdvancedFilters
+            filters={filters}
+            setFilters={setFilters}
+            refetch={refetch}
+            isDebouncing={false}
+            loading={isLoading}
+            clearFilters={clearFilters}
+          />
+        </Box>
+      )}
+
       {/* DataGrid */}
       <Box
         sx={{
@@ -210,6 +269,7 @@ export const TicketsViewDesktop = () => {
           loading={isLoading}
           error={isError ? "Error loading tickets" : null}
           emptyMessage={t("tickets.noTicketsFound") || "No tickets found"}
+          autoHeight={true}
           onRowClick={(params) =>
             navigate(`/app/tickets/ticketTable/${params.id}`)
           }

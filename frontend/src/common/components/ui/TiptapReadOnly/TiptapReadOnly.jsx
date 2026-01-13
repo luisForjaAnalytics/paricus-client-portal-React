@@ -1,5 +1,11 @@
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import { Image } from "@tiptap/extension-image";
+import { Link } from "@tiptap/extension-link";
+import { Table } from "@tiptap/extension-table";
+import { TableRow } from "@tiptap/extension-table-row";
+import { TableCell } from "@tiptap/extension-table-cell";
+import { TableHeader } from "@tiptap/extension-table-header";
 import { Box, Alert } from "@mui/material";
 import PropTypes from "prop-types";
 import "./TiptapReadOnly.css";
@@ -31,7 +37,31 @@ export const TiptapReadOnly = ({
   try {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     editor = useEditor({
-      extensions: [StarterKit],
+      extensions: [
+        StarterKit.configure({
+          // Exclude Link from StarterKit since we're configuring it manually
+          link: false,
+        }),
+        Image.configure({
+          inline: true,
+          allowBase64: true,
+          HTMLAttributes: {
+            class: 'tiptap-image',
+          },
+        }),
+        Link.configure({
+          openOnClick: false,
+          HTMLAttributes: {
+            class: 'tiptap-link',
+          },
+        }),
+        Table.configure({
+          resizable: false,
+        }),
+        TableRow,
+        TableHeader,
+        TableCell,
+      ],
       content: content,
       editable: false,
       editorProps: {

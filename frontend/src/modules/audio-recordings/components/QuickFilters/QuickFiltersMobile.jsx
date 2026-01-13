@@ -621,3 +621,33 @@ export const QuickFiltersMobile = ({
     </TableContainer>
   );
 };
+
+QuickFiltersMobile.propTypes = {
+  dataViewInfo: PropTypes.array,
+  formatDateTime: PropTypes.func.isRequired,
+  toggleAudio: PropTypes.func.isRequired,
+  downloadAudio: PropTypes.func.isRequired,
+  currentlyPlaying: PropTypes.string,
+  loadingAudioUrl: PropTypes.string,
+  handlePrefetchAudio: PropTypes.func,
+  filters: PropTypes.shape({
+    interactionId: PropTypes.string,
+    customerPhone: PropTypes.string,
+    agentName: PropTypes.string,
+    callType: PropTypes.string,
+    startDate: PropTypes.string,
+    endDate: PropTypes.string,
+  }).isRequired,
+  setFilters: PropTypes.func.isRequired,
+  refetch: PropTypes.func.isRequired,
+  setLoadCallTypes: PropTypes.func.isRequired,
+  isDebouncing: PropTypes.bool,
+  loading: PropTypes.bool,
+  clearFilters: PropTypes.func.isRequired,
+  callTypes: PropTypes.array,
+  page: PropTypes.number,
+  itemsPerPage: PropTypes.number,
+  totalCount: PropTypes.number,
+  onPageChange: PropTypes.func.isRequired,
+  onPageSizeChange: PropTypes.func.isRequired,
+};

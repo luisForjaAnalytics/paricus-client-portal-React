@@ -6,6 +6,7 @@ import ListItemText from "@mui/material/ListItemText";
 import { Box } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import PropTypes from "prop-types";
 import { colors } from "../../../styles/styles";
 
 export const ItemMenu = ({
@@ -88,4 +89,13 @@ export const ItemMenu = ({
       </ListItem>
     </List>
   );
+};
+
+ItemMenu.propTypes = {
+  label: PropTypes.string.isRequired,
+  icon: PropTypes.node.isRequired,
+  route: PropTypes.string.isRequired,
+  setTitleState: PropTypes.func.isRequired,
+  titleState: PropTypes.string.isRequired,
+  open: PropTypes.bool,
 };

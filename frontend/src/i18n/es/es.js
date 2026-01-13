@@ -10,9 +10,6 @@ export default {
     financial: "Financiero",
     reportsManagement: "Gestión de Reportes",
     userManagement: "Gestión de Usuarios",
-    clientManagement: "Administrador de Clientes",
-    usersManagement: "Administrador de Usuarios",
-    roleManagement: "Administrador de Roles",
     logs: "Registros",
     myProfile: "Mi Perfil",
   },
@@ -20,7 +17,6 @@ export default {
   // Tooltips de navegación (cuando el sidebar está colapsado)
   tooltips: {
     knowledgeBase: "Conocimientos",
-    myProfile: "Mi Perfil",
   },
 
   // Header
@@ -97,7 +93,6 @@ export default {
     // Advanced Filters
     advancedFilters: {
       title: "Filtros Avanzados",
-      typing: "Escribiendo...",
       search: "Buscar",
       loading: "Cargando...",
       clearAll: "Limpiar Todos los Filtros",
@@ -708,6 +703,12 @@ export default {
     noArticlesFound: "No se encontraron artículos",
     loadingArticles: "Cargando artículos...",
     filtersButton: "Filtros",
+    table: {
+      articleName: "Nombre del Artículo",
+      synopsis: "Sinopsis",
+      updatedAt: "Actualizado el",
+      actions: "Acciones",
+    },
     filters: {
       articleName: "Nombre del Artículo",
       articleNamePlaceholder: "Buscar por nombre del artículo...",
@@ -717,6 +718,10 @@ export default {
       search: "Buscar",
       loading: "Cargando...",
       clearAll: "Limpiar Todos los Filtros",
+    },
+    actions: {
+      edit: "Editar",
+      view: "Ver",
     },
   },
   tickets: {
@@ -733,6 +738,19 @@ export default {
       priority: "Prioridad",
       actions: "Acciones",
       status: "Estado",
+    },
+    filters: {
+      subject: "Asunto",
+      subjectPlaceholder: "Buscar por asunto...",
+      from: "De",
+      fromPlaceholder: "Buscar por creador...",
+      assignedTo: "Asignado a",
+      assignedToPlaceholder: "Buscar por asignado...",
+      priority: "Prioridad",
+      allPriorities: "Todas las Prioridades",
+      status: "Estado",
+      allStatuses: "Todos los Estados",
+      lastUpdate: "Última Actualización",
     },
     createNewTicket: {
       createNewTicket: "Crear Nuevo Ticket",
@@ -798,4 +816,88 @@ export default {
       totalSizeExceeded: "El tamaño total de los archivos adjuntos no puede exceder 5MB. Te quedan {{remaining}}MB disponibles.",
     },
   },
+    dashboard:{
+    title: "Dashboard",
+    portfolioRevenue: "Ingresos del Portafolio",
+    masterKbArticles: "Artículos KB Maestros",
+    urgentAlerts: "Alertas Urgentes",
+    activeClients: "Clientes Activos",
+    quickBroadcast: {
+      title: "Difusión Rápida",
+      subject: "Asunto",
+      subjectPlaceholder: "Ingrese el asunto del anuncio...",
+      placeholder: "Publicar un anuncio para todos los clientes o grupos específicos...",
+      attachFile: "Adjuntar Archivo",
+      sendAnnouncement: "Enviar Anuncio",
+      selectClients: "Seleccionar Clientes",
+      selectAll: "Seleccionar Todos",
+      priority: "Prioridad",
+      priorityLevels: {
+        low: "Baja",
+        medium: "Media",
+        high: "Alta",
+      },
+      success: "Anuncio enviado exitosamente",
+      error: "Error al enviar el anuncio",
+      emptyMessage: "Por favor escribe un mensaje",
+      emptySubject: "Por favor ingrese un asunto",
+      noClientsSelected: "Por favor selecciona al menos un cliente",
+      filesAttached: "archivo(s) adjunto(s)",
+    },
+    announcementsInbox: {
+      title: "Bandeja de Anuncios",
+      highPriority: "Prioridad Alta",
+      mediumPriority: "Prioridad Media",
+      lowPriority: "Prioridad Baja",
+      scheduledMaintenance: "Mantenimiento Programado",
+      newProcess: "Nuevo Proceso",
+      holidaySchedule: "Calendario de Festividades",
+      viewAllHistory: "Ver Todo el Historial",
+      noAnnouncements: "No hay anuncios aún",
+      attachmentNotAvailable: "Archivos adjuntos: {{files}}. Los archivos aún no han sido subidos al almacenamiento. Esta funcionalidad estará disponible pronto.",
+    },
+    ticketsBySegment: "Tickets por Segmento",
+    ticketLifeCycle: "Ciclo de Vida del Ticket",
+    noLifecycleData: "No hay datos del ciclo de vida de tickets disponibles",
+    lifecycleStatus: {
+      open: "Abierto",
+      inProgress: "En Progreso",
+      resolved: "Resuelto",
+      closed: "Cerrado",
+    },
+    latestInteractions: {
+      title: "Últimas Interacciones",
+      noRecordings: "No hay grabaciones disponibles",
+      viewAll: "Ver Todas las Grabaciones",
+    },
+    activeTasks: {
+      title: "Tareas Activas",
+      noTasks: "No hay tareas pendientes",
+      browseTaskManager: "Explorar Gestor de Tareas",
+    },
+    masterRepository: {
+      title: "Repositorio Maestro",
+      noArticles: "No hay artículos disponibles",
+      views: "vistas",
+      browseKnowledgeBase: "Explorar Base de Conocimiento",
+      addNewSOP: "Agregar Nuevo SOP",
+    },
+    systemStatus: {
+      title: "Estado del Sistema",
+      queuePerformance: "Rendimiento de Cola",
+      healthy: "Saludable",
+      queuePerformanceLabel: "Rendimiento de Cola",
+      avgWaitTime: "Tiempo de Espera Promedio",
+      agentUtilization: "Utilización de Agentes",
+      agents: "Agentes",
+      currentlyHandling: "manejando interacciones actualmente.",
+    },
+    statistics: {
+      callsOffered: "Llamadas Ofrecidas",
+      callsAnswered: "Llamadas Contestadas",
+      answerRate: "Tasa de Respuesta",
+      slaCompliance: "Cumplimiento SLA",
+      viewReports: "Ver Reportes",
+    },
+  }
 };

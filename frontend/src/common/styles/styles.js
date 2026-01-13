@@ -1064,3 +1064,144 @@ export const tiptapEditorStyle = {
     },
   },
 };
+
+  // ========================================
+// PRIMARY BUTTON (WITH GRADIENT)
+// ========================================
+
+export const dashboardStyles = {
+  dashboardViewSelectBox: {
+    display: 'flex',
+    flexDirection: 'column',
+  },
+
+  // Dashboard Stats Card (clean, modern design without left border)
+  dashboardStatsCard: {
+    backgroundColor: colors.surface,
+    borderRadius: '1rem', // rounded-2xl for modern look
+    border: `1px solid ${colors.border}`, // Subtle border
+    boxShadow: 'none', // No heavy shadows
+    overflow: 'hidden',
+    transition: 'border-color 200ms ease-in-out, box-shadow 200ms ease-in-out',
+    height: '100%',
+    '&:hover': {
+      borderColor: colors.primary,
+      boxShadow: '0 2px 8px rgba(22, 163, 74, 0.08)',
+    },
+  },
+
+  // Micro-typography for labels (UPPERCASE with tracking)
+  dashboardMicroLabel: {
+    fontSize: '0.625rem', // text-xxs (10px)
+    fontWeight: typography.fontWeight.bold,
+    letterSpacing: '0.1em', // tracking-widest
+    textTransform: 'uppercase',
+    color: colors.textMuted,
+    fontFamily: typography.fontFamily,
+  },
+
+  // Dashboard section title
+  dashboardSectionTitle: {
+    fontSize: typography.fontSize.small, // 12px
+    fontWeight: typography.fontWeight.bold,
+    letterSpacing: '0.05em',
+    textTransform: 'uppercase',
+    color: colors.textSecondary,
+    fontFamily: typography.fontFamily,
+  },
+
+  // Icon container for dashboard cards
+  dashboardIconContainer: {
+    padding: '0.5rem',
+    backgroundColor: colors.primaryLight, // emerald-50 equivalent
+    color: colors.primary,
+    borderRadius: '0.5rem',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  // Quick Broadcast Card (special styling for admin actions)
+  quickBroadcastCard: {
+    backgroundColor: colors.surface,
+    borderRadius: '1rem',
+    border: `1px solid ${colors.border}`,
+    boxShadow: 'none',
+    overflow: 'hidden',
+    transition: 'border-color 200ms ease-in-out',
+    '&:hover': {
+      borderColor: colors.primary,
+    },
+  },
+
+  // Playbook/Document card (dark theme for contrast)
+  playbookCard: {
+    backgroundColor: colors.primaryDark, // emerald-700 equivalent
+    borderRadius: '1rem',
+    overflow: 'hidden',
+    color: colors.textWhite,
+    position: 'relative',
+    '& .background-icon': {
+      position: 'absolute',
+      right: -20,
+      bottom: -20,
+      fontSize: '8rem',
+      opacity: 0.1,
+      color: colors.textWhite,
+    },
+  },
+
+  // Textarea for Quick Broadcast
+  broadcastTextarea: {
+    width: '100%',
+    backgroundColor: colors.background, // bg-gray-50
+    border: 'none',
+    borderRadius: '0.75rem',
+    padding: '1rem',
+    fontSize: typography.fontSize.body,
+    fontFamily: typography.fontFamily,
+    minHeight: '100px',
+    resize: 'none',
+    '&:focus': {
+      outline: 'none',
+      boxShadow: `0 0 0 2px ${colors.primaryLight}`,
+    },
+  },
+
+  // Broadcast send button
+  broadcastSendButton: {
+    ...primaryIconButton,
+    boxShadow: `0 4px 12px ${colors.primaryLight}`,
+    '&:hover': {
+      boxShadow: `0 6px 16px ${colors.primaryLight}`,
+    },
+  },
+
+  // Priority selector (similar to AdvancedFilters multiOptionFilter)
+  prioritySelector: {
+    inputLabelSection: {
+      fontSize: typography.fontSize.small,
+      fontWeight: typography.fontWeight.semibold,
+      color: colors.textSecondary,
+      '&.Mui-focused': {
+        color: colors.primary,
+      },
+    },
+    selectSection: {
+      backgroundColor: colors.surface,
+      borderRadius: borderRadiusSection,
+      fontSize: typography.fontSize.body,
+      '& .MuiOutlinedInput-notchedOutline': {
+        borderColor: colors.border,
+        transition: 'border-color 0.2s ease',
+      },
+      '&:hover .MuiOutlinedInput-notchedOutline': {
+        borderColor: colors.primary,
+      },
+      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+        borderColor: colors.primary,
+        borderWidth: '2px',
+      },
+    },
+  },
+}

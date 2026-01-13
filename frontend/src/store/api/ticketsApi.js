@@ -23,7 +23,19 @@ export const ticketsApi = createApi({
 
     // GET /api/tickets - Get all tickets for user's client
     getTickets: builder.query({
-      query: () => "",
+      query: (params) => {
+        // If params is undefined or empty, return all tickets
+        if (!params) return "";
+
+        // Build query string from params
+        const queryParams = new URLSearchParams();
+        if (params.limit) queryParams.append("limit", params.limit);
+        if (params.sortBy) queryParams.append("sortBy", params.sortBy);
+        if (params.sortOrder) queryParams.append("sortOrder", params.sortOrder);
+
+        const queryString = queryParams.toString();
+        return queryString ? `?${queryString}` : "";
+      },
       transformResponse: (response) => response.data || [],
       providesTags: ["Tickets"],
     }),

@@ -8,19 +8,20 @@ datasource db {
 }
 
 model Client {
-  id               Int                   @id @default(autoincrement())
-  name             String
-  isActive         Boolean               @default(true) @map("is_active")
-  isProspect       Boolean               @default(false) @map("is_prospect")
-  createdAt        DateTime              @default(now()) @map("created_at")
-  updatedAt        DateTime              @default(now()) @updatedAt @map("updated_at")
-  reports          Report[]
-  roles            Role[]
-  users            User[]
-  knowledgeBase    KnowledgeBase[]
-  folderAccess     ClientFolderAccess[]
-  invoices         Invoice[]
-  tickets          Ticket[]
+  id                     Int                        @id @default(autoincrement())
+  name                   String
+  isActive               Boolean                    @default(true) @map("is_active")
+  isProspect             Boolean                    @default(false) @map("is_prospect")
+  createdAt              DateTime                   @default(now()) @map("created_at")
+  updatedAt              DateTime                   @default(now()) @updatedAt @map("updated_at")
+  reports                Report[]
+  roles                  Role[]
+  users                  User[]
+  knowledgeBase          KnowledgeBase[]
+  folderAccess           ClientFolderAccess[]
+  invoices               Invoice[]
+  tickets                Ticket[]
+  announcementRecipients AnnouncementRecipient[]
 
   @@index([isActive])
   @@index([isProspect])
@@ -281,4 +282,48 @@ model TicketDetailAttachment {
   @@index([ticketDetailId])
   @@index([uploadedAt])
   @@map("ticket_detail_attachments")
+}
+
+model Announcement {
+  id          String                     @id @default(uuid())
+  title       String
+  content     String                     // HTML content from TiptapEditor
+  priority    String                     // "low", "medium", "high"
+  createdAt   DateTime                   @default(now()) @map("created_at")
+  updatedAt   DateTime                   @default(now()) @updatedAt @map("updated_at")
+  recipients  AnnouncementRecipient[]
+  attachments AnnouncementAttachment[]
+
+  @@index([priority])
+  @@index([createdAt])
+  @@map("announcements")
+}
+
+model AnnouncementRecipient {
+  id             Int          @id @default(autoincrement())
+  announcementId String       @map("announcement_id")
+  clientId       Int          @map("client_id")
+  announcement   Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  client         Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@unique([announcementId, clientId])
+  @@index([announcementId])
+  @@index([clientId])
+  @@map("announcement_recipients")
+}
+
+model AnnouncementAttachment {
+  id             Int          @id @default(autoincrement())
+  announcementId String       @map("announcement_id")
+  fileName       String       @map("file_name")
+  s3Key          String       @map("s3_key")
+  s3Bucket       String       @map("s3_bucket")
+  fileSize       Int?         @map("file_size")
+  mimeType       String       @map("mime_type")
+  uploadedAt     DateTime     @default(now()) @map("uploaded_at")
+  announcement   Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+
+  @@index([announcementId])
+  @@index([uploadedAt])
+  @@map("announcement_attachments")
 }

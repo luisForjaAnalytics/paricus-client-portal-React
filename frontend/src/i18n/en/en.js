@@ -8,9 +8,6 @@ export default {
     financial: "Financial",
     reportsManagement: "Reports Management",
     userManagement: "Management",
-    clientManagement: "Client Management",
-    usersManagement: "User Management",
-    roleManagement: "Role Management",
     logs: "Logs",
     myProfile: "My Profile",
   },
@@ -18,7 +15,6 @@ export default {
   // Navigation tooltips (when sidebar is collapsed)
   tooltips: {
     knowledgeBase: "Knowledge Base",
-    myProfile: "My Profile",
   },
 
   // Header
@@ -96,7 +92,6 @@ export default {
     // Advanced Filters
     advancedFilters: {
       title: "Advanced Filters",
-      typing: "Typing...",
       search: "Search",
       loading: "Loading...",
       clearAll: "Clear All Filters",
@@ -706,6 +701,12 @@ export default {
     noArticlesFound: "No articles found",
     loadingArticles: "Loading articles...",
     filtersButton: "Filters",
+    table: {
+      articleName: "Article Name",
+      synopsis: "Synopsis",
+      updatedAt: "Updated At",
+      actions: "Actions",
+    },
     filters: {
       articleName: "Article Name",
       articleNamePlaceholder: "Search by article name...",
@@ -715,6 +716,10 @@ export default {
       search: "Search",
       loading: "Loading...",
       clearAll: "Clear All Filters",
+    },
+    actions: {
+      edit: "Edit",
+      view: "View",
     },
   },
   tickets: {
@@ -731,6 +736,19 @@ export default {
       priority: "Priority",
       actions: "Actions",
       status: "Status",
+    },
+    filters: {
+      subject: "Subject",
+      subjectPlaceholder: "Search by subject...",
+      from: "From",
+      fromPlaceholder: "Search by creator...",
+      assignedTo: "Assigned To",
+      assignedToPlaceholder: "Search by assignee...",
+      priority: "Priority",
+      allPriorities: "All Priorities",
+      status: "Status",
+      allStatuses: "All Statuses",
+      lastUpdate: "Last Update",
     },
     createNewTicket: {
       createNewTicket: "Create New Ticket",
@@ -796,4 +814,89 @@ export default {
       totalSizeExceeded: "Total attachment size cannot exceed 5MB. You have {{remaining}}MB remaining.",
     },
   },
+
+  dashboard:{
+    title: "Dashboard",
+    portfolioRevenue: "Portfolio Revenue",
+    masterKbArticles: "Master KB Articles",
+    urgentAlerts: "Urgent Alerts",
+    activeClients: "Active Clients",
+    quickBroadcast: {
+      title: "Quick Broadcast",
+      subject: "Subject",
+      subjectPlaceholder: "Enter announcement subject...",
+      placeholder: "Post an announcement to all clients or specific groups...",
+      attachFile: "Attach File",
+      sendAnnouncement: "Send Announcement",
+      selectClients: "Select Clients",
+      selectAll: "Select All",
+      priority: "Priority",
+      priorityLevels: {
+        low: "Low",
+        medium: "Medium",
+        high: "High",
+      },
+      success: "Announcement sent successfully",
+      error: "Error sending announcement",
+      emptyMessage: "Please write a message",
+      emptySubject: "Please enter a subject",
+      noClientsSelected: "Please select at least one client",
+      filesAttached: "file(s) attached",
+    },
+    announcementsInbox: {
+      title: "Announcements Inbox",
+      highPriority: "High Priority",
+      mediumPriority: "Medium Priority",
+      lowPriority: "Low Priority",
+      scheduledMaintenance: "Scheduled Maintenance",
+      newProcess: "New Process",
+      holidaySchedule: "Holiday Schedule",
+      viewAllHistory: "View All History",
+      noAnnouncements: "No announcements yet",
+      attachmentNotAvailable: "Attached files: {{files}}. Files have not been uploaded to storage yet. This feature will be available soon.",
+    },
+    ticketsBySegment: "Tickets by Segment",
+    ticketLifeCycle: "Ticket Life-Cycle",
+    noLifecycleData: "No ticket lifecycle data available",
+    lifecycleStatus: {
+      open: "Open",
+      inProgress: "In Progress",
+      resolved: "Resolved",
+      closed: "Closed",
+    },
+    latestInteractions: {
+      title: "Latest Interactions",
+      noRecordings: "No recordings available",
+      viewAll: "View All Recordings",
+    },
+    activeTasks: {
+      title: "Active Tasks",
+      noTasks: "No pending tasks",
+      browseTaskManager: "Browse Task Manager",
+    },
+    masterRepository: {
+      title: "Master Repository",
+      noArticles: "No articles available",
+      views: "views",
+      browseKnowledgeBase: "Browse Knowledge Base",
+      addNewSOP: "Add New SOP",
+    },
+    systemStatus: {
+      title: "System Status",
+      queuePerformance: "Queue Performance",
+      healthy: "Healthy",
+      queuePerformanceLabel: "Queue Performance",
+      avgWaitTime: "Avg Wait Time",
+      agentUtilization: "Agent Utilization",
+      agents: "Agents",
+      currentlyHandling: "currently handling interactions.",
+    },
+    statistics: {
+      callsOffered: "Calls Offered",
+      callsAnswered: "Calls Answered",
+      answerRate: "Answer Rate",
+      slaCompliance: "SLA Compliance",
+      viewReports: "View Reports",
+    },
+  }
 };

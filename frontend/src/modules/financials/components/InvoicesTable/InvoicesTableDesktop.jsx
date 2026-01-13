@@ -21,6 +21,7 @@ import {
   Visibility,
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
+import PropTypes from "prop-types";
 import { PendingLinkModal } from "./PendingLinkModal";
 import {
   table,
@@ -280,4 +281,37 @@ export const InvoicesTableDesktop = ({
       </Table>
     </TableContainer>
   );
+};
+
+InvoicesTableDesktop.propTypes = {
+  invoices: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      invoiceNumber: PropTypes.string.isRequired,
+      title: PropTypes.string.isRequired,
+      fileName: PropTypes.string,
+      amount: PropTypes.number.isRequired,
+      currency: PropTypes.string.isRequired,
+      status: PropTypes.string.isRequired,
+      dueDate: PropTypes.string.isRequired,
+      issuedDate: PropTypes.string.isRequired,
+      paidDate: PropTypes.string,
+      paymentLink: PropTypes.string,
+    })
+  ).isRequired,
+  isAdmin: PropTypes.bool.isRequired,
+  formatDate: PropTypes.func.isRequired,
+  formatCurrency: PropTypes.func.isRequired,
+  viewInvoice: PropTypes.func.isRequired,
+  downloadInvoice: PropTypes.func.isRequired,
+  openEditInvoiceModal: PropTypes.func.isRequired,
+  handleDeleteInvoice: PropTypes.func.isRequired,
+  openPaymentLink: PropTypes.func.isRequired,
+  onPaymentLinkSuccess: PropTypes.func.isRequired,
+  onPaymentLinkError: PropTypes.func.isRequired,
+  selectedFolderDisplay: PropTypes.string,
+  onUploadClick: PropTypes.func,
+  onRefreshClick: PropTypes.func,
+  loadingInvoices: PropTypes.bool,
+  getStatusColor: PropTypes.func,
 };

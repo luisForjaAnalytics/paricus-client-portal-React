@@ -14,6 +14,7 @@ import {
   MenuItem,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
+import PropTypes from "prop-types";
 import {
   primaryButton,
   outlinedButton,
@@ -272,4 +273,24 @@ export const EditInvoiceModal = ({
       </form>
     </Dialog>
   );
+};
+
+EditInvoiceModal.propTypes = {
+  showEditInvoiceModal: PropTypes.bool.isRequired,
+  editInvoiceForm: PropTypes.shape({
+    invoiceNumber: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+    amount: PropTypes.number.isRequired,
+    currency: PropTypes.string.isRequired,
+    status: PropTypes.string.isRequired,
+    paymentMethod: PropTypes.string,
+    issuedDate: PropTypes.string.isRequired,
+    dueDate: PropTypes.string.isRequired,
+    paidDate: PropTypes.string,
+  }).isRequired,
+  setEditInvoiceForm: PropTypes.func.isRequired,
+  handleSaveInvoiceEdit: PropTypes.func.isRequired,
+  setShowEditInvoiceModal: PropTypes.func.isRequired,
+  savingInvoiceEdit: PropTypes.bool.isRequired,
+  markAsPaid: PropTypes.func.isRequired,
 };

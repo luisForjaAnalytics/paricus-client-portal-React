@@ -1,4 +1,5 @@
 import { Avatar, Box } from "@mui/material";
+import PropTypes from "prop-types";
 import { TicketText } from "../TicketText";
 import { getInitials } from "../../../utils/getInitials";
 import { colors } from "../../../styles/styles";
@@ -27,4 +28,9 @@ export const GetInitialsAvatar = ({ userName, variantStyle }) => {
       <TicketText variant={variantStyle}>{`${userName} `}</TicketText>
     </Box>
   );
+};
+
+GetInitialsAvatar.propTypes = {
+  userName: PropTypes.string.isRequired,
+  variantStyle: PropTypes.string,
 };

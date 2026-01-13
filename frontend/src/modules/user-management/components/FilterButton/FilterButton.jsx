@@ -1,6 +1,7 @@
 import { IconButton, Tooltip } from "@mui/material";
 import { FilterList } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
+import PropTypes from "prop-types";
 import { colors } from "../../../../common/styles/styles";
 
 export const FilterButton = ({ folderName, isOpen, setIsOpen }) => {
@@ -20,4 +21,10 @@ export const FilterButton = ({ folderName, isOpen, setIsOpen }) => {
       </IconButton>
     </Tooltip>
   );
+};
+
+FilterButton.propTypes = {
+  folderName: PropTypes.string.isRequired,
+  isOpen: PropTypes.bool.isRequired,
+  setIsOpen: PropTypes.func.isRequired,
 };

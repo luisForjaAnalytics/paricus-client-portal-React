@@ -218,51 +218,6 @@ export const TableView = ({
     },
   ]);
 
-  // Wrapper component for AdvancedFilters to work as DataGrid toolbar
-  const AdvancedFiltersToolbar = React.useMemo(() => {
-    return () => {
-      if (!isOpen) return null;
-
-      return (
-        <Box
-          sx={{
-            padding: "0.2rem 0 1rem 0",
-            display: "flex",
-            justifyContent: "left",
-            alignItems: "center",
-            backgroundColor: colors.subSectionBackground,
-            borderBottom: `1px solid ${colors.subSectionBorder}`,
-          }}
-        >
-          <AdvancedFilters
-            filters={filters}
-            refetch={refetch}
-            setFilters={setFilters}
-            setLoadCallTypes={setLoadCallTypes}
-            isDebouncing={isDebouncing}
-            loading={loading}
-            clearFilters={clearFilters}
-            callTypes={callTypes}
-            setCompanyFilter={setCompanyFilter}
-            setAudioFilter={setAudioFilter}
-            companies={companies}
-          />
-        </Box>
-      );
-    };
-  }, [
-    filters,
-    isOpen,
-    refetch,
-    setFilters,
-    setLoadCallTypes,
-    isDebouncing,
-    loading,
-    clearFilters,
-    callTypes,
-    setAudioFilter,
-  ]);
-
   // Handle pagination model change (DataGrid uses 0-based page index)
   const handlePaginationChange = React.useCallback(
     (model) => {
@@ -285,12 +240,40 @@ export const TableView = ({
         width: { md: "95%", lg: "100%" },
       }}
     >
+      {/* Advanced Filters - Rendered outside DataGrid */}
+      {isOpen && (
+        <Box
+          sx={{
+            padding: "0.2rem 0 1rem 0",
+            display: "flex",
+            justifyContent: "left",
+            alignItems: "center",
+            backgroundColor: colors.subSectionBackground,
+            borderBottom: `1px solid ${colors.subSectionBorder}`,
+            marginBottom: 1,
+          }}
+        >
+          <AdvancedFilters
+            filters={filters}
+            refetch={refetch}
+            setFilters={setFilters}
+            setLoadCallTypes={setLoadCallTypes}
+            isDebouncing={isDebouncing}
+            loading={loading}
+            clearFilters={clearFilters}
+            callTypes={callTypes}
+            setCompanyFilter={setCompanyFilter}
+            setAudioFilter={setAudioFilter}
+            companies={companies}
+          />
+        </Box>
+      )}
+
       <UniversalDataGrid
         rows={rows}
         columns={columns}
         loading={loading}
         emptyMessage={t("audioRecordings.noRecordings") || "No recordings found"}
-        slots={{ toolbar: AdvancedFiltersToolbar }}
         paginationMode="server"
         rowCount={totalCount}
         paginationModel={{

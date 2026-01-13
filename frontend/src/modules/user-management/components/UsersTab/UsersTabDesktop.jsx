@@ -20,6 +20,7 @@ import {
   Block as BlockIcon,
   CheckCircle as CheckCircleIcon,
 } from "@mui/icons-material";
+import PropTypes from "prop-types";
 import {
   primaryIconButton,
   colors,
@@ -286,4 +287,41 @@ export const UsersTabDesktop = ({
       </Box>
     </Box>
   );
+};
+
+UsersTabDesktop.propTypes = {
+  users: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      firstName: PropTypes.string,
+      lastName: PropTypes.string,
+      email: PropTypes.string.isRequired,
+      isActive: PropTypes.bool.isRequired,
+      createdAt: PropTypes.string,
+      client: PropTypes.shape({
+        name: PropTypes.string,
+      }),
+      role: PropTypes.shape({
+        roleName: PropTypes.string,
+      }),
+    })
+  ).isRequired,
+  loading: PropTypes.bool.isRequired,
+  isBPOAdmin: PropTypes.bool.isRequired,
+  selectedClient: PropTypes.string.isRequired,
+  setSelectedClient: PropTypes.func.isRequired,
+  searchQuery: PropTypes.string.isRequired,
+  setSearchQuery: PropTypes.func.isRequired,
+  isOpen: PropTypes.bool.isRequired,
+  setIsOpen: PropTypes.func.isRequired,
+  clientOptions: PropTypes.arrayOf(
+    PropTypes.shape({
+      value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+      title: PropTypes.string.isRequired,
+    })
+  ).isRequired,
+  openAddDialog: PropTypes.func.isRequired,
+  openEditDialog: PropTypes.func.isRequired,
+  toggleUserStatus: PropTypes.func.isRequired,
+  formatDate: PropTypes.func.isRequired,
 };

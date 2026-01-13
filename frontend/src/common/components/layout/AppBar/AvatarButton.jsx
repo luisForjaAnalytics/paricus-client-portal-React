@@ -4,6 +4,7 @@ import IconButton from "@mui/material/IconButton";
 import Menu from "@mui/material/Menu";
 import Avatar from "@mui/material/Avatar";
 import Tooltip from "@mui/material/Tooltip";
+import PropTypes from "prop-types";
 import { MenuSectionsAvatar } from "../Navigation/MenuSection";
 import { useSelector } from "react-redux";
 
@@ -58,4 +59,8 @@ export const AvatarButton = ({ setTitleState }) => {
       </Menu>
     </Box>
   );
+};
+
+AvatarButton.propTypes = {
+  setTitleState: PropTypes.func.isRequired,
 };

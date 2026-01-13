@@ -65,7 +65,11 @@
       "Bash(cmd /c \"set PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=si&& npx prisma db push --force-reset --skip-generate\")",
       "Bash(PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=si npx prisma db push --force-reset --skip-generate)",
       "Bash(npx prisma db seed:*)",
-      "Bash(start cmd /k \"npm run dev\")"
+      "Bash(start cmd /k \"npm run dev\")",
+      "Bash(ls:*)",
+      "Bash(wc:*)",
+      "Bash($env:PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=\"si\")",
+      "Bash(PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=\"si\" npx prisma migrate reset:*)"
     ],
     "deny": [],
     "ask": []

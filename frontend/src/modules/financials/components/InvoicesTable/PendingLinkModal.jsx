@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import { Warning as WarningIcon, Edit as EditIcon } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
+import PropTypes from "prop-types";
 import { useUpdatePaymentLinkMutation } from "../../../../store/api/invoicesApi";
 import { useCreateLogMutation } from "../../../../store/api/logsApi";
 import { useSelector } from "react-redux";
@@ -166,6 +167,18 @@ export const PendingLinkModal = ({ invoice, onSuccess, onError }) => {
       </Dialog>
     </>
   );
+};
+
+PendingLinkModal.propTypes = {
+  invoice: PropTypes.shape({
+    id: PropTypes.number.isRequired,
+    invoiceNumber: PropTypes.string.isRequired,
+    title: PropTypes.string,
+    fileName: PropTypes.string,
+    paymentLink: PropTypes.string,
+  }).isRequired,
+  onSuccess: PropTypes.func.isRequired,
+  onError: PropTypes.func.isRequired,
 };
 
 export default PendingLinkModal;

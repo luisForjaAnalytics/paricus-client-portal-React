@@ -290,35 +290,6 @@ export const LogsView = () => {
     },
   ]);
 
-  // Toolbar component for logs table with filter button
-  const LogsToolbar = useMemo(() => {
-    return () => (
-      <>
-        {isOpen && (
-          <Box
-            sx={{
-              padding: "0.2rem 0 1rem 0",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: colors.subSectionBackground,
-              borderBottom: `1px solid ${colors.subSectionBorder}`,
-            }}
-          >
-            <AdvancedFilters
-              filters={filters}
-              setFilters={setFilters}
-              refetch={refetch}
-              isDebouncing={false}
-              loading={isLoading}
-              clearFilters={clearFilters}
-            />
-          </Box>
-        )}
-      </>
-    );
-  }, [t, totalRows, isOpen, filters, isLoading]);
-
   return (
     <Box sx={{ px: 3 }}>
       {/* Error Alert */}
@@ -339,7 +310,6 @@ export const LogsView = () => {
           width: "100%",
         }}
       >
-        {" "}
         <Box
           sx={{
             display: "flex",
@@ -360,12 +330,36 @@ export const LogsView = () => {
             </IconButton>
           </Tooltip>
         </Box>
+
+        {/* Advanced Filters - Rendered outside DataGrid */}
+        {isOpen && (
+          <Box
+            sx={{
+              padding: "0.2rem 0 1rem 0",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: colors.subSectionBackground,
+              borderBottom: `1px solid ${colors.subSectionBorder}`,
+              marginBottom: 1,
+            }}
+          >
+            <AdvancedFilters
+              filters={filters}
+              setFilters={setFilters}
+              refetch={refetch}
+              isDebouncing={false}
+              loading={isLoading}
+              clearFilters={clearFilters}
+            />
+          </Box>
+        )}
+
         <UniversalDataGrid
           rows={logs}
           columns={columns}
           loading={isLoading}
           emptyMessage={t("userManagement.logs.noLogsFound") || "No logs found"}
-          slots={{ toolbar: LogsToolbar }}
           rowCount={totalRows}
           paginationMode="server"
           paginationModel={paginationModel}

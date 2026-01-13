@@ -22,6 +22,7 @@ import {
   FormatAlignJustify,
   Highlight as HighlightIcon,
 } from "@mui/icons-material";
+import PropTypes from "prop-types";
 import { tiptapEditorStyle } from "../../../styles/styles";
 
 const MenuBar = ({ editor, customLeftButtons = [] }) => {
@@ -384,4 +385,21 @@ export const TiptapEditor = ({
       )}
     </Box>
   );
+};
+
+TiptapEditor.propTypes = {
+  value: PropTypes.string,
+  onChange: PropTypes.func,
+  placeholder: PropTypes.string,
+  error: PropTypes.bool,
+  helperText: PropTypes.string,
+  maxCharacters: PropTypes.number,
+  sx: PropTypes.object,
+  fullWidth: PropTypes.bool,
+  customLeftButtons: PropTypes.arrayOf(PropTypes.node),
+};
+
+MenuBar.propTypes = {
+  editor: PropTypes.object,
+  customLeftButtons: PropTypes.arrayOf(PropTypes.node),
 };

@@ -156,6 +156,7 @@ function processTicketWithUrls(ticket) {
 router.get('/', authenticateToken, async (req, res) => {
   try {
     const { clientId, id: userId, permissions } = req.user;
+    const { limit, sortBy = 'createdAt', sortOrder = 'desc' } = req.query;
 
     // Determine user role and build where clause
     const isBPOAdmin = permissions?.includes('admin_clients');
@@ -180,7 +181,12 @@ router.get('/', authenticateToken, async (req, res) => {
       };
     }
 
-    const tickets = await prisma.ticket.findMany({
+    // Build orderBy object - only allow specific fields for security
+    const allowedSortFields = ['createdAt', 'updatedAt', 'subject', 'priority', 'status'];
+    const sortField = allowedSortFields.includes(sortBy) ? sortBy : 'createdAt';
+    const sortDirection = sortOrder === 'asc' ? 'asc' : 'desc';
+
+    const queryOptions = {
       where: whereClause,
       include: {
         details: {
@@ -211,8 +217,18 @@ router.get('/', authenticateToken, async (req, res) => {
           },
         },
       },
-      orderBy: { createdAt: 'desc' },
-    });
+      orderBy: { [sortField]: sortDirection },
+    };
+
+    // Add limit if provided
+    if (limit) {
+      const parsedLimit = parseInt(limit);
+      if (!isNaN(parsedLimit) && parsedLimit > 0) {
+        queryOptions.take = parsedLimit;
+      }
+    }
+
+    const tickets = await prisma.ticket.findMany(queryOptions);
 
     // Process tickets: parse description and add URLs to attachments
     const processedTickets = tickets.map(processTicketWithUrls);
