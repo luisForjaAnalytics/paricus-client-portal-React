@@ -1,10 +1,4 @@
 // ========================================
-// DESIGN SYSTEM - STYLES
-// ========================================
-
-import { Margin } from "@mui/icons-material";
-
-// ========================================
 // FONT FAMILY
 // ========================================
 const fontFamilyCustom = "'Inter', sans-serif";
@@ -47,6 +41,10 @@ export const colors = {
   datailsTitleColor: "#16A34A",
   detailsBackgroundColor: "#4ee78611",
   detailsBorderColor: "#16A34A",
+
+  //Dashboard Section
+
+  masterRepoBackgroundColor: "#4ee78611",
   // Text colors (from Tailwind)
   textPrimary: "#111827", // text-gray-900
   textSecondary: "#374151", // text-gray-700

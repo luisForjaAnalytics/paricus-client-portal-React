@@ -3,6 +3,7 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
+import jwt from 'jsonwebtoken';
 import { authenticateToken, requirePermission } from '../middleware/auth-prisma.js';
 import { prisma } from '../database/prisma.js';
 
@@ -53,7 +54,7 @@ const upload = multer({
 /**
  * Helper function to verify token from query parameter or header
  */
-async function authenticateTokenFlexible(req, res, next) {
+function authenticateTokenFlexible(req, res, next) {
   try {
     // Try to get token from query parameter first (for direct file access)
     let token = req.query.token;
@@ -65,16 +66,20 @@ async function authenticateTokenFlexible(req, res, next) {
     }
 
     if (!token) {
+      console.log('❌ No token provided in request');
       return res.status(401).json({ error: 'No token provided' });
     }
 
+    console.log('🔑 Token received, verifying...');
+
     // Verify token
-    const jwt = await import('jsonwebtoken');
-    jwt.default.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
       if (err) {
+        console.error('❌ Token verification error:', err.message);
         return res.status(403).json({ error: 'Invalid or expired token' });
       }
 
+      console.log('✅ Token verified successfully');
       req.user = {
         userId: decoded.userId,
         clientId: decoded.clientId,
@@ -85,7 +90,7 @@ async function authenticateTokenFlexible(req, res, next) {
       next();
     });
   } catch (error) {
-    console.error('Authentication error:', error);
+    console.error('❌ Authentication error:', error);
     return res.status(500).json({ error: 'Authentication failed' });
   }
 }
@@ -530,12 +535,12 @@ router.get(
       }
 
       // Add URLs to attachments
-      // NOTE: URL should NOT include /api prefix because VITE_API_URL already has it
+      // NOTE: URL must include /api prefix (same pattern as tickets)
       const announcementsWithUrls = announcements.map(announcement => ({
         ...announcement,
         attachments: announcement.attachments.map(att => ({
           ...att,
-          url: `/dashboard/announcements/${announcement.id}/attachments/${att.id}/file`
+          url: `/api/dashboard/announcements/${announcement.id}/attachments/${att.id}/file`
         }))
       }));
 
@@ -606,12 +611,12 @@ router.get(
       }
 
       // Add URLs to attachments
-      // NOTE: URL should NOT include /api prefix because VITE_API_URL already has it
+      // NOTE: URL must include /api prefix (same pattern as tickets)
       const announcementWithUrls = {
         ...announcement,
         attachments: announcement.attachments.map(att => ({
           ...att,
-          url: `/dashboard/announcements/${announcement.id}/attachments/${att.id}/file`
+          url: `/api/dashboard/announcements/${announcement.id}/attachments/${att.id}/file`
         }))
       };
 
@@ -780,10 +785,10 @@ router.get(
       }
 
       // Add URLs to attachments
-      // NOTE: URL should NOT include /api prefix because VITE_API_URL already has it
+      // NOTE: URL must include /api prefix (same pattern as tickets)
       const attachmentsWithUrls = announcement.attachments.map(att => ({
         ...att,
-        url: `/dashboard/announcements/${announcementId}/attachments/${att.id}/file`
+        url: `/api/dashboard/announcements/${announcementId}/attachments/${att.id}/file`
       }));
 
       res.json({
@@ -814,7 +819,8 @@ router.get(
       const isBPOAdmin = permissions.includes('admin_clients');
 
       console.log('🔍 File access request:');
-      console.log('   User:', req.user);
+      console.log('   User clientId:', clientId, 'type:', typeof clientId);
+      console.log('   User permissions:', permissions);
       console.log('   Is BPO Admin:', isBPOAdmin);
 
       // Check if user has access to this announcement
@@ -832,14 +838,20 @@ router.get(
         });
       }
 
-      console.log('   Announcement recipients:', announcement.recipients.map(r => r.clientId));
+      console.log('   Announcement recipients:', announcement.recipients.map(r => ({
+        clientId: r.clientId,
+        type: typeof r.clientId
+      })));
 
       // Check access
       if (!isBPOAdmin) {
+        // Ensure both values are numbers for comparison
+        const userClientId = typeof clientId === 'string' ? parseInt(clientId) : clientId;
         const hasAccess = announcement.recipients.some(
-          recipient => recipient.clientId === parseInt(clientId)
+          recipient => recipient.clientId === userClientId
         );
 
+        console.log('   User clientId (normalized):', userClientId);
         console.log('   Has access:', hasAccess);
 
         if (!hasAccess) {

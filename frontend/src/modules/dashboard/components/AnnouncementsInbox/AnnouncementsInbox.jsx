@@ -4,14 +4,20 @@ import {
   Chip,
   Card,
   CardContent,
-  Button,
   CircularProgress,
-  Snackbar,
-  Alert,
+  Dialog,
+  DialogContent,
+  DialogActions,
+  IconButton,
 } from "@mui/material";
-import { Notifications, AttachFile } from "@mui/icons-material";
+import {
+  Notifications,
+  AttachFile,
+  Close as CloseIcon,
+} from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
+import { useSelector } from "react-redux";
 import { formatDateTime } from "../../../../common/utils/formatDateTime";
 import { TiptapReadOnly } from "../../../../common/components/ui/TiptapReadOnly/TiptapReadOnly";
 import { dashboardStyles } from "../../../../common/styles/styles";
@@ -58,8 +64,10 @@ const getPriorityLabel = (priority, t) => {
 
 export const AnnouncementsInbox = () => {
   const { t } = useTranslation();
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [selectedImage, setSelectedImage] = useState(null);
+
+  const token = useSelector((state) => state.auth?.token);
+
   // Get announcements from API (filtered by user role on backend)
   const {
     data: announcements = [],
@@ -67,42 +75,30 @@ export const AnnouncementsInbox = () => {
     error,
   } = useGetAnnouncementsQuery();
 
-  // Handle attachment click
-  const handleAttachmentClick = (attachment) => {
+  // Build image URL with token (same pattern as TicketDescriptionInfo)
+  const getImageUrl = (attachment) => {
     try {
-      if (!attachment) {
-        console.error("Missing attachment data");
-        return;
+      if (!attachment?.url || !token) {
+        console.log("❌ Missing attachment URL or token:", { url: attachment?.url, hasToken: !!token });
+        return null;
       }
-
-      // Get token from Redux store
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        console.error("No authentication token found");
-        alert("Please login to view attachments");
-        return;
-      }
-
-      // Use the URL that comes from the backend
-      // Note: URL should NOT include /api prefix because VITE_API_URL already has it
-      const url =
-        attachment.url ||
-        `/dashboard/announcements/${attachment.announcementId}/attachments/${attachment.id}/file`;
-
-      // Add token as query parameter for authentication
-      const urlWithToken = `${
-        import.meta.env.VITE_API_URL
-      }${url}?token=${token}`;
-
-      console.log("Opening attachment URL:", urlWithToken);
-
-      // Open file in new tab
-      window.open(urlWithToken, "_blank", "noopener,noreferrer");
+      const baseUrl = import.meta.env.VITE_API_URL.replace("/api", "");
+      const fullUrl = `${baseUrl}${attachment.url}`;
+      const finalUrl = `${fullUrl}?token=${encodeURIComponent(token)}`;
+      return finalUrl;
     } catch (error) {
-      console.error("Error handling attachment click:", error);
-      alert("Failed to open file. Please try again.");
+      console.error("Error building image URL:", error);
+      return null;
     }
+  };
+
+  // Handle image click to open in dialog
+  const handleImageClick = (attachment) => {
+    setSelectedImage(attachment);
+  };
+
+  const handleCloseDialog = () => {
+    setSelectedImage(null);
   };
 
   return (
@@ -235,7 +231,7 @@ export const AnnouncementsInbox = () => {
                     {announcement.title}
                   </Typography>
 
-                  {/* Attachments */}
+                  {/* Attachments - Display as clickable attachment chips */}
                   {announcement.attachments &&
                     announcement.attachments.length > 0 && (
                       <Box
@@ -249,25 +245,14 @@ export const AnnouncementsInbox = () => {
                         {announcement.attachments.map((attachment) => (
                           <Chip
                             key={attachment.id}
+                            icon={<AttachFile />}
                             label={attachment.fileName}
-                            icon={<AttachFile sx={{ fontSize: "0.875rem" }} />}
+                            onClick={() => handleImageClick(attachment)}
                             size="small"
-                            variant="outlined"
-                            onClick={() => handleAttachmentClick(attachment)}
                             sx={{
-                              maxWidth: "100%",
-                              fontSize: "0.75rem",
-                              height: "24px",
                               cursor: "pointer",
-                              transition: "all 0.2s ease",
                               "&:hover": {
-                                backgroundColor: "rgba(25, 118, 210, 0.08)",
-                                borderColor: "primary.main",
-                              },
-                              "& .MuiChip-label": {
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap",
+                                backgroundColor: "action.hover",
                               },
                             }}
                           />
@@ -296,21 +281,34 @@ export const AnnouncementsInbox = () => {
         )}
       </CardContent>
 
-      {/* Snackbar for attachment notification */}
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={4000}
-        onClose={() => setSnackbarOpen(false)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      {/* Image Preview Dialog - Same as TicketDescriptionInfo */}
+      <Dialog
+        open={!!selectedImage}
+        onClose={handleCloseDialog}
+        maxWidth="lg"
+        fullWidth
       >
-        <Alert
-          onClose={() => setSnackbarOpen(false)}
-          severity="info"
-          sx={{ width: "100%" }}
-        >
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
+        <DialogActions sx={{ p: 1 }}>
+          <IconButton onClick={handleCloseDialog} size="small">
+            <CloseIcon />
+          </IconButton>
+        </DialogActions>
+        <DialogContent sx={{ p: 0 }}>
+          {selectedImage && (
+            <Box
+              component="img"
+              src={getImageUrl(selectedImage)}
+              alt={selectedImage.fileName}
+              sx={{
+                width: "100%",
+                height: "auto",
+                maxHeight: "80vh",
+                objectFit: "contain",
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };

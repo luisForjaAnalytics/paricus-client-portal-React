@@ -78,15 +78,21 @@ router.post('/login',
     //   data: { lastLogin: new Date() }
     // });
 
-    // Generate JWT token
+    // Extract permissions
+    const permissions = user.role?.rolePermissions.map(rp => rp.permission.permissionName) || [];
+
+    // Generate JWT token with all necessary user data
     const token = jwt.sign(
-      { userId: user.id, email: user.email },
+      {
+        userId: user.id,
+        email: user.email,
+        clientId: user.clientId,
+        roleId: user.roleId,
+        permissions
+      },
       config.jwtSecret,
       { expiresIn: config.jwtExpiresIn }
     );
-
-    // Extract permissions
-    const permissions = user.role?.rolePermissions.map(rp => rp.permission.permissionName) || [];
 
     // Log successful login
     await logLogin(user.id, email, true);

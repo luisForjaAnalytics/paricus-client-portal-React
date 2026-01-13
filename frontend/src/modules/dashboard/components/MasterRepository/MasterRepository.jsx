@@ -46,7 +46,7 @@ export const MasterRepository = () => {
       sx={{
         ...dashboardStyles.dashboardStatsCard,
         border: `2px solid ${colors.success}`,
-        backgroundColor: colors.successLight || "rgba(46, 125, 50, 0.08)",
+        backgroundColor: colors.masterRepoBackgroundColor || "rgba(46, 125, 50, 0.08)",
       }}
     >
       <CardContent sx={{ padding: "1rem" }}>
