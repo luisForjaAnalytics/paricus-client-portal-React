@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import {
   Dialog,
@@ -10,9 +10,13 @@ import {
   ListItem,
   ListItemButton,
   Chip,
+  CircularProgress,
+  Box,
+  Typography,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { modalCard } from "../../../../../common/styles/styles";
+import { useGetAssignableUsersQuery } from "../../../../../store/api/ticketsApi";
 
 /**
  * Configuration for different change types
@@ -105,10 +109,25 @@ export const TicketChangesRequest = ({
   const { t } = useTranslation();
   const [selectedValue, setSelectedValue] = useState(currentValue);
 
+  // Fetch assignable users only if changeType is "assignedTo"
+  const { data: usersData, isLoading: loadingUsers } = useGetAssignableUsersQuery(undefined, {
+    skip: changeType !== "assignedTo",
+  });
+
   // Get configuration based on change type
   const config = CHANGE_CONFIGS[changeType];
 
-  if (!config) {
+  // For assignedTo, generate options from fetched users
+  const options = changeType === "assignedTo" && usersData?.data
+    ? usersData.data.map(user => ({
+        value: user.id,
+        label: `${user.firstName} ${user.lastName}`,
+        sublabel: user.client?.name || "",
+        styles: {}, // No special styling for users
+      }))
+    : config?.options || [];
+
+  if (!config && changeType !== "assignedTo") {
     console.error(`Invalid changeType: ${changeType}`);
     return null;
   }
@@ -124,6 +143,12 @@ export const TicketChangesRequest = ({
     setSelectedValue(currentValue);
   };
 
+  // Get title based on changeType
+  const getTitle = () => {
+    if (changeType === "assignedTo") return t("tickets.ticketView.changeAssignedTo") || "Assign To";
+    return config?.titleKey ? t(config.titleKey) : "Change";
+  };
+
   return (
     <Dialog
       open={open}
@@ -137,37 +162,56 @@ export const TicketChangesRequest = ({
         },
       }}
     >
-      <DialogTitle>{t(config.titleKey)}</DialogTitle>
+      <DialogTitle>{getTitle()}</DialogTitle>
       <DialogContent>
-        <List sx={{ pt: 1 }}>
-          {config.options.map((option) => (
-            <ListItem key={option.value} disablePadding>
-              <ListItemButton
-                selected={selectedValue === option.value}
-                onClick={() => handleSelect(option.value)}
-                sx={{
-                  "&.Mui-selected": {
-                    backgroundColor: "action.selected",
-                    "&:hover": {
-                      backgroundColor: "action.hover",
-                    },
-                  },
-                }}
-              >
-                <Chip
-                  label={option.label}
+        {loadingUsers ? (
+          <Box display="flex" justifyContent="center" py={4}>
+            <CircularProgress size={40} />
+          </Box>
+        ) : (
+          <List sx={{ pt: 1 }}>
+            {options.map((option) => (
+              <ListItem key={option.value} disablePadding>
+                <ListItemButton
+                  selected={selectedValue === option.value}
+                  onClick={() => handleSelect(option.value)}
                   sx={{
-                    ...option.styles,
-                    fontWeight: "medium",
-                    fontSize: "0.875rem",
-                    width: "100%",
+                    "&.Mui-selected": {
+                      backgroundColor: "action.selected",
+                      "&:hover": {
+                        backgroundColor: "action.hover",
+                      },
+                    },
                   }}
-                  size="small"
-                />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
+                >
+                  {changeType === "assignedTo" ? (
+                    <Box display="flex" flexDirection="column" width="100%">
+                      <Typography variant="body2" fontWeight="medium">
+                        {option.label}
+                      </Typography>
+                      {option.sublabel && (
+                        <Typography variant="caption" color="text.secondary">
+                          {option.sublabel}
+                        </Typography>
+                      )}
+                    </Box>
+                  ) : (
+                    <Chip
+                      label={option.label}
+                      sx={{
+                        ...option.styles,
+                        fontWeight: "medium",
+                        fontSize: "0.875rem",
+                        width: "100%",
+                      }}
+                      size="small"
+                    />
+                  )}
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </List>
+        )}
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>{t("common.cancel")}</Button>
@@ -179,7 +223,7 @@ export const TicketChangesRequest = ({
 TicketChangesRequest.propTypes = {
   open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  currentValue: PropTypes.string.isRequired,
+  currentValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   onSelect: PropTypes.func.isRequired,
-  changeType: PropTypes.oneOf(["priority", "status"]).isRequired,
+  changeType: PropTypes.oneOf(["priority", "status", "assignedTo"]).isRequired,
 };

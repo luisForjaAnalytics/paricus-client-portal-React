@@ -1604,4 +1604,92 @@ router.delete('/:ticketId/details/:detailId/attachments/:attachmentId', authenti
   }
 });
 
+/**
+ * GET /api/tickets/assignable-users
+ * Get list of users that can be assigned to tickets based on permissions
+ *
+ * Permission Logic:
+ * - BPO Admin (admin_users + admin_clients): Can see ALL users including themselves
+ * - Client Admin: Can see only users from their own client (Client Admin + Client User roles)
+ * - Client User: Cannot access this endpoint (no edit permissions)
+ */
+router.get('/assignable-users', authenticateToken, async (req, res) => {
+  try {
+    const { clientId, permissions } = req.user;
+
+    // Check if user is BPO Admin
+    const isBPOAdmin = permissions.includes('admin_users') && permissions.includes('admin_clients');
+
+    let users;
+
+    if (isBPOAdmin) {
+      // BPO Admin can see ALL users from ALL clients
+      users = await prisma.user.findMany({
+        where: {
+          isActive: true
+        },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          clientId: true,
+          client: {
+            select: {
+              name: true
+            }
+          },
+          role: {
+            select: {
+              roleName: true
+            }
+          }
+        },
+        orderBy: [
+          { client: { name: 'asc' } },
+          { firstName: 'asc' },
+          { lastName: 'asc' }
+        ]
+      });
+    } else {
+      // Client Admin can only see users from their own client
+      users = await prisma.user.findMany({
+        where: {
+          clientId: clientId,
+          isActive: true
+        },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          clientId: true,
+          client: {
+            select: {
+              name: true
+            }
+          },
+          role: {
+            select: {
+              roleName: true
+            }
+          }
+        },
+        orderBy: [
+          { firstName: 'asc' },
+          { lastName: 'asc' }
+        ]
+      });
+    }
+
+    res.json({
+      success: true,
+      data: users
+    });
+  } catch (error) {
+    console.error('Error fetching assignable users:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export default router;

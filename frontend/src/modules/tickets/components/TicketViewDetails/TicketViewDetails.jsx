@@ -1,4 +1,4 @@
-import { createContext, useState } from "react";
+import { createContext, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { Box, Typography, Divider, Alert, LinearProgress } from "@mui/material";
 import { useTranslation } from "react-i18next";
@@ -22,11 +22,40 @@ export const TicketStatusContext = createContext({
   clearPendingStatus: () => {},
 });
 
+// Context to share pending assignedTo changes
+export const TicketAssignedToContext = createContext({
+  pendingAssignedTo: null,
+  pendingAssignedToUser: null,
+  setPendingAssignedTo: () => {},
+  setPendingAssignedToUser: () => {},
+  clearPendingAssignedTo: () => {},
+});
+
+// Context to share comment description state
+export const TicketDescriptionContext = createContext({
+  description: "",
+  setDescription: () => {},
+  clearDescription: () => {},
+});
+
+// Context to share files state
+export const TicketFilesContext = createContext({
+  hasFiles: false,
+  setHasFiles: () => {},
+  clearFilesRef: null,
+});
+
 export const TicketViewDetails = () => {
   const { t } = useTranslation();
   const { ticketId } = useParams();
   const [pendingPriority, setPendingPriority] = useState(null);
   const [pendingStatus, setPendingStatus] = useState(null);
+  const [pendingAssignedTo, setPendingAssignedTo] = useState(null);
+  const [pendingAssignedToUser, setPendingAssignedToUser] = useState(null);
+  const [description, setDescription] = useState("");
+  const [hasFiles, setHasFiles] = useState(false);
+  const clearFilesRef = useRef(null);
+
   const {
     data: ticket,
     isLoading,
@@ -47,6 +76,11 @@ export const TicketViewDetails = () => {
 
   const clearPendingPriority = () => setPendingPriority(null);
   const clearPendingStatus = () => setPendingStatus(null);
+  const clearPendingAssignedTo = () => {
+    setPendingAssignedTo(null);
+    setPendingAssignedToUser(null);
+  };
+  const clearDescription = () => setDescription("");
 
   const priorityContextValue = {
     pendingPriority,
@@ -60,9 +94,32 @@ export const TicketViewDetails = () => {
     clearPendingStatus,
   };
 
+  const assignedToContextValue = {
+    pendingAssignedTo,
+    pendingAssignedToUser,
+    setPendingAssignedTo,
+    setPendingAssignedToUser,
+    clearPendingAssignedTo,
+  };
+
+  const descriptionContextValue = {
+    description,
+    setDescription,
+    clearDescription,
+  };
+
+  const filesContextValue = {
+    hasFiles,
+    setHasFiles,
+    clearFilesRef,
+  };
+
   return (
     <TicketPriorityContext.Provider value={priorityContextValue}>
       <TicketStatusContext.Provider value={statusContextValue}>
+        <TicketAssignedToContext.Provider value={assignedToContextValue}>
+          <TicketDescriptionContext.Provider value={descriptionContextValue}>
+            <TicketFilesContext.Provider value={filesContextValue}>
         <Box
           sx={{
             width: "100%",
@@ -136,6 +193,9 @@ export const TicketViewDetails = () => {
             </Box>
           </Box>
         </Box>
+            </TicketFilesContext.Provider>
+          </TicketDescriptionContext.Provider>
+        </TicketAssignedToContext.Provider>
       </TicketStatusContext.Provider>
     </TicketPriorityContext.Provider>
   );

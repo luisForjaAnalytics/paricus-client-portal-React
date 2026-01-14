@@ -1202,4 +1202,49 @@ export const dashboardStyles = {
       },
     },
   },
+
+  // Compact selectors for Quick Broadcast (same style but smaller height)
+  compactSelector: {
+    inputLabelSection: {
+      fontSize: '0.75rem',
+      fontWeight: typography.fontWeight.semibold,
+      color: colors.textSecondary,
+      top: '-2px',
+      '&.MuiInputLabel-shrink': {
+        top: '0',
+      },
+      '&.Mui-focused': {
+        color: colors.primary,
+      },
+    },
+    selectSection: {
+      height: '36px',
+      backgroundColor: colors.surface,
+      borderRadius: borderRadiusSection,
+      fontSize: '0.75rem',
+      '& .MuiSelect-select': {
+        padding: '6px 12px',
+        display: 'flex',
+        alignItems: 'center',
+      },
+      '& .MuiOutlinedInput-notchedOutline': {
+        borderColor: colors.border,
+        transition: 'border-color 0.2s ease',
+      },
+      '&:hover .MuiOutlinedInput-notchedOutline': {
+        borderColor: colors.primary,
+      },
+      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+        borderColor: colors.primary,
+        borderWidth: '2px',
+      },
+    },
+    menuItem: {
+      fontSize: '0.75rem',
+    },
+    chip: {
+      fontSize: '0.65rem',
+      height: '20px',
+    },
+  },
 }

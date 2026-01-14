@@ -10,6 +10,7 @@ import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
 import PersonIcon from "@mui/icons-material/Person";
 import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
 import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
+import DashboardIcon from '@mui/icons-material/Dashboard';
 import { permissionListSection } from "../../common/utils/permissionParser";
 
 // Permission per section
@@ -26,14 +27,14 @@ const {
 export const menuItemsCommon = [
   {
     label: "dashboard",
-    icon: <LeaderboardOutlinedIcon fontSize="medium" />,
+    icon: <DashboardIcon fontSize="medium" />,
     route: "dashboard",
     permission: "view_dashboard",
     permissionList: dashboard,
   },
   {
     label: "reporting",
-    icon: <DescriptionOutlinedIcon fontSize="medium" />,
+    icon: <LeaderboardOutlinedIcon fontSize="medium" />,
     route: "reporting",
     permission: "view_reporting",
     permissionList: reporting,

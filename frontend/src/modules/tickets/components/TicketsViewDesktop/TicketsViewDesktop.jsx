@@ -21,6 +21,7 @@ export const TicketsViewDesktop = () => {
 
   // Filters state
   const [filters, setFilters] = useState({
+    ticketId: "",
     subject: "",
     from: "",
     assignedTo: "",
@@ -32,6 +33,7 @@ export const TicketsViewDesktop = () => {
   // Clear all filters
   const clearFilters = () => {
     setFilters({
+      ticketId: "",
       subject: "",
       from: "",
       assignedTo: "",
@@ -43,11 +45,15 @@ export const TicketsViewDesktop = () => {
 
   // Filter tickets based on advanced filters
   const filteredTickets = useMemo(() => {
-    if (!filters.subject && !filters.from && !filters.assignedTo && !filters.priority && !filters.status && !filters.lastUpdate) {
+    if (!filters.ticketId && !filters.subject && !filters.from && !filters.assignedTo && !filters.priority && !filters.status && !filters.lastUpdate) {
       return data;
     }
 
     return data.filter((ticket) => {
+      const matchesTicketId = filters.ticketId
+        ? String(ticket.id).includes(filters.ticketId)
+        : true;
+
       const matchesSubject = filters.subject
         ? ticket.subject?.toLowerCase().includes(filters.subject.toLowerCase())
         : true;
@@ -78,7 +84,7 @@ export const TicketsViewDesktop = () => {
         ? formatDateTime(ticket.updatedAt)?.startsWith(filters.lastUpdate)
         : true;
 
-      return matchesSubject && matchesFrom && matchesAssignedTo && matchesPriority && matchesStatus && matchesLastUpdate;
+      return matchesTicketId && matchesSubject && matchesFrom && matchesAssignedTo && matchesPriority && matchesStatus && matchesLastUpdate;
     });
   }, [data, filters]);
 

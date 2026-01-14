@@ -47,6 +47,23 @@ export const TicketAdvancedFilters = ({
       }}
     >
       <Box sx={filterStyles?.boxFilterbyGroup}>
+        {/* Ticket ID */}
+        <Box sx={{ minWidth: "120px" }}>
+          <TextField
+            fullWidth
+            label={t("tickets.filters.ticketId")}
+            placeholder={t("tickets.filters.ticketIdPlaceholder")}
+            value={filters.ticketId || ""}
+            onChange={(e) =>
+              setFilters((prev) => ({
+                ...prev,
+                ticketId: e.target.value,
+              }))
+            }
+            sx={filterStyles?.inputFilter}
+          />
+        </Box>
+
         {/* Subject */}
         <Box sx={{ minWidth: "200px" }}>
           <TextField
@@ -285,6 +302,7 @@ export const TicketAdvancedFilters = ({
 
 TicketAdvancedFilters.propTypes = {
   filters: PropTypes.shape({
+    ticketId: PropTypes.string,
     subject: PropTypes.string,
     from: PropTypes.string,
     assignedTo: PropTypes.string,

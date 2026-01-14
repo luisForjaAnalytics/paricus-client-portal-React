@@ -410,6 +410,7 @@ export default {
     admin_audio_recordings: "Administrar Grabaciones de Audio",
     view_invoices: "Ver Facturas",
     pay_invoices: "Pagar Facturas",
+    view_tickets: "Ver Tickets de Soporte",
   },
 
   // Gestión de Clientes
@@ -740,6 +741,8 @@ export default {
       status: "Estado",
     },
     filters: {
+      ticketId: "ID de Ticket",
+      ticketIdPlaceholder: "Buscar por ID...",
       subject: "Asunto",
       subjectPlaceholder: "Buscar por asunto...",
       from: "De",
@@ -808,6 +811,7 @@ export default {
       details: "Detalles",
       changePriority: "Cambiar Prioridad",
       changeStatus: "Cambiar Estado",
+      changeAssignedTo: "Asignar A",
       historical: "Historial",
       comments: "Comentarios",
     },
@@ -831,6 +835,7 @@ export default {
       sendAnnouncement: "Enviar Anuncio",
       selectClients: "Seleccionar Clientes",
       selectAll: "Seleccionar Todos",
+      clientsSelected: "seleccionados",
       priority: "Prioridad",
       priorityLevels: {
         low: "Baja",

@@ -138,6 +138,7 @@ export const PermissionsModal = ({
           "create_kb_articles",
           "edit_kb_articles",
         ],
+        tickets: ["view_tickets"],
         financial: [
           "view_financials",
           "admin_invoices",

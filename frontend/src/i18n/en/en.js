@@ -409,6 +409,7 @@ export default {
     admin_audio_recordings: "Manage Audio Recordings",
     view_invoices: "View Invoices",
     pay_invoices: "Pay Invoices",
+    view_tickets: "View Support Tickets",
   },
 
   // Clients Management
@@ -738,6 +739,8 @@ export default {
       status: "Status",
     },
     filters: {
+      ticketId: "Ticket ID",
+      ticketIdPlaceholder: "Search by ID...",
       subject: "Subject",
       subjectPlaceholder: "Search by subject...",
       from: "From",
@@ -806,6 +809,7 @@ export default {
       details: " Ticket Details",
       changePriority: "Change Priority",
       changeStatus: "Change Status",
+      changeAssignedTo: "Assign To",
       historical: "Historical",
       comments: "Comments",
     },
@@ -830,6 +834,7 @@ export default {
       sendAnnouncement: "Send Announcement",
       selectClients: "Select Clients",
       selectAll: "Select All",
+      clientsSelected: "selected",
       priority: "Priority",
       priorityLevels: {
         low: "Low",

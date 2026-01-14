@@ -11,7 +11,7 @@ import { MasterRepository } from "../MasterRepository";
 export const DashboardViewSelect = () => {
   // Get user permissions to check if BPO Admin
   const permissions = useSelector((state) => state.auth.permissions);
-  const isBPOAdmin = permissions?.includes('admin_clients');
+  const isBPOAdmin = permissions?.includes("admin_clients");
 
   const {
     data: stats,
@@ -53,7 +53,12 @@ export const DashboardViewSelect = () => {
   }
 
   return (
-    <Box sx={{ p: { xs: 3, md: 4 } }}>
+    <Box
+      sx={{
+        p: { xs: 3, md: 0 },
+        paddingTop: { xs: 3, md: 3 },
+      }}
+    >
       {/* Header */}
       {/* <Box sx={{ mb: 4 }}>
         <Typography
@@ -71,15 +76,16 @@ export const DashboardViewSelect = () => {
       {/* Top Stats Cards */}
       <DashboardStatisticsView stats={stats} />
 
-      {/* Main Content Grid: Quick Broadcast (70%) + Charts (30%) */}
+      {/* Main Content Grid: Quick Broadcast (60%) + Charts (40%) */}
       <Box
         sx={{
-           display: "grid",
+          display: "grid",
           gridTemplateColumns: isBPOAdmin
             ? { xs: "1fr", lg: "60% 40%" }
             : "1fr",
           gap: 2,
           mb: 4,
+          height:'48vh' /// Box uick Broadcast and Announcements Inbox
         }}
       >
         {/* Quick Broadcast - Only for BPO Admin */}
