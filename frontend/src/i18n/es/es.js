@@ -776,6 +776,7 @@ export default {
         label: "Asignado a",
         requiredMsg: "El campo Asignado a es requerido.",
       },
+      url: "Link URL (Opcional)",
       description: {
         label: "Descripción",
         placeholderMsg: "Agregar notas o descripción para este Ticket",
@@ -814,13 +815,16 @@ export default {
       changeAssignedTo: "Asignar A",
       historical: "Historial",
       comments: "Comentarios",
+      url: "URL",
     },
     attachments: {
-      invalidFileType: "Solo se permiten imágenes, PDFs y documentos de Office (Word, Excel, PowerPoint)",
-      totalSizeExceeded: "El tamaño total de los archivos adjuntos no puede exceder 5MB. Te quedan {{remaining}}MB disponibles.",
+      invalidFileType:
+        "Solo se permiten imágenes, PDFs y documentos de Office (Word, Excel, PowerPoint)",
+      totalSizeExceeded:
+        "El tamaño total de los archivos adjuntos no puede exceder 5MB. Te quedan {{remaining}}MB disponibles.",
     },
   },
-    dashboard:{
+  dashboard: {
     title: "Dashboard",
     portfolioRevenue: "Ingresos del Portafolio",
     masterKbArticles: "Artículos KB Maestros",
@@ -830,7 +834,8 @@ export default {
       title: "Difusión Rápida",
       subject: "Asunto",
       subjectPlaceholder: "Ingrese el asunto del anuncio...",
-      placeholder: "Publicar un anuncio para todos los clientes o grupos específicos...",
+      placeholder:
+        "Publicar un anuncio para todos los clientes o grupos específicos...",
       attachFile: "Adjuntar Archivo",
       sendAnnouncement: "Enviar Anuncio",
       selectClients: "Seleccionar Clientes",
@@ -859,7 +864,8 @@ export default {
       holidaySchedule: "Calendario de Festividades",
       viewAllHistory: "Ver Todo el Historial",
       noAnnouncements: "No hay anuncios aún",
-      attachmentNotAvailable: "Archivos adjuntos: {{files}}. Los archivos aún no han sido subidos al almacenamiento. Esta funcionalidad estará disponible pronto.",
+      attachmentNotAvailable:
+        "Archivos adjuntos: {{files}}. Los archivos aún no han sido subidos al almacenamiento. Esta funcionalidad estará disponible pronto.",
     },
     ticketsBySegment: "Tickets por Segmento",
     ticketLifeCycle: "Ciclo de Vida del Ticket",
@@ -904,5 +910,5 @@ export default {
       slaCompliance: "Cumplimiento SLA",
       viewReports: "Ver Reportes",
     },
-  }
+  },
 };

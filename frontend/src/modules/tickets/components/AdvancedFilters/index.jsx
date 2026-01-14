@@ -1,1 +1,1 @@
-export { default as AdvancedFilters } from './AdvancedFilters';
+export { TicketAdvancedFilters } from './TicketAdvancedFilters';

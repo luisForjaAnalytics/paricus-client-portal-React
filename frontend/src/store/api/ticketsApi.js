@@ -17,7 +17,7 @@ export const ticketsApi = createApi({
     // GET /api/tickets/assignable-users - Get users that can be assigned tickets
     getAssignableUsers: builder.query({
       query: () => "/assignable-users",
-      transformResponse: (response) => response || { data: [] },
+      transformResponse: (response) => response.data || [],
       providesTags: ["AssignableUsers"],
     }),
 

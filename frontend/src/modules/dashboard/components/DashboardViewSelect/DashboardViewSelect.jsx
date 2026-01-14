@@ -85,7 +85,7 @@ export const DashboardViewSelect = () => {
             : "1fr",
           gap: 2,
           mb: 4,
-          height:'48vh' /// Box uick Broadcast and Announcements Inbox
+          height:'45vh' /// Box Quick Broadcast and Announcements Inbox
         }}
       >
         {/* Quick Broadcast - Only for BPO Admin */}

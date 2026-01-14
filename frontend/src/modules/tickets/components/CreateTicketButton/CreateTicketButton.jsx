@@ -32,7 +32,7 @@ import {
 import {
   useCreateTicketMutation,
   useUploadTicketAttachmentMutation,
-  useGetAssignableUsersQuery
+  useGetAssignableUsersQuery,
 } from "../../../../store/api/ticketsApi";
 import { PRIORITY_STATUS } from "./ticketStatus";
 import { TiptapEditor } from "../../../../common/components/ui/TiptapEditor";
@@ -43,7 +43,8 @@ export const CreateTickeButton = ({}) => {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [createTicket, { isLoading, error }] = useCreateTicketMutation();
   const [uploadAttachment] = useUploadTicketAttachmentMutation();
-  const { data: assignableUsers = [], isLoading: loadingUsers } = useGetAssignableUsersQuery();
+  const { data: assignableUsers = [], isLoading: loadingUsers } =
+    useGetAssignableUsersQuery();
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -62,6 +63,7 @@ export const CreateTickeButton = ({}) => {
       subject: "",
       priority: "",
       assignedTo: "",
+      url: "",
       description: {
         descriptionData: "",
         textLength: 0,
@@ -82,7 +84,9 @@ export const CreateTickeButton = ({}) => {
 
   // Remove file from selection
   const removeFile = (indexToRemove) => {
-    setSelectedFiles((prev) => prev.filter((_, index) => index !== indexToRemove));
+    setSelectedFiles((prev) =>
+      prev.filter((_, index) => index !== indexToRemove)
+    );
   };
 
   // Clear all files
@@ -143,17 +147,15 @@ export const CreateTickeButton = ({}) => {
         priority: data.priority,
         assignedToId: data.assignedTo, // Backend expects 'assignedToId'
         description: data.description.descriptionData,
+        url: data.url || null,
       };
 
       // 1. Create the ticket
       const result = await createTicket(payload).unwrap();
-      console.log("✅ Ticket created successfully:", result);
 
       // 2. Upload attachments if any
       if (selectedFiles.length > 0 && result?.id) {
         setIsUploading(true);
-        console.log(`🎯 Uploading ${selectedFiles.length} attachments to ticket ${result.id}`);
-
         try {
           // Upload each file sequentially
           for (const file of selectedFiles) {
@@ -161,9 +163,7 @@ export const CreateTickeButton = ({}) => {
               ticketId: result.id,
               file: file,
             }).unwrap();
-            console.log(`✅ Uploaded: ${file.name}`);
           }
-          console.log("✅ All attachments uploaded successfully");
         } catch (uploadError) {
           console.error("❌ Error uploading attachments:", uploadError);
           // Don't fail the whole operation if attachments fail
@@ -199,7 +199,10 @@ export const CreateTickeButton = ({}) => {
         fullWidth
         slotProps={{
           paper: {
-            sx: {...modalCard?.createNewTiketStyle?.dialogTicketSection, width:'60vh'},
+            sx: {
+              ...modalCard?.createNewTiketStyle?.dialogTicketSection,
+              width: "60vh",
+            },
           },
         }}
       >
@@ -272,7 +275,7 @@ export const CreateTickeButton = ({}) => {
                         label={t("tickets.createNewTicket.priority.label")}
                       >
                         {Object.values(PRIORITY_STATUS).map((item, index) => (
-                          <MenuItem key={index} value={item} >
+                          <MenuItem key={index} value={item}>
                             {t(
                               `tickets.createNewTicket.priority.level.${item.toLowerCase()}`
                             )}
@@ -314,7 +317,11 @@ export const CreateTickeButton = ({}) => {
                         ))}
                       </Select>
                       {errors.assignedTo && (
-                        <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 1.5 }}>
+                        <Typography
+                          variant="caption"
+                          color="error"
+                          sx={{ mt: 0.5, ml: 1.5 }}
+                        >
                           {errors.assignedTo.message}
                         </Typography>
                       )}
@@ -322,10 +329,34 @@ export const CreateTickeButton = ({}) => {
                   )}
                 />
               </Box>
-
+              <Controller
+                name="url"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    label={t("tickets.createNewTicket.url")}
+                    type="url"
+                    // placeholder="https://example.com/ticket-123"
+                    helperText="https://example.com/ticket-123"
+                    sx={modalCard?.inputSection}
+                  />
+                )}
+              />
               {/* Selected Files Preview */}
               {selectedFiles.length > 0 && (
-                <Box sx={{ width: '100%', display: 'flex', flexWrap: 'wrap', gap: 1, mb: 1, px: 2 }}>
+                <Box
+                  sx={{
+                    width: "100%",
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: 1,
+                    mt: 1,
+                    //mb: 1,
+                    px: 2,
+                  }}
+                >
                   {selectedFiles.map((file, index) => (
                     <Chip
                       key={index}
@@ -339,7 +370,13 @@ export const CreateTickeButton = ({}) => {
                 </Box>
               )}
 
-              <Box sx={{ ...modalCard?.createNewTiketStyle?.boxTicketModal, width: "100%", marginTop:'1rem' }}>
+              <Box
+                sx={{
+                  ...modalCard?.createNewTiketStyle?.boxTicketModal,
+                  width: "100%",
+                  marginTop: "1rem",
+                }}
+              >
                 <Controller
                   name="description.descriptionData"
                   control={control}
@@ -358,13 +395,18 @@ export const CreateTickeButton = ({}) => {
                       placeholder={t(
                         "tickets.createNewTicket.description.placeholderMsg"
                       )}
-                      error={isOverLimit || !!errors.description?.descriptionData}
+                      error={
+                        isOverLimit || !!errors.description?.descriptionData
+                      }
                       helperText={
                         errors.description?.descriptionData?.message ||
                         (isOverLimit
-                          ? t("tickets.createNewTicket.description.maxCharactersError", {
-                              max: MAX_CHARACTERS,
-                            })
+                          ? t(
+                              "tickets.createNewTicket.description.maxCharactersError",
+                              {
+                                max: MAX_CHARACTERS,
+                              }
+                            )
                           : "")
                       }
                       maxCharacters={MAX_CHARACTERS}

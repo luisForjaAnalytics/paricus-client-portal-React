@@ -64,6 +64,24 @@ export const TicketAdvancedFilters = ({
           />
         </Box>
 
+        {/* Last Update Date */}
+        <Box sx={{ minWidth: "150px" }}>
+          <TextField
+            fullWidth
+            label={t("tickets.filters.lastUpdate")}
+            type="date"
+            InputLabelProps={{ shrink: true }}
+            value={filters.lastUpdate || ""}
+            onChange={(e) =>
+              setFilters((prev) => ({
+                ...prev,
+                lastUpdate: e.target.value,
+              }))
+            }
+            sx={filterStyles?.inputFilter}
+          />
+        </Box>
+
         {/* Subject */}
         <Box sx={{ minWidth: "200px" }}>
           <TextField
@@ -237,24 +255,6 @@ export const TicketAdvancedFilters = ({
               ))}
             </Select>
           </FormControl>
-        </Box>
-
-        {/* Last Update Date */}
-        <Box sx={{ minWidth: "150px" }}>
-          <TextField
-            fullWidth
-            label={t("tickets.filters.lastUpdate")}
-            type="date"
-            InputLabelProps={{ shrink: true }}
-            value={filters.lastUpdate || ""}
-            onChange={(e) =>
-              setFilters((prev) => ({
-                ...prev,
-                lastUpdate: e.target.value,
-              }))
-            }
-            sx={filterStyles?.inputFilter}
-          />
         </Box>
       </Box>
 

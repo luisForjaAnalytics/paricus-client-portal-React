@@ -8,6 +8,7 @@ import GppGoodIcon from "@mui/icons-material/GppGood";
 import EmailIcon from "@mui/icons-material/Email";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import LinkIcon from "@mui/icons-material/Link";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { formatDateTime } from "../../../../../common/utils/formatDateTime";
@@ -38,6 +39,7 @@ const fieldIcons = {
   email: EmailIcon,
   id: BookmarkIcon,
   createdAt: AccessTimeIcon,
+  url: LinkIcon,
 };
 
 // Helper function to capitalize first letter only
@@ -239,6 +241,27 @@ const fieldFormatters = {
     return formatDateTime(value);
   },
 
+  // Format URL as clickable link (URL is stored in ticket.description.url)
+  url: (value, ticket) => {
+    // URL is stored inside the description object
+    const urlValue = ticket?.description?.url;
+    if (!urlValue) return "";
+    return (
+      <a
+        href={urlValue}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          color: colors.primary,
+          textDecoration: "none",
+          wordBreak: "break-all",
+        }}
+      >
+        {urlValue}
+      </a>
+    );
+  },
+
   // Default formatter for any other field
   default: (value) => {
     if (value === null || value === undefined) return "N/A";
@@ -307,6 +330,11 @@ const TICKET_FIELDS_CONFIG = {
     visible: true,
     label: "createdAt",
     formatter: "createdAt",
+  },
+  url: {
+    visible: true,
+    label: "url",
+    formatter: "url",
   },
   updatedAt: {
     visible: false,

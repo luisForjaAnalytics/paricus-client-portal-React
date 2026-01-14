@@ -418,7 +418,7 @@ router.get('/:id', authenticateToken, async (req, res) => {
 router.post('/', authenticateToken, async (req, res) => {
   try {
     const { clientId, id: userId, permissions } = req.user;
-    const { subject, priority, assignedToId, description } = req.body;
+    const { subject, priority, assignedToId, description, url } = req.body;
 
     // Validation
     if (!subject || !priority || !description) {
@@ -459,7 +459,7 @@ router.post('/', authenticateToken, async (req, res) => {
     const descriptionJson = JSON.stringify({
       descriptionData: description,
       attachmentIds: [],
-      url: null,
+      url: url || null,
     });
 
     // Create ticket with initial description

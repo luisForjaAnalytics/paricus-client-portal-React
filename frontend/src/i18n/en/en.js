@@ -774,6 +774,7 @@ export default {
         label: "Assigned To",
         requiredMsg: "The Assigned To field is required.",
       },
+      url:'Link URL (Optional)',
       description: {
         label: "Description",
         placeholderMsg: "Add notes or description for this Ticket",
@@ -812,6 +813,7 @@ export default {
       changeAssignedTo: "Assign To",
       historical: "Historical",
       comments: "Comments",
+      url: "URL",
     },
     attachments: {
       invalidFileType: "Only images, PDFs, and Office documents (Word, Excel, PowerPoint) are allowed",
