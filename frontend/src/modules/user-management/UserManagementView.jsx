@@ -7,11 +7,8 @@ export const UserManagementView = () => {
   try {
     const context = useOutletContext();
     setTitleState = context?.setTitleState;
-    if (!setTitleState) {
-      console.log("ERROR UserManagementView: setTitleState not found in context");
-    }
   } catch (err) {
-    console.log(`ERROR UserManagementView useOutletContext: ${err}`);
+    console.error(`UserManagementView useOutletContext: ${err}`);
   }
 
   return (

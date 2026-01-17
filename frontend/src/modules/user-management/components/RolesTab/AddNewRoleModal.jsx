@@ -23,6 +23,7 @@ import {
   modalCard,
   titlesTypography,
   primaryIconButton,
+  selectMenuProps,
 } from "../../../../common/styles/styles";
 
 export const AddNewRoleModal = ({
@@ -136,6 +137,7 @@ export const AddNewRoleModal = ({
                 <Select
                   value={roleForm.client_id || ""}
                   label={t("roles.form.client")}
+                  MenuProps={selectMenuProps}
                   sx={modalCard?.multiOptionFilter?.selectSection}
                   onChange={(e) =>
                     setRoleForm({ ...roleForm, client_id: e.target.value })

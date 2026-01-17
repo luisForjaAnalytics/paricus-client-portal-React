@@ -170,7 +170,7 @@ export const RolesTabDesktop = ({
         original: role, // Keep original object for actions
       }));
     } catch (err) {
-      console.log(`ERROR rows: ${err}`);
+      console.error(`ERROR rows: ${err}`);
       return [];
     }
   }, [roles]);

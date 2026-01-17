@@ -35,7 +35,7 @@ function Row({ client, handleEdit, handleDeactivate, formatDate }) {
     try {
       setOpen(!open);
     } catch (err) {
-      console.log(`ERROR toggleOpen: ${err}`);
+      console.error(`ERROR toggleOpen: ${err}`);
     }
   };
 

@@ -217,7 +217,7 @@ export const FinancialsView = () => {
       setSelectedFolder(clientFolder);
       scrollToInvoices();
     } catch (err) {
-      console.warn(`ERROR: ${err}`);
+      console.error(`FinancialsView: ${err}`);
     }
   };
 
@@ -230,7 +230,7 @@ export const FinancialsView = () => {
         });
       }, 100);
     } catch (err) {
-      console.warn(`ERROR: ${err}`);
+      console.error(`FinancialsView: ${err}`);
     }
   };
 
@@ -324,7 +324,7 @@ export const FinancialsView = () => {
 
           showNotification("success", "Download completed");
         } catch (err) {
-          console.log(`ERROR downloadInvoice fetch/blob: ${err}`);
+          console.error(`FinancialsView downloadInvoice: ${err}`);
           throw err;
         }
 
@@ -384,7 +384,7 @@ export const FinancialsView = () => {
       window.open(paymentLink, "_blank");
       showNotification("success", "Opening payment page...");
     } catch (err) {
-      console.warn(`ERROR: ${err}`);
+      console.error(`FinancialsView: ${err}`);
     }
   };
 
@@ -410,7 +410,7 @@ export const FinancialsView = () => {
       });
       setShowEditInvoiceModal(true);
     } catch (err) {
-      console.warn(`ERROR: ${err}`);
+      console.error(`FinancialsView: ${err}`);
     }
   };
 
@@ -422,7 +422,7 @@ export const FinancialsView = () => {
         paidDate: prev.paidDate || new Date().toISOString().split("T")[0],
       }));
     } catch (err) {
-      console.warn(`ERROR: ${err}`);
+      console.error(`FinancialsView: ${err}`);
     }
   };
 
@@ -433,7 +433,7 @@ export const FinancialsView = () => {
       const adjustedDate = new Date(date.getTime() - offset * 60 * 1000);
       return adjustedDate.toISOString();
     } catch (err) {
-      console.warn(`ERROR: ${err}`);
+      console.error(`FinancialsView: ${err}`);
       return new Date().toISOString();
     }
   };
@@ -476,7 +476,7 @@ export const FinancialsView = () => {
     try {
       setNotification({ type, message });
     } catch (err) {
-      console.warn(`ERROR: ${err}`);
+      console.error(`FinancialsView: ${err}`);
     }
   };
 
@@ -484,7 +484,7 @@ export const FinancialsView = () => {
     try {
       setNotification(null);
     } catch (err) {
-      console.warn(`ERROR: ${err}`);
+      console.error(`FinancialsView: ${err}`);
     }
   };
 
@@ -494,7 +494,7 @@ export const FinancialsView = () => {
       if (!dateString) return "N/A";
       return new Date(dateString).toLocaleDateString();
     } catch (err) {
-      console.warn(`ERROR: ${err}`);
+      console.error(`FinancialsView: ${err}`);
       return "N/A";
     }
   };
@@ -506,7 +506,7 @@ export const FinancialsView = () => {
         currency: currency,
       }).format(amount);
     } catch (err) {
-      console.warn(`ERROR: ${err}`);
+      console.error(`FinancialsView: ${err}`);
       return `$${amount}`;
     }
   };
@@ -523,7 +523,7 @@ export const FinancialsView = () => {
       };
       return statusColors[status] || "default";
     } catch (err) {
-      console.warn(`ERROR: ${err}`);
+      console.error(`FinancialsView: ${err}`);
       return "default";
     }
   };

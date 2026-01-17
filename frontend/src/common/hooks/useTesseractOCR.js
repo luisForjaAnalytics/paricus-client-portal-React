@@ -40,7 +40,7 @@ export const useTesseractOCR =()=> {
 
       return images;
     } catch (err) {
-      console.log(`ERROR extractImagesFromPDF: ${err}`);
+      console.error(`ERROR extractImagesFromPDF: ${err}`);
       throw err;
     }
   }, []);

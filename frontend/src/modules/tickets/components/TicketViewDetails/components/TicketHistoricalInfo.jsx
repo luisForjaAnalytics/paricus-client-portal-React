@@ -61,7 +61,6 @@ export const TicketHistoricalInfo = ({ ticket }) => {
           try {
             // Validate item has required data
             if (!item) {
-              console.warn("Empty detail item at index:", index);
               return null;
             }
 

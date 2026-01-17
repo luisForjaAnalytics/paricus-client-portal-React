@@ -12,7 +12,7 @@ export const decodeToken = (token) => {
     const decodedPayload = atob(payloadBase64)
     return JSON.parse(decodedPayload)
   } catch (error) {
-    console.warn('Error decoding token:', error)
+    console.error(`tokenUtils decodeToken: ${error}`)
     return null
   }
 }

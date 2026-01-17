@@ -78,10 +78,6 @@ export const AnnouncementsInbox = () => {
   const getImageUrl = (attachment) => {
     try {
       if (!attachment?.url || !token) {
-        console.log("❌ Missing attachment URL or token:", {
-          url: attachment?.url,
-          hasToken: !!token,
-        });
         return null;
       }
       const baseUrl = import.meta.env.VITE_API_URL.replace("/api", "");
@@ -89,7 +85,7 @@ export const AnnouncementsInbox = () => {
       const finalUrl = `${fullUrl}?token=${encodeURIComponent(token)}`;
       return finalUrl;
     } catch (error) {
-      console.error("Error building image URL:", error);
+      console.error(`AnnouncementsInbox getImageUrl: ${error}`);
       return null;
     }
   };

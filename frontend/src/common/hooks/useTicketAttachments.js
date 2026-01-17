@@ -101,14 +101,10 @@ export const useTicketAttachments = (ticketId, existingAttachments = []) => {
 
   const handleImageClick = async (attachment) => {
     try {
-      console.log('Loading image:', { ticketId, attachmentId: attachment.id });
-
       const response = await getAttachmentUrl({
         ticketId,
         attachmentId: attachment.id,
       }).unwrap();
-
-      console.log('Image URL response:', response);
 
       // The response is the URL string (transformed by RTK Query)
       let url = response;
@@ -123,13 +119,11 @@ export const useTicketAttachments = (ticketId, existingAttachments = []) => {
         url = `${baseUrl}${url}`;
       }
 
-      console.log('Final image URL:', url);
-
       setImageUrl(url);
       setSelectedImage(attachment);
       setOpenDialog(true);
     } catch (error) {
-      console.error("Error loading image:", error);
+      console.error(`useTicketAttachments handleImageClick: ${error}`);
       const errorMessage = error?.data?.error || error?.message || "Failed to load image";
       alert(errorMessage);
     }

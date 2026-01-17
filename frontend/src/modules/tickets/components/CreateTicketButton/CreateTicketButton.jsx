@@ -37,10 +37,8 @@ import {
 } from "../../../../store/api/ticketsApi";
 import { TiptapEditor } from "../../../../common/components/ui/TiptapEditor";
 import "../../../../common/components/ui/TiptapEditor/tiptap-editor.css";
-import {
-  getPriorityStyles,
-  priorityStatesList,
-} from "../../../../common/utils/getStatusProperty";
+import { SelectMenuItem } from "../../../../common/components/ui/SelectMenuItem/SelectMenuItem";
+import { priorityOptions } from "./options";
 
 export const CreateTickeButton = ({}) => {
   const { t } = useTranslation();
@@ -264,49 +262,15 @@ export const CreateTickeButton = ({}) => {
                     required: t("tickets.createNewTicket.priority.requiredMsg"),
                   }}
                   render={({ field }) => (
-                    <FormControl fullWidth>
-                      <InputLabel
-                        sx={modalCard?.multiOptionFilter?.inputLabelSection}
-                      >
-                        {t("tickets.createNewTicket.priority.label")}
-                      </InputLabel>
-                      <Select
-                        {...field}
-                        MenuProps={selectMenuProps}
-                        sx={{
-                          ...modalCard?.multiOptionFilter?.selectSection,
-                          height: "3rem",
-                        }}
-                        label={t("tickets.createNewTicket.priority.label")}
-                      >
-                        {priorityStatesList.map((item, index) => (
-                          <MenuItem key={index} value={item.toLowerCase()}>
-                            <Box
-                              sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 0.5,
-                              }}
-                            >
-                              <Box
-                                sx={{
-                                  width: 6,
-                                  height: 6,
-                                  borderRadius: "50%",
-                                  marginLeft:'1rem',
-                                   marginRight:'0.4rem',
-                                  backgroundColor:
-                                    getPriorityStyles(item.toLowerCase()).color,
-                                }}
-                              />
-                              <Typography >
-                                {t(`priorityLevels.${item.toLowerCase()}`)}
-                              </Typography>
-                            </Box>
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
+                    <SelectMenuItem
+                      name="priority"
+                      label="tickets.createNewTicket.priority.label"
+                      options={priorityOptions}
+                      value={field.value}
+                      field={field}
+                      error={!!errors.priority}
+                      showDot={true}
+                    />
                   )}
                 />
                 <Controller
@@ -332,6 +296,7 @@ export const CreateTickeButton = ({}) => {
                         }}
                         label={t("tickets.createNewTicket.assignedTo.label")}
                         disabled={loadingUsers}
+                        MenuProps={selectMenuProps}
                       >
                         {assignableUsers.map((user) => (
                           <MenuItem key={user.id} value={user.id}>

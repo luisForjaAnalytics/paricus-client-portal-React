@@ -60,7 +60,7 @@ function Row({ user, clients, roles, handleEdit, t }) {
     try {
       setOpen(!open);
     } catch (err) {
-      console.log(`ERROR toggleOpen: ${err}`);
+      console.error(`ERROR toggleOpen: ${err}`);
     }
   };
 
@@ -69,7 +69,7 @@ function Row({ user, clients, roles, handleEdit, t }) {
       const client = clients.find((c) => c.id === clientId);
       return client ? client.name : t("common.unknown");
     } catch (err) {
-      console.log(`ERROR getClientName: ${err}`);
+      console.error(`ERROR getClientName: ${err}`);
       return t("common.unknown");
     }
   };
@@ -79,7 +79,7 @@ function Row({ user, clients, roles, handleEdit, t }) {
       const role = roles.find((r) => r.id === roleId);
       return role ? role.roleName : t("users.table.noRoleAssigned");
     } catch (err) {
-      console.log(`ERROR getRoleName: ${err}`);
+      console.error(`ERROR getRoleName: ${err}`);
       return t("users.table.noRoleAssigned");
     }
   };
@@ -90,7 +90,7 @@ function Row({ user, clients, roles, handleEdit, t }) {
       const lastInitial = user.lastName ? user.lastName[0] : "";
       return `${firstInitial}${lastInitial}`.toUpperCase();
     } catch (err) {
-      console.log(`ERROR getInitials: ${err}`);
+      console.error(`ERROR getInitials: ${err}`);
       return "?";
     }
   };
@@ -291,7 +291,7 @@ export const UsersTabMobile = () => {
     try {
       return clients.map((client) => ({ title: client.name, value: client.id }));
     } catch (err) {
-      console.log(`ERROR clientOptions: ${err}`);
+      console.error(`ERROR clientOptions: ${err}`);
       return [];
     }
   }, [clients]);
@@ -302,7 +302,7 @@ export const UsersTabMobile = () => {
         .filter((role) => role.clientId === userForm.client_id)
         .map((role) => ({ title: role.roleName, value: role.id }));
     } catch (err) {
-      console.log(`ERROR roleOptions: ${err}`);
+      console.error(`ERROR roleOptions: ${err}`);
       return [];
     }
   }, [roles, userForm.client_id]);
@@ -319,7 +319,7 @@ export const UsersTabMobile = () => {
         (editingUser || userForm.password)
       );
     } catch (err) {
-      console.log(`ERROR isFormValid: ${err}`);
+      console.error(`ERROR isFormValid: ${err}`);
       return false;
     }
   }, [userForm, editingUser]);
@@ -338,7 +338,7 @@ export const UsersTabMobile = () => {
       });
       setDialog(true);
     } catch (err) {
-      console.log(`ERROR openAddDialog: ${err}`);
+      console.error(`ERROR openAddDialog: ${err}`);
     }
   };
 
@@ -355,7 +355,7 @@ export const UsersTabMobile = () => {
       });
       setDialog(true);
     } catch (err) {
-      console.log(`ERROR openEditDialog: ${err}`);
+      console.error(`ERROR openEditDialog: ${err}`);
     }
   };
 
@@ -372,7 +372,7 @@ export const UsersTabMobile = () => {
         password: "",
       });
     } catch (err) {
-      console.log(`ERROR closeDialog: ${err}`);
+      console.error(`ERROR closeDialog: ${err}`);
     }
   };
 
@@ -410,7 +410,7 @@ export const UsersTabMobile = () => {
     try {
       setNotification({ open: true, message, severity });
     } catch (err) {
-      console.log(`ERROR showNotification: ${err}`);
+      console.error(`ERROR showNotification: ${err}`);
     }
   };
 
@@ -418,7 +418,7 @@ export const UsersTabMobile = () => {
     try {
       setNotification({ ...notification, open: false });
     } catch (err) {
-      console.log(`ERROR handleCloseNotification: ${err}`);
+      console.error(`ERROR handleCloseNotification: ${err}`);
     }
   };
 
@@ -426,7 +426,7 @@ export const UsersTabMobile = () => {
     try {
       setUserForm((prev) => ({ ...prev, client_id: clientId, role_id: null }));
     } catch (err) {
-      console.log(`ERROR handleClientChange: ${err}`);
+      console.error(`ERROR handleClientChange: ${err}`);
     }
   };
 

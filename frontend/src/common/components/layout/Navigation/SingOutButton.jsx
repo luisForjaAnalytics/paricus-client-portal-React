@@ -14,7 +14,7 @@ export const SingOutButton = () => {
       await logout();
       navigate(`/login`,{ replace: true });
     } catch (err) {
-      console.log(`ERROR handleMenuOption: ${err}`);
+      console.error(`ERROR handleMenuOption: ${err}`);
     }
   };
   const { t } = useTranslation();

@@ -68,7 +68,7 @@ export const UsersTab = () => {
         value: client.id,
       }));
     } catch (err) {
-      console.log(`ERROR clientOptions: ${err}`);
+      console.error(`ERROR clientOptions: ${err}`);
       return [];
     }
   }, [clients]);
@@ -79,7 +79,7 @@ export const UsersTab = () => {
         .filter((role) => role.client_id === userForm.client_id)
         .map((role) => ({ title: role.role_name, value: role.id }));
     } catch (err) {
-      console.log(`ERROR roleOptions: ${err}`);
+      console.error(`ERROR roleOptions: ${err}`);
       return [];
     }
   }, [roles, userForm.client_id]);
@@ -112,7 +112,7 @@ export const UsersTab = () => {
 
       return filtered;
     } catch (err) {
-      console.log(`ERROR filteredUsers: ${err}`);
+      console.error(`ERROR filteredUsers: ${err}`);
       return users;
     }
   }, [
@@ -137,7 +137,7 @@ export const UsersTab = () => {
         (editingUser || userForm.password)
       );
     } catch (err) {
-      console.log(`ERROR isFormValid: ${err}`);
+      console.error(`ERROR isFormValid: ${err}`);
       return false;
     }
   }, [userForm, editingUser]);
@@ -157,7 +157,7 @@ export const UsersTab = () => {
       });
       setDialog(true);
     } catch (err) {
-      console.log(`ERROR openAddDialog: ${err}`);
+      console.error(`ERROR openAddDialog: ${err}`);
     }
   };
 
@@ -174,7 +174,7 @@ export const UsersTab = () => {
       });
       setDialog(true);
     } catch (err) {
-      console.log(`ERROR openEditDialog: ${err}`);
+      console.error(`ERROR openEditDialog: ${err}`);
     }
   };
 
@@ -191,7 +191,7 @@ export const UsersTab = () => {
         password: "",
       });
     } catch (err) {
-      console.log(`ERROR closeDialog: ${err}`);
+      console.error(`ERROR closeDialog: ${err}`);
     }
   };
 
@@ -254,7 +254,7 @@ export const UsersTab = () => {
     try {
       setNotification({ open: true, message, severity });
     } catch (err) {
-      console.log(`ERROR showNotification: ${err}`);
+      console.error(`ERROR showNotification: ${err}`);
     }
   };
 
@@ -262,7 +262,7 @@ export const UsersTab = () => {
     try {
       setNotification({ ...notification, open: false });
     } catch (err) {
-      console.log(`ERROR handleCloseNotification: ${err}`);
+      console.error(`ERROR handleCloseNotification: ${err}`);
     }
   };
 
@@ -272,7 +272,7 @@ export const UsersTab = () => {
       const locale = t("common.locale") || "en-US";
       return new Date(dateString).toLocaleDateString(locale);
     } catch (error) {
-      console.log(`ERROR formatDate: ${error}`);
+      console.error(`ERROR formatDate: ${error}`);
       return t("common.invalidDate");
     }
   };
@@ -281,7 +281,7 @@ export const UsersTab = () => {
     try {
       setUserForm((prev) => ({ ...prev, client_id: clientId, role_id: null }));
     } catch (err) {
-      console.log(`ERROR handleClientChange: ${err}`);
+      console.error(`ERROR handleClientChange: ${err}`);
     }
   };
 

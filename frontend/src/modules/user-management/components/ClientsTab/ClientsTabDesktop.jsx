@@ -75,7 +75,7 @@ export const ClientsTabDesktop = ({
 
       return filtered;
     } catch (err) {
-      console.log(`ERROR filteredClients: ${err}`);
+      console.error(`ERROR filteredClients: ${err}`);
       return clients;
     }
   }, [clients, selectedStatus, searchQuery]);
@@ -181,7 +181,7 @@ export const ClientsTabDesktop = ({
         original: client, // Keep original object for actions
       }));
     } catch (err) {
-      console.log(`ERROR rows: ${err}`);
+      console.error(`ERROR rows: ${err}`);
       return [];
     }
   }, [filteredClients]);

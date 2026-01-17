@@ -67,9 +67,6 @@ export const parseInvoiceData = (text) => {
       }
     }
   }
-  if (!result.amount || result.amount === 0) {
-    console.log("❌ No Total Amount found in OCR text");
-  }
 
   // Buscar fecha de emisión (Issue Date)
   // Patrones PRIORITARIOS: "Invoice date" primero
@@ -97,9 +94,6 @@ export const parseInvoiceData = (text) => {
       }
     }
   }
-  if (!result.issuedDate) {
-    console.log("❌ No Issue Date found in OCR text");
-  }
 
   // Buscar fecha de vencimiento (Due Date)
   // Patrones PRIORITARIOS: "Payment due" primero
@@ -122,13 +116,8 @@ export const parseInvoiceData = (text) => {
 
         result.dueDate = parsedDate;
         break;
-      } else {
-        console.log(`⚠️ Due Date found but failed to parse: "${dateStr}"`);
       }
     }
-  }
-  if (!result.dueDate) {
-    console.log("❌ No Due Date found in OCR text");
   }
 
   // Extraer descripción desde "Notes / Terms"
@@ -217,13 +206,11 @@ const parseDate = (dateStr) => {
       date = new Date(cleanedDate);
     }
     else {
-      console.log(`⚠️ Date format not recognized: "${cleanedDate}"`);
       return "";
     }
 
     // Validar que la fecha es válida
     if (isNaN(date.getTime())) {
-      console.log(`❌ Invalid date object created from: "${cleanedDate}"`);
       return "";
     }
 

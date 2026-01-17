@@ -63,7 +63,7 @@ export const ClientsTab = () => {
       });
       setShowCreateDialog(true);
     } catch (err) {
-      console.log(`ERROR handleEdit: ${err}`);
+      console.error(`ERROR handleEdit: ${err}`);
     }
   };
 
@@ -72,7 +72,7 @@ export const ClientsTab = () => {
       setClientToDeactivate(client);
       setShowConfirmDialog(true);
     } catch (err) {
-      console.log(`ERROR handleDeactivate: ${err}`);
+      console.error(`ERROR handleDeactivate: ${err}`);
     }
   };
 
@@ -83,7 +83,7 @@ export const ClientsTab = () => {
       setShowConfirmDialog(false);
       setClientToDeactivate(null);
     } catch (error) {
-      console.log(`ERROR confirmDeactivation: ${error}`);
+      console.error(`ERROR confirmDeactivation: ${error}`);
       showNotification(t("clients.messages.clientDeactivateFailed"), "error");
     }
   };
@@ -102,7 +102,7 @@ export const ClientsTab = () => {
 
       handleCloseDialog();
     } catch (error) {
-      console.log(`ERROR handleSave: ${error}`);
+      console.error(`ERROR handleSave: ${error}`);
       const errorMessage =
         error.data?.error || t("clients.messages.clientSaveFailed");
       showNotification(errorMessage, "error");
@@ -119,7 +119,7 @@ export const ClientsTab = () => {
         isActive: true,
       });
     } catch (err) {
-      console.log(`ERROR handleCloseDialog: ${err}`);
+      console.error(`ERROR handleCloseDialog: ${err}`);
     }
   };
 
@@ -127,7 +127,7 @@ export const ClientsTab = () => {
     try {
       return clientForm.name && clientForm.name.length >= 2;
     } catch (err) {
-      console.log(`ERROR isFormValid: ${err}`);
+      console.error(`ERROR isFormValid: ${err}`);
       return false;
     }
   };
@@ -137,7 +137,7 @@ export const ClientsTab = () => {
       const locale = t("common.locale") || "en-US";
       return new Date(dateString).toLocaleDateString(locale);
     } catch (err) {
-      console.log(`ERROR formatDate: ${err}`);
+      console.error(`ERROR formatDate: ${err}`);
       return dateString;
     }
   };
@@ -150,7 +150,7 @@ export const ClientsTab = () => {
         severity,
       });
     } catch (err) {
-      console.log(`ERROR showNotification: ${err}`);
+      console.error(`ERROR showNotification: ${err}`);
     }
   };
 
@@ -158,7 +158,7 @@ export const ClientsTab = () => {
     try {
       setSnackbar({ ...snackbar, open: false });
     } catch (err) {
-      console.log(`ERROR handleCloseSnackbar: ${err}`);
+      console.error(`ERROR handleCloseSnackbar: ${err}`);
     }
   };
 

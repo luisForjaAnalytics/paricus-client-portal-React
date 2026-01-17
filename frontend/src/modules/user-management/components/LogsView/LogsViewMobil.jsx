@@ -32,7 +32,7 @@ function Row({ log, formatTimestamp, getEventTypeColor, getStatusColor, cleanIpA
     try {
       setOpen(!open);
     } catch (err) {
-      console.log(`ERROR toggleOpen: ${err}`);
+      console.error(`ERROR toggleOpen: ${err}`);
     }
   };
 

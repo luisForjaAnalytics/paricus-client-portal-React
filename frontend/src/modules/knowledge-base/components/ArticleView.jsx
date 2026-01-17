@@ -99,7 +99,7 @@ export const ArticleView = () => {
         </Box>
       );
     } catch (err) {
-      console.warn(`Error :${err}`);
+      console.error(`ArticleView renderBlock: ${err}`);
     }
   }
 };

@@ -139,7 +139,6 @@ export const invoicesApi = createApi({
               };
             } catch (err) {
               if (err.status === 404) {
-                console.warn(`Client folder ${folder} not properly configured`);
                 return null;
               }
               return {

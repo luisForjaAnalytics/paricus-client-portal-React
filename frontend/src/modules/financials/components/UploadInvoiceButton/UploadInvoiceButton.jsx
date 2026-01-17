@@ -7,10 +7,6 @@ import {
   DialogContent,
   DialogActions,
   TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   Box,
   CircularProgress,
   LinearProgress,
@@ -20,7 +16,6 @@ import { Upload as UploadIcon } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
 import { useUploadInvoiceMutation } from "../../../../store/api/invoicesApi";
-import { TiptapEditor } from "../../../../common/components/ui/TiptapEditor";
 import { useTesseractOCR } from "../../../../common/hooks/useTesseractOCR";
 import { parseInvoiceData } from "../../../../common/utils/invoiceParser";
 import {
@@ -30,6 +25,12 @@ import {
   modalCard,
   titlesTypography,
 } from "../../../../common/styles/styles";
+import {
+  currencyOptions,
+  invoiceStatusOptions,
+  paymentMethodOptions,
+} from "./options";
+import { SelectMenuItem } from "../../../../common/components/ui/SelectMenuItem/SelectMenuItem";
 
 export const UploadInvoiceButton = ({ selectedFolder, onSuccess, onError }) => {
   const { t } = useTranslation();
@@ -108,7 +109,7 @@ export const UploadInvoiceButton = ({ selectedFolder, onSuccess, onError }) => {
         await runOcr(file);
       }
     } catch (err) {
-      console.warn(`ERROR: ${err}`);
+      console.error(`UploadInvoiceButton handleFileSelect: ${err}`);
       onError("Error processing PDF file");
     }
   };
@@ -237,7 +238,7 @@ export const UploadInvoiceButton = ({ selectedFolder, onSuccess, onError }) => {
                       placeholder="e.g., March_2024_Services"
                       error={!!errors.invoiceName}
                       helperText={errors.invoiceName?.message}
-                      sx={{...modalCard?.inputSection, width: "50%"}}
+                      sx={{ ...modalCard?.inputSection, width: "50%" }}
                     />
                   )}
                 />
@@ -252,8 +253,8 @@ export const UploadInvoiceButton = ({ selectedFolder, onSuccess, onError }) => {
                   {ocrLoading
                     ? t("financials.messages.processingFile")
                     : watchedFile
-                    ? watchedFile.name
-                    : t("financials.form.chooseFile")}
+                      ? watchedFile.name
+                      : t("financials.form.chooseFile")}
                   <input
                     type="file"
                     accept=".pdf"
@@ -293,34 +294,13 @@ export const UploadInvoiceButton = ({ selectedFolder, onSuccess, onError }) => {
                   name="currency"
                   control={control}
                   render={({ field }) => (
-                    <FormControl fullWidth>
-                      <InputLabel
-                        sx={modalCard?.multiOptionFilter?.inputLabelSection}
-                      >
-                        {t("financials.form.currency")}
-                      </InputLabel>
-                      <Select
-                        {...field}
-                        sx={{
-                          ...modalCard?.multiOptionFilter?.selectSection,
-                          height: "3rem",
-                        }}
-                        label={t("financials.form.currency")}
-                      >
-                        <MenuItem value="USD">
-                          {t("financials.form.currencies.usd")}
-                        </MenuItem>
-                        <MenuItem value="EUR">
-                          {t("financials.form.currencies.eur")}
-                        </MenuItem>
-                        <MenuItem value="GBP">
-                          {t("financials.form.currencies.gbp")}
-                        </MenuItem>
-                        <MenuItem value="MXN">
-                          {t("financials.form.currencies.mxn")}
-                        </MenuItem>
-                      </Select>
-                    </FormControl>
+                    <SelectMenuItem
+                      name="currency"
+                      label="financials.form.currency"
+                      options={currencyOptions}
+                      value={field.value}
+                      field={field}
+                    />
                   )}
                 />
               </Box>
@@ -368,80 +348,26 @@ export const UploadInvoiceButton = ({ selectedFolder, onSuccess, onError }) => {
                   name="status"
                   control={control}
                   render={({ field }) => (
-                    <FormControl fullWidth>
-                      <InputLabel
-                        sx={modalCard?.multiOptionFilter?.inputLabelSection}
-                      >
-                        {t("financials.form.status")}
-                      </InputLabel>
-                      <Select
-                        {...field}
-                        sx={{
-                          ...modalCard?.multiOptionFilter?.selectSection,
-                          height: "3rem",
-                        }}
-                        label={t("financials.form.status")}
-                      >
-                        <MenuItem value="draft">
-                          {t("financials.form.statuses.draft")}
-                        </MenuItem>
-                        <MenuItem value="sent">
-                          {t("financials.form.statuses.sent")}
-                        </MenuItem>
-                        <MenuItem value="viewed">
-                          {t("financials.form.statuses.viewed")}
-                        </MenuItem>
-                        <MenuItem value="paid">
-                          {t("financials.form.statuses.paid")}
-                        </MenuItem>
-                        <MenuItem value="overdue">
-                          {t("financials.form.statuses.overdue")}
-                        </MenuItem>
-                        <MenuItem value="cancelled">
-                          {t("financials.form.statuses.cancelled")}
-                        </MenuItem>
-                      </Select>
-                    </FormControl>
+                    <SelectMenuItem
+                      name="status"
+                      label="financials.form.status"
+                      options={invoiceStatusOptions}
+                      value={field.value}
+                      field={field}
+                    />
                   )}
                 />
                 <Controller
                   name="paymentMethod"
                   control={control}
                   render={({ field }) => (
-                    <FormControl fullWidth>
-                      <InputLabel
-                        sx={modalCard?.multiOptionFilter?.inputLabelSection}
-                      >
-                        {t("financials.form.paymentMethodOptional")}
-                      </InputLabel>
-                      <Select
-                        {...field}
-                        sx={{
-                          ...modalCard?.multiOptionFilter?.selectSection,
-                          height: "3rem",
-                        }}
-                        label={t("financials.form.paymentMethodOptional")}
-                      >
-                        <MenuItem value="">
-                          {t("financials.form.paymentMethods.notSet")}
-                        </MenuItem>
-                        <MenuItem value="credit_card">
-                          {t("financials.form.paymentMethods.creditCard")}
-                        </MenuItem>
-                        <MenuItem value="bank_transfer">
-                          {t("financials.form.paymentMethods.bankTransfer")}
-                        </MenuItem>
-                        <MenuItem value="check">
-                          {t("financials.form.paymentMethods.check")}
-                        </MenuItem>
-                        <MenuItem value="cash">
-                          {t("financials.form.paymentMethods.cash")}
-                        </MenuItem>
-                        <MenuItem value="other">
-                          {t("financials.form.paymentMethods.other")}
-                        </MenuItem>
-                      </Select>
-                    </FormControl>
+                    <SelectMenuItem
+                      name="paymentMethod"
+                      label="financials.form.paymentMethodOptional"
+                      options={paymentMethodOptions}
+                      value={field.value}
+                      field={field}
+                    />
                   )}
                 />
               </Box>

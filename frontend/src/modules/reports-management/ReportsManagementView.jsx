@@ -156,7 +156,7 @@ export const ReportsManagementView = () => {
         setUploadForm({ ...uploadForm, file: event.target.files[0] });
       }
     } catch (err) {
-      console.log(`ERROR handleFileSelect: ${err}`);
+      console.error(`ERROR handleFileSelect: ${err}`);
     }
   };
 
@@ -291,7 +291,7 @@ export const ReportsManagementView = () => {
         fileInputRef.current.value = "";
       }
     } catch (err) {
-      console.log(`ERROR resetUploadForm: ${err}`);
+      console.error(`ERROR resetUploadForm: ${err}`);
     }
   };
 
@@ -308,7 +308,7 @@ export const ReportsManagementView = () => {
       const i = Math.floor(Math.log(bytes) / Math.log(k));
       return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
     } catch (err) {
-      console.log(`ERROR formatFileSize: ${err}`);
+      console.error(`ERROR formatFileSize: ${err}`);
       return `0 ${t("reportsManagement.fileSize.bytes")}`;
     }
   };
@@ -324,7 +324,7 @@ export const ReportsManagementView = () => {
         minute: "2-digit",
       });
     } catch (err) {
-      console.log(`ERROR formatDate: ${err}`);
+      console.error(`ERROR formatDate: ${err}`);
       return t("reportsManagement.invalidDate");
     }
   };
@@ -333,7 +333,7 @@ export const ReportsManagementView = () => {
     try {
       setNotification({ type, message });
     } catch (err) {
-      console.log(`ERROR showNotification: ${err}`);
+      console.error(`ERROR showNotification: ${err}`);
     }
   };
 
@@ -341,7 +341,7 @@ export const ReportsManagementView = () => {
     try {
       setNotification(null);
     } catch (err) {
-      console.log(`ERROR handleCloseNotification: ${err}`);
+      console.error(`ERROR handleCloseNotification: ${err}`);
     }
   };
 
@@ -388,7 +388,7 @@ export const ReportsManagementView = () => {
     try {
       setShowFolderAccessModal(true);
     } catch (err) {
-      console.log(`ERROR openFolderAccessModal: ${err}`);
+      console.error(`ERROR openFolderAccessModal: ${err}`);
     }
   };
 

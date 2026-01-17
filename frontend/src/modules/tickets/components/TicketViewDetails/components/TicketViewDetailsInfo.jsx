@@ -203,10 +203,14 @@ const fieldFormatters = {
 
     if (pendingUser) {
       // Show pending user if one is selected
-      name = `${pendingUser.firstName || ""} ${pendingUser.lastName || ""}`.trim() || "Unknown";
+      name =
+        `${pendingUser.firstName || ""} ${pendingUser.lastName || ""}`.trim() ||
+        "Unknown";
     } else if (ticket?.assignedTo) {
       // Show current assigned user
-      name = `${ticket.assignedTo.firstName || ""} ${ticket.assignedTo.lastName || ""}`.trim() || "Unknown";
+      name =
+        `${ticket.assignedTo.firstName || ""} ${ticket.assignedTo.lastName || ""}`.trim() ||
+        "Unknown";
     } else {
       // No one assigned
       name = "Unassigned";
@@ -222,9 +226,11 @@ const fieldFormatters = {
           fontWeight: "medium",
           fontSize: "0.875rem",
           cursor: handlers?.onAssignedToClick ? "pointer" : "default",
-          "&:hover": handlers?.onAssignedToClick ? {
-            opacity: 0.8,
-          } : {},
+          "&:hover": handlers?.onAssignedToClick
+            ? {
+                opacity: 0.8,
+              }
+            : {},
         }}
         size="small"
       />
@@ -354,28 +360,34 @@ const TicketInfoDetails = ({ ticket }) => {
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(false);
 
-  const { setPendingPriority, pendingPriority, clearPendingPriority } = useContext(
-    TicketPriorityContext
-  );
-  const { setPendingStatus, pendingStatus, clearPendingStatus } = useContext(TicketStatusContext);
+  const { setPendingPriority, pendingPriority, clearPendingPriority } =
+    useContext(TicketPriorityContext);
+  const { setPendingStatus, pendingStatus, clearPendingStatus } =
+    useContext(TicketStatusContext);
   const {
     pendingAssignedTo,
     pendingAssignedToUser,
     setPendingAssignedTo,
     setPendingAssignedToUser,
-    clearPendingAssignedTo
+    clearPendingAssignedTo,
   } = useContext(TicketAssignedToContext);
-  const { description, clearDescription } = useContext(TicketDescriptionContext);
+  const { description, clearDescription } = useContext(
+    TicketDescriptionContext,
+  );
   const { hasFiles, clearFilesRef } = useContext(TicketFilesContext);
 
-  const [updateTicket, { isLoading: isUpdatingTicket }] = useUpdateTicketMutation();
-  const [addDetail, { isLoading: isAddingDetail }] = useAddTicketDetailMutation();
-  const [createChangeRequest, { isLoading: isCreatingChangeRequest }] = useCreateChangeRequestMutation();
+  const [updateTicket, { isLoading: isUpdatingTicket }] =
+    useUpdateTicketMutation();
+  const [addDetail, { isLoading: isAddingDetail }] =
+    useAddTicketDetailMutation();
+  const [createChangeRequest, { isLoading: isCreatingChangeRequest }] =
+    useCreateChangeRequestMutation();
 
   // Get uploadAllFiles function from the hook (same instance used in TicketUpdateStatus)
   const { uploadAllFiles } = useTicketDetailAttachments(ticketId, null);
 
-  const isLoading = isUpdatingTicket || isAddingDetail || isCreatingChangeRequest;
+  const isLoading =
+    isUpdatingTicket || isAddingDetail || isCreatingChangeRequest;
 
   // Get user permissions
   const { isBPOAdmin, isClientAdmin } = usePermissions();
@@ -412,13 +424,13 @@ const TicketInfoDetails = ({ ticket }) => {
             displayValue,
             ticket,
             handlers,
-            pendingAssignedToUser
+            pendingAssignedToUser,
           );
         }
         return fieldFormatters[config.formatter](
           displayValue,
           ticket,
-          handlers
+          handlers,
         );
       }
       return fieldFormatters.default(displayValue);
@@ -443,13 +455,14 @@ const TicketInfoDetails = ({ ticket }) => {
 
     // Find the selected user from the users list
     // Note: usersData is already the array after transformResponse in ticketsApi
-    const selectedUser = Array.isArray(usersData) ? usersData.find(user => user.id === userId) : null;
+    const selectedUser = Array.isArray(usersData)
+      ? usersData.find((user) => user.id === userId)
+      : null;
     if (selectedUser) {
       setPendingAssignedToUser(selectedUser);
     }
 
     setOpenAssignedToModal(false);
-    console.log("Assigned to user:", selectedUser);
   };
 
   // Check if there are any changes
@@ -458,14 +471,12 @@ const TicketInfoDetails = ({ ticket }) => {
     pendingStatus ||
     pendingAssignedTo ||
     description.trim() ||
-    hasFiles
+    hasFiles,
   );
 
   // Check if there are field changes (status, priority, assignedTo)
   const hasFieldChanges = Boolean(
-    pendingPriority ||
-    pendingStatus ||
-    pendingAssignedTo
+    pendingPriority || pendingStatus || pendingAssignedTo,
   );
 
   const handleUpdate = async () => {
@@ -476,16 +487,12 @@ const TicketInfoDetails = ({ ticket }) => {
     try {
       // For client users (not BPO Admin or Client Admin), create a change request instead of direct update
       if (canRequestChanges && hasFieldChanges) {
-        console.log('📋 Creating change request for client user');
-
         await createChangeRequest({
           ticketId: ticketId,
           requestedStatus: pendingStatus || null,
           requestedPriority: pendingPriority || null,
           requestedAssignedToId: pendingAssignedTo || null,
         }).unwrap();
-
-        console.log('✅ Change request created successfully');
 
         // Clear pending changes
         if (pendingPriority) clearPendingPriority();
@@ -495,12 +502,10 @@ const TicketInfoDetails = ({ ticket }) => {
         // Handle description/comments separately (these don't need approval)
         let result = null;
         if (description.trim()) {
-          console.log('📝 Creating detail for ticketId:', ticketId);
           result = await addDetail({
             id: ticketId,
             detail: description,
           }).unwrap();
-          console.log('✅ Detail created successfully:', result);
         }
 
         // Upload attachments if any
@@ -508,9 +513,8 @@ const TicketInfoDetails = ({ ticket }) => {
           const newDetail = result.details[result.details.length - 1];
           try {
             await uploadAllFiles(newDetail.id);
-            console.log('✅ Files uploaded successfully');
           } catch (uploadError) {
-            console.error("Error uploading attachments:", uploadError);
+            console.error(`TicketViewDetailsInfo uploadAllFiles: ${uploadError}`);
           }
         }
 
@@ -535,17 +539,14 @@ const TicketInfoDetails = ({ ticket }) => {
       const updateData = {};
 
       if (pendingPriority) {
-        console.log('🎯 Updating priority to:', pendingPriority);
         updateData.priority = pendingPriority;
       }
 
       if (pendingStatus) {
-        console.log('🎯 Updating status to:', pendingStatus);
         updateData.status = pendingStatus;
       }
 
       if (pendingAssignedTo) {
-        console.log('🎯 Updating assignedTo to:', pendingAssignedTo);
         updateData.assignedToId = pendingAssignedTo;
       }
 
@@ -554,8 +555,6 @@ const TicketInfoDetails = ({ ticket }) => {
           id: ticketId,
           ...updateData,
         }).unwrap();
-
-        console.log('✅ Ticket fields updated successfully');
 
         // Clear pending changes
         if (pendingPriority) clearPendingPriority();
@@ -566,25 +565,21 @@ const TicketInfoDetails = ({ ticket }) => {
       // 2. Create detail if there's a description
       let result = null;
       if (description.trim()) {
-        console.log('📝 Creating detail for ticketId:', ticketId);
         result = await addDetail({
           id: ticketId,
           detail: description,
         }).unwrap();
-        console.log('✅ Detail created successfully:', result);
       }
 
       // 3. Upload attachments if any and we created a detail
       if (hasFiles && result?.details) {
         // Get the newly created detail (last one in the array)
         const newDetail = result.details[result.details.length - 1];
-        console.log('🎯 New detail to attach files to:', { detailId: newDetail.id });
 
         try {
           await uploadAllFiles(newDetail.id);
-          console.log('✅ Files uploaded successfully');
         } catch (uploadError) {
-          console.error("Error uploading attachments:", uploadError);
+          console.error(`TicketViewDetailsInfo uploadAllFiles: ${uploadError}`);
           setError("Update created but failed to upload some attachments");
           return;
         }
@@ -604,12 +599,13 @@ const TicketInfoDetails = ({ ticket }) => {
         navigate("/app/tickets/ticketTable");
       }, 1000);
     } catch (err) {
-      console.error("Failed to update ticket:", err);
+      console.error(`TicketViewDetailsInfo handleUpdate: ${err}`);
 
       let errorMessage = "Failed to update ticket. Please try again.";
 
       if (err?.status === 400) {
-        errorMessage = err?.data?.error || "Invalid request. Please check your input.";
+        errorMessage =
+          err?.data?.error || "Invalid request. Please check your input.";
       } else if (err?.status === 404) {
         errorMessage = "Ticket not found. It may have been deleted.";
       } else if (err?.status === 401) {
@@ -650,10 +646,11 @@ const TicketInfoDetails = ({ ticket }) => {
         open={successMessage}
         autoHideDuration={3000}
         onClose={() => setSuccessMessage(false)}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <Alert severity="success" onClose={() => setSuccessMessage(false)}>
-          {t("tickets.ticketView.updateSuccess") || "Update added successfully!"}
+          {t("tickets.ticketView.updateSuccess") ||
+            "Update added successfully!"}
         </Alert>
       </Snackbar>
 
@@ -739,7 +736,7 @@ const TicketInfoDetails = ({ ticket }) => {
       </Box>
 
       {/* Priority Change Modal */}
-      {(
+      {
         <TicketChangesRequest
           open={openPriorityModal}
           onClose={() => setOpenPriorityModal(false)}
@@ -747,10 +744,10 @@ const TicketInfoDetails = ({ ticket }) => {
           onSelect={handlePrioritySelect}
           changeType="priority"
         />
-      )}
+      }
 
       {/* Status Change Modal */}
-      {(
+      {
         <TicketChangesRequest
           open={openStatusModal}
           onClose={() => setOpenStatusModal(false)}
@@ -758,10 +755,10 @@ const TicketInfoDetails = ({ ticket }) => {
           onSelect={handleStatusSelect}
           changeType="status"
         />
-      )}
+      }
 
       {/* Assigned To Change Modal */}
-      {(
+      {
         <TicketChangesRequest
           open={openAssignedToModal}
           onClose={() => setOpenAssignedToModal(false)}
@@ -769,7 +766,7 @@ const TicketInfoDetails = ({ ticket }) => {
           onSelect={handleAssignedToSelect}
           changeType="assignedTo"
         />
-      )}
+      }
     </>
   );
 };

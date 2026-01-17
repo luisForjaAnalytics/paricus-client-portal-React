@@ -35,7 +35,7 @@ export default function LanguageMenu() {
       localStorage.setItem("lang", selectedLang);
       setAnchorEl(null);
     } catch (err) {
-      console.log(`ERROR handleMenuItemClick: ${err}`);
+      console.error(`ERROR handleMenuItemClick: ${err}`);
     }
   };
 

@@ -82,7 +82,7 @@ export const ClientFolders = ({
 
       // Reports are already loaded on mount, no need to fetch here
     } catch (err) {
-      console.log(`ERROR toggleRow: ${err}`);
+      console.error(`ERROR toggleRow: ${err}`);
     }
   };
 
@@ -90,7 +90,7 @@ export const ClientFolders = ({
     try {
       setPage(newPage);
     } catch (err) {
-      console.log(`ERROR handleChangePage: ${err}`);
+      console.error(`ERROR handleChangePage: ${err}`);
     }
   };
 
@@ -99,7 +99,7 @@ export const ClientFolders = ({
       setRowsPerPage(parseInt(event.target.value, 10));
       setPage(0);
     } catch (err) {
-      console.log(`ERROR handleChangeRowsPerPage: ${err}`);
+      console.error(`ERROR handleChangeRowsPerPage: ${err}`);
     }
   };
 
@@ -109,7 +109,7 @@ export const ClientFolders = ({
       setOrder(isAsc ? "desc" : "asc");
       setOrderBy(property);
     } catch (err) {
-      console.log(`ERROR handleRequestSort: ${err}`);
+      console.error(`ERROR handleRequestSort: ${err}`);
     }
   };
 

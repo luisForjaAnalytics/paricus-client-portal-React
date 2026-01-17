@@ -81,15 +81,11 @@ export const useTicketDetailAttachments = (ticketId, detailId) => {
 
   // Upload all selected files after detail is created
   const uploadAllFiles = async (detailId) => {
-    console.log('🔍 uploadAllFiles called with:', { ticketId, detailId, filesCount: selectedFiles.length });
-
     if (!ticketId || !detailId || selectedFiles.length === 0) {
-      console.log('⚠️ Validation failed:', { ticketId, detailId, filesCount: selectedFiles.length });
       return;
     }
 
     const uploadPromises = selectedFiles.map((file) => {
-      console.log('📤 Uploading file:', file.name);
       return uploadAttachment({
         ticketId,
         detailId,
@@ -98,16 +94,10 @@ export const useTicketDetailAttachments = (ticketId, detailId) => {
     });
 
     try {
-      const results = await Promise.all(uploadPromises);
-      console.log('✅ All uploads successful:', results);
+      await Promise.all(uploadPromises);
       setSelectedFiles([]); // Clear after successful upload
     } catch (error) {
-      console.error('❌ Upload failed:', error);
-      console.error('Error details:', {
-        message: error.message,
-        status: error.status,
-        data: error.data
-      });
+      console.error(`useTicketDetailAttachments uploadAllFiles: ${error}`);
       throw error;
     }
   };
@@ -137,15 +127,11 @@ export const useTicketDetailAttachments = (ticketId, detailId) => {
 
   const handleImageClick = async (attachment) => {
     try {
-      console.log('Loading detail image:', { ticketId, detailId, attachmentId: attachment.id });
-
       const response = await getAttachmentUrl({
         ticketId,
         detailId,
         attachmentId: attachment.id,
       }).unwrap();
-
-      console.log('Detail image URL response:', response);
 
       // The response is the URL string (transformed by RTK Query)
       let url = response;
@@ -160,13 +146,11 @@ export const useTicketDetailAttachments = (ticketId, detailId) => {
         url = `${baseUrl}${url}`;
       }
 
-      console.log('Final detail image URL:', url);
-
       setImageUrl(url);
       setSelectedImage(attachment);
       setOpenDialog(true);
     } catch (error) {
-      console.error("Error loading image:", error);
+      console.error(`useTicketDetailAttachments handleImageClick: ${error}`);
       const errorMessage = error?.data?.error || error?.message || "Failed to load image";
       alert(errorMessage);
     }

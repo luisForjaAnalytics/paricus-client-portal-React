@@ -70,7 +70,7 @@ function Row({
     try {
       setOpen(!open);
     } catch (err) {
-      console.log(`ERROR toggleOpen: ${err}`);
+      console.error(`ERROR toggleOpen: ${err}`);
     }
   };
 
@@ -79,7 +79,7 @@ function Row({
       const client = clients.find((c) => c.id === clientId);
       return client ? client.name : t("roles.unknownClient");
     } catch (err) {
-      console.log(`ERROR getClientName: ${err}`);
+      console.error(`ERROR getClientName: ${err}`);
       return t("roles.unknownClient");
     }
   };
@@ -88,7 +88,7 @@ function Row({
     try {
       return roleName === "BPO Admin" || roleName === "Client Admin";
     } catch (err) {
-      console.log(`ERROR isProtectedRole: ${err}`);
+      console.error(`ERROR isProtectedRole: ${err}`);
       return false;
     }
   };
@@ -288,7 +288,7 @@ export const RolesTabMobile = () => {
       });
       setDialog(true);
     } catch (err) {
-      console.log(`ERROR openAddDialog: ${err}`);
+      console.error(`ERROR openAddDialog: ${err}`);
     }
   };
 
@@ -302,7 +302,7 @@ export const RolesTabMobile = () => {
       });
       setDialog(true);
     } catch (err) {
-      console.log(`ERROR openEditDialog: ${err}`);
+      console.error(`ERROR openEditDialog: ${err}`);
     }
   };
 
@@ -316,7 +316,7 @@ export const RolesTabMobile = () => {
         client_id: null,
       });
     } catch (err) {
-      console.log(`ERROR closeDialog: ${err}`);
+      console.error(`ERROR closeDialog: ${err}`);
     }
   };
 
@@ -339,7 +339,7 @@ export const RolesTabMobile = () => {
 
       setPermissionsDialog(true);
     } catch (err) {
-      console.log(`ERROR openPermissionsDialog: ${err}`);
+      console.error(`ERROR openPermissionsDialog: ${err}`);
     }
   };
 
@@ -349,7 +349,7 @@ export const RolesTabMobile = () => {
       setSelectedRole(null);
       setSelectedPermissions([]);
     } catch (err) {
-      console.log(`ERROR closePermissionsDialog: ${err}`);
+      console.error(`ERROR closePermissionsDialog: ${err}`);
     }
   };
 
@@ -416,7 +416,7 @@ export const RolesTabMobile = () => {
       setRoleToDelete(role);
       setDeleteDialog(true);
     } catch (err) {
-      console.log(`ERROR confirmDelete: ${err}`);
+      console.error(`ERROR confirmDelete: ${err}`);
     }
   };
 
@@ -440,7 +440,7 @@ export const RolesTabMobile = () => {
           : [...prev, permissionId]
       );
     } catch (err) {
-      console.log(`ERROR handlePermissionToggle: ${err}`);
+      console.error(`ERROR handlePermissionToggle: ${err}`);
     }
   };
 
@@ -450,7 +450,7 @@ export const RolesTabMobile = () => {
         roleForm.role_name && roleForm.role_name.length >= 2 && roleForm.client_id
       );
     } catch (err) {
-      console.log(`ERROR isFormValid: ${err}`);
+      console.error(`ERROR isFormValid: ${err}`);
       return false;
     }
   };
@@ -459,7 +459,7 @@ export const RolesTabMobile = () => {
     try {
       return roleName === "BPO Admin" || roleName === "Client Admin";
     } catch (err) {
-      console.log(`ERROR isProtectedRole: ${err}`);
+      console.error(`ERROR isProtectedRole: ${err}`);
       return false;
     }
   };
@@ -472,7 +472,7 @@ export const RolesTabMobile = () => {
         severity,
       });
     } catch (err) {
-      console.log(`ERROR showNotification: ${err}`);
+      console.error(`ERROR showNotification: ${err}`);
     }
   };
 
@@ -480,7 +480,7 @@ export const RolesTabMobile = () => {
     try {
       setSnackbar({ ...snackbar, open: false });
     } catch (err) {
-      console.log(`ERROR handleCloseSnackbar: ${err}`);
+      console.error(`ERROR handleCloseSnackbar: ${err}`);
     }
   };
 

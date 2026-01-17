@@ -153,7 +153,7 @@ export const LogsView = () => {
         second: "2-digit",
       });
     } catch (err) {
-      console.log(`ERROR formatTimestamp: ${err}`);
+      console.error(`ERROR formatTimestamp: ${err}`);
       return timestamp;
     }
   };
@@ -165,7 +165,7 @@ export const LogsView = () => {
       // Remove ::ffff: prefix if present
       return ip.startsWith("::ffff:") ? ip.replace("::ffff:", "") : ip;
     } catch (err) {
-      console.log(`ERROR cleanIpAddress: ${err}`);
+      console.error(`ERROR cleanIpAddress: ${err}`);
       return "N/A";
     }
   };
@@ -184,7 +184,7 @@ export const LogsView = () => {
           return "default";
       }
     } catch (err) {
-      console.log(`ERROR getStatusColor: ${err}`);
+      console.error(`ERROR getStatusColor: ${err}`);
       return "default";
     }
   };
@@ -209,7 +209,7 @@ export const LogsView = () => {
           return "default";
       }
     } catch (err) {
-      console.log(`ERROR getEventTypeColor: ${err}`);
+      console.error(`ERROR getEventTypeColor: ${err}`);
       return "default";
     }
   };

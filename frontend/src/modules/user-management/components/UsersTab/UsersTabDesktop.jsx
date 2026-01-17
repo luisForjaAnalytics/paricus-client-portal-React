@@ -166,7 +166,7 @@ export const UsersTabDesktop = ({
         original: user, // Keep original object for actions
       }));
     } catch (err) {
-      console.log(`ERROR rows: ${err}`);
+      console.error(`ERROR rows: ${err}`);
       return [];
     }
   }, [users, t]);

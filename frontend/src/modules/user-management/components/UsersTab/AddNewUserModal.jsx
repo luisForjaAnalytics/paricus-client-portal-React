@@ -24,6 +24,7 @@ import {
   modalCard,
   titlesTypography,
   primaryIconButton,
+  selectMenuProps,
 } from "../../../../common/styles/styles";
 
 export const AddNewUserModal = ({
@@ -139,6 +140,7 @@ export const AddNewUserModal = ({
                     value={userForm.client_id || ""}
                     onChange={(e) => handleClientChange(e.target.value || null)}
                     label={t("users.form.client")}
+                    MenuProps={selectMenuProps}
                     sx={modalCard?.multiOptionFilter?.selectSection}
                   >
                     <MenuItem value="">{t("users.form.selectClient")}</MenuItem>
@@ -166,6 +168,7 @@ export const AddNewUserModal = ({
                     })
                   }
                   label={t("users.form.role")}
+                  MenuProps={selectMenuProps}
                   sx={modalCard?.multiOptionFilter?.selectSection}
                   displayEmpty={false}
                 >

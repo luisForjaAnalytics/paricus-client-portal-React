@@ -19,9 +19,11 @@ import { useUpdatePaymentLinkMutation } from "../../../../store/api/invoicesApi"
 import { useCreateLogMutation } from "../../../../store/api/logsApi";
 import { useSelector } from "react-redux";
 import {
-  primaryButton,
+  modalCard,
   outlinedButton,
   PaymentLinkStyle,
+  primaryIconButton,
+  titlesTypography,
 } from "../../../../common/styles/styles";
 
 export const PendingLinkModal = ({ invoice, onSuccess, onError }) => {
@@ -128,10 +130,29 @@ export const PendingLinkModal = ({ invoice, onSuccess, onError }) => {
       )}
 
       {/* Modal */}
-      <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        maxWidth="sm"
+        fullWidth
+        slotProps={{
+          paper: {
+            sx: modalCard?.dialogSection,
+          },
+        }}
+      >
         <form onSubmit={handleSubmit} sx={{ borderRadius: "1rem" }}>
-          <DialogTitle>{t("invoices.paymentLink.modalTitle")}</DialogTitle>
-          <DialogContent>
+          <DialogTitle>
+            <Typography
+              sx={{
+                ...titlesTypography.primaryTitle,
+                textAlign: "center",
+              }}
+            >
+              {t("invoices.paymentLink.modalTitle")}
+            </Typography>
+          </DialogTitle>
+          <DialogContent dividers>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
               {t("invoices.paymentLink.invoiceLabel")}:{" "}
               {invoice?.fileName || invoice?.title}
@@ -145,22 +166,27 @@ export const PendingLinkModal = ({ invoice, onSuccess, onError }) => {
               placeholder={t("invoices.paymentLink.urlPlaceholder")}
               helperText={t("invoices.paymentLink.urlHelper")}
               required
-              sx={{ mt: 1 }}
+              sx={modalCard?.inputSection}
             />
           </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose} sx={outlinedButton}>
-              {t("invoices.paymentLink.cancel")}
-            </Button>
+          <DialogActions
+            sx={{
+              margin: "0 0 1rem 0",
+              justifyContent: "center",
+            }}
+          >
             <Button
               type="submit"
               variant="contained"
               disabled={savingPaymentLink}
-              sx={primaryButton}
+              sx={primaryIconButton}
             >
               {savingPaymentLink
                 ? t("invoices.paymentLink.saving")
                 : t("invoices.paymentLink.saveButton")}
+            </Button>
+            <Button onClick={handleClose} sx={outlinedButton}>
+              {t("invoices.paymentLink.cancel")}
             </Button>
           </DialogActions>
         </form>
@@ -180,5 +206,3 @@ PendingLinkModal.propTypes = {
   onSuccess: PropTypes.func.isRequired,
   onError: PropTypes.func.isRequired,
 };
-
-export default PendingLinkModal;

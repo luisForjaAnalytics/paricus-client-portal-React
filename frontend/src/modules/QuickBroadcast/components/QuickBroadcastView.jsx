@@ -10,11 +10,11 @@ import {
   MenuItem,
   Chip,
   Typography,
-  IconButton,
   Alert,
   CircularProgress,
   OutlinedInput,
   TextField,
+  IconButton,
 } from "@mui/material";
 import {
   AttachFile,
@@ -34,10 +34,9 @@ import {
   quickBroadcastCard,
   selectMenuProps,
 } from "../../../common/styles/styles";
-import {
-  getPriorityStyles,
-  priorityStatesList,
-} from "../../../common/utils/getStatusProperty";
+import { SelectMenuItem } from "../../../common/components/ui/SelectMenuItem/SelectMenuItem";
+import { priorityOptions } from "./options";
+
 
 // Compact selector styles for Quick Broadcast
 const compactSelector = {
@@ -467,48 +466,18 @@ export const QuickBroadcastView = () => {
             )}
             {/* Priority Selection */}
             <Box sx={{ minWidth: "120px" }}>
-              <FormControl size="small" fullWidth>
-                <InputLabel
-                  id="priority-select-label"
-                  sx={compactSelector.inputLabelSection}
-                >
-                  {t("quickBroadcast.priority")}
-                </InputLabel>
-                <Select
-                  labelId="priority-select-label"
-                  id="priority-select"
-                  value={priority}
-                  onChange={(e) => setPriority(e.target.value)}
-                  label={t("quickBroadcast.priority")}
-                  MenuProps={selectMenuProps}
-                  sx={compactSelector.selectSection}
-                >
-                  {priorityStatesList.map((item, index) => (
-                    <MenuItem
-                      key={index}
-                      value={item.toLowerCase()}
-                      sx={compactSelector.menuItem}
-                    >
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
-                      >
-                        <Box
-                          sx={{
-                            width: 6,
-                            height: 6,
-                            borderRadius: "50%",
-                            marginRight:'0.3rem',
-                            backgroundColor: getPriorityStyles(item.toLowerCase()).color,
-                          }}
-                        />
-                        <Typography fontSize="0.75rem">
-                          {t(`priorityLevels.${item.toLowerCase()}`)}
-                        </Typography>
-                      </Box>
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              <SelectMenuItem
+                name="priority"
+                label="quickBroadcast.priority"
+                options={priorityOptions}
+                value={priority}
+                onChange={setPriority}
+                size="small"
+                showDot={true}
+                sx={compactSelector.selectSection}
+                inputLabelSx={compactSelector.inputLabelSection}
+                menuItemSx={compactSelector.menuItem}
+              />
             </Box>
           </Box>
 
