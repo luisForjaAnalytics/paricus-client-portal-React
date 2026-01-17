@@ -72,11 +72,14 @@ model User {
   passwordResetExpires DateTime?       @map("password_reset_expires")
   createdAt            DateTime        @default(now()) @map("created_at")
   updatedAt            DateTime        @default(now()) @updatedAt @map("updated_at")
-  role                 Role?           @relation(fields: [roleId], references: [id], onDelete: SetNull)
-  client               Client?         @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  knowledgeBase        KnowledgeBase[]
-  ticketsCreated       Ticket[]        @relation("TicketCreator")
-  ticketsAssigned      Ticket[]        @relation("TicketAssignee")
+  role                          Role?                 @relation(fields: [roleId], references: [id], onDelete: SetNull)
+  client                        Client?               @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  knowledgeBase                 KnowledgeBase[]
+  ticketsCreated                Ticket[]              @relation("TicketCreator")
+  ticketsAssigned               Ticket[]              @relation("TicketAssignee")
+  changeRequestsCreated         TicketChangeRequest[] @relation("ChangeRequestedBy")
+  changeRequestsReviewed        TicketChangeRequest[] @relation("ChangeReviewedBy")
+  changeRequestsAssignedTo      TicketChangeRequest[] @relation("ChangeRequestedAssignee")
 
   @@index([email])
   @@index([clientId])
@@ -214,21 +217,22 @@ model Log {
 }
 
 model Ticket {
-  id           String           @id @default(uuid())
-  clientId     Int              @map("client_id")
-  userId       Int              @map("user_id")
-  assignedToId Int?             @map("assigned_to_id")
-  subject      String
-  priority     String           // "High", "Medium", "Low"
-  status       String           @default("Open") // "Open", "In Progress", "Resolved", "Closed"
-  description  String           // JSON: { descriptionData, attachmentIds: [], url }
-  createdAt    DateTime         @default(now()) @map("created_at")
-  updatedAt    DateTime         @default(now()) @updatedAt @map("updated_at")
-  client       Client           @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  user         User             @relation("TicketCreator", fields: [userId], references: [id], onDelete: Cascade)
-  assignedTo   User?            @relation("TicketAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
-  details      TicketDetail[]
-  attachments  TicketAttachment[]
+  id             String                @id @default(uuid())
+  clientId       Int                   @map("client_id")
+  userId         Int                   @map("user_id")
+  assignedToId   Int?                  @map("assigned_to_id")
+  subject        String
+  priority       String                // "High", "Medium", "Low"
+  status         String                @default("Open") // "Open", "In Progress", "Resolved", "Closed"
+  description    String                // JSON: { descriptionData, attachmentIds: [], url }
+  createdAt      DateTime              @default(now()) @map("created_at")
+  updatedAt      DateTime              @default(now()) @updatedAt @map("updated_at")
+  client         Client                @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  user           User                  @relation("TicketCreator", fields: [userId], references: [id], onDelete: Cascade)
+  assignedTo     User?                 @relation("TicketAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  details        TicketDetail[]
+  attachments    TicketAttachment[]
+  changeRequests TicketChangeRequest[]
 
   @@index([clientId])
   @@index([userId])
@@ -237,6 +241,34 @@ model Ticket {
   @@index([priority])
   @@index([createdAt])
   @@map("tickets")
+}
+
+model TicketChangeRequest {
+  id                    Int       @id @default(autoincrement())
+  ticketId              String    @map("ticket_id")
+  requestedById         Int       @map("requested_by_id")
+  requestedStatus       String?   @map("requested_status")       // New status requested (null if no change)
+  requestedPriority     String?   @map("requested_priority")     // New priority requested (null if no change)
+  requestedAssignedToId Int?      @map("requested_assigned_to_id") // New assignee requested (null if no change)
+  currentStatus         String    @map("current_status")         // Status at time of request
+  currentPriority       String    @map("current_priority")       // Priority at time of request
+  currentAssignedToId   Int?      @map("current_assigned_to_id") // Assignee at time of request
+  status                String    @default("pending")            // "pending", "approved", "rejected"
+  reviewedById          Int?      @map("reviewed_by_id")
+  reviewedAt            DateTime? @map("reviewed_at")
+  rejectionReason       String?   @map("rejection_reason")
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @default(now()) @updatedAt @map("updated_at")
+  ticket                Ticket    @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  requestedBy           User      @relation("ChangeRequestedBy", fields: [requestedById], references: [id], onDelete: Cascade)
+  reviewedBy            User?     @relation("ChangeReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+  requestedAssignedTo   User?     @relation("ChangeRequestedAssignee", fields: [requestedAssignedToId], references: [id], onDelete: SetNull)
+
+  @@index([ticketId])
+  @@index([requestedById])
+  @@index([status])
+  @@index([createdAt])
+  @@map("ticket_change_requests")
 }
 
 model TicketDetail {

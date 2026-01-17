@@ -4,78 +4,62 @@ import AutoStoriesOutlinedIcon from "@mui/icons-material/AutoStoriesOutlined";
 import LocalAtmOutlinedIcon from "@mui/icons-material/LocalAtmOutlined";
 import VolumeUpOutlinedIcon from "@mui/icons-material/VolumeUpOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import CampaignIcon from "@mui/icons-material/Campaign";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import LocalActivityIcon from "@mui/icons-material/LocalActivity";
 import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
 import PersonIcon from "@mui/icons-material/Person";
 import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
 import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import { permissionListSection } from "../../common/utils/permissionParser";
+import DashboardIcon from "@mui/icons-material/Dashboard";
 
-// Permission per section
-const {
-  dashboard,
-  reporting,
-  audioRetrieval,
-  knowledgeBase,
-  financial,
-  reportsManagement,
-} = permissionListSection();
-
-// Drawer menu - Exported for filtering in router
+// Drawer menu - Common items (visible based on permission)
 export const menuItemsCommon = [
   {
     label: "dashboard",
     icon: <DashboardIcon fontSize="medium" />,
     route: "dashboard",
     permission: "view_dashboard",
-    permissionList: dashboard,
   },
   {
     label: "reporting",
     icon: <LeaderboardOutlinedIcon fontSize="medium" />,
     route: "reporting",
     permission: "view_reporting",
-    permissionList: reporting,
   },
   {
     label: "audioRetrieval",
     icon: <VolumeUpOutlinedIcon fontSize="medium" />,
     route: "audio-recordings",
     permission: "view_interactions",
-    permissionList: audioRetrieval,
   },
   {
     label: "knowledgeBase",
     icon: <AutoStoriesOutlinedIcon fontSize="medium" />,
     route: "knowledge-base/articles",
     permission: "view_knowledge_base",
-    permissionList: knowledgeBase,
   },
   {
     label: "tickets",
     icon: <LocalActivityIcon fontSize="medium" />,
     route: "tickets/ticketTable",
     permission: "view_tickets",
-    permissionList: ["view_tickets"],
   },
 ];
 
+// Drawer menu - Admin items (visible based on permission)
 export const menuItemsAdmin = [
   {
     label: "financial",
     icon: <LocalAtmOutlinedIcon fontSize="medium" />,
     route: "financial",
     permission: "view_financials",
-    permissionList: financial,
   },
   {
     label: "reportsManagement",
     icon: <DescriptionOutlinedIcon fontSize="medium" />,
     route: "reports-management",
     permission: "admin_reports",
-    permissionList: reportsManagement,
   },
   {
     label: "userManagement",
@@ -88,34 +72,36 @@ export const menuItemsAdmin = [
         icon: <PeopleAltIcon fontSize="medium" />,
         route: "users-management/clients",
         permission: "admin_clients",
-        permissionList: ["admin_clients"],
       },
       {
         label: "usersManagement",
         icon: <PersonIcon fontSize="medium" />,
         route: "users-management/users",
         permission: "admin_users",
-        permissionList: ["admin_users"],
       },
       {
         label: "roleManagement",
         icon: <VerifiedUserIcon fontSize="medium" />,
         route: "users-management/rolesPermissions",
         permission: "admin_roles",
-        permissionList: ["admin_roles"],
       },
       {
         label: "logs",
         icon: <AppRegistrationIcon fontSize="medium" />,
         route: "users-management/logs",
         permission: "admin_users",
-        permissionList: ["admin_users"],
       },
     ],
   },
+  {
+    label: "broadcast",
+    icon: <CampaignIcon fontSize="medium" />,
+    route: "broadcast",
+    permission: "admin_broadcast",
+  },
 ];
 
-// Menu Avatar buttom //
+// Avatar dropdown menu items
 export const menuItemsAvatar = [
   {
     label: "myProfile",

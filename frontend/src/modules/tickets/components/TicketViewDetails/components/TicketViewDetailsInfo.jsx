@@ -27,6 +27,7 @@ import {
   useGetAssignableUsersQuery,
   useUpdateTicketMutation,
   useAddTicketDetailMutation,
+  useCreateChangeRequestMutation,
 } from "../../../../../store/api/ticketsApi";
 import { useTicketDetailAttachments } from "../../../../../common/hooks/useTicketDetailAttachments";
 
@@ -369,11 +370,12 @@ const TicketInfoDetails = ({ ticket }) => {
 
   const [updateTicket, { isLoading: isUpdatingTicket }] = useUpdateTicketMutation();
   const [addDetail, { isLoading: isAddingDetail }] = useAddTicketDetailMutation();
+  const [createChangeRequest, { isLoading: isCreatingChangeRequest }] = useCreateChangeRequestMutation();
 
   // Get uploadAllFiles function from the hook (same instance used in TicketUpdateStatus)
   const { uploadAllFiles } = useTicketDetailAttachments(ticketId, null);
 
-  const isLoading = isUpdatingTicket || isAddingDetail;
+  const isLoading = isUpdatingTicket || isAddingDetail || isCreatingChangeRequest;
 
   // Get user permissions
   const { isBPOAdmin, isClientAdmin } = usePermissions();
@@ -381,16 +383,16 @@ const TicketInfoDetails = ({ ticket }) => {
   // Fetch assignable users to get user details when selected
   const { data: usersData } = useGetAssignableUsersQuery();
 
-  // Determine if user can edit based on permissions
-  // - BPO Admin: can edit everything
-  // - Client Admin: can edit everything
-  // - Client User: cannot edit anything
-  const canEdit = isBPOAdmin() || isClientAdmin();
-
+  // Determine edit capabilities based on permissions
+  // - BPO Admin: can edit directly
+  // - Client Admin: can edit directly
+  // - Client User: can request changes (creates change request)
+  const canEditDirectly = isBPOAdmin() || isClientAdmin();
+  const canRequestChanges = !canEditDirectly; // Client users can request changes
   const handlers = {
-    onPriorityClick: canEdit ? () => setOpenPriorityModal(true) : undefined,
-    onStatusClick: canEdit ? () => setOpenStatusModal(true) : undefined,
-    onAssignedToClick: canEdit ? () => setOpenAssignedToModal(true) : undefined,
+    onPriorityClick: () => setOpenPriorityModal(true),
+    onStatusClick: () => setOpenStatusModal(true),
+    onAssignedToClick: () => setOpenAssignedToModal(true),
   };
 
   const formatValue = (value, config, key) => {
@@ -440,7 +442,8 @@ const TicketInfoDetails = ({ ticket }) => {
     setPendingAssignedTo(userId);
 
     // Find the selected user from the users list
-    const selectedUser = usersData?.data?.find(user => user.id === userId);
+    // Note: usersData is already the array after transformResponse in ticketsApi
+    const selectedUser = Array.isArray(usersData) ? usersData.find(user => user.id === userId) : null;
     if (selectedUser) {
       setPendingAssignedToUser(selectedUser);
     }
@@ -458,13 +461,77 @@ const TicketInfoDetails = ({ ticket }) => {
     hasFiles
   );
 
+  // Check if there are field changes (status, priority, assignedTo)
+  const hasFieldChanges = Boolean(
+    pendingPriority ||
+    pendingStatus ||
+    pendingAssignedTo
+  );
+
   const handleUpdate = async () => {
     if (!hasChanges) return;
 
     setError(null);
 
     try {
-      // 1. Update ticket fields (priority, status, assignedTo) if there are changes
+      // For client users (not BPO Admin or Client Admin), create a change request instead of direct update
+      if (canRequestChanges && hasFieldChanges) {
+        console.log('📋 Creating change request for client user');
+
+        await createChangeRequest({
+          ticketId: ticketId,
+          requestedStatus: pendingStatus || null,
+          requestedPriority: pendingPriority || null,
+          requestedAssignedToId: pendingAssignedTo || null,
+        }).unwrap();
+
+        console.log('✅ Change request created successfully');
+
+        // Clear pending changes
+        if (pendingPriority) clearPendingPriority();
+        if (pendingStatus) clearPendingStatus();
+        if (pendingAssignedTo) clearPendingAssignedTo();
+
+        // Handle description/comments separately (these don't need approval)
+        let result = null;
+        if (description.trim()) {
+          console.log('📝 Creating detail for ticketId:', ticketId);
+          result = await addDetail({
+            id: ticketId,
+            detail: description,
+          }).unwrap();
+          console.log('✅ Detail created successfully:', result);
+        }
+
+        // Upload attachments if any
+        if (hasFiles && result?.details) {
+          const newDetail = result.details[result.details.length - 1];
+          try {
+            await uploadAllFiles(newDetail.id);
+            console.log('✅ Files uploaded successfully');
+          } catch (uploadError) {
+            console.error("Error uploading attachments:", uploadError);
+          }
+        }
+
+        // Clear description and files
+        clearDescription();
+        if (clearFilesRef.current) {
+          clearFilesRef.current();
+        }
+
+        // Show success message for change request
+        setSuccessMessage(true);
+
+        // Navigate after short delay
+        setTimeout(() => {
+          navigate("/app/tickets/ticketTable");
+        }, 1000);
+
+        return;
+      }
+
+      // For BPO Admin and Client Admin - direct update
       const updateData = {};
 
       if (pendingPriority) {
@@ -672,7 +739,7 @@ const TicketInfoDetails = ({ ticket }) => {
       </Box>
 
       {/* Priority Change Modal */}
-      {canEdit && (
+      {(
         <TicketChangesRequest
           open={openPriorityModal}
           onClose={() => setOpenPriorityModal(false)}
@@ -683,7 +750,7 @@ const TicketInfoDetails = ({ ticket }) => {
       )}
 
       {/* Status Change Modal */}
-      {canEdit && (
+      {(
         <TicketChangesRequest
           open={openStatusModal}
           onClose={() => setOpenStatusModal(false)}
@@ -694,7 +761,7 @@ const TicketInfoDetails = ({ ticket }) => {
       )}
 
       {/* Assigned To Change Modal */}
-      {canEdit && (
+      {(
         <TicketChangesRequest
           open={openAssignedToModal}
           onClose={() => setOpenAssignedToModal(false)}

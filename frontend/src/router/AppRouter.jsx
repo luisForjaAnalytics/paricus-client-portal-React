@@ -1,4 +1,3 @@
-import React from "react";
 import {
   createBrowserRouter,
   Navigate,
@@ -36,7 +35,9 @@ import {
   TicketsView,
   TicketsViewDesktop,
   TicketViewDetails,
+  TicketsCenter,
 } from "../modules/tickets";
+import { QuickBroadcast } from "../modules/QuickBroadcast";
 
 const router = createBrowserRouter(
   [
@@ -118,6 +119,10 @@ const router = createBrowserRouter(
               path: "ticketTable/:ticketId",
               element: <TicketViewDetails />,
             },
+            {
+              path: "changeRequests",
+              element: <TicketsCenter />,
+            },
           ],
         },
         {
@@ -181,6 +186,14 @@ const router = createBrowserRouter(
         {
           path: "users-profile",
           element: <ProfileView />,
+        },
+        {
+          path: "broadcast",
+          element: (
+            <ProtectedRoute requiredPermission="admin_broadcast">
+              <QuickBroadcast />
+            </ProtectedRoute>
+          ),
         },
       ],
     },

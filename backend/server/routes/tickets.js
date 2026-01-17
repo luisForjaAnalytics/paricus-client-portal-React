@@ -326,6 +326,84 @@ router.get('/assignable-users', authenticateToken, async (req, res) => {
 });
 
 /**
+ * @route   GET /api/tickets/change-requests
+ * @desc    Get all pending change requests (BPO Admin and Client Admin only)
+ * @access  Private
+ * @note    This route MUST be defined before /:id to avoid route conflicts
+ */
+router.get('/change-requests', authenticateToken, async (req, res) => {
+  try {
+    const { clientId, permissions } = req.user;
+    const isBPOAdmin = permissions.includes('admin_users') && permissions.includes('admin_clients');
+
+    let whereClause = {
+      status: 'pending'
+    };
+
+    // If not BPO Admin, filter by client
+    if (!isBPOAdmin) {
+      whereClause.ticket = {
+        clientId: clientId
+      };
+    }
+
+    const changeRequests = await prisma.ticketChangeRequest.findMany({
+      where: whereClause,
+      include: {
+        ticket: {
+          select: {
+            id: true,
+            subject: true,
+            status: true,
+            priority: true,
+            assignedToId: true,
+            assignedTo: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true
+              }
+            },
+            client: {
+              select: {
+                id: true,
+                name: true
+              }
+            }
+          }
+        },
+        requestedBy: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true
+          }
+        },
+        requestedAssignedTo: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    res.json({
+      success: true,
+      data: changeRequests
+    });
+  } catch (error) {
+    console.error('Error fetching change requests:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
  * @route   GET /api/tickets/:id
  * @desc    Get a single ticket by ID
  * @access  Private
@@ -1604,90 +1682,341 @@ router.delete('/:ticketId/details/:detailId/attachments/:attachmentId', authenti
   }
 });
 
-/**
- * GET /api/tickets/assignable-users
- * Get list of users that can be assigned to tickets based on permissions
- *
- * Permission Logic:
- * - BPO Admin (admin_users + admin_clients): Can see ALL users including themselves
- * - Client Admin: Can see only users from their own client (Client Admin + Client User roles)
- * - Client User: Cannot access this endpoint (no edit permissions)
- */
-router.get('/assignable-users', authenticateToken, async (req, res) => {
-  try {
-    const { clientId, permissions } = req.user;
+// ============================================================================
+// TICKET CHANGE REQUESTS ENDPOINTS
+// ============================================================================
 
-    // Check if user is BPO Admin
+/**
+ * @route   POST /api/tickets/:id/change-request
+ * @desc    Create a change request for a ticket (Client users only)
+ * @access  Private
+ */
+router.post('/:id/change-request', authenticateToken, async (req, res) => {
+  try {
+    const { id: ticketId } = req.params;
+    const { id: userId, clientId, permissions } = req.user;
+    const { requestedStatus, requestedPriority, requestedAssignedToId } = req.body;
+
+    // Check if user is BPO Admin or Client Admin - they should use direct update
     const isBPOAdmin = permissions.includes('admin_users') && permissions.includes('admin_clients');
 
-    let users;
-
     if (isBPOAdmin) {
-      // BPO Admin can see ALL users from ALL clients
-      users = await prisma.user.findMany({
-        where: {
-          isActive: true
-        },
-        select: {
-          id: true,
-          firstName: true,
-          lastName: true,
-          email: true,
-          clientId: true,
-          client: {
-            select: {
-              name: true
-            }
-          },
-          role: {
-            select: {
-              roleName: true
-            }
-          }
-        },
-        orderBy: [
-          { client: { name: 'asc' } },
-          { firstName: 'asc' },
-          { lastName: 'asc' }
-        ]
-      });
-    } else {
-      // Client Admin can only see users from their own client
-      users = await prisma.user.findMany({
-        where: {
-          clientId: clientId,
-          isActive: true
-        },
-        select: {
-          id: true,
-          firstName: true,
-          lastName: true,
-          email: true,
-          clientId: true,
-          client: {
-            select: {
-              name: true
-            }
-          },
-          role: {
-            select: {
-              roleName: true
-            }
-          }
-        },
-        orderBy: [
-          { firstName: 'asc' },
-          { lastName: 'asc' }
-        ]
+      return res.status(400).json({
+        error: 'BPO Admins should use direct update instead of change requests'
       });
     }
 
-    res.json({
+    // Validate that at least one change is requested
+    if (!requestedStatus && !requestedPriority && requestedAssignedToId === undefined) {
+      return res.status(400).json({
+        error: 'At least one change (status, priority, or assignedTo) must be requested'
+      });
+    }
+
+    // Fetch the ticket to get current values
+    const ticket = await prisma.ticket.findUnique({
+      where: { id: ticketId },
+      select: {
+        id: true,
+        clientId: true,
+        status: true,
+        priority: true,
+        assignedToId: true
+      }
+    });
+
+    if (!ticket) {
+      return res.status(404).json({ error: 'Ticket not found' });
+    }
+
+    // Verify ticket belongs to user's client
+    if (ticket.clientId !== clientId) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    // Check if there's already a pending change request for this ticket
+    const existingRequest = await prisma.ticketChangeRequest.findFirst({
+      where: {
+        ticketId: ticketId,
+        status: 'pending'
+      }
+    });
+
+    if (existingRequest) {
+      return res.status(400).json({
+        error: 'There is already a pending change request for this ticket. Please wait for it to be reviewed.'
+      });
+    }
+
+    // Create the change request
+    const changeRequest = await prisma.ticketChangeRequest.create({
+      data: {
+        ticketId: ticketId,
+        requestedById: userId,
+        requestedStatus: requestedStatus || null,
+        requestedPriority: requestedPriority || null,
+        requestedAssignedToId: requestedAssignedToId || null,
+        currentStatus: ticket.status,
+        currentPriority: ticket.priority,
+        currentAssignedToId: ticket.assignedToId,
+        status: 'pending'
+      },
+      include: {
+        ticket: {
+          select: {
+            id: true,
+            subject: true
+          }
+        },
+        requestedBy: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true
+          }
+        }
+      }
+    });
+
+    res.status(201).json({
       success: true,
-      data: users
+      message: 'Change request created successfully',
+      data: changeRequest
     });
   } catch (error) {
-    console.error('Error fetching assignable users:', error);
+    console.error('Error creating change request:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * @route   PUT /api/tickets/change-requests/:id/approve
+ * @desc    Approve a change request and apply changes to the ticket
+ * @access  Private (BPO Admin and Client Admin only)
+ */
+router.put('/change-requests/:id/approve', authenticateToken, async (req, res) => {
+  try {
+    const { id: changeRequestId } = req.params;
+    const { id: userId, clientId, permissions } = req.user;
+
+    const isBPOAdmin = permissions.includes('admin_users') && permissions.includes('admin_clients');
+
+    // Fetch the change request
+    const changeRequest = await prisma.ticketChangeRequest.findUnique({
+      where: { id: parseInt(changeRequestId) },
+      include: {
+        ticket: true
+      }
+    });
+
+    if (!changeRequest) {
+      return res.status(404).json({ error: 'Change request not found' });
+    }
+
+    // Verify access
+    if (!isBPOAdmin && changeRequest.ticket.clientId !== clientId) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    if (changeRequest.status !== 'pending') {
+      return res.status(400).json({ error: 'Change request has already been processed' });
+    }
+
+    // Build the update data for the ticket
+    const ticketUpdateData = {};
+    if (changeRequest.requestedStatus) {
+      ticketUpdateData.status = changeRequest.requestedStatus;
+    }
+    if (changeRequest.requestedPriority) {
+      ticketUpdateData.priority = changeRequest.requestedPriority;
+    }
+    if (changeRequest.requestedAssignedToId !== null) {
+      ticketUpdateData.assignedToId = changeRequest.requestedAssignedToId;
+    }
+
+    // Use a transaction to update both the change request and the ticket
+    const result = await prisma.$transaction([
+      // Update the change request
+      prisma.ticketChangeRequest.update({
+        where: { id: parseInt(changeRequestId) },
+        data: {
+          status: 'approved',
+          reviewedById: userId,
+          reviewedAt: new Date()
+        }
+      }),
+      // Update the ticket
+      prisma.ticket.update({
+        where: { id: changeRequest.ticketId },
+        data: ticketUpdateData,
+        include: {
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true
+            }
+          },
+          assignedTo: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true
+            }
+          }
+        }
+      })
+    ]);
+
+    res.json({
+      success: true,
+      message: 'Change request approved and changes applied',
+      data: {
+        changeRequest: result[0],
+        ticket: result[1]
+      }
+    });
+  } catch (error) {
+    console.error('Error approving change request:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * @route   PUT /api/tickets/change-requests/:id/reject
+ * @desc    Reject a change request
+ * @access  Private (BPO Admin and Client Admin only)
+ */
+router.put('/change-requests/:id/reject', authenticateToken, async (req, res) => {
+  try {
+    const { id: changeRequestId } = req.params;
+    const { id: userId, clientId, permissions } = req.user;
+    const { rejectionReason } = req.body;
+
+    const isBPOAdmin = permissions.includes('admin_users') && permissions.includes('admin_clients');
+
+    // Fetch the change request
+    const changeRequest = await prisma.ticketChangeRequest.findUnique({
+      where: { id: parseInt(changeRequestId) },
+      include: {
+        ticket: true
+      }
+    });
+
+    if (!changeRequest) {
+      return res.status(404).json({ error: 'Change request not found' });
+    }
+
+    // Verify access
+    if (!isBPOAdmin && changeRequest.ticket.clientId !== clientId) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    if (changeRequest.status !== 'pending') {
+      return res.status(400).json({ error: 'Change request has already been processed' });
+    }
+
+    // Update the change request as rejected
+    const updatedRequest = await prisma.ticketChangeRequest.update({
+      where: { id: parseInt(changeRequestId) },
+      data: {
+        status: 'rejected',
+        reviewedById: userId,
+        reviewedAt: new Date(),
+        rejectionReason: rejectionReason || null
+      },
+      include: {
+        ticket: {
+          select: {
+            id: true,
+            subject: true
+          }
+        },
+        requestedBy: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true
+          }
+        }
+      }
+    });
+
+    res.json({
+      success: true,
+      message: 'Change request rejected',
+      data: updatedRequest
+    });
+  } catch (error) {
+    console.error('Error rejecting change request:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * @route   GET /api/tickets/:id/change-requests
+ * @desc    Get change requests for a specific ticket
+ * @access  Private
+ */
+router.get('/:id/change-requests', authenticateToken, async (req, res) => {
+  try {
+    const { id: ticketId } = req.params;
+    const { clientId, permissions } = req.user;
+
+    const isBPOAdmin = permissions.includes('admin_users') && permissions.includes('admin_clients');
+
+    // First verify ticket exists and user has access
+    const ticket = await prisma.ticket.findUnique({
+      where: { id: ticketId },
+      select: { clientId: true }
+    });
+
+    if (!ticket) {
+      return res.status(404).json({ error: 'Ticket not found' });
+    }
+
+    if (!isBPOAdmin && ticket.clientId !== clientId) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    const changeRequests = await prisma.ticketChangeRequest.findMany({
+      where: { ticketId: ticketId },
+      include: {
+        requestedBy: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true
+          }
+        },
+        reviewedBy: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true
+          }
+        },
+        requestedAssignedTo: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    res.json({
+      success: true,
+      data: changeRequests
+    });
+  } catch (error) {
+    console.error('Error fetching ticket change requests:', error);
     res.status(500).json({ error: error.message });
   }
 });

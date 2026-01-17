@@ -1,10 +1,8 @@
-import { Box, Typography, CircularProgress, Alert } from "@mui/material";
+import { Box, CircularProgress, Alert } from "@mui/material";
 import { useSelector } from "react-redux";
 import { useGetDashboardStatsQuery } from "../../../../store/api/dashboardApi";
-import { QuickBroadcast } from "../QuickBroadcast";
 import { AnnouncementsInbox } from "../AnnouncementsInbox";
 import { DashboardStatisticsView } from "../DashboardStatisticsView/DashboardStatisticsView";
-import { LatestInteractions } from "../LatestInteractions";
 import { ActiveTasks } from "../ActiveTasks";
 import { MasterRepository } from "../MasterRepository";
 
@@ -59,38 +57,16 @@ export const DashboardViewSelect = () => {
         paddingTop: { xs: 3, md: 3 },
       }}
     >
-      {/* Header */}
-      {/* <Box sx={{ mb: 4 }}>
-        <Typography
-          variant="h4"
-          fontWeight="bold"
-          sx={{
-            fontSize: { xs: "1.5rem", md: "2rem" },
-            color: "text.primary",
-          }}
-        >
-          BPO Command Center
-        </Typography>
-      </Box> */}
-
       {/* Top Stats Cards */}
       <DashboardStatisticsView stats={stats} />
 
       {/* Main Content Grid: Quick Broadcast (60%) + Charts (40%) */}
       <Box
         sx={{
-          display: "grid",
-          gridTemplateColumns: isBPOAdmin
-            ? { xs: "1fr", lg: "60% 40%" }
-            : "1fr",
-          gap: 2,
-          mb: 4,
-          height:'45vh' /// Box Quick Broadcast and Announcements Inbox
+          mb: 2,
+          height: "25vh", /// Announcements Inbox
         }}
       >
-        {/* Quick Broadcast - Only for BPO Admin */}
-        {isBPOAdmin && <QuickBroadcast />}
-
         {/* Announcements Inbox */}
         <AnnouncementsInbox />
       </Box>
@@ -106,7 +82,7 @@ export const DashboardViewSelect = () => {
         }}
       >
         {/* Latest Interactions */}
-        <LatestInteractions />
+        {/* <LatestInteractions /> */}
 
         {/* Active Tasks */}
         <ActiveTasks />

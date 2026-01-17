@@ -80,6 +80,23 @@ export const colors = {
   errorContainer: "#FEE2E2",
 
   // ========================================
+  //  getStatusPropertyColors function helper
+  // ========================================
+
+  priorityStyles: {
+    high: { backgroundColor: "#ffebee", color: "#c62828" },
+    medium: { backgroundColor: "#fff3e0", color: "#e65100" },
+    low: { backgroundColor: "#e3f2fd", color: "#1565c0" },
+    default: { backgroundColor: "#f5f5f5", color: "#757575" },
+  },
+  statusStyles: {
+    open: { backgroundColor: "#e3f2fd", color: "#1565c0" },
+    inProgress: { backgroundColor: "#fff3e0", color: "#e65100" },
+    resolved: { backgroundColor: "#e8f5e9", color: "#2e7d32" },
+    closed: { backgroundColor: "#f5f5f5", color: "#616161" },
+    default: { backgroundColor: "#f5f5f5", color: "#616161" },
+  },
+  // ========================================
   //   Sub Sections open
   // ========================================
 
@@ -217,6 +234,16 @@ export const primaryButton = {
   },
 };
 
+// ========================================
+//  Main Box and Typography Section
+// ========================================
+export const boxTypography = {
+  box: { py: { xs: 2, md: 4 }, px: { xs: 2, md: 3 } },
+  typography: {
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily,
+  },
+};
 // ========================================
 // PRIMARY BUTTON WITH ICON
 // ========================================
@@ -992,16 +1019,15 @@ export const ticketStyle = {
     // },
   },
 
-
   //Container for historical descriptions
   historicalContainer: {
     padding: "0rem 0 1rem 1rem", // p-5 (20px)
-    backgroundColor: '  #f1f1f179',
-    borderRadius: '1rem',
+    backgroundColor: "  #f1f1f179",
+    borderRadius: "1rem",
     boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
     border: `1px solid ${colors.border}`,
     overflow: "visible",
-    flexShrink: 0, 
+    flexShrink: 0,
     transition: "border 1000ms ",
     "&:hover": {
       border: `1px solid ${colors.focusRing}`,
@@ -1063,37 +1089,37 @@ export const tiptapEditorStyle = {
   },
 };
 
-  // ========================================
+// ========================================
 // PRIMARY BUTTON (WITH GRADIENT)
 // ========================================
 
 export const dashboardStyles = {
   dashboardViewSelectBox: {
-    display: 'flex',
-    flexDirection: 'column',
+    display: "flex",
+    flexDirection: "column",
   },
 
   // Dashboard Stats Card (clean, modern design without left border)
   dashboardStatsCard: {
     backgroundColor: colors.surface,
-    borderRadius: '1rem', // rounded-2xl for modern look
+    borderRadius: "1rem", // rounded-2xl for modern look
     border: `1px solid ${colors.border}`, // Subtle border
-    boxShadow: 'none', // No heavy shadows
-    overflow: 'hidden',
-    transition: 'border-color 200ms ease-in-out, box-shadow 200ms ease-in-out',
-    height: '100%',
-    '&:hover': {
+    boxShadow: "none", // No heavy shadows
+    overflow: "hidden",
+    transition: "border-color 200ms ease-in-out, box-shadow 200ms ease-in-out",
+    height: "100%",
+    "&:hover": {
       borderColor: colors.primary,
-      boxShadow: '0 2px 8px rgba(22, 163, 74, 0.08)',
+      boxShadow: "0 2px 8px rgba(22, 163, 74, 0.08)",
     },
   },
 
   // Micro-typography for labels (UPPERCASE with tracking)
   dashboardMicroLabel: {
-    fontSize: '0.625rem', // text-xxs (10px)
+    fontSize: "0.625rem", // text-xxs (10px)
     fontWeight: typography.fontWeight.bold,
-    letterSpacing: '0.1em', // tracking-widest
-    textTransform: 'uppercase',
+    letterSpacing: "0.1em", // tracking-widest
+    textTransform: "uppercase",
     color: colors.textMuted,
     fontFamily: typography.fontFamily,
   },
@@ -1102,48 +1128,35 @@ export const dashboardStyles = {
   dashboardSectionTitle: {
     fontSize: typography.fontSize.small, // 12px
     fontWeight: typography.fontWeight.bold,
-    letterSpacing: '0.05em',
-    textTransform: 'uppercase',
+    letterSpacing: "0.05em",
+    textTransform: "uppercase",
     color: colors.textSecondary,
     fontFamily: typography.fontFamily,
   },
 
   // Icon container for dashboard cards
   dashboardIconContainer: {
-    padding: '0.5rem',
+    padding: "0.5rem",
     backgroundColor: colors.primaryLight, // emerald-50 equivalent
     color: colors.primary,
-    borderRadius: '0.5rem',
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  // Quick Broadcast Card (special styling for admin actions)
-  quickBroadcastCard: {
-    backgroundColor: colors.surface,
-    borderRadius: '1rem',
-    border: `1px solid ${colors.border}`,
-    boxShadow: 'none',
-    overflow: 'hidden',
-    transition: 'border-color 200ms ease-in-out',
-    '&:hover': {
-      borderColor: colors.primary,
-    },
+    borderRadius: "0.5rem",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   // Playbook/Document card (dark theme for contrast)
   playbookCard: {
     backgroundColor: colors.primaryDark, // emerald-700 equivalent
-    borderRadius: '1rem',
-    overflow: 'hidden',
+    borderRadius: "1rem",
+    overflow: "hidden",
     color: colors.textWhite,
-    position: 'relative',
-    '& .background-icon': {
-      position: 'absolute',
+    position: "relative",
+    "& .background-icon": {
+      position: "absolute",
       right: -20,
       bottom: -20,
-      fontSize: '8rem',
+      fontSize: "8rem",
       opacity: 0.1,
       color: colors.textWhite,
     },
@@ -1151,17 +1164,17 @@ export const dashboardStyles = {
 
   // Textarea for Quick Broadcast
   broadcastTextarea: {
-    width: '100%',
+    width: "100%",
     backgroundColor: colors.background, // bg-gray-50
-    border: 'none',
-    borderRadius: '0.75rem',
-    padding: '1rem',
+    border: "none",
+    borderRadius: "0.75rem",
+    padding: "1rem",
     fontSize: typography.fontSize.body,
     fontFamily: typography.fontFamily,
-    minHeight: '100px',
-    resize: 'none',
-    '&:focus': {
-      outline: 'none',
+    minHeight: "100px",
+    resize: "none",
+    "&:focus": {
+      outline: "none",
       boxShadow: `0 0 0 2px ${colors.primaryLight}`,
     },
   },
@@ -1170,7 +1183,7 @@ export const dashboardStyles = {
   broadcastSendButton: {
     ...primaryIconButton,
     boxShadow: `0 4px 12px ${colors.primaryLight}`,
-    '&:hover': {
+    "&:hover": {
       boxShadow: `0 6px 16px ${colors.primaryLight}`,
     },
   },
@@ -1181,7 +1194,7 @@ export const dashboardStyles = {
       fontSize: typography.fontSize.small,
       fontWeight: typography.fontWeight.semibold,
       color: colors.textSecondary,
-      '&.Mui-focused': {
+      "&.Mui-focused": {
         color: colors.primary,
       },
     },
@@ -1189,16 +1202,16 @@ export const dashboardStyles = {
       backgroundColor: colors.surface,
       borderRadius: borderRadiusSection,
       fontSize: typography.fontSize.body,
-      '& .MuiOutlinedInput-notchedOutline': {
+      "& .MuiOutlinedInput-notchedOutline": {
         borderColor: colors.border,
-        transition: 'border-color 0.2s ease',
+        transition: "border-color 0.2s ease",
       },
-      '&:hover .MuiOutlinedInput-notchedOutline': {
+      "&:hover .MuiOutlinedInput-notchedOutline": {
         borderColor: colors.primary,
       },
-      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
         borderColor: colors.primary,
-        borderWidth: '2px',
+        borderWidth: "2px",
       },
     },
   },
@@ -1206,45 +1219,75 @@ export const dashboardStyles = {
   // Compact selectors for Quick Broadcast (same style but smaller height)
   compactSelector: {
     inputLabelSection: {
-      fontSize: '0.75rem',
+      fontSize: "0.75rem",
       fontWeight: typography.fontWeight.semibold,
       color: colors.textSecondary,
-      top: '-2px',
-      '&.MuiInputLabel-shrink': {
-        top: '0',
+      top: "-2px",
+      "&.MuiInputLabel-shrink": {
+        top: "0",
       },
-      '&.Mui-focused': {
+      "&.Mui-focused": {
         color: colors.primary,
       },
     },
     selectSection: {
-      height: '36px',
+      height: "36px",
       backgroundColor: colors.surface,
       borderRadius: borderRadiusSection,
-      fontSize: '0.75rem',
-      '& .MuiSelect-select': {
-        padding: '6px 12px',
-        display: 'flex',
-        alignItems: 'center',
+      fontSize: "0.75rem",
+      "& .MuiSelect-select": {
+        padding: "6px 12px",
+        display: "flex",
+        alignItems: "center",
       },
-      '& .MuiOutlinedInput-notchedOutline': {
+      "& .MuiOutlinedInput-notchedOutline": {
         borderColor: colors.border,
-        transition: 'border-color 0.2s ease',
+        transition: "border-color 0.2s ease",
       },
-      '&:hover .MuiOutlinedInput-notchedOutline': {
+      "&:hover .MuiOutlinedInput-notchedOutline": {
         borderColor: colors.primary,
       },
-      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
         borderColor: colors.primary,
-        borderWidth: '2px',
+        borderWidth: "2px",
       },
     },
     menuItem: {
-      fontSize: '0.75rem',
+      fontSize: "0.75rem",
     },
     chip: {
-      fontSize: '0.65rem',
-      height: '20px',
+      fontSize: "0.65rem",
+      height: "20px",
     },
   },
-}
+};
+
+// Quick Broadcast Card (special styling for admin actions)
+export const quickBroadcastCard = {
+  backgroundColor: colors.surface,
+  borderRadius: "1rem",
+  border: `1px solid ${colors.border}`,
+  boxShadow: "none",
+  overflow: "hidden",
+  mt: 8,
+  transition: "border-color 200ms ease-in-out",
+  "&:hover": {
+    borderColor: colors.primary,
+  },
+};
+
+// ========================================
+// SELECT MENU PROPS (Dropdown Paper styling)
+// ========================================
+// Use this with MenuProps prop on MUI Select components
+// Example: <Select MenuProps={selectMenuProps} ... />
+export const selectMenuProps = {
+  PaperProps: {
+    sx: {
+      borderRadius: "1rem",
+      marginTop: "0.5rem",
+      boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
+      border: `1px solid ${colors.border}`,
+    },
+  },
+};

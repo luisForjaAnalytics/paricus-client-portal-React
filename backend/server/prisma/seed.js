@@ -88,6 +88,10 @@ async function main() {
       permissionName: "view_tickets",
       description: "View and manage support tickets",
     },
+    {
+      permissionName: "admin_broadcast",
+      description: "Send announcements and broadcasts to clients (BPO Admin and Client Admin only)",
+    },
   ];
 
   console.log("Creating permissions...");
@@ -303,6 +307,7 @@ async function main() {
     "admin_users",
     "admin_roles",
     "admin_reports",
+    "admin_broadcast",
   ];
 
   const clientUserPermissions = [

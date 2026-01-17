@@ -20,6 +20,7 @@
     "@mui/x-data-grid-generator": "^8.15.0",
     "@prisma/client": "^6.17.1",
     "@reduxjs/toolkit": "^2.9.0",
+    "@tiptap/extension-character-count": "^3.15.3",
     "@tiptap/extension-color": "^3.14.0",
     "@tiptap/extension-highlight": "^3.14.0",
     "@tiptap/extension-image": "^3.15.3",

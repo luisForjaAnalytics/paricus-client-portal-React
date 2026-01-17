@@ -28,15 +28,19 @@ import {
   outlinedButton,
   modalCard,
   titlesTypography,
+  selectMenuProps,
 } from "../../../../common/styles/styles";
 import {
   useCreateTicketMutation,
   useUploadTicketAttachmentMutation,
   useGetAssignableUsersQuery,
 } from "../../../../store/api/ticketsApi";
-import { PRIORITY_STATUS } from "./ticketStatus";
 import { TiptapEditor } from "../../../../common/components/ui/TiptapEditor";
 import "../../../../common/components/ui/TiptapEditor/tiptap-editor.css";
+import {
+  getPriorityStyles,
+  priorityStatesList,
+} from "../../../../common/utils/getStatusProperty";
 
 export const CreateTickeButton = ({}) => {
   const { t } = useTranslation();
@@ -268,17 +272,37 @@ export const CreateTickeButton = ({}) => {
                       </InputLabel>
                       <Select
                         {...field}
+                        MenuProps={selectMenuProps}
                         sx={{
                           ...modalCard?.multiOptionFilter?.selectSection,
                           height: "3rem",
                         }}
                         label={t("tickets.createNewTicket.priority.label")}
                       >
-                        {Object.values(PRIORITY_STATUS).map((item, index) => (
-                          <MenuItem key={index} value={item}>
-                            {t(
-                              `tickets.createNewTicket.priority.level.${item.toLowerCase()}`
-                            )}
+                        {priorityStatesList.map((item, index) => (
+                          <MenuItem key={index} value={item.toLowerCase()}>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 0.5,
+                              }}
+                            >
+                              <Box
+                                sx={{
+                                  width: 6,
+                                  height: 6,
+                                  borderRadius: "50%",
+                                  marginLeft:'1rem',
+                                   marginRight:'0.4rem',
+                                  backgroundColor:
+                                    getPriorityStyles(item.toLowerCase()).color,
+                                }}
+                              />
+                              <Typography >
+                                {t(`priorityLevels.${item.toLowerCase()}`)}
+                              </Typography>
+                            </Box>
                           </MenuItem>
                         ))}
                       </Select>

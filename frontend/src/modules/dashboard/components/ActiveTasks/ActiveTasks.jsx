@@ -7,7 +7,7 @@ import {
   CircularProgress,
   Link,
 } from "@mui/material";
-import { Assignment} from "@mui/icons-material";
+import { Assignment } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import { dashboardStyles, colors } from "../../../../common/styles/styles";
 import { AppText } from "../../../../common/components/ui/AppText/AppText";
@@ -15,20 +15,7 @@ import { useGetTicketsQuery } from "../../../../store/api/ticketsApi";
 import { formatDistanceToNow } from "date-fns";
 import { es, enUS } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
-
-const getPriorityColor = (priority) => {
-  switch (priority?.toLowerCase()) {
-    case "high":
-    case "urgent":
-      return "error";
-    case "medium":
-      return "warning";
-    case "low":
-      return "success";
-    default:
-      return "default";
-  }
-};
+import { getPriorityStyles } from "../../../../common/utils/getStatusProperty";
 
 export const ActiveTasks = () => {
   const { t, i18n } = useTranslation();
@@ -87,7 +74,6 @@ export const ActiveTasks = () => {
               {t("dashboard.activeTasks.title")}
             </AppText>
           </Box>
-
         </Box>
 
         {/* Loading State */}
@@ -154,13 +140,8 @@ export const ActiveTasks = () => {
                           width: 6,
                           height: 6,
                           borderRadius: "50%",
-                          backgroundColor:
-                            getPriorityColor(ticket.priority) === "error"
-                              ? colors.error
-                              : getPriorityColor(ticket.priority) === "warning"
-                              ? colors.warning
-                              : colors.success,
-                        }}
+                          backgroundColor:getPriorityStyles(ticket.priority).color
+                         }}
                       />
                       <Typography
                         variant="body2"
@@ -176,9 +157,12 @@ export const ActiveTasks = () => {
                     </Box>
                     <Chip
                       label={ticket.priority || "Medium"}
-                      color={getPriorityColor(ticket.priority)}
                       size="small"
-                      sx={{ fontSize: "0.625rem", height: 20 }}
+                      sx={{
+                        fontSize: "0.625rem",
+                        height: 20,
+                        ...getPriorityStyles(ticket.priority),
+                      }}
                     />
                   </Box>
 

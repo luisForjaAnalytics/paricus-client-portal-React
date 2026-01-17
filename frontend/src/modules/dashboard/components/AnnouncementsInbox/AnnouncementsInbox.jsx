@@ -16,32 +16,15 @@ import {
   Close as CloseIcon,
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { formatDateTime } from "../../../../common/utils/formatDateTime";
 import { TiptapReadOnly } from "../../../../common/components/ui/TiptapReadOnly/TiptapReadOnly";
 import { dashboardStyles } from "../../../../common/styles/styles";
 import { AppText } from "../../../../common/components/ui/AppText/AppText";
 import { useGetAnnouncementsQuery } from "../../../../store/api/dashboardApi";
+import { getPriorityStyles } from "../../../../common/utils/getStatusProperty";
 
-const getPriorityColor = (priority) => {
-  try {
-    if (!priority || typeof priority !== "string") return "default";
-    switch (priority.toLowerCase()) {
-      case "high":
-        return "error";
-      case "medium":
-        return "warning";
-      case "low":
-        return "info";
-      default:
-        return "default";
-    }
-  } catch (error) {
-    console.error("Error getting priority color:", error);
-    return "default";
-  }
-};
 
 const getPriorityLabel = (priority, t) => {
   try {
@@ -65,6 +48,8 @@ const getPriorityLabel = (priority, t) => {
 export const AnnouncementsInbox = () => {
   const { t } = useTranslation();
   const [selectedImage, setSelectedImage] = useState(null);
+  const [containerHeight, setContainerHeight] = useState(null);
+  const firstAnnouncementRef = useRef(null);
 
   const token = useSelector((state) => state.auth?.token);
 
@@ -75,11 +60,28 @@ export const AnnouncementsInbox = () => {
     error,
   } = useGetAnnouncementsQuery();
 
+  // Measure first announcement height and set container height
+  useEffect(() => {
+    if (firstAnnouncementRef.current && announcements.length > 0) {
+      // Small delay to ensure content is rendered
+      const timer = setTimeout(() => {
+        const height = firstAnnouncementRef.current?.offsetHeight;
+        if (height) {
+          setContainerHeight(height + 16); // Add some padding
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [announcements]);
+
   // Build image URL with token (same pattern as TicketDescriptionInfo)
   const getImageUrl = (attachment) => {
     try {
       if (!attachment?.url || !token) {
-        console.log("❌ Missing attachment URL or token:", { url: attachment?.url, hasToken: !!token });
+        console.log("❌ Missing attachment URL or token:", {
+          url: attachment?.url,
+          hasToken: !!token,
+        });
         return null;
       }
       const baseUrl = import.meta.env.VITE_API_URL.replace("/api", "");
@@ -150,7 +152,7 @@ export const AnnouncementsInbox = () => {
           </Box>
         )}
 
-        {/* Announcements List - Scrollable like TicketHistoricalInfo */}
+        {/* Announcements List - Height adapts to first announcement */}
         {!isLoading && !error && (
           <Box
             sx={{
@@ -158,10 +160,10 @@ export const AnnouncementsInbox = () => {
               flexDirection: "column",
               flex: 1,
               minHeight: 0,
-              maxHeight: 400,
-              overflowY: "auto",
+              maxHeight: containerHeight || "auto",
+              overflowY: announcements.length > 1 ? "auto" : "hidden",
               overflowX: "hidden",
-              paddingRight: 1,
+              paddingRight: announcements.length > 1 ? 1 : 0,
               "&::-webkit-scrollbar": {
                 width: "8px",
               },
@@ -190,9 +192,10 @@ export const AnnouncementsInbox = () => {
                 </Typography>
               </Box>
             ) : (
-              announcements.map((announcement) => (
+              announcements.map((announcement, index) => (
                 <Box
                   key={announcement.id}
+                  ref={index === 0 ? firstAnnouncementRef : null}
                   sx={{
                     mb: 2,
                     pb: 2,
@@ -213,9 +216,11 @@ export const AnnouncementsInbox = () => {
                   >
                     <Chip
                       label={getPriorityLabel(announcement.priority, t)}
-                      color={getPriorityColor(announcement.priority)}
                       size="small"
-                      sx={{ fontWeight: "bold" }}
+                      sx={{
+                        fontWeight: "bold",
+                        ...getPriorityStyles(announcement.priority),
+                      }}
                     />
                     <Typography variant="caption" color="text.secondary">
                       {formatDateTime(announcement.createdAt)}
@@ -231,35 +236,6 @@ export const AnnouncementsInbox = () => {
                     {announcement.title}
                   </Typography>
 
-                  {/* Attachments - Display as clickable attachment chips */}
-                  {announcement.attachments &&
-                    announcement.attachments.length > 0 && (
-                      <Box
-                        sx={{
-                          mb: 1,
-                          display: "flex",
-                          flexWrap: "wrap",
-                          gap: 0.5,
-                        }}
-                      >
-                        {announcement.attachments.map((attachment) => (
-                          <Chip
-                            key={attachment.id}
-                            icon={<AttachFile />}
-                            label={attachment.fileName}
-                            onClick={() => handleImageClick(attachment)}
-                            size="small"
-                            sx={{
-                              cursor: "pointer",
-                              "&:hover": {
-                                backgroundColor: "action.hover",
-                              },
-                            }}
-                          />
-                        ))}
-                      </Box>
-                    )}
-
                   {/* Content */}
                   <Box
                     sx={{
@@ -274,6 +250,34 @@ export const AnnouncementsInbox = () => {
                       showErrorAlert={false}
                     />
                   </Box>
+                  {/* Attachments - Display as clickable attachment chips */}
+                  {announcement.attachments &&
+                    announcement.attachments.length > 0 && (
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexWrap: "wrap",
+                          gap: 0.5,
+                        }}
+                      >
+                        {announcement.attachments.map((attachment) => (
+                          <Chip
+                            key={attachment.id}
+                            icon={<AttachFile />}
+                            label={attachment.fileName}
+                            onClick={() => handleImageClick(attachment)}
+                            size="small"
+                            sx={{
+                              cursor: "pointer",
+                              mt: 1,
+                              "&:hover": {
+                                backgroundColor: "action.hover",
+                              },
+                            }}
+                          />
+                        ))}
+                      </Box>
+                    )}
                 </Box>
               ))
             )}

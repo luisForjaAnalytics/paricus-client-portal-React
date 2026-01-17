@@ -5,6 +5,7 @@ import Underline from "@tiptap/extension-underline";
 import TextAlign from "@tiptap/extension-text-align";
 import Highlight from "@tiptap/extension-highlight";
 import Placeholder from "@tiptap/extension-placeholder";
+import CharacterCount from "@tiptap/extension-character-count";
 import { Box, IconButton, Divider, Tooltip } from "@mui/material";
 import {
   FormatBold,
@@ -224,13 +225,16 @@ const MenuBar = ({ editor, customLeftButtons = [] }) => {
   }
 };
 
+// Default character limit
+const DEFAULT_MAX_CHARACTERS = 2000;
+
 export const TiptapEditor = ({
   value = "",
   onChange,
   placeholder = "",
   error,
   helperText,
-  maxCharacters,
+  maxCharacters = DEFAULT_MAX_CHARACTERS,
   sx = {},
   fullWidth = true,
   customLeftButtons = [],
@@ -252,6 +256,9 @@ export const TiptapEditor = ({
       }),
       Placeholder.configure({
         placeholder: placeholder,
+      }),
+      CharacterCount.configure({
+        limit: maxCharacters,
       }),
     ],
     content: value || "",
@@ -299,15 +306,10 @@ export const TiptapEditor = ({
     };
   }, [editor]);
 
-  let currentLength = 0;
-  let isOverLimit = false;
-
-  try {
-    currentLength = editor?.getText().length || 0;
-    isOverLimit = maxCharacters && currentLength > maxCharacters;
-  } catch (err) {
-    console.error("Error calculating text length:", err);
-  }
+  // Get character count from the extension
+  const currentLength = editor?.storage.characterCount?.characters() || 0;
+  const isOverLimit = maxCharacters && currentLength > maxCharacters;
+  const isNearLimit = maxCharacters && currentLength > maxCharacters * 0.9;
 
   return (
     <Box
@@ -333,15 +335,28 @@ export const TiptapEditor = ({
         {/* Editor Content */}
         <Box
           sx={{
+            overflow: "hidden",
             "& .ProseMirror": {
               minHeight: "150px",
+              maxHeight: "400px",
+              overflowY: "auto",
               padding: "16.5px 14px",
-              //paddingBottom: "4rem",
               fontSize: "1rem",
               fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
               lineHeight: 1.4375,
               color: "rgba(0, 0, 0, 0.87)",
               outline: "none",
+              wordBreak: "break-word",
+              overflowWrap: "break-word",
+              "& p, & ul, & ol, & blockquote, & pre": {
+                maxWidth: "100%",
+                overflowWrap: "break-word",
+                wordBreak: "break-word",
+              },
+              "& img": {
+                maxWidth: "100%",
+                height: "auto",
+              },
             },
           }}
         >
@@ -373,7 +388,8 @@ export const TiptapEditor = ({
             <Box
               sx={{
                 fontSize: "0.75rem",
-                color: isOverLimit ? "#d32f2f" : "rgba(0, 0, 0, 0.6)",
+                color: isOverLimit ? "#d32f2f" : isNearLimit ? "#ed6c02" : "rgba(0, 0, 0, 0.6)",
+                fontWeight: isNearLimit ? 500 : 400,
                 lineHeight: 1.66,
                 whiteSpace: "nowrap",
               }}

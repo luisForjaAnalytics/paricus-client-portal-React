@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-
 import {
   Box,
   Button,
@@ -8,7 +7,17 @@ import {
   DialogTitle,
   Typography,
   Checkbox,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Collapse,
 } from "@mui/material";
+import ExpandLess from "@mui/icons-material/ExpandLess";
+import ExpandMore from "@mui/icons-material/ExpandMore";
+import StarBorder from "@mui/icons-material/StarBorder";
+import { useTranslation } from "react-i18next";
+import { useSelector } from "react-redux";
 
 import {
   colors,
@@ -17,46 +26,29 @@ import {
   outlinedIconButton,
   modalCard,
 } from "../../../../common/styles/styles";
-import List from "@mui/material/List";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
-import Collapse from "@mui/material/Collapse";
-import ExpandLess from "@mui/icons-material/ExpandLess";
-import ExpandMore from "@mui/icons-material/ExpandMore";
-import StarBorder from "@mui/icons-material/StarBorder";
 import {
   menuItemsAdmin,
   menuItemsCommon,
 } from "../../../../config/menu/MenusSection";
-import { useTranslation } from "react-i18next";
 import { useGetPermissionsQuery } from "../../../../store/api/adminApi";
-import { useSelector } from "react-redux";
+import { permissionSections } from "../../../../common/utils/permissionParser";
 
-//Checkbox Permission component
-
+// Checkbox Permission component
 const CheckboxList = ({ permission, selectedPermissions, t, onToggle, disabled }) => {
   const checked = selectedPermissions.includes(permission.id);
 
   const handleChecked = () => {
     if (disabled) return;
-    try {
-      onToggle(permission.id);
-    } catch (err) {
-      console.warn(err);
-    }
+    onToggle(permission.id);
   };
+
   return (
     <List component="div" disablePadding>
       <ListItemButton sx={{ pl: 4 }} disabled={disabled}>
         <Checkbox
           checked={checked}
           disabled={disabled}
-          sx={{
-            "&.Mui-checked": {
-              color: colors.primary,
-            },
-          }}
+          sx={{ "&.Mui-checked": { color: colors.primary } }}
           onChange={handleChecked}
         >
           <StarBorder />
@@ -70,14 +62,6 @@ const CheckboxList = ({ permission, selectedPermissions, t, onToggle, disabled }
 const NestedList = ({ t, index, item, selectedPermissions, onToggle, disabled }) => {
   const [open, setOpen] = useState(false);
 
-  const handleClick = () => {
-    try {
-      setOpen(!open);
-    } catch (err) {
-      console.log(`ERROR handleClick: ${err}`);
-    }
-  };
-
   // Don't render if no permissions
   if (!item?.permissionList || item.permissionList.length === 0) {
     return null;
@@ -85,7 +69,7 @@ const NestedList = ({ t, index, item, selectedPermissions, onToggle, disabled })
 
   return (
     <React.Fragment key={index}>
-      <ListItemButton onClick={handleClick}>
+      <ListItemButton onClick={() => setOpen(!open)}>
         <ListItemIcon>{item.icon}</ListItemIcon>
         <ListItemText primary={t(`navigation.${item.label}`)} />
         {open ? <ExpandLess /> : <ExpandMore />}
@@ -122,70 +106,32 @@ export const PermissionsModal = ({
   // Check if the selected role is the user's own role
   const isEditingOwnRole = selectedRole?.id === authUser?.roleId;
 
-  // Build menu items with permission lists from API
-  const buildMenuItems = () => {
-    try {
-      const sections = {
-        dashboard: ["view_dashboard", "admin_dashboard_config"],
-        reporting: ["view_reporting"],
-        audioRetrieval: [
-          "view_interactions",
-          "admin_audio_recordings",
-          "download_audio_files",
-        ],
-        knowledgeBase: [
-          "view_knowledge_base",
-          "create_kb_articles",
-          "edit_kb_articles",
-        ],
-        tickets: ["view_tickets"],
-        financial: [
-          "view_financials",
-          "admin_invoices",
-          "download_invoices",
-          "pay_invoices",
-          "view_invoices",
-        ],
-        reportsManagement: ["admin_reports", "download_reports"],
-        userManagement: ["admin_clients", "admin_users", "admin_roles"],
-      };
-
-      const getPermissionsForSection = (sectionKey) => {
-        const permissionNames = sections[sectionKey];
-        return allPermissions.filter((p) =>
-          permissionNames.includes(p.permissionName)
-        );
-      };
-
-      return [
-        ...menuItemsCommon.map((item) => ({
-          ...item,
-          permissionList: getPermissionsForSection(item.label),
-        })),
-        ...menuItemsAdmin.map((item) => {
-          if (item.label === "userManagement" && item.subItems) {
-            return {
-              ...item,
-              permissionList: item.subItems.flatMap((subItem) =>
-                allPermissions.filter((p) =>
-                  subItem.permissionList?.includes(p.permissionName)
-                )
-              ),
-            };
-          }
-          return {
-            ...item,
-            permissionList: getPermissionsForSection(item.label),
-          };
-        }),
-      ];
-    } catch (err) {
-      console.log(`ERROR buildMenuItems: ${err}`);
-      return [];
-    }
+  // Helper to get permissions for a section
+  const getPermissionsForSection = (sectionKey) => {
+    const permissionNames = permissionSections[sectionKey] || [];
+    return allPermissions.filter((p) => permissionNames.includes(p.permissionName));
   };
 
-  const menuitem = buildMenuItems();
+  // Build menu items with permission lists from API
+  const menuItems = [
+    ...menuItemsCommon.map((item) => ({
+      ...item,
+      permissionList: getPermissionsForSection(item.label),
+    })),
+    ...menuItemsAdmin.map((item) => {
+      // Special handling for userManagement with subItems
+      if (item.label === "userManagement" && item.subItems) {
+        return {
+          ...item,
+          permissionList: getPermissionsForSection("userManagement"),
+        };
+      }
+      return {
+        ...item,
+        permissionList: getPermissionsForSection(item.label),
+      };
+    }),
+  ];
 
   return (
     <Dialog
@@ -193,15 +139,11 @@ export const PermissionsModal = ({
       onClose={closePermissionsDialog}
       maxWidth="md"
       slotProps={{
-        paper: {
-          sx: modalCard?.dialogSection
-        },
+        paper: { sx: modalCard?.dialogSection },
       }}
     >
       <DialogTitle>
-        <Typography
-        sx={titlesTypography.primaryTitle}
-        >
+        <Typography sx={titlesTypography.primaryTitle}>
           {t("roles.configurePermissions")} - {selectedRole?.role_name}
         </Typography>
       </DialogTitle>
@@ -215,7 +157,7 @@ export const PermissionsModal = ({
           component="nav"
           aria-labelledby="nested-list-subheader"
         >
-          {menuitem.map((item, index) => (
+          {menuItems.map((item, index) => (
             <NestedList
               key={index}
               t={t}
@@ -243,9 +185,7 @@ export const PermissionsModal = ({
           disabled={isUpdatingPermissions || isEditingOwnRole}
           sx={primaryIconButton}
         >
-          {isUpdatingPermissions
-            ? t("common.saving")
-            : t("roles.actions.savePermissions")}
+          {isUpdatingPermissions ? t("common.saving") : t("roles.actions.savePermissions")}
         </Button>
         <Button onClick={closePermissionsDialog} sx={outlinedIconButton}>
           {t("common.cancel")}

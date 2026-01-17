@@ -12,6 +12,7 @@ import {
   useDataGridColumns,
 } from "../../../../common/components/ui/DataGrid/UniversalDataGrid";
 import { TicketAdvancedFilters } from "../AdvancedFilters/TicketAdvancedFilters";
+import { getPriorityStyles, getStatusStyles } from "../../../../common/utils/getStatusProperty";
 
 export const TicketsViewDesktop = () => {
   const { t } = useTranslation();
@@ -110,35 +111,7 @@ export const TicketsViewDesktop = () => {
     }
   }, [filteredTickets]);
 
-  // Helper function for priority styles
-  const getPriorityStyles = (priority) => {
-    switch (priority?.toLowerCase()) {
-      case "high":
-        return { backgroundColor: "#ffebee", color: "#c62828" };
-      case "medium":
-        return { backgroundColor: "#fff3e0", color: "#e65100" };
-      case "low":
-        return { backgroundColor: "#e3f2fd", color: "#1565c0" };
-      default:
-        return { backgroundColor: "#f5f5f5", color: "#757575" };
-    }
-  };
 
-  // Helper function for status styles
-  const getStatusStyles = (status) => {
-    switch (status?.toLowerCase()) {
-      case "open":
-        return { backgroundColor: "#e3f2fd", color: "#1565c0" };
-      case "in progress":
-        return { backgroundColor: "#fff3e0", color: "#e65100" };
-      case "resolved":
-        return { backgroundColor: "#e8f5e9", color: "#2e7d32" };
-      case "closed":
-        return { backgroundColor: "#f5f5f5", color: "#616161" };
-      default:
-        return { backgroundColor: "#f5f5f5", color: "#616161" };
-    }
-  };
 
   // DataGrid columns using helper hook
   const columns = useDataGridColumns([

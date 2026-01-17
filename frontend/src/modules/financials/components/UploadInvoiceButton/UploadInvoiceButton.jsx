@@ -20,6 +20,7 @@ import { Upload as UploadIcon } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
 import { useUploadInvoiceMutation } from "../../../../store/api/invoicesApi";
+import { TiptapEditor } from "../../../../common/components/ui/TiptapEditor";
 import { useTesseractOCR } from "../../../../common/hooks/useTesseractOCR";
 import { parseInvoiceData } from "../../../../common/utils/invoiceParser";
 import {

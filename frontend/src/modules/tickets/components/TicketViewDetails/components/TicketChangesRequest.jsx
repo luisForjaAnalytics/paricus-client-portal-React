@@ -118,11 +118,12 @@ export const TicketChangesRequest = ({
   const config = CHANGE_CONFIGS[changeType];
 
   // For assignedTo, generate options from fetched users
-  const options = changeType === "assignedTo" && usersData?.data
-    ? usersData.data.map(user => ({
+  // Note: usersData is already the array after transformResponse in ticketsApi
+  const options = changeType === "assignedTo" && Array.isArray(usersData)
+    ? usersData.map(user => ({
         value: user.id,
         label: `${user.firstName} ${user.lastName}`,
-        sublabel: user.client?.name || "",
+        sublabel: user.clientName || "",
         styles: {}, // No special styling for users
       }))
     : config?.options || [];

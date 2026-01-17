@@ -21,64 +21,68 @@ import {
   Send,
   CheckBox,
   CheckBoxOutlineBlank,
-  Campaign,
   Close,
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
-import { TiptapEditor } from "../../../../common/components/ui/TiptapEditor/TiptapEditor";
-import { useGetClientsQuery } from "../../../../store/api/adminApi";
-import { useCreateAnnouncementMutation } from "../../../../store/api/dashboardApi";
+import { TiptapEditor } from "../../../common/components/ui/TiptapEditor/TiptapEditor";
+import { useGetClientsQuery } from "../../../store/api/adminApi";
+import { useCreateAnnouncementMutation } from "../../../store/api/dashboardApi";
 import { useSelector } from "react-redux";
 import {
-  dashboardStyles,
   colors,
   primaryIconButton,
-} from "../../../../common/styles/styles";
+  quickBroadcastCard,
+  selectMenuProps,
+} from "../../../common/styles/styles";
+import {
+  getPriorityStyles,
+  priorityStatesList,
+} from "../../../common/utils/getStatusProperty";
 
 // Compact selector styles for Quick Broadcast
 const compactSelector = {
   inputLabelSection: {
-    fontSize: '0.75rem',
-    top: '-2px',
-    '&.MuiInputLabel-shrink': {
-      top: '0',
+    fontSize: "0.75rem",
+    top: "-2px",
+    "&.MuiInputLabel-shrink": {
+      top: "0",
     },
-    '&.Mui-focused': {
+    "&.Mui-focused": {
       color: colors.primary,
     },
   },
   selectSection: {
-    height: '36px',
-    backgroundColor: 'white',
-    borderRadius: '0.75rem',
-    fontSize: '0.75rem',
-    '& .MuiSelect-select': {
-      padding: '6px 12px',
-      display: 'flex',
-      alignItems: 'center',
+    height: "36px",
+    backgroundColor: "white",
+    borderRadius: "0.75rem",
+    fontSize: "0.75rem",
+    "& .MuiSelect-select": {
+      padding: "6px 12px",
+      display: "flex",
+      alignItems: "center",
     },
-    '& .MuiOutlinedInput-notchedOutline': {
+    "& .MuiOutlinedInput-notchedOutline": {
       borderColor: colors.border,
-      transition: 'border-color 0.2s ease',
+      transition: "border-color 0.2s ease",
     },
-    '&:hover .MuiOutlinedInput-notchedOutline': {
+    "&:hover .MuiOutlinedInput-notchedOutline": {
       borderColor: colors.primary,
     },
-    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
       borderColor: colors.primary,
-      borderWidth: '2px',
+      borderWidth: "2px",
     },
   },
   menuItem: {
-    fontSize: '0.75rem',
+    fontSize: "0.75rem",
   },
   chip: {
-    fontSize: '0.65rem',
-    height: '20px',
+    fontSize: "0.65rem",
+    height: "20px",
   },
 };
 
-export const QuickBroadcast = () => {
+export const QuickBroadcastView = () => {
   const { t } = useTranslation();
   const [subject, setSubject] = useState("");
   const [content, setContent] = useState("");
@@ -134,18 +138,18 @@ export const QuickBroadcast = () => {
   const handleSubmit = async () => {
     // Validation
     if (!subject.trim()) {
-      setError(t("dashboard.quickBroadcast.emptySubject"));
+      setError(t("quickBroadcast.emptySubject"));
       return;
     }
 
     const textContent = content.replace(/<[^>]*>/g, "").trim();
     if (!textContent) {
-      setError(t("dashboard.quickBroadcast.emptyMessage"));
+      setError(t("quickBroadcast.emptyMessage"));
       return;
     }
 
     if (selectedClients.length === 0) {
-      setError(t("dashboard.quickBroadcast.noClientsSelected"));
+      setError(t("quickBroadcast.noClientsSelected"));
       return;
     }
 
@@ -200,7 +204,7 @@ export const QuickBroadcast = () => {
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
       console.error("Error creating announcement:", err);
-      setError(err?.data?.error || t("dashboard.quickBroadcast.error"));
+      setError(err?.data?.error || t("quickBroadcast.error"));
     } finally {
       setSending(false);
     }
@@ -231,28 +235,11 @@ export const QuickBroadcast = () => {
   return (
     <Card
       sx={{
-        ...dashboardStyles.quickBroadcastCard,
+        ...quickBroadcastCard,
         minWidth: { xs: "100%", md: "400px" },
       }}
     >
       <CardContent sx={{ padding: "1.5rem" }}>
-        {/* Header with Icon */}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            mb: 3,
-            gap: 1.5,
-          }}
-        >
-          <Box sx={dashboardStyles.dashboardIconContainer}>
-            <Campaign sx={{ fontSize: "1.25rem" }} />
-          </Box>
-          <Typography sx={dashboardStyles.dashboardSectionTitle}>
-            {t("dashboard.quickBroadcast.title")}
-          </Typography>
-        </Box>
-
         {/* Success/Error messages */}
         {success && (
           <Alert
@@ -260,7 +247,7 @@ export const QuickBroadcast = () => {
             sx={{ mb: 2 }}
             onClose={() => setSuccess(false)}
           >
-            {t("dashboard.quickBroadcast.success")}
+            {t("quickBroadcast.success")}
           </Alert>
         )}
 
@@ -274,8 +261,8 @@ export const QuickBroadcast = () => {
         <Box sx={{ mb: 2 }}>
           <TextField
             fullWidth
-            label={t("dashboard.quickBroadcast.subject")}
-            placeholder={t("dashboard.quickBroadcast.subjectPlaceholder")}
+            label={t("quickBroadcast.subject")}
+            placeholder={t("quickBroadcast.subjectPlaceholder")}
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
             sx={{
@@ -318,7 +305,7 @@ export const QuickBroadcast = () => {
           <TiptapEditor
             value={content}
             onChange={(html) => setContent(html)}
-            placeholder={t("dashboard.quickBroadcast.placeholder")}
+            placeholder={t("quickBroadcast.placeholder")}
             customLeftButtons={[attachFileButton]}
           />
         </Box>
@@ -331,7 +318,7 @@ export const QuickBroadcast = () => {
               color="text.secondary"
               sx={{ mb: 1, display: "block" }}
             >
-              {attachments.length} {t("dashboard.quickBroadcast.filesAttached")}
+              {attachments.length} {t("quickBroadcast.filesAttached")}
             </Typography>
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
               {attachments.map((file, index) => (
@@ -383,7 +370,7 @@ export const QuickBroadcast = () => {
                       id="clients-select-label"
                       sx={compactSelector.inputLabelSection}
                     >
-                      {t("dashboard.quickBroadcast.selectClients")}
+                      {t("quickBroadcast.selectClients")}
                     </InputLabel>
                     <Select
                       labelId="clients-select-label"
@@ -391,9 +378,10 @@ export const QuickBroadcast = () => {
                       multiple
                       value={selectedClients}
                       onChange={handleSelectChange}
+                      MenuProps={selectMenuProps}
                       input={
                         <OutlinedInput
-                          label={t("dashboard.quickBroadcast.selectClients")}
+                          label={t("quickBroadcast.selectClients")}
                         />
                       }
                       renderValue={(selected) => (
@@ -402,14 +390,17 @@ export const QuickBroadcast = () => {
                         >
                           {selected.length === clients.length ? (
                             <Chip
-                              label={t("dashboard.quickBroadcast.selectAll")}
+                              label={t("quickBroadcast.selectAll")}
                               size="small"
                               color="primary"
                               sx={compactSelector.chip}
                             />
                           ) : selected.length > 0 ? (
                             <Chip
-                              label={`${selected.length} ${t("dashboard.quickBroadcast.clientsSelected") || "selected"}`}
+                              label={`${selected.length} ${
+                                t("quickBroadcast.clientsSelected") ||
+                                "selected"
+                              }`}
                               size="small"
                               sx={compactSelector.chip}
                             />
@@ -421,22 +412,33 @@ export const QuickBroadcast = () => {
                       {/* Select All Option */}
                       <MenuItem value="all" sx={compactSelector.menuItem}>
                         <Box
-                          sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 0.5,
+                          }}
                         >
                           {selectedClients.length === clients.length ? (
-                            <CheckBox color="primary" sx={{ fontSize: "1rem" }} />
+                            <CheckBox
+                              color="primary"
+                              sx={{ fontSize: "1rem" }}
+                            />
                           ) : (
                             <CheckBoxOutlineBlank sx={{ fontSize: "1rem" }} />
                           )}
                           <Typography fontSize="0.75rem" fontWeight="bold">
-                            {t("dashboard.quickBroadcast.selectAll")}
+                            {t("quickBroadcast.selectAll")}
                           </Typography>
                         </Box>
                       </MenuItem>
 
                       {/* Individual Client Options */}
                       {clients.map((client) => (
-                        <MenuItem key={client.id} value={client.id} sx={compactSelector.menuItem}>
+                        <MenuItem
+                          key={client.id}
+                          value={client.id}
+                          sx={compactSelector.menuItem}
+                        >
                           <Box
                             sx={{
                               display: "flex",
@@ -445,11 +447,16 @@ export const QuickBroadcast = () => {
                             }}
                           >
                             {selectedClients.includes(client.id) ? (
-                              <CheckBox color="primary" sx={{ fontSize: "1rem" }} />
+                              <CheckBox
+                                color="primary"
+                                sx={{ fontSize: "1rem" }}
+                              />
                             ) : (
                               <CheckBoxOutlineBlank sx={{ fontSize: "1rem" }} />
                             )}
-                            <Typography fontSize="0.75rem">{client.name}</Typography>
+                            <Typography fontSize="0.75rem">
+                              {client.name}
+                            </Typography>
                           </Box>
                         </MenuItem>
                       ))}
@@ -465,61 +472,41 @@ export const QuickBroadcast = () => {
                   id="priority-select-label"
                   sx={compactSelector.inputLabelSection}
                 >
-                  {t("dashboard.quickBroadcast.priority")}
+                  {t("quickBroadcast.priority")}
                 </InputLabel>
                 <Select
                   labelId="priority-select-label"
                   id="priority-select"
                   value={priority}
                   onChange={(e) => setPriority(e.target.value)}
-                  label={t("dashboard.quickBroadcast.priority")}
+                  label={t("quickBroadcast.priority")}
+                  MenuProps={selectMenuProps}
                   sx={compactSelector.selectSection}
                 >
-                  <MenuItem value="low" sx={compactSelector.menuItem}>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                  {priorityStatesList.map((item, index) => (
+                    <MenuItem
+                      key={index}
+                      value={item.toLowerCase()}
+                      sx={compactSelector.menuItem}
+                    >
                       <Box
-                        sx={{
-                          width: 6,
-                          height: 6,
-                          borderRadius: "50%",
-                          backgroundColor: colors.success,
-                        }}
-                      />
-                      <Typography fontSize="0.75rem">
-                        {t("dashboard.quickBroadcast.priorityLevels.low")}
-                      </Typography>
-                    </Box>
-                  </MenuItem>
-                  <MenuItem value="medium" sx={compactSelector.menuItem}>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                      <Box
-                        sx={{
-                          width: 6,
-                          height: 6,
-                          borderRadius: "50%",
-                          backgroundColor: colors.warning,
-                        }}
-                      />
-                      <Typography fontSize="0.75rem">
-                        {t("dashboard.quickBroadcast.priorityLevels.medium")}
-                      </Typography>
-                    </Box>
-                  </MenuItem>
-                  <MenuItem value="high" sx={compactSelector.menuItem}>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                      <Box
-                        sx={{
-                          width: 6,
-                          height: 6,
-                          borderRadius: "50%",
-                          backgroundColor: colors.error,
-                        }}
-                      />
-                      <Typography fontSize="0.75rem">
-                        {t("dashboard.quickBroadcast.priorityLevels.high")}
-                      </Typography>
-                    </Box>
-                  </MenuItem>
+                        sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+                      >
+                        <Box
+                          sx={{
+                            width: 6,
+                            height: 6,
+                            borderRadius: "50%",
+                            marginRight:'0.3rem',
+                            backgroundColor: getPriorityStyles(item.toLowerCase()).color,
+                          }}
+                        />
+                        <Typography fontSize="0.75rem">
+                          {t(`priorityLevels.${item.toLowerCase()}`)}
+                        </Typography>
+                      </Box>
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Box>
@@ -549,7 +536,7 @@ export const QuickBroadcast = () => {
               },
             }}
           >
-            {t("dashboard.quickBroadcast.sendAnnouncement")}
+            {t("quickBroadcast.sendAnnouncement")}
           </Button>
         </Box>
       </CardContent>

@@ -12,7 +12,7 @@ export const ticketsApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Tickets", "AssignableUsers"],
+  tagTypes: ["Tickets", "AssignableUsers", "ChangeRequests"],
   endpoints: (builder) => ({
     // GET /api/tickets/assignable-users - Get users that can be assigned tickets
     getAssignableUsers: builder.query({
@@ -170,6 +170,58 @@ export const ticketsApi = createApi({
         { type: "Tickets", id: ticketId },
       ],
     }),
+
+    // ========================================================================
+    // CHANGE REQUESTS ENDPOINTS
+    // ========================================================================
+
+    // GET /api/tickets/change-requests - Get all pending change requests
+    getChangeRequests: builder.query({
+      query: () => "/change-requests",
+      transformResponse: (response) => response.data || [],
+      providesTags: ["ChangeRequests"],
+    }),
+
+    // POST /api/tickets/:id/change-request - Create a change request
+    createChangeRequest: builder.mutation({
+      query: ({ ticketId, requestedStatus, requestedPriority, requestedAssignedToId }) => ({
+        url: `/${ticketId}/change-request`,
+        method: "POST",
+        body: { requestedStatus, requestedPriority, requestedAssignedToId },
+      }),
+      transformResponse: (response) => response.data,
+      invalidatesTags: ["ChangeRequests"],
+    }),
+
+    // PUT /api/tickets/change-requests/:id/approve - Approve a change request
+    approveChangeRequest: builder.mutation({
+      query: (changeRequestId) => ({
+        url: `/change-requests/${changeRequestId}/approve`,
+        method: "PUT",
+      }),
+      transformResponse: (response) => response.data,
+      invalidatesTags: ["ChangeRequests", "Tickets"],
+    }),
+
+    // PUT /api/tickets/change-requests/:id/reject - Reject a change request
+    rejectChangeRequest: builder.mutation({
+      query: ({ changeRequestId, rejectionReason }) => ({
+        url: `/change-requests/${changeRequestId}/reject`,
+        method: "PUT",
+        body: { rejectionReason },
+      }),
+      transformResponse: (response) => response.data,
+      invalidatesTags: ["ChangeRequests"],
+    }),
+
+    // GET /api/tickets/:id/change-requests - Get change requests for a specific ticket
+    getTicketChangeRequests: builder.query({
+      query: (ticketId) => `/${ticketId}/change-requests`,
+      transformResponse: (response) => response.data || [],
+      providesTags: (result, error, ticketId) => [
+        { type: "ChangeRequests", id: ticketId },
+      ],
+    }),
   }),
 });
 
@@ -187,4 +239,10 @@ export const {
   useUploadDetailAttachmentMutation,
   useLazyGetDetailAttachmentUrlQuery,
   useDeleteDetailAttachmentMutation,
+  // Change Requests
+  useGetChangeRequestsQuery,
+  useCreateChangeRequestMutation,
+  useApproveChangeRequestMutation,
+  useRejectChangeRequestMutation,
+  useGetTicketChangeRequestsQuery,
 } = ticketsApi;

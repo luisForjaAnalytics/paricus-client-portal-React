@@ -135,7 +135,7 @@ export const MenuSectionsAvatar = ({
         >
           <ListItemIcon>{setting.icon}</ListItemIcon>
           <Typography sx={{ textAlign: "center", color: "text.secondary" }}>
-            {t(`tooltips.${setting.label}`)}
+            {t(`navigation.${setting.label}`)}
           </Typography>
         </MenuItem>
       ))}
