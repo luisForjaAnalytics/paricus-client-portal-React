@@ -4,7 +4,6 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Button,
   TextField,
   Typography,
   Chip,
@@ -20,11 +19,11 @@ import { useCreateLogMutation } from "../../../../store/api/logsApi";
 import { useSelector } from "react-redux";
 import {
   modalCard,
-  outlinedButton,
-  PaymentLinkStyle,
-  primaryIconButton,
+  colors,
   titlesTypography,
 } from "../../../../common/styles/styles";
+import { ActionButton } from "../../../../common/components/ui/ActionButton/ActionButton";
+import { CancelButton } from "../../../../common/components/ui/CancelButton/CancelButton";
 
 export const PendingLinkModal = ({ invoice, onSuccess, onError }) => {
   const { t } = useTranslation();
@@ -103,9 +102,9 @@ export const PendingLinkModal = ({ invoice, onSuccess, onError }) => {
         <Chip
           label={t("invoices.paymentLink.pendingLink")}
           size="small"
-          icon={<WarningIcon color={PaymentLinkStyle.intranetYellow.color} />}
+          icon={<WarningIcon color={colors.intranetYellow.color} />}
           onClick={handleOpen}
-          sx={{ cursor: "pointer", ...PaymentLinkStyle.intranetYellow }}
+          sx={{ cursor: "pointer", ...colors.intranetYellow }}
         />
       ) : (
         <Box
@@ -119,7 +118,7 @@ export const PendingLinkModal = ({ invoice, onSuccess, onError }) => {
             label={t("invoices.paymentLink.linkSet")}
             color="success"
             size="small"
-            sx={PaymentLinkStyle.intranetgreen}
+            sx={colors.intranetgreen}
           />
           <Tooltip title={t("invoices.paymentLink.updateLink")}>
             <IconButton size="small" color="primary" onClick={handleOpen}>
@@ -175,19 +174,15 @@ export const PendingLinkModal = ({ invoice, onSuccess, onError }) => {
               justifyContent: "center",
             }}
           >
-            <Button
+            <ActionButton
               type="submit"
-              variant="contained"
               disabled={savingPaymentLink}
-              sx={primaryIconButton}
-            >
-              {savingPaymentLink
-                ? t("invoices.paymentLink.saving")
-                : t("invoices.paymentLink.saveButton")}
-            </Button>
-            <Button onClick={handleClose} sx={outlinedButton}>
-              {t("invoices.paymentLink.cancel")}
-            </Button>
+              text={savingPaymentLink ? t("invoices.paymentLink.saving") : t("invoices.paymentLink.saveButton")}
+            />
+            <CancelButton
+              handleClick={handleClose}
+              text={t("invoices.paymentLink.cancel")}
+            />
           </DialogActions>
         </form>
       </Dialog>

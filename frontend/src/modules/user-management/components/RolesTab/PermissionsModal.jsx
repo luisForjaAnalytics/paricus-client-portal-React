@@ -34,7 +34,13 @@ import { useGetPermissionsQuery } from "../../../../store/api/adminApi";
 import { permissionSections } from "../../../../common/utils/permissionParser";
 
 // Checkbox Permission component
-const CheckboxList = ({ permission, selectedPermissions, t, onToggle, disabled }) => {
+const CheckboxList = ({
+  permission,
+  selectedPermissions,
+  t,
+  onToggle,
+  disabled,
+}) => {
   const checked = selectedPermissions.includes(permission.id);
 
   const handleChecked = () => {
@@ -44,7 +50,15 @@ const CheckboxList = ({ permission, selectedPermissions, t, onToggle, disabled }
 
   return (
     <List component="div" disablePadding>
-      <ListItemButton sx={{ pl: 4 }} disabled={disabled}>
+      <ListItemButton
+        sx={{
+          pl: 4,
+          "&:hover": {
+            borderRadius: "1.5rem",
+          },
+        }}
+        disabled={disabled}
+      >
         <Checkbox
           checked={checked}
           disabled={disabled}
@@ -59,7 +73,14 @@ const CheckboxList = ({ permission, selectedPermissions, t, onToggle, disabled }
   );
 };
 
-const NestedList = ({ t, index, item, selectedPermissions, onToggle, disabled }) => {
+const NestedList = ({
+  t,
+  index,
+  item,
+  selectedPermissions,
+  onToggle,
+  disabled,
+}) => {
   const [open, setOpen] = useState(false);
 
   // Don't render if no permissions
@@ -109,7 +130,9 @@ export const PermissionsModal = ({
   // Helper to get permissions for a section
   const getPermissionsForSection = (sectionKey) => {
     const permissionNames = permissionSections[sectionKey] || [];
-    return allPermissions.filter((p) => permissionNames.includes(p.permissionName));
+    return allPermissions.filter((p) =>
+      permissionNames.includes(p.permissionName),
+    );
   };
 
   // Build menu items with permission lists from API
@@ -185,7 +208,9 @@ export const PermissionsModal = ({
           disabled={isUpdatingPermissions || isEditingOwnRole}
           sx={primaryIconButton}
         >
-          {isUpdatingPermissions ? t("common.saving") : t("roles.actions.savePermissions")}
+          {isUpdatingPermissions
+            ? t("common.saving")
+            : t("roles.actions.savePermissions")}
         </Button>
         <Button onClick={closePermissionsDialog} sx={outlinedIconButton}>
           {t("common.cancel")}

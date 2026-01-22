@@ -37,7 +37,6 @@ import {
 import { SelectMenuItem } from "../../../common/components/ui/SelectMenuItem/SelectMenuItem";
 import { priorityOptions } from "./options";
 
-
 // Compact selector styles for Quick Broadcast
 const compactSelector = {
   inputLabelSection: {
@@ -183,7 +182,7 @@ export const QuickBroadcastView = () => {
                   Authorization: `Bearer ${token}`,
                 },
                 body: formData,
-              }
+              },
             );
           } catch (uploadErr) {
             console.error("Error uploading attachment:", uploadErr);
@@ -420,7 +419,7 @@ export const QuickBroadcastView = () => {
                           {selectedClients.length === clients.length ? (
                             <CheckBox
                               color="primary"
-                              sx={{ fontSize: "1rem" }}
+                              sx={{ fontSize: "1rem", color: colors.primary }}
                             />
                           ) : (
                             <CheckBoxOutlineBlank sx={{ fontSize: "1rem" }} />
@@ -448,7 +447,7 @@ export const QuickBroadcastView = () => {
                             {selectedClients.includes(client.id) ? (
                               <CheckBox
                                 color="primary"
-                                sx={{ fontSize: "1rem" }}
+                                sx={{ fontSize: "1rem", color: colors.primary }}
                               />
                             ) : (
                               <CheckBoxOutlineBlank sx={{ fontSize: "1rem" }} />

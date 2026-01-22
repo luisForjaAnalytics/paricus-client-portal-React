@@ -135,7 +135,7 @@ export const SelectMenuItem = forwardRef(
             <MenuItem
               key={option.value || index}
               value={option.value}
-              sx={menuItemSx}
+              sx={{ color: "text.primary", ...menuItemSx }}
             >
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
                 {showDot && (

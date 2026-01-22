@@ -15,18 +15,15 @@ import {
 } from "@mui/material";
 import {
   Add as AddIcon,
-  Edit as EditIcon,
   Block as BlockIcon,
   Search as SearchIcon,
 } from "@mui/icons-material";
-import {
-  primaryIconButton,
-  colors,
-  filterStyles,
-} from "../../../../common/styles/styles";
+import { colors, filterStyles } from "../../../../common/styles/styles";
 import PropTypes from "prop-types";
 import { FilterButton } from "../FilterButton/FilterButton";
 import { useTranslation } from "react-i18next";
+import { ActionButton } from "../../../../common/components/ui/ActionButton/ActionButton";
+import { EditButton } from "../../../../common/components/ui/EditButton/EditButton";
 import {
   UniversalDataGrid,
   useDataGridColumns,
@@ -143,14 +140,11 @@ export const ClientsTabDesktop = ({
       sortable: false,
       renderCell: (params) => (
         <Box sx={{ display: "flex", gap: 0.5, justifyContent: "center" }}>
-          <Tooltip title={t("clients.actions.edit")}>
-            <IconButton
-              size="small"
-              onClick={() => handleEdit(params.row.original)}
-            >
-              <EditIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
+          <EditButton
+            handleClick={handleEdit}
+            item={params.row.original}
+            title={t("clients.actions.edit")}
+          />
           <Tooltip title={t("clients.actions.deactivate")}>
             <span>
               <IconButton
@@ -271,15 +265,11 @@ export const ClientsTabDesktop = ({
             gap: 1,
           }}
         >
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<AddIcon />}
-            onClick={onAddClick}
-            sx={primaryIconButton}
-          >
-            {t("clients.addClient")}
-          </Button>
+          <ActionButton
+            handleClick={onAddClick}
+            icon={<AddIcon />}
+            text={t("clients.addClient")}
+          />
           {/* filter Button */}
           <FilterButton
             folderName={"clients.filters"}

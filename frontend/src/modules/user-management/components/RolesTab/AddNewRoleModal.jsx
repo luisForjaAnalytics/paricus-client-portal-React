@@ -19,12 +19,12 @@ import { Close as CloseIcon } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import {
   primaryButton,
-  outlinedButton,
   modalCard,
   titlesTypography,
-  primaryIconButton,
   selectMenuProps,
 } from "../../../../common/styles/styles";
+import { ActionButton } from "../../../../common/components/ui/ActionButton/ActionButton";
+import { CancelButton } from "../../../../common/components/ui/CancelButton/CancelButton";
 
 export const AddNewRoleModal = ({
   dialog,
@@ -162,17 +162,16 @@ export const AddNewRoleModal = ({
             justifyContent: "center",
           }}
         >
-          <Button
-            variant="contained"
-            onClick={saveRole}
+          <ActionButton
+            handleClick={saveRole}
             disabled={isSaving || !isFormValid() || isOverLimit}
-            sx={{ ...primaryIconButton, width: "6rem" }}
-          >
-            {isSaving ? t("common.saving") : t("common.save")}
-          </Button>
-          <Button onClick={closeDialog} sx={outlinedButton}>
-            {t("common.cancel")}
-          </Button>
+            text={isSaving ? t("common.saving") : t("common.save")}
+            sx={{ width: "6rem" }}
+          />
+          <CancelButton
+            handleClick={closeDialog}
+            text={t("common.cancel")}
+          />
         </DialogActions>
       </Dialog>
 
@@ -191,9 +190,10 @@ export const AddNewRoleModal = ({
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteDialog(false)} sx={outlinedButton}>
-            {t("common.cancel")}
-          </Button>
+          <CancelButton
+            handleClick={() => setDeleteDialog(false)}
+            text={t("common.cancel")}
+          />
           <Button
             variant="contained"
             color="error"

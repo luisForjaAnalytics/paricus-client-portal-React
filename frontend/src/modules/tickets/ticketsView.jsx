@@ -2,7 +2,11 @@ import { useEffect, useState } from "react";
 import { Box, Typography, Tabs, Tab } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useLocation, Outlet } from "react-router-dom";
-import { typography, colors, titlesTypography } from "../../common/styles/styles";
+import {
+  typography,
+  colors,
+  titlesTypography,
+} from "../../common/styles/styles";
 import { usePermissions } from "../../common/hooks/usePermissions";
 
 function a11yProps(index) {
@@ -55,10 +59,9 @@ export const TicketsView = () => {
 
   return (
     <Box sx={{ py: { xs: 2, md: 4 }, px: { xs: 2, md: 3 } }}>
-
       {/* Tabs Navigation */}
       {availableTabs.length > 1 && (
-        <Box sx={{ borderBottom: 0, mt: 2, display: { xs: "none", md: "block" } }}>
+        <Box sx={{ borderBottom: 0, display: { xs: "none", md: "block" } }}>
           <Tabs
             value={value}
             onChange={handleChange}
@@ -78,7 +81,9 @@ export const TicketsView = () => {
               <Tab
                 key={tab.route}
                 label={
-                  <Typography sx={titlesTypography.managementSection}>
+                  <Typography
+                    sx={{ ...titlesTypography.managementSection, mt: -2 }}
+                  >
                     {tab.label}
                   </Typography>
                 }

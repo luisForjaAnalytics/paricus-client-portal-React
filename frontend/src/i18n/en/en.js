@@ -241,6 +241,25 @@ export default {
     items: "items",
     updating: "Updating...",
     update: "Update",
+    view: "View",
+    // Delete confirmation dialog
+    confirmDeleteTitle: "Delete {{item}}",
+    confirmDeleteMessage: "Are you sure you want to delete {{item}}? This action cannot be undone.",
+    deleteSuccess: "{{item}} deleted successfully",
+    deleteError: "Error deleting {{item}}",
+    // Snackbar messages
+    operationSuccess: "Operation completed successfully",
+    operationError: "An error occurred",
+    warning: "Warning",
+    info: "Information",
+    // Item types
+    item: "item",
+    invoice: "Invoice",
+    user: "User",
+    role: "Role",
+    client: "Client",
+    report: "Report",
+    ticket: "Ticket",
   },
 
   // Login
@@ -411,6 +430,7 @@ export default {
     view_invoices: "View Invoices",
     pay_invoices: "Pay Invoices",
     view_tickets: "View Support Tickets",
+    admin_broadcast: "Quick Broadcast",
   },
 
   // Clients Management
@@ -682,7 +702,7 @@ export default {
       title: "Page Not Found",
       description:
         "The page you're looking for doesn't exist or has been moved.",
-      goHome: "Go Home",
+      goHome: "Go back to dashboard",
     },
   },
 
@@ -776,6 +796,10 @@ export default {
         label: "Assigned To",
         requiredMsg: "The Assigned To field is required.",
       },
+      department: {
+        label: "Department",
+        requiredMsg: "The Department field is required.",
+      },
       url: "Link URL (Optional)",
       description: {
         label: "Description",
@@ -851,6 +875,12 @@ export default {
 
   dashboard: {
     title: "Dashboard",
+    selectClient: "View Client",
+    allClients: "All Clients",
+    selectUser: "View User",
+    allUsers: "All Users",
+    viewAs: "View As",
+    viewAllDashboard: "All Dashboards",
     portfolioRevenue: "Portfolio Revenue",
     masterKbArticles: "Master KB Articles",
     urgentAlerts: "Urgent Alerts",

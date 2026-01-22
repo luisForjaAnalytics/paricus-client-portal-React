@@ -18,13 +18,10 @@ import {
   CircularProgress,
   IconButton,
   Stack,
-  Tooltip,
 } from "@mui/material";
 import {
   PictureAsPdf as PdfIcon,
   Upload as UploadIcon,
-  Download as DownloadIcon,
-  Delete as DeleteIcon,
   Refresh as RefreshIcon,
   Close as CloseIcon,
   Description as DescriptionIcon,
@@ -39,6 +36,8 @@ import {
   titlesTypography,
   reportsCardSelected,
 } from "../../../common/styles/styles";
+import { DownloadButton } from "../../../common/components/ui/DownloadButton/DownloadButton";
+import { DeleteButton } from "../../../common/components/ui/DeleteButton/DeleteButton";
 
 export const ClientReports = ({
   selectedFolder,
@@ -205,34 +204,17 @@ export const ClientReports = ({
                         spacing={0.5}
                         justifyContent="flex-end"
                       >
-                        <Tooltip title={t("reportsManagement.reports.download")}>
-                          <IconButton
-                            size="small"
-                            onClick={() => handleDownloadReport(report)}
-                            sx={{
-                              color: colors.primary,
-                              "&:hover": {
-                                backgroundColor: colors.primaryLight,
-                              },
-                            }}
-                          >
-                            <DownloadIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title={t("reportsManagement.reports.delete")}>
-                          <IconButton
-                            size="small"
-                            onClick={() => handleDeleteReport(report)}
-                            sx={{
-                              color: colors.error,
-                              "&:hover": {
-                                backgroundColor: colors.errorContainer,
-                              },
-                            }}
-                          >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
+                        <DownloadButton
+                          handleClick={handleDownloadReport}
+                          item={report}
+                          title={t("reportsManagement.reports.download")}
+                        />
+                        <DeleteButton
+                          handleDelete={handleDeleteReport}
+                          item={report}
+                          itemName={report.name}
+                          itemType="report"
+                        />
                       </Stack>
                     </TableCell>
                   </TableRow>

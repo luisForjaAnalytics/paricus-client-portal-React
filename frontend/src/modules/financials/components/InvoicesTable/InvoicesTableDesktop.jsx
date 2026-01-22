@@ -13,12 +13,8 @@ import {
   Box,
 } from "@mui/material";
 import {
-  Download as DownloadIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
   Payment as PaymentIcon,
   PictureAsPdf as PdfIcon,
-  Visibility,
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
@@ -29,6 +25,10 @@ import {
   typography,
   statusBadges,
 } from "../../../../common/styles/styles";
+import { DeleteButton } from "../../../../common/components/ui/DeleteButton/DeleteButton";
+import { DownloadButton } from "../../../../common/components/ui/DownloadButton/DownloadButton";
+import { EditButton } from "../../../../common/components/ui/EditButton/EditButton";
+import { ViewButton } from "../../../../common/components/ui/ViewButton/ViewButton";
 
 export const InvoicesTableDesktop = ({
   invoices,
@@ -85,7 +85,9 @@ export const InvoicesTableDesktop = ({
             <TableCell sx={table.headerCellInvoice}>
               {t("invoices.table.amount")}
             </TableCell>
-            <TableCell sx={{...table.headerCellInvoice, paddingLeft:'2.5rem'}}>
+            <TableCell
+              sx={{ ...table.headerCellInvoice, paddingLeft: "2.5rem" }}
+            >
               {t("invoices.table.status")}
             </TableCell>
             <TableCell sx={table.headerCellInvoice}>
@@ -167,7 +169,13 @@ export const InvoicesTableDesktop = ({
                 </Typography>
               </TableCell>
               <TableCell sx={table.cell}>
-                <Box component="span" sx={{...getStatusBadgeStyle(invoice.status), ...colors.intranetRed}}>
+                <Box
+                  component="span"
+                  sx={{
+                    ...getStatusBadgeStyle(invoice.status),
+                    ...colors.intranetRed,
+                  }}
+                >
                   {invoice.status.toUpperCase()}
                 </Box>
               </TableCell>
@@ -228,50 +236,23 @@ export const InvoicesTableDesktop = ({
                     </Button>
                   )}
                   {isAdmin && (
-                    <Tooltip title={t("invoices.actions.editInvoice")}>
-                      <IconButton
-                        color="primary"
-                        size="small"
-                        onClick={() => openEditInvoiceModal(invoice)}
-                      >
-                        <EditIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
+                    <EditButton
+                      handleClick={openEditInvoiceModal}
+                      item={invoice}
+                    />
                   )}
-                  <Tooltip title={t("invoices.actions.view")}>
-                    <IconButton
-                      color="info"
-                      size="small"
-                      onClick={() => viewInvoice(invoice)}
-                    >
-                      <Visibility
-                        fontSize="small"
-                        sx={{ color: colors.primary }}
-                      />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title={t("invoices.actions.download")}>
-                    <IconButton
-                      color="info"
-                      size="small"
-                      onClick={() => downloadInvoice(invoice)}
-                    >
-                      <DownloadIcon
-                        fontSize="small"
-                        sx={{ color: colors.primary }}
-                      />
-                    </IconButton>
-                  </Tooltip>
+                  <ViewButton handleClick={viewInvoice} item={invoice} />
+                  <DownloadButton
+                    handleClick={downloadInvoice}
+                    item={invoice}
+                  />
                   {isAdmin && (
-                    <Tooltip title={t("invoices.actions.delete")}>
-                      <IconButton
-                        color="error"
-                        size="small"
-                        onClick={() => handleDeleteInvoice(invoice)}
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
+                    <DeleteButton
+                      handleDelete={handleDeleteInvoice}
+                      item={invoice}
+                      itemName={`${t("common.invoice")} #${invoice.invoiceNumber}`}
+                      itemType="invoice"
+                    />
                   )}
                 </Stack>
               </TableCell>
@@ -297,7 +278,7 @@ InvoicesTableDesktop.propTypes = {
       issuedDate: PropTypes.string.isRequired,
       paidDate: PropTypes.string,
       paymentLink: PropTypes.string,
-    })
+    }),
   ).isRequired,
   isAdmin: PropTypes.bool.isRequired,
   formatDate: PropTypes.func.isRequired,

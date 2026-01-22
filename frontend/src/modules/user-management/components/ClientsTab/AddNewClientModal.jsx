@@ -17,12 +17,12 @@ import { Close as CloseIcon } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import {
   primaryButton,
-  outlinedButton,
   modalCard,
   titlesTypography,
   colors,
-  primaryIconButton,
 } from "../../../../common/styles/styles";
+import { ActionButton } from "../../../../common/components/ui/ActionButton/ActionButton";
+import { CancelButton } from "../../../../common/components/ui/CancelButton/CancelButton";
 
 export const AddNewClientModal = ({
   editingClient,
@@ -127,17 +127,16 @@ export const AddNewClientModal = ({
             justifyContent: "center",
           }}
         >
-          <Button
-            variant="contained"
-            onClick={handleSave}
+          <ActionButton
+            handleClick={handleSave}
             disabled={isSaving || !isFormValid()}
-            sx={{...primaryIconButton, width:'20%'}}
-          >
-            {isSaving ? t("common.saving") : t("common.save")}
-          </Button>
-          <Button onClick={handleCloseDialog} sx={outlinedButton}>
-            {t("common.cancel")}
-          </Button>
+            text={isSaving ? t("common.saving") : t("common.save")}
+            sx={{ width: "20%" }}
+          />
+          <CancelButton
+            handleClick={handleCloseDialog}
+            text={t("common.cancel")}
+          />
         </DialogActions>
       </Dialog>
 
@@ -156,12 +155,10 @@ export const AddNewClientModal = ({
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button
-            onClick={() => setShowConfirmDialog(false)}
-            sx={outlinedButton}
-          >
-            {t("common.cancel")}
-          </Button>
+          <CancelButton
+            handleClick={() => setShowConfirmDialog(false)}
+            text={t("common.cancel")}
+          />
           <Button
             variant="contained"
             color="error"

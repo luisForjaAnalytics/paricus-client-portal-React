@@ -15,19 +15,16 @@ import {
 } from "@mui/material";
 import {
   Add as AddIcon,
-  Edit as EditIcon,
   Search as SearchIcon,
   Block as BlockIcon,
   CheckCircle as CheckCircleIcon,
 } from "@mui/icons-material";
 import PropTypes from "prop-types";
-import {
-  primaryIconButton,
-  colors,
-  filterStyles,
-} from "../../../../common/styles/styles";
+import { colors, filterStyles } from "../../../../common/styles/styles";
 import { useTranslation } from "react-i18next";
 import { FilterButton } from "../FilterButton/FilterButton";
+import { ActionButton } from "../../../../common/components/ui/ActionButton/ActionButton";
+import { EditButton } from "../../../../common/components/ui/EditButton/EditButton";
 import {
   UniversalDataGrid,
   useDataGridColumns,
@@ -118,15 +115,19 @@ export const UsersTabDesktop = ({
       flex: 1,
       sortable: false,
       renderCell: (params) => (
-        <Box sx={{ display: "flex", gap: 0.5, justifyContent: "center" }}>
-          <Tooltip title={t("users.actions.editUser")}>
-            <IconButton
-              size="small"
-              onClick={() => openEditDialog(params.row.original)}
-            >
-              <EditIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
+        <Box
+          sx={{
+            display: "flex",
+            gap: 0.5,
+            justifyContent: "center",
+            mt: "0.5rem",
+          }}
+        >
+          <EditButton
+            handleClick={openEditDialog}
+            item={params.row.original}
+            title={t("users.actions.editUser")}
+          />
           <Tooltip
             title={
               params.row.is_active
@@ -259,15 +260,11 @@ export const UsersTabDesktop = ({
             gap: 1,
           }}
         >
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<AddIcon />}
-            onClick={openAddDialog}
-            sx={primaryIconButton}
-          >
-            {t("users.addNewUser")}
-          </Button>
+          <ActionButton
+            handleClick={openAddDialog}
+            icon={<AddIcon />}
+            text={t("users.addNewUser")}
+          />
 
           {/* filter Button */}
           <FilterButton
@@ -304,7 +301,7 @@ UsersTabDesktop.propTypes = {
       role: PropTypes.shape({
         roleName: PropTypes.string,
       }),
-    })
+    }),
   ).isRequired,
   loading: PropTypes.bool.isRequired,
   isBPOAdmin: PropTypes.bool.isRequired,
@@ -316,9 +313,10 @@ UsersTabDesktop.propTypes = {
   setIsOpen: PropTypes.func.isRequired,
   clientOptions: PropTypes.arrayOf(
     PropTypes.shape({
-      value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+      value: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+        .isRequired,
       title: PropTypes.string.isRequired,
-    })
+    }),
   ).isRequired,
   openAddDialog: PropTypes.func.isRequired,
   openEditDialog: PropTypes.func.isRequired,

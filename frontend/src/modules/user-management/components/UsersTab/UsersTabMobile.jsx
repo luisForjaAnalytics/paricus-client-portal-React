@@ -32,7 +32,6 @@ import {
   KeyboardArrowDown as KeyboardArrowDownIcon,
   KeyboardArrowUp as KeyboardArrowUpIcon,
   Person as PersonIcon,
-  Edit as EditIcon,
   Add as AddIcon,
   Email as EmailIcon,
   Business as BusinessIcon,
@@ -48,9 +47,10 @@ import {
 } from "../../../../store/api/adminApi";
 import {
   primaryButton,
-  outlinedButton,
   titlesTypography,
 } from "../../../../common/styles/styles";
+import { CancelButton } from "../../../../common/components/ui/CancelButton/CancelButton";
+import { EditButton } from "../../../../common/components/ui/EditButton/EditButton";
 import { useTranslation } from "react-i18next";
 
 function Row({ user, clients, roles, handleEdit, t }) {
@@ -235,15 +235,11 @@ function Row({ user, clients, roles, handleEdit, t }) {
                   >
                     {t("users.table.actions")}:
                   </Typography>
-                  <Tooltip title={t("users.actions.editUser")}>
-                    <IconButton
-                      size="small"
-                      color="primary"
-                      onClick={() => handleEdit(user)}
-                    >
-                      <EditIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
+                  <EditButton
+                    handleClick={handleEdit}
+                    item={user}
+                    title={t("users.actions.editUser")}
+                  />
                 </Box>
               </Box>
             </Box>
@@ -636,9 +632,10 @@ export const UsersTabMobile = () => {
           </Box>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={closeDialog} sx={outlinedButton}>
-            {t("common.cancel")}
-          </Button>
+          <CancelButton
+            handleClick={closeDialog}
+            text={t("common.cancel")}
+          />
           <Button
             onClick={saveUser}
             variant="contained"

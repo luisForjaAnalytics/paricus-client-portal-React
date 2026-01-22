@@ -242,6 +242,25 @@ export default {
     items: "elementos",
     updating: "Actualizando...",
     update: "Actualizar",
+    view: "Ver",
+    // Diálogo de confirmación de eliminación
+    confirmDeleteTitle: "Eliminar {{item}}",
+    confirmDeleteMessage: "¿Está seguro que desea eliminar {{item}}? Esta acción no se puede deshacer.",
+    deleteSuccess: "{{item}} eliminado exitosamente",
+    deleteError: "Error al eliminar {{item}}",
+    // Mensajes de Snackbar
+    operationSuccess: "Operación completada exitosamente",
+    operationError: "Ocurrió un error",
+    warning: "Advertencia",
+    info: "Información",
+    // Tipos de elementos
+    item: "elemento",
+    invoice: "Factura",
+    user: "Usuario",
+    role: "Rol",
+    client: "Cliente",
+    report: "Reporte",
+    ticket: "Ticket",
   },
 
   // Login
@@ -412,6 +431,7 @@ export default {
     view_invoices: "Ver Facturas",
     pay_invoices: "Pagar Facturas",
     view_tickets: "Ver Tickets de Soporte",
+    admin_broadcast: "Difusión Rápida",
   },
 
   // Gestión de Clientes
@@ -684,7 +704,7 @@ export default {
       code: "404",
       title: "Página No Encontrada",
       description: "La página que está buscando no existe o ha sido movida.",
-      goHome: "Ir al Inicio",
+      goHome: "Regresar al dashboard",
     },
   },
 
@@ -778,6 +798,10 @@ export default {
         label: "Asignado a",
         requiredMsg: "El campo Asignado a es requerido.",
       },
+      department: {
+        label: "Departamento",
+        requiredMsg: "El campo Departamento es requerido.",
+      },
       url: "Link URL (Opcional)",
       description: {
         label: "Descripción",
@@ -852,6 +876,12 @@ export default {
   },
   dashboard: {
     title: "Dashboard",
+    selectClient: "Ver Cliente",
+    allClients: "Todos los Clientes",
+    selectUser: "Ver Usuario",
+    allUsers: "Todos los Usuarios",
+    viewAs: "Ver Como",
+    viewAllDashboard: "Todos los Dashboards",
     portfolioRevenue: "Ingresos del Portafolio",
     masterKbArticles: "Artículos KB Maestros",
     urgentAlerts: "Alertas Urgentes",

@@ -5,7 +5,6 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Button,
   List,
   ListItem,
   ListItemButton,
@@ -15,8 +14,9 @@ import {
   Typography,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import { modalCard } from "../../../../../common/styles/styles";
-import { useGetAssignableUsersQuery } from "../../../../../store/api/ticketsApi";
+import { colors, modalCard } from "../../../../../common/styles/styles";
+import { CancelButton } from "../../../../../common/components/ui/CancelButton/CancelButton";
+import { useGetDepartmentsQuery } from "../../../../../store/api/ticketsApi";
 
 /**
  * Configuration for different change types
@@ -109,24 +109,25 @@ export const TicketChangesRequest = ({
   const { t } = useTranslation();
   const [selectedValue, setSelectedValue] = useState(currentValue);
 
-  // Fetch assignable users only if changeType is "assignedTo"
-  const { data: usersData, isLoading: loadingUsers } = useGetAssignableUsersQuery(undefined, {
-    skip: changeType !== "assignedTo",
-  });
+  // Fetch departments only if changeType is "assignedTo" (now uses departments instead of users)
+  const { data: departmentsData, isLoading: loadingDepartments } =
+    useGetDepartmentsQuery(undefined, {
+      skip: changeType !== "assignedTo",
+    });
 
   // Get configuration based on change type
   const config = CHANGE_CONFIGS[changeType];
 
-  // For assignedTo, generate options from fetched users
-  // Note: usersData is already the array after transformResponse in ticketsApi
-  const options = changeType === "assignedTo" && Array.isArray(usersData)
-    ? usersData.map(user => ({
-        value: user.id,
-        label: `${user.firstName} ${user.lastName}`,
-        sublabel: user.clientName || "",
-        styles: {}, // No special styling for users
-      }))
-    : config?.options || [];
+  // For assignedTo, generate options from fetched departments (not users)
+  const options =
+    changeType === "assignedTo" && Array.isArray(departmentsData)
+      ? departmentsData.map((dept) => ({
+          value: dept.id,
+          label: dept.name,
+          sublabel: "", // Responsible user hidden from UI
+          styles: {}, // No special styling for departments
+        }))
+      : config?.options || [];
 
   if (!config && changeType !== "assignedTo") {
     console.error(`Invalid changeType: ${changeType}`);
@@ -146,7 +147,8 @@ export const TicketChangesRequest = ({
 
   // Get title based on changeType
   const getTitle = () => {
-    if (changeType === "assignedTo") return t("tickets.ticketView.changeAssignedTo") || "Assign To";
+    if (changeType === "assignedTo")
+      return t("tickets.ticketView.changeAssignedTo") || "Assign To";
     return config?.titleKey ? t(config.titleKey) : "Change";
   };
 
@@ -165,7 +167,7 @@ export const TicketChangesRequest = ({
     >
       <DialogTitle>{getTitle()}</DialogTitle>
       <DialogContent>
-        {loadingUsers ? (
+        {loadingDepartments ? (
           <Box display="flex" justifyContent="center" py={4}>
             <CircularProgress size={40} />
           </Box>
@@ -179,9 +181,11 @@ export const TicketChangesRequest = ({
                   sx={{
                     "&.Mui-selected": {
                       backgroundColor: "action.selected",
-                      "&:hover": {
-                        backgroundColor: "action.hover",
-                      },
+                      borderRadius: "1rem",
+                    },
+                    "&:hover": {
+                      //backgroundColor: colors.primaryLight,
+                      borderRadius: "1rem",
                     },
                   }}
                 >
@@ -214,8 +218,13 @@ export const TicketChangesRequest = ({
           </List>
         )}
       </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>{t("common.cancel")}</Button>
+      <DialogActions
+        sx={{
+          justifyContent: "center",
+          mb: "1rem",
+        }}
+      >
+        <CancelButton handleClick={onClose} text={t("common.cancel")} />
       </DialogActions>
     </Dialog>
   );

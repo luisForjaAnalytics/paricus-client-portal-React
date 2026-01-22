@@ -12,9 +12,16 @@ export const ticketsApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Tickets", "AssignableUsers", "ChangeRequests"],
+  tagTypes: ["Tickets", "AssignableUsers", "Departments", "ChangeRequests"],
   endpoints: (builder) => ({
-    // GET /api/tickets/assignable-users - Get users that can be assigned tickets
+    // GET /api/tickets/departments - Get departments that tickets can be assigned to
+    getDepartments: builder.query({
+      query: () => "/departments",
+      transformResponse: (response) => response.data || [],
+      providesTags: ["Departments"],
+    }),
+
+    // GET /api/tickets/assignable-users - Get users that can be assigned tickets (legacy)
     getAssignableUsers: builder.query({
       query: () => "/assignable-users",
       transformResponse: (response) => response.data || [],
@@ -32,12 +39,16 @@ export const ticketsApi = createApi({
         if (params.limit) queryParams.append("limit", params.limit);
         if (params.sortBy) queryParams.append("sortBy", params.sortBy);
         if (params.sortOrder) queryParams.append("sortOrder", params.sortOrder);
+        if (params.clientId) queryParams.append("clientId", params.clientId);
+        if (params.userId) queryParams.append("userId", params.userId);
 
         const queryString = queryParams.toString();
         return queryString ? `?${queryString}` : "";
       },
       transformResponse: (response) => response.data || [],
-      providesTags: ["Tickets"],
+      providesTags: (result, error, params) => [
+        { type: "Tickets", id: params?.userId || params?.clientId || "ALL" },
+      ],
     }),
 
     // GET /api/tickets/:id - Get single ticket
@@ -184,10 +195,10 @@ export const ticketsApi = createApi({
 
     // POST /api/tickets/:id/change-request - Create a change request
     createChangeRequest: builder.mutation({
-      query: ({ ticketId, requestedStatus, requestedPriority, requestedAssignedToId }) => ({
+      query: ({ ticketId, requestedStatus, requestedPriority, requestedAssignedToId, requestedDepartmentId }) => ({
         url: `/${ticketId}/change-request`,
         method: "POST",
-        body: { requestedStatus, requestedPriority, requestedAssignedToId },
+        body: { requestedStatus, requestedPriority, requestedAssignedToId, requestedDepartmentId },
       }),
       transformResponse: (response) => response.data,
       invalidatesTags: ["ChangeRequests"],
@@ -226,6 +237,7 @@ export const ticketsApi = createApi({
 });
 
 export const {
+  useGetDepartmentsQuery,
   useGetAssignableUsersQuery,
   useGetTicketsQuery,
   useGetTicketQuery,

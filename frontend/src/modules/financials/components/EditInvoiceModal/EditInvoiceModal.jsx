@@ -16,12 +16,11 @@ import {
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
 import {
-  primaryButton,
-  outlinedButton,
   modalCard,
   titlesTypography,
   primaryIconButton,
 } from "../../../../common/styles/styles";
+import { CancelButton } from "../../../../common/components/ui/CancelButton/CancelButton";
 
 export const EditInvoiceModal = ({
   showEditInvoiceModal,
@@ -262,12 +261,10 @@ export const EditInvoiceModal = ({
             >
               {savingInvoiceEdit ? t("common.saving") : t("common.save")}
             </Button>
-            <Button
-              onClick={() => setShowEditInvoiceModal(false)}
-              sx={outlinedButton}
-            >
-              {t("common.cancel")}
-            </Button>
+            <CancelButton
+              handleClick={() => setShowEditInvoiceModal(false)}
+              text={t("common.cancel")}
+            />
           </Box>
         </DialogActions>
       </form>

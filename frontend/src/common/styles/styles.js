@@ -251,6 +251,7 @@ export const primaryIconButton = {
   ...baseButton,
   background: colors.gradiantPrimaryColor,
   color: colors.surface,
+  minWidth: "16vh",
   gap: "8px",
   padding: "8px 16px",
   "& svg": {
@@ -1288,6 +1289,19 @@ export const selectMenuProps = {
       marginTop: "0.5rem",
       boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
       border: `1px solid ${colors.border}`,
+      backgroundColor: colors.surface,
+      "& .MuiMenuItem-root": {
+        color: colors.textPrimary,
+        "&:hover": {
+          backgroundColor: colors.background,
+        },
+        "&.Mui-selected": {
+          backgroundColor: colors.primaryLight,
+          "&:hover": {
+            backgroundColor: colors.primaryLight,
+          },
+        },
+      },
     },
   },
 };

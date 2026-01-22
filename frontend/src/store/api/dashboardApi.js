@@ -15,10 +15,16 @@ export const dashboardApi = createApi({
   tagTypes: ["DashboardStats", "RecentRecordings", "Announcements"],
   endpoints: (builder) => ({
     // Get dashboard stats
+    // Optional clientId param for BPO Admin to view specific client's data
     getDashboardStats: builder.query({
-      query: () => "/stats",
+      query: (clientId) => ({
+        url: "/stats",
+        params: clientId ? { clientId } : undefined,
+      }),
       transformResponse: (response) => response.data,
-      providesTags: ["DashboardStats"],
+      providesTags: (result, error, clientId) => [
+        { type: "DashboardStats", id: clientId || "ALL" },
+      ],
       // Cache for 5 minutes
       keepUnusedDataFor: 300,
     }),

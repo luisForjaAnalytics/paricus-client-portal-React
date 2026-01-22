@@ -36,7 +36,7 @@ export const RolesTab = () => {
   const { data: permissions = [] } = useGetPermissionsQuery();
   const [createRole, { isLoading: isCreating }] = useCreateRoleMutation();
   const [updateRole, { isLoading: isUpdating }] = useUpdateRoleMutation();
-  const [deleteRole, { isLoading: isDeleting }] = useDeleteRoleMutation();
+  const [deleteRole] = useDeleteRoleMutation();
   const [getRolePermissions] = useLazyGetRolePermissionsQuery();
   const [updateRolePermissions, { isLoading: isUpdatingPermissions }] =
     useUpdateRolePermissionsMutation();
@@ -44,12 +44,10 @@ export const RolesTab = () => {
   // Dialog states
   const [dialog, setDialog] = useState(false);
   const [permissionsDialog, setPermissionsDialog] = useState(false);
-  const [deleteDialog, setDeleteDialog] = useState(false);
 
   // Selection states
   const [editingRole, setEditingRole] = useState(null);
   const [selectedRole, setSelectedRole] = useState(null);
-  const [roleToDelete, setRoleToDelete] = useState(null);
   const [selectedClient, setSelectedClient] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPermissions, setSelectedPermissions] = useState([]);
@@ -239,26 +237,9 @@ export const RolesTab = () => {
     }
   };
 
-  const confirmDelete = (role) => {
-    try {
-      setRoleToDelete(role);
-      setDeleteDialog(true);
-    } catch (err) {
-      console.error(`ERROR confirmDelete: ${err}`);
-    }
-  };
-
-  const handleDeleteRole = async () => {
-    try {
-      await deleteRole(roleToDelete.id).unwrap();
-      showNotification(t("roles.messages.roleDeleted"), "success");
-      setDeleteDialog(false);
-      setRoleToDelete(null);
-    } catch (error) {
-      const errorMessage =
-        error.data?.error || t("roles.messages.roleDeleteFailed");
-      showNotification(errorMessage, "error");
-    }
+  // Función para eliminar rol directamente (la confirmación se maneja en DeleteButton)
+  const handleDeleteRole = async (role) => {
+    await deleteRole(role.id).unwrap();
   };
 
   const handlePermissionToggle = (permissionId) => {
@@ -340,7 +321,7 @@ export const RolesTab = () => {
     clients,
     openAddDialog,
     openEditDialog,
-    confirmDelete,
+    handleDeleteRole,
     openPermissionsDialog,
     formatDate,
     isProtectedRole,
@@ -375,11 +356,6 @@ export const RolesTab = () => {
         clients={clients}
         isBPOAdmin={isBPOAdmin}
         isProtectedRole={isProtectedRole}
-        deleteDialog={deleteDialog}
-        setDeleteDialog={setDeleteDialog}
-        roleToDelete={roleToDelete}
-        handleDeleteRole={handleDeleteRole}
-        isDeleting={isDeleting}
       />
     </>
   );

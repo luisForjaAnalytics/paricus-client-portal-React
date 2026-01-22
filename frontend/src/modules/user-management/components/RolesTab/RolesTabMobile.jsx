@@ -51,9 +51,9 @@ import {
 } from "../../../../store/api/adminApi";
 import {
   primaryButton,
-  outlinedButton,
   titlesTypography,
 } from "../../../../common/styles/styles";
+import { CancelButton } from "../../../../common/components/ui/CancelButton/CancelButton";
 import { useTranslation } from "react-i18next";
 
 function Row({
@@ -215,7 +215,7 @@ function Row({
                       </IconButton>
                     </Tooltip>
                     <Tooltip title={t("roles.actions.delete")}>
-                      <span>
+                      {/* <span>
                         <IconButton
                           size="small"
                           color="error"
@@ -224,7 +224,7 @@ function Row({
                         >
                           <DeleteIcon fontSize="small" />
                         </IconButton>
-                      </span>
+                      </span> */}
                     </Tooltip>
                   </Box>
                 </Box>
@@ -624,9 +624,10 @@ export const RolesTabMobile = () => {
           </FormControl>
         </DialogContent>
         <DialogActions>
-          <Button onClick={closeDialog} sx={outlinedButton}>
-            {t("common.cancel")}
-          </Button>
+          <CancelButton
+            handleClick={closeDialog}
+            text={t("common.cancel")}
+          />
           <Button
             variant="contained"
             onClick={saveRole}
@@ -671,9 +672,10 @@ export const RolesTabMobile = () => {
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button onClick={closePermissionsDialog} sx={outlinedButton}>
-            {t("common.cancel")}
-          </Button>
+          <CancelButton
+            handleClick={closePermissionsDialog}
+            text={t("common.cancel")}
+          />
           <Button
             variant="contained"
             onClick={savePermissions}
@@ -699,9 +701,10 @@ export const RolesTabMobile = () => {
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteDialog(false)} sx={outlinedButton}>
-            {t("common.cancel")}
-          </Button>
+          <CancelButton
+            handleClick={() => setDeleteDialog(false)}
+            text={t("common.cancel")}
+          />
           <Button
             variant="contained"
             color="error"

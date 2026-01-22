@@ -30,6 +30,7 @@ import {
 } from "../../../../common/components/ui/DataGrid/UniversalDataGrid";
 import { formatDateTime } from "../../../../common/utils/formatDateTime";
 import { colors } from "../../../../common/styles/styles";
+import { CancelButton } from "../../../../common/components/ui/CancelButton/CancelButton";
 
 export const TicketsCenter = () => {
   const { t } = useTranslation();
@@ -432,12 +433,11 @@ export const TicketsCenter = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button
-            onClick={() => setRejectDialogOpen(false)}
+          <CancelButton
+            handleClick={() => setRejectDialogOpen(false)}
             disabled={isRejecting}
-          >
-            {t("common.cancel") || "Cancel"}
-          </Button>
+            text={t("common.cancel") || "Cancel"}
+          />
           <Button
             onClick={handleRejectConfirm}
             color="error"

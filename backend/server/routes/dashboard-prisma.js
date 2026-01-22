@@ -99,19 +99,49 @@ function authenticateTokenFlexible(req, res, next) {
  * GET /api/dashboard/stats
  * Returns aggregated statistics for the main dashboard
  *
+ * Query params:
+ * - clientId (optional): For BPO Admin to view a specific client's data
+ *
  * Authorization:
- * - BPO Admin: sees ALL data across all clients
+ * - BPO Admin: sees ALL data across all clients (or specific client if clientId provided)
  * - Client Admin/User: sees only THEIR client's data
  */
 router.get('/stats', authenticateToken, async (req, res) => {
   try {
-    const { clientId, permissions } = req.user;
+    const { clientId: userClientId, permissions } = req.user;
+    const { clientId: queryClientId } = req.query;
+
+    // Validate user data
+    if (!permissions || !Array.isArray(permissions)) {
+      return res.status(401).json({
+        error: 'Invalid authentication',
+        message: 'User permissions not found'
+      });
+    }
 
     // Determine if user is BPO Admin
     const isBPOAdmin = permissions.includes('admin_clients');
 
+    // Determine which clientId to use for filtering
+    let targetClientId = null;
+    if (isBPOAdmin && queryClientId) {
+      // BPO Admin viewing specific client - validate clientId
+      const parsedClientId = parseInt(queryClientId, 10);
+      if (isNaN(parsedClientId) || parsedClientId <= 0) {
+        return res.status(400).json({
+          error: 'Invalid clientId parameter',
+          message: 'clientId must be a positive integer'
+        });
+      }
+      targetClientId = parsedClientId;
+    } else if (!isBPOAdmin) {
+      // Regular user - always filter by their client
+      targetClientId = userClientId;
+    }
+    // If BPO Admin without queryClientId, targetClientId remains null (sees all)
+
     // Where clause for filtering by client
-    const whereClause = isBPOAdmin ? {} : { clientId };
+    const whereClause = targetClientId ? { clientId: targetClientId } : {};
 
     // ==================== PARALLEL QUERIES ====================
     const [
@@ -227,9 +257,17 @@ router.get('/stats', authenticateToken, async (req, res) => {
 
     // Get client information for ticket distribution
     const clients = await prisma.client.findMany({
-      where: isBPOAdmin ? { isActive: true } : { id: clientId },
+      where: targetClientId ? { id: targetClientId } : (isBPOAdmin ? { isActive: true } : { id: userClientId }),
       select: { id: true, name: true },
     });
+
+    // Get selected client info (for UI display)
+    const selectedClient = targetClientId
+      ? await prisma.client.findUnique({
+          where: { id: targetClientId },
+          select: { id: true, name: true },
+        })
+      : null;
 
     // Map tickets by client
     const ticketsBySegment = clients.map((client) => {
@@ -273,6 +311,8 @@ router.get('/stats', authenticateToken, async (req, res) => {
         // Metadata
         lastUpdated: new Date().toISOString(),
         isBPOAdmin,
+        selectedClient, // null if viewing all, or { id, name } if viewing specific client
+        viewingAllClients: !targetClientId && isBPOAdmin,
       },
     });
   } catch (error) {

@@ -12,11 +12,16 @@ export const adminApi = createApi({
   }),
   tagTypes: ["Users", "Clients", "Roles", "Permissions", "RolePermissions"],
   endpoints: (builder) => ({
-    // Get all users
+    // Get all users (optionally filtered by clientId)
     getUsers: builder.query({
-      query: () => "/users",
+      query: (clientId) => ({
+        url: "/users",
+        params: clientId ? { clientId } : undefined,
+      }),
       transformResponse: (response) => response.users || [],
-      providesTags: ["Users"],
+      providesTags: (result, error, clientId) => [
+        { type: "Users", id: clientId || "ALL" },
+      ],
       keepUnusedDataFor: 300, // 5 minutes cache
     }),
 

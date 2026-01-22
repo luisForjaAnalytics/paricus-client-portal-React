@@ -234,50 +234,29 @@ export const ReportsManagementView = () => {
     }
   };
 
-  const handleDeleteReport = async (folder, report) => {
-    if (!window.confirm(t("reportsManagement.upload.confirmDelete", { reportName: report.name })))
-      return;
+  const handleDeleteReport = async (report) => {
+    // La confirmación se maneja en el DeleteButton via modal
+    // Extraer el folder del key del report (formato: "folder/filename")
+    const folder = report.key.split('/')[0];
+    const fileName = report.name;
 
+    await deleteReportMutation({ folder, fileName }).unwrap();
+
+    // Log successful delete
     try {
-      const fileName = report.name;
-      await deleteReportMutation({ folder, fileName }).unwrap();
-
-      showNotification("success", t("reportsManagement.upload.deleteSuccess"));
-
-      // Log successful delete
-      try {
-        await createLog({
-          userId: authUser.id.toString(),
-          eventType: 'DELETE',
-          entity: 'Report',
-          description: `Deleted report ${fileName} from folder ${folder}`,
-          status: 'SUCCESS',
-        }).unwrap();
-      } catch (logErr) {
-        console.error("Error logging report deletion:", logErr);
-      }
-
-      // Refetch reports for this folder
-      await fetchReportsForFolder(folder);
-    } catch (error) {
-      showNotification(
-        "error",
-        error.data?.message || t("reportsManagement.upload.deleteError")
-      );
-
-      // Log failed delete
-      try {
-        await createLog({
-          userId: authUser.id.toString(),
-          eventType: 'DELETE',
-          entity: 'Report',
-          description: `Failed to delete report ${report.name} from folder ${folder}`,
-          status: 'FAILURE',
-        }).unwrap();
-      } catch (logErr) {
-        console.error("Error logging report deletion failure:", logErr);
-      }
+      await createLog({
+        userId: authUser.id.toString(),
+        eventType: 'DELETE',
+        entity: 'Report',
+        description: `Deleted report ${fileName} from folder ${folder}`,
+        status: 'SUCCESS',
+      }).unwrap();
+    } catch (logErr) {
+      console.error("Error logging report deletion:", logErr);
     }
+
+    // Refetch reports for this folder
+    await fetchReportsForFolder(folder);
   };
 
   const resetUploadForm = () => {

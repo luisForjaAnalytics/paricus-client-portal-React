@@ -12,7 +12,6 @@ import LinkIcon from "@mui/icons-material/Link";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { formatDateTime } from "../../../../../common/utils/formatDateTime";
-import { TicketText } from "../../../../../common/components/ui/TicketText";
 import {
   TicketPriorityContext,
   TicketStatusContext,
@@ -24,12 +23,13 @@ import { TicketChangesRequest } from "./TicketChangesRequest";
 import { colors, ticketStyle } from "../../../../../common/styles/styles";
 import { usePermissions } from "../../../../../common/hooks/usePermissions";
 import {
-  useGetAssignableUsersQuery,
+  useGetDepartmentsQuery,
   useUpdateTicketMutation,
   useAddTicketDetailMutation,
   useCreateChangeRequestMutation,
 } from "../../../../../store/api/ticketsApi";
 import { useTicketDetailAttachments } from "../../../../../common/hooks/useTicketDetailAttachments";
+import { CancelButton } from "../../../../../common/components/ui/CancelButton/CancelButton";
 
 // Icon mapping for each field
 const fieldIcons = {
@@ -197,22 +197,18 @@ const fieldFormatters = {
     return name;
   },
 
-  // Format "assignedTo" field - extracts name from assignedTo object (clickable)
-  assignedTo: (value, ticket, handlers, pendingUser) => {
+  // Format "assignedTo" field - now shows department name (clickable)
+  assignedTo: (value, ticket, handlers, pendingDepartment) => {
     let name;
 
-    if (pendingUser) {
-      // Show pending user if one is selected
-      name =
-        `${pendingUser.firstName || ""} ${pendingUser.lastName || ""}`.trim() ||
-        "Unknown";
-    } else if (ticket?.assignedTo) {
-      // Show current assigned user
-      name =
-        `${ticket.assignedTo.firstName || ""} ${ticket.assignedTo.lastName || ""}`.trim() ||
-        "Unknown";
+    if (pendingDepartment) {
+      // Show pending department if one is selected
+      name = pendingDepartment.name || "Unknown";
+    } else if (ticket?.department) {
+      // Show current assigned department
+      name = ticket.department.name || "Unknown";
     } else {
-      // No one assigned
+      // No department assigned
       name = "Unassigned";
     }
 
@@ -221,8 +217,8 @@ const fieldFormatters = {
         label={name}
         onClick={handlers?.onAssignedToClick}
         sx={{
-          backgroundColor: pendingUser ? "#fff3e0" : "#f5f5f5",
-          color: pendingUser ? "#e65100" : "#616161",
+          backgroundColor: pendingDepartment ? "#fff3e0" : "#f5f5f5",
+          color: pendingDepartment ? "#e65100" : "#616161",
           fontWeight: "medium",
           fontSize: "0.875rem",
           cursor: handlers?.onAssignedToClick ? "pointer" : "default",
@@ -392,8 +388,8 @@ const TicketInfoDetails = ({ ticket }) => {
   // Get user permissions
   const { isBPOAdmin, isClientAdmin } = usePermissions();
 
-  // Fetch assignable users to get user details when selected
-  const { data: usersData } = useGetAssignableUsersQuery();
+  // Fetch departments to get department details when selected
+  const { data: departmentsData } = useGetDepartmentsQuery();
 
   // Determine edit capabilities based on permissions
   // - BPO Admin: can edit directly
@@ -450,16 +446,15 @@ const TicketInfoDetails = ({ ticket }) => {
     setOpenStatusModal(false);
   };
 
-  const handleAssignedToSelect = (userId) => {
-    setPendingAssignedTo(userId);
+  const handleAssignedToSelect = (departmentId) => {
+    setPendingAssignedTo(departmentId);
 
-    // Find the selected user from the users list
-    // Note: usersData is already the array after transformResponse in ticketsApi
-    const selectedUser = Array.isArray(usersData)
-      ? usersData.find((user) => user.id === userId)
+    // Find the selected department from the departments list
+    const selectedDepartment = Array.isArray(departmentsData)
+      ? departmentsData.find((dept) => dept.id === departmentId)
       : null;
-    if (selectedUser) {
-      setPendingAssignedToUser(selectedUser);
+    if (selectedDepartment) {
+      setPendingAssignedToUser(selectedDepartment); // Reusing context for department
     }
 
     setOpenAssignedToModal(false);
@@ -491,7 +486,7 @@ const TicketInfoDetails = ({ ticket }) => {
           ticketId: ticketId,
           requestedStatus: pendingStatus || null,
           requestedPriority: pendingPriority || null,
-          requestedAssignedToId: pendingAssignedTo || null,
+          requestedDepartmentId: pendingAssignedTo || null, // Now sending departmentId
         }).unwrap();
 
         // Clear pending changes
@@ -514,7 +509,9 @@ const TicketInfoDetails = ({ ticket }) => {
           try {
             await uploadAllFiles(newDetail.id);
           } catch (uploadError) {
-            console.error(`TicketViewDetailsInfo uploadAllFiles: ${uploadError}`);
+            console.error(
+              `TicketViewDetailsInfo uploadAllFiles: ${uploadError}`,
+            );
           }
         }
 
@@ -547,7 +544,7 @@ const TicketInfoDetails = ({ ticket }) => {
       }
 
       if (pendingAssignedTo) {
-        updateData.assignedToId = pendingAssignedTo;
+        updateData.departmentId = pendingAssignedTo; // Now sending departmentId
       }
 
       if (Object.keys(updateData).length > 0) {
@@ -725,26 +722,14 @@ const TicketInfoDetails = ({ ticket }) => {
           >
             {t("common.update")}
           </Button>
-          <Button
-            onClick={handleCancel}
+          <CancelButton
+            handleClick={handleCancel}
             sx={ticketStyle.cancelButton}
             disabled={isLoading}
-          >
-            {t("common.cancel")}
-          </Button>
+            text={t("common.cancel")}
+          />
         </Box>
       </Box>
-
-      {/* Priority Change Modal */}
-      {
-        <TicketChangesRequest
-          open={openPriorityModal}
-          onClose={() => setOpenPriorityModal(false)}
-          currentValue={pendingPriority || ticket.priority}
-          onSelect={handlePrioritySelect}
-          changeType="priority"
-        />
-      }
 
       {/* Status Change Modal */}
       {
@@ -756,13 +741,24 @@ const TicketInfoDetails = ({ ticket }) => {
           changeType="status"
         />
       }
+      {/* Priority Change Modal */}
+      {
+        <TicketChangesRequest
+          open={openPriorityModal}
+          onClose={() => setOpenPriorityModal(false)}
+          currentValue={pendingPriority || ticket.priority}
+          onSelect={handlePrioritySelect}
+          changeType="priority"
+        />
+      }
 
-      {/* Assigned To Change Modal */}
+
+      {/* Department Assignment Modal */}
       {
         <TicketChangesRequest
           open={openAssignedToModal}
           onClose={() => setOpenAssignedToModal(false)}
-          currentValue={pendingAssignedTo || ticket.assignedToId}
+          currentValue={pendingAssignedTo || ticket.departmentId}
           onSelect={handleAssignedToSelect}
           changeType="assignedTo"
         />

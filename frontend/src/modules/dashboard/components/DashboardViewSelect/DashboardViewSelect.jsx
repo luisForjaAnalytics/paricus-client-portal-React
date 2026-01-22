@@ -1,27 +1,51 @@
-import { Box, CircularProgress, Alert } from "@mui/material";
+import { Box, CircularProgress, Alert, Chip } from "@mui/material";
 import { useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
+import PropTypes from "prop-types";
 import { useGetDashboardStatsQuery } from "../../../../store/api/dashboardApi";
 import { AnnouncementsInbox } from "../AnnouncementsInbox";
 import { DashboardStatisticsView } from "../DashboardStatisticsView/DashboardStatisticsView";
 import { ActiveTasks } from "../ActiveTasks";
 import { MasterRepository } from "../MasterRepository";
 
-export const DashboardViewSelect = () => {
+/**
+ * DashboardViewSelect - Displays dashboard content based on selected client/user
+ * @param {Object} props
+ * @param {number|null} props.selectedClientId - Client ID to filter data
+ * @param {number|null} props.selectedUserId - User ID to simulate user view
+ */
+export const DashboardViewSelect = ({
+  selectedClientId = null,
+  selectedUserId = null,
+}) => {
+  const { t } = useTranslation();
+
   // Get user permissions to check if BPO Admin
-  const permissions = useSelector((state) => state.auth.permissions);
-  const isBPOAdmin = permissions?.includes("admin_clients");
+  const permissions = useSelector((state) => state.auth?.permissions);
+  const isBPOAdmin = permissions?.includes("admin_clients") ?? false;
 
   const {
     data: stats,
     isLoading,
     error,
     refetch,
-  } = useGetDashboardStatsQuery(undefined, {
+  } = useGetDashboardStatsQuery(selectedClientId, {
     // Refetch every 5 minutes
     pollingInterval: 300000,
     // Refetch when window regains focus
     refetchOnFocus: true,
   });
+
+  /**
+   * Handle retry on error
+   */
+  const handleRetry = () => {
+    try {
+      refetch();
+    } catch (err) {
+      console.error("Error refetching dashboard data:", err);
+    }
+  };
 
   // Loading state
   if (isLoading) {
@@ -41,10 +65,19 @@ export const DashboardViewSelect = () => {
 
   // Error state
   if (error) {
+    const errorMessage =
+      error?.data?.message ||
+      error?.message ||
+      t("dashboard.errorLoadingData", "Error loading dashboard data. Click to retry.");
+
     return (
       <Box sx={{ p: 3 }}>
-        <Alert severity="error" onClose={refetch}>
-          Error loading dashboard data. Click to retry.
+        <Alert
+          severity="error"
+          onClose={handleRetry}
+          sx={{ cursor: "pointer" }}
+        >
+          {errorMessage}
         </Alert>
       </Box>
     );
@@ -57,6 +90,18 @@ export const DashboardViewSelect = () => {
         paddingTop: { xs: 3, md: 3 },
       }}
     >
+      {/* Selected Client Indicator */}
+      {isBPOAdmin && stats?.selectedClient && (
+        <Box sx={{ mb: 2 }}>
+          <Chip
+            label={`${t("dashboard.viewing", "Viewing")}: ${stats.selectedClient.name}`}
+            color="primary"
+            variant="outlined"
+            size="small"
+          />
+        </Box>
+      )}
+
       {/* Top Stats Cards */}
       <DashboardStatisticsView stats={stats} />
 
@@ -64,7 +109,7 @@ export const DashboardViewSelect = () => {
       <Box
         sx={{
           mb: 2,
-          height: "25vh", /// Announcements Inbox
+          height: "25vh",
         }}
       >
         {/* Announcements Inbox */}
@@ -81,15 +126,20 @@ export const DashboardViewSelect = () => {
           gap: 3,
         }}
       >
-        {/* Latest Interactions */}
-        {/* <LatestInteractions /> */}
-
         {/* Active Tasks */}
-        <ActiveTasks />
+        <ActiveTasks
+          selectedClientId={selectedClientId}
+          selectedUserId={selectedUserId}
+        />
 
         {/* Master Repository */}
         <MasterRepository />
       </Box>
     </Box>
   );
+};
+
+DashboardViewSelect.propTypes = {
+  selectedClientId: PropTypes.number,
+  selectedUserId: PropTypes.number,
 };

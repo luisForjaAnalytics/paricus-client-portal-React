@@ -16,17 +16,11 @@ import {
 } from "@mui/material";
 import {
   Add as AddIcon,
-  Edit as EditIcon,
   Security as SecurityIcon,
-  Delete as DeleteIcon,
   Shield as ShieldIcon,
   Search as SearchIcon,
 } from "@mui/icons-material";
-import {
-  primaryIconButton,
-  colors,
-  filterStyles,
-} from "../../../../common/styles/styles";
+import { colors, filterStyles } from "../../../../common/styles/styles";
 import {
   UniversalDataGrid,
   useDataGridColumns,
@@ -34,6 +28,9 @@ import {
 import { useTranslation } from "react-i18next";
 import { PermissionsModal } from "./PermissionsModal";
 import { FilterButton } from "../FilterButton/FilterButton";
+import { ActionButton } from "../../../../common/components/ui/ActionButton/ActionButton";
+import { EditButton } from "../../../../common/components/ui/EditButton/EditButton";
+import { DeleteButton } from "../../../../common/components/ui/DeleteButton/DeleteButton";
 
 export const RolesTabDesktop = ({
   roles,
@@ -118,15 +115,12 @@ export const RolesTabDesktop = ({
       flex: 1,
       sortable: false,
       renderCell: (params) => (
-        <Box sx={{ display: "flex", gap: 0.5, justifyContent: "center" }}>
-          <Tooltip title={t("roles.actions.edit")}>
-            <IconButton
-              size="small"
-              onClick={() => openEditDialog(params.row.original)}
-            >
-              <EditIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
+        <Box sx={{ display: "flex", gap: 0.5, justifyContent: "center", mt:'0.5rem' }}>
+          <EditButton
+            handleClick={openEditDialog}
+            item={params.row.original}
+            title={t("roles.actions.edit")}
+          />
           <Tooltip title={t("roles.actions.configurePermissions")}>
             <IconButton
               size="small"
@@ -136,18 +130,13 @@ export const RolesTabDesktop = ({
               <SecurityIcon fontSize="small" />
             </IconButton>
           </Tooltip>
-          <Tooltip title={t("roles.actions.delete")}>
-            <span>
-              <IconButton
-                size="small"
-                color="error"
-                onClick={() => confirmDelete(params.row.original)}
-                disabled={isProtectedRole(params.row.role_name)}
-              >
-                <DeleteIcon fontSize="small" />
-              </IconButton>
-            </span>
-          </Tooltip>
+          <DeleteButton
+            handleDelete={confirmDelete}
+            item={params.row.original}
+            itemName={params.row.role_name}
+            itemType="role"
+            disabled={isProtectedRole(params.row.role_name)}
+          />
         </Box>
       ),
     },
@@ -262,15 +251,11 @@ export const RolesTabDesktop = ({
             gap: 1,
           }}
         >
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<AddIcon />}
-            onClick={openAddDialog}
-            sx={primaryIconButton}
-          >
-            {t("roles.addRole")}
-          </Button>
+          <ActionButton
+            handleClick={openAddDialog}
+            icon={<AddIcon />}
+            text={t("roles.addRole")}
+          />
 
           {/* filter Button */}
           <FilterButton

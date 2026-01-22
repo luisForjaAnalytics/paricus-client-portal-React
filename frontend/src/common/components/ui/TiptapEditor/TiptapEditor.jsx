@@ -225,8 +225,8 @@ const MenuBar = ({ editor, customLeftButtons = [] }) => {
   }
 };
 
-// Default character limit
-const DEFAULT_MAX_CHARACTERS = 2000;
+// Fixed character limit - standardized across all usages
+const MAX_CHARACTERS = 2000;
 
 export const TiptapEditor = ({
   value = "",
@@ -234,7 +234,6 @@ export const TiptapEditor = ({
   placeholder = "",
   error,
   helperText,
-  maxCharacters = DEFAULT_MAX_CHARACTERS,
   sx = {},
   fullWidth = true,
   customLeftButtons = [],
@@ -258,7 +257,7 @@ export const TiptapEditor = ({
         placeholder: placeholder,
       }),
       CharacterCount.configure({
-        limit: maxCharacters,
+        limit: MAX_CHARACTERS,
       }),
     ],
     content: value || "",
@@ -308,8 +307,8 @@ export const TiptapEditor = ({
 
   // Get character count from the extension
   const currentLength = editor?.storage.characterCount?.characters() || 0;
-  const isOverLimit = maxCharacters && currentLength > maxCharacters;
-  const isNearLimit = maxCharacters && currentLength > maxCharacters * 0.9;
+  const isOverLimit = MAX_CHARACTERS && currentLength > MAX_CHARACTERS;
+  const isNearLimit = MAX_CHARACTERS && currentLength > MAX_CHARACTERS * 0.9;
 
   return (
     <Box
@@ -365,7 +364,7 @@ export const TiptapEditor = ({
       </Box>
 
       {/* Helper Text & Character Counter */}
-      {(helperText || maxCharacters) && (
+      {(helperText || MAX_CHARACTERS) && (
         <Box
           sx={{
             display: "flex",
@@ -384,7 +383,7 @@ export const TiptapEditor = ({
           >
             {helperText}
           </Box>
-          {maxCharacters && (
+          {MAX_CHARACTERS && (
             <Box
               sx={{
                 fontSize: "0.75rem",
@@ -394,7 +393,7 @@ export const TiptapEditor = ({
                 whiteSpace: "nowrap",
               }}
             >
-              {currentLength}/{maxCharacters}
+              {currentLength}/{MAX_CHARACTERS}
             </Box>
           )}
         </Box>
@@ -409,7 +408,6 @@ TiptapEditor.propTypes = {
   placeholder: PropTypes.string,
   error: PropTypes.bool,
   helperText: PropTypes.string,
-  maxCharacters: PropTypes.number,
   sx: PropTypes.object,
   fullWidth: PropTypes.bool,
   customLeftButtons: PropTypes.arrayOf(PropTypes.node),

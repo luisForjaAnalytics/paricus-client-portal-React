@@ -17,9 +17,6 @@ import {
   Collapse,
 } from "@mui/material";
 import {
-  Download as DownloadIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
   Payment as PaymentIcon,
   PictureAsPdf as PdfIcon,
   Upload as UploadIcon,
@@ -29,6 +26,9 @@ import {
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import { PendingLinkModal } from "./PendingLinkModal";
+import { EditButton } from "../../../../common/components/ui/EditButton/EditButton";
+import { DeleteButton } from "../../../../common/components/ui/DeleteButton/DeleteButton";
+import { DownloadButton } from "../../../../common/components/ui/DownloadButton/DownloadButton";
 
 function InvoiceRow({
   invoice,
@@ -227,35 +227,24 @@ function InvoiceRow({
                       </Button>
                     )}
                     {isAdmin && (
-                      <Tooltip title={t("invoices.actions.editInvoice")}>
-                        <IconButton
-                          color="primary"
-                          size="small"
-                          onClick={() => openEditInvoiceModal(invoice)}
-                        >
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
+                      <EditButton
+                        handleClick={openEditInvoiceModal}
+                        item={invoice}
+                        title={t("invoices.actions.editInvoice")}
+                      />
                     )}
-                    <Tooltip title={t("invoices.actions.download")}>
-                      <IconButton
-                        color="info"
-                        size="small"
-                        onClick={() => downloadInvoice(invoice)}
-                      >
-                        <DownloadIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
+                    <DownloadButton
+                      handleClick={downloadInvoice}
+                      item={invoice}
+                      title={t("invoices.actions.download")}
+                    />
                     {isAdmin && (
-                      <Tooltip title={t("invoices.actions.delete")}>
-                        <IconButton
-                          color="error"
-                          size="small"
-                          onClick={() => handleDeleteInvoice(invoice)}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
+                      <DeleteButton
+                        handleDelete={handleDeleteInvoice}
+                        item={invoice}
+                        itemName={`${t("common.invoice")} #${invoice.invoiceNumber}`}
+                        itemType="invoice"
+                      />
                     )}
                   </Stack>
                 </Box>

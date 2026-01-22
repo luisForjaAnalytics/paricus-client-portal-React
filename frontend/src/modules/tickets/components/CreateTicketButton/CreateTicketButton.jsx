@@ -33,25 +33,26 @@ import {
 import {
   useCreateTicketMutation,
   useUploadTicketAttachmentMutation,
-  useGetAssignableUsersQuery,
+  useGetDepartmentsQuery,
 } from "../../../../store/api/ticketsApi";
 import { TiptapEditor } from "../../../../common/components/ui/TiptapEditor";
 import "../../../../common/components/ui/TiptapEditor/tiptap-editor.css";
 import { SelectMenuItem } from "../../../../common/components/ui/SelectMenuItem/SelectMenuItem";
 import { priorityOptions } from "./options";
+import { ActionButton } from "../../../../common/components/ui/ActionButton/ActionButton";
+import { CancelButton } from "../../../../common/components/ui/CancelButton/CancelButton";
 
 export const CreateTickeButton = ({}) => {
   const { t } = useTranslation();
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [createTicket, { isLoading, error }] = useCreateTicketMutation();
   const [uploadAttachment] = useUploadTicketAttachmentMutation();
-  const { data: assignableUsers = [], isLoading: loadingUsers } =
-    useGetAssignableUsersQuery();
+  const { data: departments = [], isLoading: loadingDepartments } =
+    useGetDepartmentsQuery();
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
 
   const MAX_CHARACTERS = 500;
-
   // React Hook Form
   const {
     control,
@@ -64,7 +65,7 @@ export const CreateTickeButton = ({}) => {
     defaultValues: {
       subject: "",
       priority: "",
-      assignedTo: "",
+      departmentId: "",
       url: "",
       description: {
         descriptionData: "",
@@ -87,7 +88,7 @@ export const CreateTickeButton = ({}) => {
   // Remove file from selection
   const removeFile = (indexToRemove) => {
     setSelectedFiles((prev) =>
-      prev.filter((_, index) => index !== indexToRemove)
+      prev.filter((_, index) => index !== indexToRemove),
     );
   };
 
@@ -102,6 +103,9 @@ export const CreateTickeButton = ({}) => {
     setShowUploadModal(false);
   };
 
+  const handleUploadModal = () => {
+    setShowUploadModal(true);
+  };
   // Custom attachment button for the editor toolbar
   const attachmentButton = (
     <Tooltip title={t("tickets.ticketView.attachFile")} arrow placement="top">
@@ -147,7 +151,7 @@ export const CreateTickeButton = ({}) => {
       const payload = {
         subject: data.subject,
         priority: data.priority,
-        assignedToId: data.assignedTo, // Backend expects 'assignedToId'
+        departmentId: data.departmentId, // Backend expects 'departmentId'
         description: data.description.descriptionData,
         url: data.url || null,
       };
@@ -186,14 +190,11 @@ export const CreateTickeButton = ({}) => {
 
   return (
     <>
-      <Button
-        variant="contained"
-        startIcon={<AddIcon />}
-        onClick={() => setShowUploadModal(true)}
-        sx={primaryIconButton}
-      >
-        {t("tickets.createNewTicket.createNewTicket")}
-      </Button>
+      <ActionButton
+        handleClick={handleUploadModal}
+        icon={<AddIcon />}
+        text={t("tickets.createNewTicket.createNewTicket")}
+      />
 
       <Dialog
         open={showUploadModal}
@@ -244,7 +245,7 @@ export const CreateTickeButton = ({}) => {
                       {...field}
                       label={t("tickets.createNewTicket.subject.label")}
                       placeholder={t(
-                        "tickets.createNewTicket.subject.placeholderMsg"
+                        "tickets.createNewTicket.subject.placeholderMsg",
                       )}
                       error={!!errors.invoiceName}
                       helperText={errors.subject?.message}
@@ -274,19 +275,19 @@ export const CreateTickeButton = ({}) => {
                   )}
                 />
                 <Controller
-                  name="assignedTo"
+                  name="departmentId"
                   control={control}
                   rules={{
                     required: t(
-                      "tickets.createNewTicket.assignedTo.requiredMsg"
+                      "tickets.createNewTicket.department.requiredMsg",
                     ),
                   }}
                   render={({ field }) => (
-                    <FormControl fullWidth error={!!errors.assignedTo}>
+                    <FormControl fullWidth error={!!errors.departmentId}>
                       <InputLabel
                         sx={modalCard?.multiOptionFilter?.inputLabelSection}
                       >
-                        {t("tickets.createNewTicket.assignedTo.label")}
+                        {t("tickets.createNewTicket.department.label")}
                       </InputLabel>
                       <Select
                         {...field}
@@ -294,24 +295,27 @@ export const CreateTickeButton = ({}) => {
                           ...modalCard?.multiOptionFilter?.selectSection,
                           height: "3rem",
                         }}
-                        label={t("tickets.createNewTicket.assignedTo.label")}
-                        disabled={loadingUsers}
+                        label={t("tickets.createNewTicket.department.label")}
+                        disabled={loadingDepartments}
                         MenuProps={selectMenuProps}
                       >
-                        {assignableUsers.map((user) => (
-                          <MenuItem key={user.id} value={user.id}>
-                            {user.fullName} ({user.roleName})
-                            {user.clientName && ` - ${user.clientName}`}
+                        {departments.map((dept) => (
+                          <MenuItem
+                            key={dept.id}
+                            value={dept.id}
+                            sx={{ color: "text.primary" }}
+                          >
+                            {dept.name}
                           </MenuItem>
                         ))}
                       </Select>
-                      {errors.assignedTo && (
+                      {errors.departmentId && (
                         <Typography
                           variant="caption"
                           color="error"
                           sx={{ mt: 0.5, ml: 1.5 }}
                         >
-                          {errors.assignedTo.message}
+                          {errors.departmentId.message}
                         </Typography>
                       )}
                     </FormControl>
@@ -371,7 +375,7 @@ export const CreateTickeButton = ({}) => {
                   control={control}
                   rules={{
                     required: t(
-                      "tickets.createNewTicket.description.requiredMsg"
+                      "tickets.createNewTicket.description.requiredMsg",
                     ),
                   }}
                   render={({ field }) => (
@@ -382,7 +386,7 @@ export const CreateTickeButton = ({}) => {
                         setValue("description.textLength", textLength);
                       }}
                       placeholder={t(
-                        "tickets.createNewTicket.description.placeholderMsg"
+                        "tickets.createNewTicket.description.placeholderMsg",
                       )}
                       error={
                         isOverLimit || !!errors.description?.descriptionData
@@ -394,11 +398,11 @@ export const CreateTickeButton = ({}) => {
                               "tickets.createNewTicket.description.maxCharactersError",
                               {
                                 max: MAX_CHARACTERS,
-                              }
+                              },
                             )
                           : "")
                       }
-                      maxCharacters={MAX_CHARACTERS}
+                      //maxCharacters={MAX_CHARACTERS}
                       fullWidth
                       customLeftButtons={[attachmentButton]}
                     />
@@ -413,23 +417,21 @@ export const CreateTickeButton = ({}) => {
               justifyContent: "center",
             }}
           >
-            <Button
+            <ActionButton
               type="submit"
               variant="contained"
-              sx={primaryIconButton}
               disabled={isLoading || isUploading || isOverLimit}
-            >
-              {isLoading || isUploading
-                ? t("common.loading") || "Loading..."
-                : t("tickets.createNewTicket.submit")}
-            </Button>
-            <Button
-              onClick={handleCancelModal}
-              sx={outlinedButton}
+              text={
+                isLoading || isUploading
+                  ? t("common.loading") || "Loading..."
+                  : t("tickets.createNewTicket.submit")
+              }
+            />
+            <CancelButton
+              handleClick={handleCancelModal}
               disabled={isLoading || isUploading}
-            >
-              {t("common.cancel")}
-            </Button>
+              text={t("common.cancel")}
+            />
           </DialogActions>
         </form>
       </Dialog>

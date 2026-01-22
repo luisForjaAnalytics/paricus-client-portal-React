@@ -80,6 +80,7 @@ model User {
   changeRequestsCreated         TicketChangeRequest[] @relation("ChangeRequestedBy")
   changeRequestsReviewed        TicketChangeRequest[] @relation("ChangeReviewedBy")
   changeRequestsAssignedTo      TicketChangeRequest[] @relation("ChangeRequestedAssignee")
+  departmentsResponsible        Department[]          @relation("DepartmentResponsible")
 
   @@index([email])
   @@index([clientId])
@@ -216,11 +217,31 @@ model Log {
   @@map("logs")
 }
 
+model Department {
+  id                Int                   @id @default(autoincrement())
+  name              String                @unique // "Reporting", "Billing", "IT Support", "Operations"
+  email             String                @unique // Contact email for the department
+  responsibleUserId Int?                  @map("responsible_user_id")
+  description       String?
+  isActive          Boolean               @default(true) @map("is_active")
+  createdAt         DateTime              @default(now()) @map("created_at")
+  updatedAt         DateTime              @default(now()) @updatedAt @map("updated_at")
+  responsibleUser   User?                 @relation("DepartmentResponsible", fields: [responsibleUserId], references: [id], onDelete: SetNull)
+  tickets           Ticket[]              @relation("TicketDepartment")
+  changeRequests    TicketChangeRequest[] @relation("ChangeRequestedDepartment")
+
+  @@index([name])
+  @@index([responsibleUserId])
+  @@index([isActive])
+  @@map("departments")
+}
+
 model Ticket {
   id             String                @id @default(uuid())
   clientId       Int                   @map("client_id")
   userId         Int                   @map("user_id")
   assignedToId   Int?                  @map("assigned_to_id")
+  departmentId   Int?                  @map("department_id")
   subject        String
   priority       String                // "High", "Medium", "Low"
   status         String                @default("Open") // "Open", "In Progress", "Resolved", "Closed"
@@ -230,6 +251,7 @@ model Ticket {
   client         Client                @relation(fields: [clientId], references: [id], onDelete: Cascade)
   user           User                  @relation("TicketCreator", fields: [userId], references: [id], onDelete: Cascade)
   assignedTo     User?                 @relation("TicketAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  department     Department?           @relation("TicketDepartment", fields: [departmentId], references: [id], onDelete: SetNull)
   details        TicketDetail[]
   attachments    TicketAttachment[]
   changeRequests TicketChangeRequest[]
@@ -237,6 +259,7 @@ model Ticket {
   @@index([clientId])
   @@index([userId])
   @@index([assignedToId])
+  @@index([departmentId])
   @@index([status])
   @@index([priority])
   @@index([createdAt])
@@ -244,28 +267,32 @@ model Ticket {
 }
 
 model TicketChangeRequest {
-  id                    Int       @id @default(autoincrement())
-  ticketId              String    @map("ticket_id")
-  requestedById         Int       @map("requested_by_id")
-  requestedStatus       String?   @map("requested_status")       // New status requested (null if no change)
-  requestedPriority     String?   @map("requested_priority")     // New priority requested (null if no change)
-  requestedAssignedToId Int?      @map("requested_assigned_to_id") // New assignee requested (null if no change)
-  currentStatus         String    @map("current_status")         // Status at time of request
-  currentPriority       String    @map("current_priority")       // Priority at time of request
-  currentAssignedToId   Int?      @map("current_assigned_to_id") // Assignee at time of request
-  status                String    @default("pending")            // "pending", "approved", "rejected"
-  reviewedById          Int?      @map("reviewed_by_id")
-  reviewedAt            DateTime? @map("reviewed_at")
-  rejectionReason       String?   @map("rejection_reason")
-  createdAt             DateTime  @default(now()) @map("created_at")
-  updatedAt             DateTime  @default(now()) @updatedAt @map("updated_at")
-  ticket                Ticket    @relation(fields: [ticketId], references: [id], onDelete: Cascade)
-  requestedBy           User      @relation("ChangeRequestedBy", fields: [requestedById], references: [id], onDelete: Cascade)
-  reviewedBy            User?     @relation("ChangeReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
-  requestedAssignedTo   User?     @relation("ChangeRequestedAssignee", fields: [requestedAssignedToId], references: [id], onDelete: SetNull)
+  id                      Int         @id @default(autoincrement())
+  ticketId                String      @map("ticket_id")
+  requestedById           Int         @map("requested_by_id")
+  requestedStatus         String?     @map("requested_status")         // New status requested (null if no change)
+  requestedPriority       String?     @map("requested_priority")       // New priority requested (null if no change)
+  requestedAssignedToId   Int?        @map("requested_assigned_to_id") // New assignee requested (null if no change)
+  requestedDepartmentId   Int?        @map("requested_department_id")  // New department requested (null if no change)
+  currentStatus           String      @map("current_status")           // Status at time of request
+  currentPriority         String      @map("current_priority")         // Priority at time of request
+  currentAssignedToId     Int?        @map("current_assigned_to_id")   // Assignee at time of request
+  currentDepartmentId     Int?        @map("current_department_id")    // Department at time of request
+  status                  String      @default("pending")              // "pending", "approved", "rejected"
+  reviewedById            Int?        @map("reviewed_by_id")
+  reviewedAt              DateTime?   @map("reviewed_at")
+  rejectionReason         String?     @map("rejection_reason")
+  createdAt               DateTime    @default(now()) @map("created_at")
+  updatedAt               DateTime    @default(now()) @updatedAt @map("updated_at")
+  ticket                  Ticket      @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  requestedBy             User        @relation("ChangeRequestedBy", fields: [requestedById], references: [id], onDelete: Cascade)
+  reviewedBy              User?       @relation("ChangeReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+  requestedAssignedTo     User?       @relation("ChangeRequestedAssignee", fields: [requestedAssignedToId], references: [id], onDelete: SetNull)
+  requestedDepartment     Department? @relation("ChangeRequestedDepartment", fields: [requestedDepartmentId], references: [id], onDelete: SetNull)
 
   @@index([ticketId])
   @@index([requestedById])
+  @@index([requestedDepartmentId])
   @@index([status])
   @@index([createdAt])
   @@map("ticket_change_requests")

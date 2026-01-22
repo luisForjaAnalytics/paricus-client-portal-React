@@ -19,12 +19,12 @@ import { useUploadInvoiceMutation } from "../../../../store/api/invoicesApi";
 import { useTesseractOCR } from "../../../../common/hooks/useTesseractOCR";
 import { parseInvoiceData } from "../../../../common/utils/invoiceParser";
 import {
-  primaryIconButton,
-  outlinedButton,
   outlinedIconButton,
   modalCard,
   titlesTypography,
 } from "../../../../common/styles/styles";
+import { ActionButton } from "../../../../common/components/ui/ActionButton/ActionButton";
+import { CancelButton } from "../../../../common/components/ui/CancelButton/CancelButton";
 import {
   currencyOptions,
   invoiceStatusOptions,
@@ -168,14 +168,11 @@ export const UploadInvoiceButton = ({ selectedFolder, onSuccess, onError }) => {
 
   return (
     <>
-      <Button
-        variant="contained"
-        startIcon={<UploadIcon />}
-        onClick={() => setShowUploadModal(true)}
-        sx={primaryIconButton}
-      >
-        {t("financials.uploadInvoice")}
-      </Button>
+      <ActionButton
+        handleClick={() => setShowUploadModal(true)}
+        icon={<UploadIcon />}
+        text={t("financials.uploadInvoice")}
+      />
 
       <Dialog
         open={showUploadModal}
@@ -218,7 +215,6 @@ export const UploadInvoiceButton = ({ selectedFolder, onSuccess, onError }) => {
             )}
 
             <Box
-              container
               sx={{
                 display: "flex",
                 flexDirection: "column",
@@ -427,23 +423,16 @@ export const UploadInvoiceButton = ({ selectedFolder, onSuccess, onError }) => {
               justifyContent: "center",
             }}
           >
-            <Button
+            <ActionButton
               type="submit"
-              variant="contained"
               disabled={uploading || ocrLoading || !isValid || isOverLimit}
-              sx={primaryIconButton}
-            >
-              {uploading
-                ? t("common.uploading")
-                : t("financials.uploadInvoice")}
-            </Button>
-            <Button
-              onClick={handleCancelModal}
-              sx={outlinedButton}
+              text={uploading ? t("common.uploading") : t("financials.uploadInvoice")}
+            />
+            <CancelButton
+              handleClick={handleCancelModal}
               disabled={ocrLoading}
-            >
-              {t("common.cancel")}
-            </Button>
+              text={t("common.cancel")}
+            />
           </DialogActions>
         </form>
       </Dialog>

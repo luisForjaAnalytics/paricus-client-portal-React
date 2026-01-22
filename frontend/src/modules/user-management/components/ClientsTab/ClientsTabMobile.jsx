@@ -20,12 +20,12 @@ import {
   KeyboardArrowDown as KeyboardArrowDownIcon,
   KeyboardArrowUp as KeyboardArrowUpIcon,
   Business as BusinessIcon,
-  Edit as EditIcon,
   Block as BlockIcon,
   Add as AddIcon,
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import { titlesTypography } from "../../../../common/styles/styles";
+import { EditButton } from "../../../../common/components/ui/EditButton/EditButton";
 
 function Row({ client, handleEdit, handleDeactivate, formatDate }) {
   const { t } = useTranslation();
@@ -139,15 +139,10 @@ function Row({ client, handleEdit, handleDeactivate, formatDate }) {
                     {t("clients.table.actions")}:
                   </Typography>
                   <Box sx={{ display: "flex", gap: 0.5 }}>
-                    <Tooltip title={t("common.edit")}>
-                      <IconButton
-                        size="small"
-                        color="primary"
-                        onClick={() => handleEdit(client)}
-                      >
-                        <EditIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
+                    <EditButton
+                      handleClick={handleEdit}
+                      item={client}
+                    />
                     {client.isActive && (
                       <Tooltip title={t("clients.actions.deactivate")}>
                         <IconButton

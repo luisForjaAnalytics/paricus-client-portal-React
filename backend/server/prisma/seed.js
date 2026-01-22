@@ -527,6 +527,152 @@ async function main() {
     },
   });
 
+  // Create Department Responsible Users (BPO Team)
+  console.log("Creating department responsible users...");
+
+  const departmentUserPassword = await bcrypt.hash("paricus123!", 12);
+
+  // Reporting - Nicolas Forero
+  const reportingUser = await prisma.user.upsert({
+    where: { email: "nicolas.forero@paricus.com" },
+    update: {
+      clientId: bpoClient.id,
+      roleId: bpoAdminRole.id,
+      passwordHash: departmentUserPassword,
+    },
+    create: {
+      email: "nicolas.forero@paricus.com",
+      passwordHash: departmentUserPassword,
+      firstName: "Nicolas",
+      lastName: "Forero",
+      clientId: bpoClient.id,
+      roleId: bpoAdminRole.id,
+      isActive: true,
+    },
+  });
+
+  // Billing - Miguel Duran
+  const billingUser = await prisma.user.upsert({
+    where: { email: "miguel.duran@paricus.com" },
+    update: {
+      clientId: bpoClient.id,
+      roleId: bpoAdminRole.id,
+      passwordHash: departmentUserPassword,
+    },
+    create: {
+      email: "miguel.duran@paricus.com",
+      passwordHash: departmentUserPassword,
+      firstName: "Miguel",
+      lastName: "Duran",
+      clientId: bpoClient.id,
+      roleId: bpoAdminRole.id,
+      isActive: true,
+    },
+  });
+
+  // IT Support - Jhonatan Arias
+  const itSupportUser = await prisma.user.upsert({
+    where: { email: "jhonatan@paricus.com" },
+    update: {
+      clientId: bpoClient.id,
+      roleId: bpoAdminRole.id,
+      passwordHash: departmentUserPassword,
+    },
+    create: {
+      email: "jhonatan@paricus.com",
+      passwordHash: departmentUserPassword,
+      firstName: "Jhonatan",
+      lastName: "Arias",
+      clientId: bpoClient.id,
+      roleId: bpoAdminRole.id,
+      isActive: true,
+    },
+  });
+
+  // Operations - Diana Olave
+  const operationsUser = await prisma.user.upsert({
+    where: { email: "diana@paricus.com" },
+    update: {
+      clientId: bpoClient.id,
+      roleId: bpoAdminRole.id,
+      passwordHash: departmentUserPassword,
+    },
+    create: {
+      email: "diana@paricus.com",
+      passwordHash: departmentUserPassword,
+      firstName: "Diana",
+      lastName: "Olave",
+      clientId: bpoClient.id,
+      roleId: bpoAdminRole.id,
+      isActive: true,
+    },
+  });
+
+  // Create Departments
+  console.log("Creating departments...");
+
+  await prisma.department.upsert({
+    where: { name: "Reporting" },
+    update: {
+      email: "nicolas.forero@paricus.com",
+      responsibleUserId: reportingUser.id,
+    },
+    create: {
+      name: "Reporting",
+      email: "nicolas.forero@paricus.com",
+      description: "Reports, KPIs, and analytics department",
+      responsibleUserId: reportingUser.id,
+      isActive: true,
+    },
+  });
+
+  await prisma.department.upsert({
+    where: { name: "Billing" },
+    update: {
+      email: "miguel.duran@paricus.com",
+      responsibleUserId: billingUser.id,
+    },
+    create: {
+      name: "Billing",
+      email: "miguel.duran@paricus.com",
+      description: "Invoicing and payment department",
+      responsibleUserId: billingUser.id,
+      isActive: true,
+    },
+  });
+
+  await prisma.department.upsert({
+    where: { name: "IT Support" },
+    update: {
+      email: "jhonatan@paricus.com",
+      responsibleUserId: itSupportUser.id,
+    },
+    create: {
+      name: "IT Support",
+      email: "jhonatan@paricus.com",
+      description: "Technical support and IT department",
+      responsibleUserId: itSupportUser.id,
+      isActive: true,
+    },
+  });
+
+  await prisma.department.upsert({
+    where: { name: "Operations" },
+    update: {
+      email: "diana@paricus.com",
+      responsibleUserId: operationsUser.id,
+    },
+    create: {
+      name: "Operations",
+      email: "diana@paricus.com",
+      description: "Operations and general support department",
+      responsibleUserId: operationsUser.id,
+      isActive: true,
+    },
+  });
+
+  console.log("Departments created!");
+
   // Flex Mobile users
   const flexAdminPassword = await bcrypt.hash("flex123!", 12);
   await prisma.user.upsert({

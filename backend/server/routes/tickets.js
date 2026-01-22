@@ -156,7 +156,7 @@ function processTicketWithUrls(ticket) {
 router.get('/', authenticateToken, async (req, res) => {
   try {
     const { clientId, id: userId, permissions } = req.user;
-    const { limit, sortBy = 'createdAt', sortOrder = 'desc' } = req.query;
+    const { limit, sortBy = 'createdAt', sortOrder = 'desc', clientId: queryClientId, userId: queryUserId } = req.query;
 
     // Determine user role and build where clause
     const isBPOAdmin = permissions?.includes('admin_clients');
@@ -165,8 +165,63 @@ router.get('/', authenticateToken, async (req, res) => {
     let whereClause = {};
 
     if (isBPOAdmin) {
-      // BPO Admin: Can see ALL tickets from all clients
-      whereClause = {};
+      // BPO Admin: Can see ALL tickets, or filter by clientId/userId if provided
+      if (queryUserId) {
+        // If userId is provided, simulate viewing as that specific user
+        const targetUserId = parseInt(queryUserId, 10);
+
+        // Validate userId is a valid number
+        if (isNaN(targetUserId) || targetUserId <= 0) {
+          return res.status(400).json({
+            error: 'Invalid userId parameter',
+            message: 'userId must be a positive integer'
+          });
+        }
+
+        // First get the target user to check their role
+        const targetUser = await prisma.user.findUnique({
+          where: { id: targetUserId },
+          include: {
+            role: {
+              include: {
+                rolePermissions: {
+                  include: { permission: true }
+                }
+              }
+            }
+          }
+        });
+
+        if (!targetUser) {
+          return res.status(404).json({
+            error: 'User not found',
+            message: `User with ID ${targetUserId} does not exist`
+          });
+        }
+
+        const targetPermissions = targetUser.role?.rolePermissions?.map(rp => rp.permission?.permissionName).filter(Boolean) || [];
+        const isTargetClientAdmin = targetPermissions.includes('view_invoices');
+
+        if (isTargetClientAdmin) {
+          // Target user is Client Admin: show all tickets from their client
+          whereClause = { clientId: targetUser.clientId };
+        } else {
+          // Target user is Client User: show only their tickets
+          whereClause = {
+            clientId: targetUser.clientId,
+            OR: [
+              { userId: targetUserId },
+              { assignedToId: targetUserId },
+            ],
+          };
+        }
+      } else if (queryClientId) {
+        // Only clientId provided: show all tickets from that client
+        whereClause = { clientId: parseInt(queryClientId) };
+      } else {
+        // No filter: show all tickets
+        whereClause = {};
+      }
     } else if (isClientAdmin) {
       // Client Admin: Can see all tickets from their client company
       whereClause = { clientId };
@@ -216,6 +271,20 @@ router.get('/', authenticateToken, async (req, res) => {
             email: true,
           },
         },
+        department: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            responsibleUser: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+              }
+            }
+          },
+        },
       },
       orderBy: { [sortField]: sortDirection },
     };
@@ -241,8 +310,54 @@ router.get('/', authenticateToken, async (req, res) => {
 });
 
 /**
+ * @route   GET /api/tickets/departments
+ * @desc    Get list of departments that tickets can be assigned to
+ * @access  Private
+ */
+router.get('/departments', authenticateToken, async (req, res) => {
+  try {
+    const departments = await prisma.department.findMany({
+      where: {
+        isActive: true,
+      },
+      include: {
+        responsibleUser: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+          }
+        }
+      },
+      orderBy: {
+        name: 'asc',
+      }
+    });
+
+    // Format response
+    const formattedDepartments = departments.map(dept => ({
+      id: dept.id,
+      name: dept.name,
+      email: dept.email,
+      description: dept.description,
+      responsibleUser: dept.responsibleUser ? {
+        id: dept.responsibleUser.id,
+        fullName: `${dept.responsibleUser.firstName} ${dept.responsibleUser.lastName}`,
+        email: dept.responsibleUser.email,
+      } : null,
+    }));
+
+    res.json({ data: formattedDepartments });
+  } catch (error) {
+    console.error('Error fetching departments:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
  * @route   GET /api/tickets/assignable-users
- * @desc    Get list of users that can be assigned tickets
+ * @desc    Get list of users that can be assigned tickets (legacy - kept for backward compatibility)
  * @access  Private
  */
 router.get('/assignable-users', authenticateToken, async (req, res) => {
@@ -471,6 +586,20 @@ router.get('/:id', authenticateToken, async (req, res) => {
             email: true,
           },
         },
+        department: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            responsibleUser: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+              }
+            }
+          },
+        },
       },
     });
 
@@ -496,7 +625,7 @@ router.get('/:id', authenticateToken, async (req, res) => {
 router.post('/', authenticateToken, async (req, res) => {
   try {
     const { clientId, id: userId, permissions } = req.user;
-    const { subject, priority, assignedToId, description, url } = req.body;
+    const { subject, priority, assignedToId, departmentId, description, url } = req.body;
 
     // Validation
     if (!subject || !priority || !description) {
@@ -505,10 +634,33 @@ router.post('/', authenticateToken, async (req, res) => {
       });
     }
 
+    // Validate that at least one of departmentId or assignedToId is provided
+    if (!departmentId && !assignedToId) {
+      return res.status(400).json({
+        error: 'Either department or assigned user must be provided',
+      });
+    }
+
     const isBPOAdmin = permissions?.includes('admin_clients');
 
-    // Validate assignedToId if provided
-    if (assignedToId) {
+    // Validate departmentId if provided (preferred method)
+    if (departmentId) {
+      const department = await prisma.department.findFirst({
+        where: {
+          id: parseInt(departmentId),
+          isActive: true,
+        },
+      });
+
+      if (!department) {
+        return res.status(400).json({
+          error: 'Invalid department',
+        });
+      }
+    }
+
+    // Validate assignedToId if provided (legacy method)
+    if (assignedToId && !departmentId) {
       // Build where clause based on user role
       const whereClause = {
         id: parseInt(assignedToId),
@@ -547,6 +699,7 @@ router.post('/', authenticateToken, async (req, res) => {
         userId,
         subject,
         priority,
+        departmentId: departmentId ? parseInt(departmentId) : null,
         assignedToId: assignedToId ? parseInt(assignedToId) : null,
         status: 'Open',
         description: descriptionJson,
@@ -567,6 +720,20 @@ router.post('/', authenticateToken, async (req, res) => {
             firstName: true,
             lastName: true,
             email: true,
+          },
+        },
+        department: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            responsibleUser: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+              }
+            }
           },
         },
       },
@@ -594,7 +761,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     const { clientId, id: userId, permissions } = req.user;
-    const { subject, priority, status, assignedToId } = req.body;
+    const { subject, priority, status, assignedToId, departmentId } = req.body;
 
     // Determine user role
     const isBPOAdmin = permissions?.includes('admin_clients');
@@ -633,7 +800,23 @@ router.put('/:id', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'Ticket not found' });
     }
 
-    // Validate assignedToId if provided
+    // Validate departmentId if provided
+    if (departmentId !== undefined && departmentId !== null) {
+      const department = await prisma.department.findFirst({
+        where: {
+          id: parseInt(departmentId),
+          isActive: true,
+        },
+      });
+
+      if (!department) {
+        return res.status(400).json({
+          error: 'Invalid department',
+        });
+      }
+    }
+
+    // Validate assignedToId if provided (legacy)
     if (assignedToId !== undefined && assignedToId !== null) {
       // Build where clause based on user role
       const assignedUserWhereClause = {
@@ -664,6 +847,9 @@ router.put('/:id', authenticateToken, async (req, res) => {
     if (subject !== undefined) updateData.subject = subject;
     if (priority !== undefined) updateData.priority = priority;
     if (status !== undefined) updateData.status = status;
+    if (departmentId !== undefined) {
+      updateData.departmentId = departmentId ? parseInt(departmentId) : null;
+    }
     if (assignedToId !== undefined) {
       updateData.assignedToId = assignedToId ? parseInt(assignedToId) : null;
     }
@@ -690,6 +876,20 @@ router.put('/:id', authenticateToken, async (req, res) => {
             firstName: true,
             lastName: true,
             email: true,
+          },
+        },
+        department: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            responsibleUser: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+              }
+            }
           },
         },
       },
@@ -1695,7 +1895,7 @@ router.post('/:id/change-request', authenticateToken, async (req, res) => {
   try {
     const { id: ticketId } = req.params;
     const { id: userId, clientId, permissions } = req.user;
-    const { requestedStatus, requestedPriority, requestedAssignedToId } = req.body;
+    const { requestedStatus, requestedPriority, requestedAssignedToId, requestedDepartmentId } = req.body;
 
     // Check if user is BPO Admin or Client Admin - they should use direct update
     const isBPOAdmin = permissions.includes('admin_users') && permissions.includes('admin_clients');
@@ -1707,10 +1907,26 @@ router.post('/:id/change-request', authenticateToken, async (req, res) => {
     }
 
     // Validate that at least one change is requested
-    if (!requestedStatus && !requestedPriority && requestedAssignedToId === undefined) {
+    if (!requestedStatus && !requestedPriority && requestedAssignedToId === undefined && requestedDepartmentId === undefined) {
       return res.status(400).json({
-        error: 'At least one change (status, priority, or assignedTo) must be requested'
+        error: 'At least one change (status, priority, department, or assignedTo) must be requested'
       });
+    }
+
+    // Validate requestedDepartmentId if provided
+    if (requestedDepartmentId !== undefined && requestedDepartmentId !== null) {
+      const department = await prisma.department.findFirst({
+        where: {
+          id: parseInt(requestedDepartmentId),
+          isActive: true,
+        },
+      });
+
+      if (!department) {
+        return res.status(400).json({
+          error: 'Invalid department',
+        });
+      }
     }
 
     // Fetch the ticket to get current values
@@ -1721,7 +1937,8 @@ router.post('/:id/change-request', authenticateToken, async (req, res) => {
         clientId: true,
         status: true,
         priority: true,
-        assignedToId: true
+        assignedToId: true,
+        departmentId: true
       }
     });
 
@@ -1756,9 +1973,11 @@ router.post('/:id/change-request', authenticateToken, async (req, res) => {
         requestedStatus: requestedStatus || null,
         requestedPriority: requestedPriority || null,
         requestedAssignedToId: requestedAssignedToId || null,
+        requestedDepartmentId: requestedDepartmentId ? parseInt(requestedDepartmentId) : null,
         currentStatus: ticket.status,
         currentPriority: ticket.priority,
         currentAssignedToId: ticket.assignedToId,
+        currentDepartmentId: ticket.departmentId,
         status: 'pending'
       },
       include: {
@@ -1773,6 +1992,12 @@ router.post('/:id/change-request', authenticateToken, async (req, res) => {
             id: true,
             firstName: true,
             lastName: true
+          }
+        },
+        requestedDepartment: {
+          select: {
+            id: true,
+            name: true
           }
         }
       }
@@ -1833,6 +2058,9 @@ router.put('/change-requests/:id/approve', authenticateToken, async (req, res) =
     if (changeRequest.requestedAssignedToId !== null) {
       ticketUpdateData.assignedToId = changeRequest.requestedAssignedToId;
     }
+    if (changeRequest.requestedDepartmentId !== null) {
+      ticketUpdateData.departmentId = changeRequest.requestedDepartmentId;
+    }
 
     // Use a transaction to update both the change request and the ticket
     const result = await prisma.$transaction([
@@ -1864,6 +2092,20 @@ router.put('/change-requests/:id/approve', authenticateToken, async (req, res) =
               firstName: true,
               lastName: true,
               email: true
+            }
+          },
+          department: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              responsibleUser: {
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true
+                }
+              }
             }
           }
         }

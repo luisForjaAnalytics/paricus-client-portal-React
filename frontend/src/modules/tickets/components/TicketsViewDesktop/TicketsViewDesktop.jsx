@@ -66,8 +66,8 @@ export const TicketsViewDesktop = () => {
         ? fromName.includes(filters.from.toLowerCase())
         : true;
 
-      const assignedToName = ticket.assignedTo
-        ? `${ticket.assignedTo.firstName} ${ticket.assignedTo.lastName}`.toLowerCase()
+      const assignedToName = ticket.department
+        ? ticket.department.name.toLowerCase()
         : "unassigned";
       const matchesAssignedTo = filters.assignedTo
         ? assignedToName.includes(filters.assignedTo.toLowerCase())
@@ -99,8 +99,8 @@ export const TicketsViewDesktop = () => {
         from: ticket.user
           ? `${ticket.user.firstName} ${ticket.user.lastName}`
           : "Unknown",
-        assignedTo: ticket.assignedTo
-          ? `${ticket.assignedTo.firstName} ${ticket.assignedTo.lastName}`
+        assignedTo: ticket.department
+          ? ticket.department.name
           : "Unassigned",
         priority: ticket.priority,
         status: ticket.status,

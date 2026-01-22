@@ -13,11 +13,12 @@ import {
 import { Upload as UploadIcon } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import {
-  primaryIconButton,
   outlinedIconButton,
   modalCard,
   titlesTypography,
 } from "../../../../common/styles/styles";
+import { ActionButton } from "../../../../common/components/ui/ActionButton/ActionButton";
+import { CancelButton } from "../../../../common/components/ui/CancelButton/CancelButton";
 
 export const UploadReportModal = ({
   showUploadModal,
@@ -146,25 +147,17 @@ export const UploadReportModal = ({
           justifyContent: "center",
         }}
       >
-        <Button
-          variant="contained"
-          onClick={handleUploadReport}
+        <ActionButton
+          handleClick={handleUploadReport}
           disabled={uploading || !uploadForm.file || isOverLimit}
-          startIcon={
-            uploading ? <CircularProgress size={20} /> : <UploadIcon />
-          }
-          sx={{ ...primaryIconButton, width: "10rem" }}
-        >
-          {uploading
-            ? t("reportsManagement.upload.uploading")
-            : t("reportsManagement.upload.upload")}
-        </Button>
-        <Button
-          onClick={() => setShowUploadModal(null)}
-          sx={outlinedIconButton}
-        >
-          {t("reportsManagement.upload.cancel")}
-        </Button>
+          icon={uploading ? <CircularProgress size={20} /> : <UploadIcon />}
+          text={uploading ? t("reportsManagement.upload.uploading") : t("reportsManagement.upload.upload")}
+          sx={{ width: "10rem" }}
+        />
+        <CancelButton
+          handleClick={() => setShowUploadModal(null)}
+          text={t("reportsManagement.upload.cancel")}
+        />
       </DialogActions>
     </Dialog>
   );

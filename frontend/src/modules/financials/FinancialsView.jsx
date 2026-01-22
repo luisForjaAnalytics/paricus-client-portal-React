@@ -364,19 +364,8 @@ export const FinancialsView = () => {
   };
 
   const handleDeleteInvoice = async (invoice) => {
-    if (!window.confirm("Are you sure you want to delete this invoice?"))
-      return;
-
-    try {
-      await deleteInvoiceMutation(invoice.id).unwrap();
-      showNotification("success", "Invoice deleted successfully");
-    } catch (err) {
-      console.error("Error deleting invoice:", err);
-      showNotification(
-        "error",
-        err.data?.message || "Failed to delete invoice"
-      );
-    }
+    // La confirmación se maneja en el DeleteButton via modal
+    await deleteInvoiceMutation(invoice.id).unwrap();
   };
 
   const openPaymentLink = (paymentLink) => {

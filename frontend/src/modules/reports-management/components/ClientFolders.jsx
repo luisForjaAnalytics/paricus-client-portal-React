@@ -16,7 +16,6 @@ import {
   TableSortLabel,
   TablePagination,
   Collapse,
-  Tooltip,
 } from "@mui/material";
 import {
   Folder as FolderIcon,
@@ -26,8 +25,6 @@ import {
   KeyboardArrowUp as KeyboardArrowUpIcon,
   PictureAsPdf as PdfIcon,
   Upload as UploadIcon,
-  Download as DownloadIcon,
-  Delete as DeleteIcon,
   Description as DescriptionIcon,
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
@@ -37,10 +34,12 @@ import {
   colors,
   typography,
   titlesTypography,
-  primaryIconButton,
   outlinedIconButton,
   table,
 } from "../../../common/styles/styles";
+import { ActionButton } from "../../../common/components/ui/ActionButton/ActionButton";
+import { DownloadButton } from "../../../common/components/ui/DownloadButton/DownloadButton";
+import { DeleteButton } from "../../../common/components/ui/DeleteButton/DeleteButton";
 
 export const ClientFolders = ({
   clientFolders = [],
@@ -139,7 +138,7 @@ export const ClientFolders = ({
   const paginatedData = useMemo(() => {
     return sortedData.slice(
       page * rowsPerPage,
-      page * rowsPerPage + rowsPerPage
+      page * rowsPerPage + rowsPerPage,
     );
   }, [sortedData, page, rowsPerPage]);
 
@@ -164,15 +163,11 @@ export const ClientFolders = ({
           </Typography>
 
           <Stack direction="row" spacing={2}>
-            <Button
-              variant="contained"
-              color="success"
-              startIcon={<LockIcon />}
-              onClick={openFolderAccessModal}
-              sx={primaryIconButton}
-            >
-              {t("reportsManagement.clientFolders.manageAccess")}
-            </Button>
+            <ActionButton
+              handleClick={openFolderAccessModal}
+              icon={<LockIcon />}
+              text={t("reportsManagement.clientFolders.manageAccess")}
+            />
             <Button
               variant="outlined"
               startIcon={
@@ -397,16 +392,13 @@ export const ClientFolders = ({
                             }}
                           >
                             <Stack direction="row" spacing={1}>
-                              <Button
-                                variant="contained"
-                                color="primary"
-                                size="small"
-                                startIcon={<UploadIcon />}
-                                onClick={() => setShowUploadModal(folder)}
-                                sx={primaryIconButton}
-                              >
-                                {t("reportsManagement.reports.uploadReport")}
-                              </Button>
+                              <ActionButton
+                                handleClick={() => setShowUploadModal(folder)}
+                                icon={<UploadIcon />}
+                                text={t(
+                                  "reportsManagement.reports.uploadReport",
+                                )}
+                              />
                             </Stack>
                           </Box>
 
@@ -431,7 +423,7 @@ export const ClientFolders = ({
                                 color="text.secondary"
                               >
                                 {t(
-                                  "reportsManagement.reports.noReportsForFolder"
+                                  "reportsManagement.reports.noReportsForFolder",
                                 )}
                               </Typography>
                             </Box>
@@ -454,7 +446,7 @@ export const ClientFolders = ({
                                     </TableCell>
                                     <TableCell sx={table.headerCell}>
                                       {t(
-                                        "reportsManagement.reports.lastModified"
+                                        "reportsManagement.reports.lastModified",
                                       )}
                                     </TableCell>
                                     <TableCell
@@ -534,54 +526,20 @@ export const ClientFolders = ({
                                           spacing={0.5}
                                           justifyContent="flex-end"
                                         >
-                                          <Tooltip
+                                          <DownloadButton
+                                            handleClick={() =>
+                                              handleDownloadReport(folder, report)
+                                            }
                                             title={t(
-                                              "reportsManagement.reports.download"
+                                              "reportsManagement.reports.download",
                                             )}
-                                          >
-                                            <IconButton
-                                              size="small"
-                                              onClick={() =>
-                                                handleDownloadReport(
-                                                  folder,
-                                                  report
-                                                )
-                                              }
-                                              sx={{
-                                                color: colors.primary,
-                                                "&:hover": {
-                                                  backgroundColor:
-                                                    colors.primaryLight,
-                                                },
-                                              }}
-                                            >
-                                              <DownloadIcon fontSize="small" />
-                                            </IconButton>
-                                          </Tooltip>
-                                          <Tooltip
-                                            title={t(
-                                              "reportsManagement.reports.delete"
-                                            )}
-                                          >
-                                            <IconButton
-                                              size="small"
-                                              onClick={() =>
-                                                handleDeleteReport(
-                                                  folder,
-                                                  report
-                                                )
-                                              }
-                                              sx={{
-                                                color: colors.error,
-                                                "&:hover": {
-                                                  backgroundColor:
-                                                    colors.errorContainer,
-                                                },
-                                              }}
-                                            >
-                                              <DeleteIcon fontSize="small" />
-                                            </IconButton>
-                                          </Tooltip>
+                                          />
+                                          <DeleteButton
+                                            handleDelete={handleDeleteReport}
+                                            item={report}
+                                            itemName={report.name}
+                                            itemType="report"
+                                          />
                                         </Stack>
                                       </TableCell>
                                     </TableRow>
@@ -644,8 +602,8 @@ ClientFolders.propTypes = {
         name: PropTypes.string.isRequired,
         size: PropTypes.number.isRequired,
         lastModified: PropTypes.string.isRequired,
-      })
-    )
+      }),
+    ),
   ),
   loadingReports: PropTypes.bool,
   fetchReportsForFolder: PropTypes.func.isRequired,

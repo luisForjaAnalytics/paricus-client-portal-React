@@ -19,13 +19,12 @@ import {
 import { Close as CloseIcon } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import {
-  primaryButton,
-  outlinedButton,
   modalCard,
   titlesTypography,
-  primaryIconButton,
   selectMenuProps,
 } from "../../../../common/styles/styles";
+import { ActionButton } from "../../../../common/components/ui/ActionButton/ActionButton";
+import { CancelButton } from "../../../../common/components/ui/CancelButton/CancelButton";
 
 export const AddNewUserModal = ({
   dialog,
@@ -198,17 +197,16 @@ export const AddNewUserModal = ({
             justifyContent: "center",
           }}
         >
-          <Button
-            onClick={saveUser}
-            variant="contained"
+          <ActionButton
+            handleClick={saveUser}
             disabled={saving || !isFormValid}
-            sx={{...primaryIconButton, width:'20%'}}
-          >
-            {saving ? t("common.saving") : t("common.save")}
-          </Button>
-          <Button onClick={closeDialog} sx={outlinedButton}>
-            {t("common.cancel")}
-          </Button>
+            text={saving ? t("common.saving") : t("common.save")}
+            sx={{ width: "20%" }}
+          />
+          <CancelButton
+            handleClick={closeDialog}
+            text={t("common.cancel")}
+          />
         </DialogActions>
       </Dialog>
 

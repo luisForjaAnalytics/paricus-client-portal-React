@@ -36,7 +36,11 @@ export const AvatarButton = ({ setTitleState }) => {
         </IconButton>
       </Tooltip>
       <Menu
-        sx={{ mt: "45px" }}
+        sx={{
+          mt: "40px",
+          ml: "1rem",
+          "& .MuiMenu-paper": { borderRadius: "1rem" },
+        }}
         id="menu-appbar"
         anchorEl={anchorElUser}
         anchorOrigin={{
