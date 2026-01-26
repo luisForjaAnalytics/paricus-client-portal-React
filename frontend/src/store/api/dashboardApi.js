@@ -63,7 +63,20 @@ export const dashboardApi = createApi({
     // Get all announcements (filtered by user role on backend)
     getAnnouncements: builder.query({
       query: () => "/announcements",
-      transformResponse: (response) => response.data || [],
+      transformResponse: (response) => {
+        const data = response.data || [];
+        // Sort by priority (high first) then by date (newest first)
+        const priorityOrder = { high: 0, medium: 1, low: 2 };
+        return [...data].sort((a, b) => {
+          const priorityA = priorityOrder[a.priority?.toLowerCase()] ?? 3;
+          const priorityB = priorityOrder[b.priority?.toLowerCase()] ?? 3;
+          if (priorityA !== priorityB) {
+            return priorityA - priorityB;
+          }
+          // Same priority: sort by date descending (newest first)
+          return new Date(b.createdAt) - new Date(a.createdAt);
+        });
+      },
       providesTags: ["Announcements"],
       // Cache for 2 minutes
       keepUnusedDataFor: 120,

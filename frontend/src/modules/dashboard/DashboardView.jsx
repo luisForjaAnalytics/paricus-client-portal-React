@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import PropTypes from "prop-types";
@@ -16,10 +16,11 @@ import {
   MenuItem,
   ListSubheader,
   CircularProgress,
-  Alert,
 } from "@mui/material";
 import { DashboardViewSelect } from "./components/DashboardViewSelect/DashboardViewSelect";
 import { useGetClientsQuery, useGetUsersQuery } from "../../store/api/adminApi";
+import { HeaderBoxTypography } from "../../common/components/ui/HeaderBoxTypography/HeaderBoxTypography";
+import { SuccessErrorSnackbar } from "../../common/components/ui/SuccessErrorSnackbar/SuccessErrorSnackbar";
 
 /**
  * DashboardView - Main dashboard component with user/client selector for BPO Admin
@@ -87,9 +88,9 @@ export const DashboardView = () => {
   /**
    * Handle selector change
    */
-  const handleChange = ((event) => {
+  const handleChange = (event) => {
     setSelectedValue(event.target.value ?? "");
-  });
+  };
 
   /**
    * Group users by client (excluding BPO Administration - clientId 1)
@@ -126,7 +127,7 @@ export const DashboardView = () => {
         <Typography fontWeight="medium">
           {t("dashboard.viewAllDashboard")}
         </Typography>
-      </MenuItem>
+      </MenuItem>,
     );
 
     // Add grouped options for each client
@@ -143,7 +144,7 @@ export const DashboardView = () => {
           }}
         >
           {client.name}
-        </ListSubheader>
+        </ListSubheader>,
       );
 
       // Users under this client
@@ -162,7 +163,7 @@ export const DashboardView = () => {
             >
               ({user.role?.roleName || t("common.user")})
             </Typography>
-          </MenuItem>
+          </MenuItem>,
         );
       });
     });
@@ -203,9 +204,20 @@ export const DashboardView = () => {
   // Error state
   const hasError = clientsError || usersError;
 
+  // Snackbar ref for error notifications
+  const snackbarRef = useRef();
+
+  // Show error snackbar when errors occur
+  useEffect(() => {
+    if (hasError) {
+      snackbarRef.current?.showError(t("common.errorLoadingData"));
+    }
+  }, [hasError, t]);
+
   return (
     <Box sx={boxTypography.box}>
       {/* Page Header with Grouped Selector */}
+      {/* <HeaderBoxTypography text={t("dashboard.title")} /> */}
       <Box
         sx={{
           display: "flex",
@@ -223,45 +235,44 @@ export const DashboardView = () => {
         {/* Loading indicator for selector data */}
         {isLoading && <CircularProgress size={24} />}
 
-        {/* Error message */}
-        {hasError && (
-          <Alert severity="error" sx={{ py: 0 }}>
-            {t("common.errorLoadingData")}
-          </Alert>
-        )}
-
         {/* Grouped Client/User Selector - Only visible for BPO Admin */}
-        {isBPOAdmin && !isLoading && !hasError && clientsWithUsers.length > 0 && (
-          <FormControl sx={{ minWidth: 280 }}>
-            <InputLabel
-              id="dashboard-view-selector-label"
-              sx={modalCard?.multiOptionFilter?.inputLabelSection}
-            >
-              {t("dashboard.viewAs")}
-            </InputLabel>
-            <Select
-              labelId="dashboard-view-selector-label"
-              id="dashboard-view-selector"
-              value={selectedValue}
-              onChange={handleChange}
-              label={t("dashboard.viewAs")}
-              MenuProps={selectMenuProps}
-              renderValue={getDisplayValue}
-              sx={{
-                ...modalCard?.multiOptionFilter?.selectSection,
-                height: "3rem",
-              }}
-            >
-              {menuItems}
-            </Select>
-          </FormControl>
-        )}
+        {isBPOAdmin &&
+          !isLoading &&
+          !hasError &&
+          clientsWithUsers.length > 0 && (
+            <FormControl sx={{ minWidth: 280 }}>
+              <InputLabel
+                id="dashboard-view-selector-label"
+                sx={modalCard?.multiOptionFilter?.inputLabelSection}
+              >
+                {t("dashboard.viewAs")}
+              </InputLabel>
+              <Select
+                labelId="dashboard-view-selector-label"
+                id="dashboard-view-selector"
+                value={selectedValue}
+                onChange={handleChange}
+                label={t("dashboard.viewAs")}
+                MenuProps={selectMenuProps}
+                renderValue={getDisplayValue}
+                sx={{
+                  ...modalCard?.multiOptionFilter?.selectSection,
+                  height: "3rem",
+                }}
+              >
+                {menuItems}
+              </Select>
+            </FormControl>
+          )}
       </Box>
 
       <DashboardViewSelect
         selectedClientId={dashboardClientId}
         selectedUserId={dashboardUserId}
       />
+
+      {/* Error Snackbar */}
+      <SuccessErrorSnackbar ref={snackbarRef} />
     </Box>
   );
 };

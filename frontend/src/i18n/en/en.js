@@ -216,6 +216,8 @@ export default {
     add: "Add",
     search: "Search",
     filter: "Filter",
+    filterBy: "Filter by",
+    clearFilter: "Clear filter",
     clear: "Clear",
     loading: "Loading...",
     error: "Error",
@@ -244,7 +246,8 @@ export default {
     view: "View",
     // Delete confirmation dialog
     confirmDeleteTitle: "Delete {{item}}",
-    confirmDeleteMessage: "Are you sure you want to delete {{item}}? This action cannot be undone.",
+    confirmDeleteMessage:
+      "Are you sure you want to delete {{item}}? This action cannot be undone.",
     deleteSuccess: "{{item}} deleted successfully",
     deleteError: "Error deleting {{item}}",
     // Snackbar messages
@@ -730,6 +733,7 @@ export default {
       actions: "Actions",
     },
     filters: {
+      articleSearch: "Search by Article",
       articleName: "Article Name",
       articleNamePlaceholder: "Search by article name...",
       synopsis: "Article Synopsis",

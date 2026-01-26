@@ -1,33 +1,23 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import {
   Box,
-  Button,
   Chip,
-  FormControl,
   IconButton,
-  InputAdornment,
-  InputLabel,
-  MenuItem,
-  Select,
-  TextField,
   Typography,
   Tooltip,
 } from "@mui/material";
 import {
   Add as AddIcon,
   Block as BlockIcon,
-  Search as SearchIcon,
 } from "@mui/icons-material";
-import { colors, filterStyles } from "../../../../common/styles/styles";
+import { colors } from "../../../../common/styles/styles";
 import PropTypes from "prop-types";
 import { FilterButton } from "../FilterButton/FilterButton";
 import { useTranslation } from "react-i18next";
 import { ActionButton } from "../../../../common/components/ui/ActionButton/ActionButton";
 import { EditButton } from "../../../../common/components/ui/EditButton/EditButton";
-import {
-  UniversalDataGrid,
-  useDataGridColumns,
-} from "../../../../common/components/ui/DataGrid/UniversalDataGrid";
+import { UniversalDataGrid } from "../../../../common/components/ui/DataGrid/UniversalDataGrid";
+import { ColumnHeaderFilter } from "../../../../common/components/ui/ColumnHeaderFilter";
 
 export const ClientsTabDesktop = ({
   clients,
@@ -40,11 +30,40 @@ export const ClientsTabDesktop = ({
   const { t } = useTranslation();
 
   // State for filters
-  const [selectedStatus, setSelectedStatus] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [filters, setFilters] = useState({
+    name: "",
+    status: "",
+  });
 
   // State for advanced filters visibility
   const [isOpen, setIsOpen] = useState(false);
+
+  // Handler para cambiar filtros desde el header
+  const handleFilterChange = useCallback(
+    (filterKey, value) => {
+      setFilters((prev) => ({
+        ...prev,
+        [filterKey]: value,
+      }));
+    },
+    [setFilters]
+  );
+
+  // Clear all filters
+  const clearFilters = () => {
+    setFilters({
+      name: "",
+      status: "",
+    });
+  };
+
+  // Status options for select filter
+  const statusOptions = [
+    { name: t("common.active"), value: "active" },
+    { name: t("common.inactive"), value: "inactive" },
+    { name: t("clients.clientsOnly"), value: "client" },
+    { name: t("clients.prospectsOnly"), value: "prospect" },
+  ];
 
   // Filter clients based on status and search query
   const filteredClients = useMemo(() => {
@@ -52,19 +71,19 @@ export const ClientsTabDesktop = ({
       let filtered = clients;
 
       // Filter by status
-      if (selectedStatus === "active") {
+      if (filters.status === "active") {
         filtered = filtered.filter((client) => client.isActive);
-      } else if (selectedStatus === "inactive") {
+      } else if (filters.status === "inactive") {
         filtered = filtered.filter((client) => !client.isActive);
-      } else if (selectedStatus === "prospect") {
+      } else if (filters.status === "prospect") {
         filtered = filtered.filter((client) => client.isProspect);
-      } else if (selectedStatus === "client") {
+      } else if (filters.status === "client") {
         filtered = filtered.filter((client) => !client.isProspect);
       }
 
-      // Filter by search query
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
+      // Filter by name
+      if (filters.name) {
+        const query = filters.name.toLowerCase();
         filtered = filtered.filter((client) =>
           client.name?.toLowerCase().includes(query)
         );
@@ -75,91 +94,139 @@ export const ClientsTabDesktop = ({
       console.error(`ERROR filteredClients: ${err}`);
       return clients;
     }
-  }, [clients, selectedStatus, searchQuery]);
-  // DataGrid columns
-  const columns = useDataGridColumns([
-    {
-      field: "name",
-      headerNameKey: "clients.table.clientName",
-      flex: 1,
-      align: "left",
-      renderCell: (params) => (
-        <Typography variant="body2" fontWeight={500} sx={{ margin: "1rem" }}>
-          {params.value}
-        </Typography>
-      ),
-    },
-    {
-      field: "type",
-      headerNameKey: "clients.table.type",
-      flex: 1,
-      renderCell: (params) => (
-        <Chip
-          label={
-            params.row.isProspect
-              ? t("clients.table.prospect")
-              : t("clients.table.client")
-          }
-          color={params.row.isProspect ? "warning" : "primary"}
-          size="small"
-        />
-      ),
-    },
-    {
-      field: "isActive",
-      headerNameKey: "clients.table.status",
-      flex: 1,
-      renderCell: (params) => (
-        <Chip
-          label={params.value ? t("common.active") : t("common.inactive")}
-          color={params.value ? "success" : "error"}
-          size="small"
-        />
-      ),
-    },
-    {
-      field: "userCount",
-      headerNameKey: "clients.table.users",
-      flex: 1,
-    },
-    {
-      field: "roleCount",
-      headerNameKey: "clients.table.roles",
-      flex: 1,
-    },
-    {
-      field: "createdAt",
-      headerNameKey: "clients.table.created",
-      flex: 1,
-      valueFormatter: (value) => formatDate(value),
-    },
-    {
-      field: "actions",
-      headerNameKey: "clients.table.actions",
-      flex: 1,
-      sortable: false,
-      renderCell: (params) => (
-        <Box sx={{ display: "flex", gap: 0.5, justifyContent: "center" }}>
-          <EditButton
-            handleClick={handleEdit}
-            item={params.row.original}
-            title={t("clients.actions.edit")}
+  }, [clients, filters]);
+  // DataGrid columns with ColumnHeaderFilter
+  const columns = useMemo(
+    () => [
+      {
+        field: "name",
+        headerName: t("clients.table.clientName"),
+        flex: 1,
+        align: "left",
+        headerAlign: "center",
+        renderHeader: () => (
+          <ColumnHeaderFilter
+            headerName={t("clients.table.clientName")}
+            filterType="text"
+            filterKey="name"
+            filterValue={filters.name}
+            onFilterChange={handleFilterChange}
+            placeholder={t("clients.searchPlaceholder")}
+            isOpen={isOpen}
           />
-          <Tooltip title={t("clients.actions.deactivate")}>
-            <span>
-              <IconButton
-                size="small"
-                onClick={() => handleDeactivate(params.row.original)}
-                disabled={!params.row.isActive}
-              >
-                <BlockIcon fontSize="small" />
-              </IconButton>
-            </span>
-          </Tooltip>
-        </Box>
-      ),
-    },
-  ]);
+        ),
+        renderCell: (params) => (
+          <Typography variant="body2" fontWeight={500} sx={{ margin: "1rem" }}>
+            {params.value}
+          </Typography>
+        ),
+      },
+      {
+        field: "type",
+        headerName: t("clients.table.type"),
+        flex: 1,
+        align: "center",
+        headerAlign: "center",
+        renderCell: (params) => (
+          <Chip
+            label={
+              params.row.isProspect
+                ? t("clients.table.prospect")
+                : t("clients.table.client")
+            }
+            color={params.row.isProspect ? "warning" : "primary"}
+            size="small"
+          />
+        ),
+      },
+      {
+        field: "isActive",
+        headerName: t("clients.table.status"),
+        flex: 1,
+        align: "center",
+        headerAlign: "center",
+        renderHeader: () => (
+          <ColumnHeaderFilter
+            headerName={t("clients.table.status")}
+            filterType="select"
+            filterKey="status"
+            filterValue={filters.status}
+            onFilterChange={handleFilterChange}
+            options={statusOptions}
+            labelKey="name"
+            valueKey="value"
+            isOpen={isOpen}
+          />
+        ),
+        renderCell: (params) => (
+          <Chip
+            label={params.value ? t("common.active") : t("common.inactive")}
+            color={params.value ? "success" : "error"}
+            size="small"
+          />
+        ),
+      },
+      {
+        field: "userCount",
+        headerName: t("clients.table.users"),
+        flex: 1,
+        align: "center",
+        headerAlign: "center",
+      },
+      {
+        field: "roleCount",
+        headerName: t("clients.table.roles"),
+        flex: 1,
+        align: "center",
+        headerAlign: "center",
+      },
+      {
+        field: "createdAt",
+        headerName: t("clients.table.created"),
+        flex: 1,
+        align: "center",
+        headerAlign: "center",
+        valueFormatter: (value) => formatDate(value),
+      },
+      {
+        field: "actions",
+        headerName: t("clients.table.actions"),
+        flex: 1,
+        align: "center",
+        headerAlign: "center",
+        sortable: false,
+        renderHeader: () => (
+          <ColumnHeaderFilter
+            headerName={t("clients.table.actions")}
+            filterType="actions"
+            isOpen={isOpen}
+            onClearFilters={clearFilters}
+          />
+        ),
+        renderCell: (params) => (
+          <Box sx={{ display: "flex", gap: 0.5, justifyContent: "center" }}>
+            <EditButton
+              handleClick={handleEdit}
+              item={params.row.original}
+              title={t("clients.actions.edit")}
+            />
+            <Tooltip title={t("clients.actions.deactivate")}>
+              <span>
+                <IconButton
+                  size="small"
+                  onClick={() => handleDeactivate(params.row.original)}
+                  disabled={!params.row.isActive}
+                >
+                  <BlockIcon fontSize="small" />
+                </IconButton>
+              </span>
+            </Tooltip>
+          </Box>
+        ),
+      },
+    ],
+    [t, filters, handleFilterChange, isOpen, statusOptions, clearFilters, handleEdit, handleDeactivate, formatDate]
+  );
 
   // Transform clients data for DataGrid
   const rows = useMemo(() => {
@@ -179,71 +246,6 @@ export const ClientsTabDesktop = ({
       return [];
     }
   }, [filteredClients]);
-
-  // Toolbar component with filters
-  const ClientsToolbar = useMemo(() => {
-    return () => (
-      <>
-        {isOpen && (
-          <Box
-            sx={{
-              padding: "1rem 2rem",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: colors.subSectionBackground,
-              borderBottom: `1px solid ${colors.subSectionBorder}`,
-            }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 2,
-                width: "100%",
-              }}
-            >
-              <TextField
-                sx={filterStyles?.inputFilter}
-                label={t("clients.searchClients")}
-                placeholder={t("clients.searchPlaceholder")}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-              <FormControl sx={filterStyles?.formControlStyleCUR}>
-                <InputLabel
-                  sx={filterStyles?.multiOptionFilter?.inputLabelSection}
-                >
-                  {t("clients.filterByStatus")}
-                </InputLabel>
-                <Select
-                  value={selectedStatus}
-                  onChange={(e) => setSelectedStatus(e.target.value)}
-                  label={t("clients.filterByStatus")}
-                  sx={filterStyles?.multiOptionFilter?.selectSection}
-                >
-                  <MenuItem value="">{t("clients.allClients")}</MenuItem>
-                  <MenuItem value="active">{t("common.active")}</MenuItem>
-                  <MenuItem value="inactive">{t("common.inactive")}</MenuItem>
-                  <MenuItem value="client">{t("clients.clientsOnly")}</MenuItem>
-                  <MenuItem value="prospect">
-                    {t("clients.prospectsOnly")}
-                  </MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-          </Box>
-        )}
-      </>
-    );
-  }, [isOpen, selectedStatus, searchQuery, t]);
 
   return (
     <Box sx={{ px: 3 }}>
@@ -283,8 +285,8 @@ export const ClientsTabDesktop = ({
           columns={columns}
           loading={isLoading}
           emptyMessage={t("clients.noClientsFound") || "No clients found"}
-          slots={{ toolbar: ClientsToolbar }}
           pageSizeOptions={[10, 25, 50, 100]}
+          columnHeaderHeight={isOpen ? 90 : 56}
         />
       </Box>
     </Box>

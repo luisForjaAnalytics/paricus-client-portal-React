@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   Box,
   Button,
@@ -10,7 +10,6 @@ import {
   MenuItem,
   Chip,
   Typography,
-  Alert,
   CircularProgress,
   OutlinedInput,
   TextField,
@@ -36,6 +35,7 @@ import {
 } from "../../../common/styles/styles";
 import { SelectMenuItem } from "../../../common/components/ui/SelectMenuItem/SelectMenuItem";
 import { priorityOptions } from "./options";
+import { SuccessErrorSnackbar } from "../../../common/components/ui/SuccessErrorSnackbar/SuccessErrorSnackbar";
 
 // Compact selector styles for Quick Broadcast
 const compactSelector = {
@@ -88,8 +88,9 @@ export const QuickBroadcastView = () => {
   const [priority, setPriority] = useState("medium");
   const [attachments, setAttachments] = useState([]);
   const [sending, setSending] = useState(false);
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(false);
+
+  // Snackbar ref for notifications
+  const snackbarRef = useRef();
 
   // Get clients from API
   const { data: clients = [], isLoading: loadingClients } =
@@ -136,22 +137,21 @@ export const QuickBroadcastView = () => {
   const handleSubmit = async () => {
     // Validation
     if (!subject.trim()) {
-      setError(t("quickBroadcast.emptySubject"));
+      snackbarRef.current?.showError(t("quickBroadcast.emptySubject"));
       return;
     }
 
     const textContent = content.replace(/<[^>]*>/g, "").trim();
     if (!textContent) {
-      setError(t("quickBroadcast.emptyMessage"));
+      snackbarRef.current?.showError(t("quickBroadcast.emptyMessage"));
       return;
     }
 
     if (selectedClients.length === 0) {
-      setError(t("quickBroadcast.noClientsSelected"));
+      snackbarRef.current?.showError(t("quickBroadcast.noClientsSelected"));
       return;
     }
 
-    setError(null);
     setSending(true);
 
     try {
@@ -191,18 +191,15 @@ export const QuickBroadcastView = () => {
         }
       }
 
-      setSuccess(true);
+      snackbarRef.current?.showSuccess(t("quickBroadcast.success"));
       setSubject("");
       setContent("");
       setSelectedClients([]);
       setPriority("medium");
       setAttachments([]);
-
-      // Clear success message after 3 seconds
-      setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
       console.error("Error creating announcement:", err);
-      setError(err?.data?.error || t("quickBroadcast.error"));
+      snackbarRef.current?.showError(err?.data?.error || t("quickBroadcast.error"));
     } finally {
       setSending(false);
     }
@@ -238,23 +235,6 @@ export const QuickBroadcastView = () => {
       }}
     >
       <CardContent sx={{ padding: "1.5rem" }}>
-        {/* Success/Error messages */}
-        {success && (
-          <Alert
-            severity="success"
-            sx={{ mb: 2 }}
-            onClose={() => setSuccess(false)}
-          >
-            {t("quickBroadcast.success")}
-          </Alert>
-        )}
-
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
-            {error}
-          </Alert>
-        )}
-
         {/* Subject Field */}
         <Box sx={{ mb: 2 }}>
           <TextField
@@ -508,6 +488,9 @@ export const QuickBroadcastView = () => {
           </Button>
         </Box>
       </CardContent>
+
+      {/* Success/Error Snackbar */}
+      <SuccessErrorSnackbar ref={snackbarRef} />
     </Card>
   );
 };

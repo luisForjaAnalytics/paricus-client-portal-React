@@ -1,16 +1,9 @@
-import { useMemo } from "react";
+import { useMemo, useCallback } from "react";
 import {
   Box,
-  Button,
   Chip,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Badge,
   Tooltip,
-  InputAdornment,
-  TextField,
   Typography,
   IconButton,
 } from "@mui/material";
@@ -18,13 +11,9 @@ import {
   Add as AddIcon,
   Security as SecurityIcon,
   Shield as ShieldIcon,
-  Search as SearchIcon,
 } from "@mui/icons-material";
-import { colors, filterStyles } from "../../../../common/styles/styles";
-import {
-  UniversalDataGrid,
-  useDataGridColumns,
-} from "../../../../common/components/ui/DataGrid/UniversalDataGrid";
+import { UniversalDataGrid } from "../../../../common/components/ui/DataGrid/UniversalDataGrid";
+import { ColumnHeaderFilter } from "../../../../common/components/ui/ColumnHeaderFilter";
 import { useTranslation } from "react-i18next";
 import { PermissionsModal } from "./PermissionsModal";
 import { FilterButton } from "../FilterButton/FilterButton";
@@ -45,7 +34,7 @@ export const RolesTabDesktop = ({
   clients,
   openAddDialog,
   openEditDialog,
-  confirmDelete,
+  handleDeleteRole,
   openPermissionsDialog,
   formatDate,
   isProtectedRole,
@@ -60,87 +49,185 @@ export const RolesTabDesktop = ({
 }) => {
   const { t } = useTranslation();
 
-  // DataGrid columns
-  const columns = useDataGridColumns([
-    {
-      field: "role_name",
-      headerNameKey: "roles.table.roleName",
-      flex: 1,
-      align: "left",
-      renderCell: (params) => (
-        <Typography variant="body2" fontWeight={500} sx={{ margin: "1rem" }}>
-          {params.value}
-        </Typography>
-      ),
+  // Handler para cambiar filtros desde el header
+  const handleFilterChange = useCallback(
+    (filterKey, value) => {
+      if (filterKey === "roleName") {
+        setSearchQuery(value);
+      } else if (filterKey === "client") {
+        setSelectedClient(value);
+      }
     },
-    {
-      field: "description",
-      headerNameKey: "roles.table.description",
-      flex: 1,
-      align: "left",
-    },
-    {
-      field: "client_name",
-      headerNameKey: "roles.table.client",
-      flex: 1,
-      align: "left",
-      renderCell: (params) => (
-        <Chip
-          label={params.value}
-          color="primary"
-          variant="outlined"
-          size="small"
-        />
-      ),
-    },
-    {
-      field: "permissions_count",
-      headerNameKey: "roles.table.permissions",
-      flex: 1,
-      renderCell: (params) => (
-        <Badge badgeContent={params.value || 0} color="info">
-          <ShieldIcon color="action" />
-        </Badge>
-      ),
-    },
-    {
-      field: "created_at",
-      headerNameKey: "roles.table.created",
-      flex: 1,
-      valueFormatter: (value) => formatDate(value),
-    },
-    {
-      field: "actions",
-      headerNameKey: "roles.table.actions",
-      flex: 1,
-      sortable: false,
-      renderCell: (params) => (
-        <Box sx={{ display: "flex", gap: 0.5, justifyContent: "center", mt:'0.5rem' }}>
-          <EditButton
-            handleClick={openEditDialog}
-            item={params.row.original}
-            title={t("roles.actions.edit")}
+    [setSearchQuery, setSelectedClient]
+  );
+
+  // Clear all filters
+  const clearFilters = useCallback(() => {
+    setSearchQuery("");
+    setSelectedClient("");
+  }, [setSearchQuery, setSelectedClient]);
+
+  // Client options for filter
+  const clientOptions = useMemo(() => {
+    return clients.map((client) => ({
+      name: client.name,
+      value: client.id,
+    }));
+  }, [clients]);
+
+  // DataGrid columns with ColumnHeaderFilter
+  const columns = useMemo(
+    () => [
+      {
+        field: "role_name",
+        headerName: t("roles.table.roleName"),
+        flex: 1,
+        align: "left",
+        headerAlign: "center",
+        renderHeader: () => (
+          <ColumnHeaderFilter
+            headerName={t("roles.table.roleName")}
+            filterType="text"
+            filterKey="roleName"
+            filterValue={searchQuery}
+            onFilterChange={handleFilterChange}
+            placeholder={t("roles.searchPlaceholder")}
+            isOpen={isOpen}
           />
-          <Tooltip title={t("roles.actions.configurePermissions")}>
-            <IconButton
-              size="small"
-              color="success"
-              onClick={() => openPermissionsDialog(params.row.original)}
-            >
-              <SecurityIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          <DeleteButton
-            handleDelete={confirmDelete}
-            item={params.row.original}
-            itemName={params.row.role_name}
-            itemType="role"
-            disabled={isProtectedRole(params.row.role_name)}
+        ),
+        renderCell: (params) => (
+          <Typography variant="body2" fontWeight={500} sx={{ margin: "1rem" }}>
+            {params.value}
+          </Typography>
+        ),
+      },
+      {
+        field: "description",
+        headerName: t("roles.table.description"),
+        flex: 1,
+        align: "left",
+        headerAlign: "center",
+        renderHeader: () => (
+          <ColumnHeaderFilter
+            headerName={t("roles.table.description")}
+            filterType="none"
+            isOpen={isOpen}
           />
-        </Box>
-      ),
-    },
-  ]);
+        ),
+      },
+      {
+        field: "client_name",
+        headerName: t("roles.table.client"),
+        flex: 1,
+        align: "left",
+        headerAlign: "center",
+        renderHeader: () =>
+          isBPOAdmin ? (
+            <ColumnHeaderFilter
+              headerName={t("roles.table.client")}
+              filterType="select"
+              filterKey="client"
+              filterValue={selectedClient}
+              onFilterChange={handleFilterChange}
+              options={clientOptions}
+              labelKey="name"
+              valueKey="value"
+              isOpen={isOpen}
+            />
+          ) : (
+            <ColumnHeaderFilter
+              headerName={t("roles.table.client")}
+              filterType="none"
+              isOpen={isOpen}
+            />
+          ),
+        renderCell: (params) => (
+          <Chip
+            label={params.value}
+            color="primary"
+            variant="outlined"
+            size="small"
+          />
+        ),
+      },
+      {
+        field: "permissions_count",
+        headerName: t("roles.table.permissions"),
+        flex: 1,
+        align: "center",
+        headerAlign: "center",
+        renderHeader: () => (
+          <ColumnHeaderFilter
+            headerName={t("roles.table.permissions")}
+            filterType="none"
+            isOpen={isOpen}
+          />
+        ),
+        renderCell: (params) => (
+          <Badge badgeContent={params.value || 0} color="info">
+            <ShieldIcon color="action" />
+          </Badge>
+        ),
+      },
+      {
+        field: "created_at",
+        headerName: t("roles.table.created"),
+        flex: 1,
+        align: "center",
+        headerAlign: "center",
+        renderHeader: () => (
+          <ColumnHeaderFilter
+            headerName={t("roles.table.created")}
+            filterType="none"
+            isOpen={isOpen}
+          />
+        ),
+        valueFormatter: (value) => formatDate(value),
+      },
+      {
+        field: "actions",
+        headerName: t("roles.table.actions"),
+        flex: 1,
+        align: "center",
+        headerAlign: "center",
+        sortable: false,
+        renderHeader: () => (
+          <ColumnHeaderFilter
+            headerName={t("roles.table.actions")}
+            filterType="actions"
+            isOpen={isOpen}
+            onClearFilters={clearFilters}
+          />
+        ),
+        renderCell: (params) => (
+          <Box sx={{ display: "flex", gap: 0.5, justifyContent: "center", mt: "0.5rem" }}>
+            <EditButton
+              handleClick={openEditDialog}
+              item={params.row.original}
+              title={t("roles.actions.edit")}
+            />
+            <Tooltip title={t("roles.actions.configurePermissions")}>
+              <IconButton
+                size="small"
+                color="success"
+                onClick={() => openPermissionsDialog(params.row.original)}
+              >
+                <SecurityIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <DeleteButton
+              handleDelete={handleDeleteRole}
+              item={params.row.original}
+              itemName={params.row.role_name}
+              itemType="role"
+              disabled={isProtectedRole(params.row.role_name)}
+            />
+          </Box>
+        ),
+      },
+    ],
+    [t, searchQuery, selectedClient, handleFilterChange, isOpen, isBPOAdmin, clientOptions, clearFilters, openEditDialog, openPermissionsDialog, handleDeleteRole, isProtectedRole, formatDate]
+  );
 
   // Transform roles data for DataGrid
   const rows = useMemo(() => {
@@ -163,73 +250,6 @@ export const RolesTabDesktop = ({
       return [];
     }
   }, [roles]);
-
-  // Toolbar component with filters
-  const RolesToolbar = useMemo(() => {
-    return () => (
-      <>
-        {isOpen && (
-          <Box
-            sx={{
-              padding: "1rem 2rem",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: colors.subSectionBackground,
-              borderBottom: `1px solid ${colors.subSectionBorder}`,
-            }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 2,
-                width: "100%",
-              }}
-            >
-              <TextField
-                sx={filterStyles?.inputFilter}
-                label={t("roles.searchLabel")}
-                placeholder={t("roles.searchPlaceholder")}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-
-              {isBPOAdmin && (
-                <FormControl sx={filterStyles?.formControlStyleCUR}>
-                  <InputLabel
-                    sx={filterStyles?.multiOptionFilter?.inputLabelSection}
-                  >
-                    {t("roles.filterByClient")}
-                  </InputLabel>
-                  <Select
-                    value={selectedClient}
-                    label={t("roles.filterByClient")}
-                    onChange={(e) => setSelectedClient(e.target.value)}
-                    sx={filterStyles?.multiOptionFilter?.selectSection}
-                  >
-                    <MenuItem value="">{t("roles.allClients")}</MenuItem>
-                    {clients.map((client) => (
-                      <MenuItem key={client.id} value={client.id}>
-                        {client.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              )}
-            </Box>
-          </Box>
-        )}
-      </>
-    );
-  }, [isOpen, isBPOAdmin, selectedClient, searchQuery, clients, t]);
 
   return (
     <Box sx={{ px: 3 }}>
@@ -270,8 +290,8 @@ export const RolesTabDesktop = ({
           columns={columns}
           loading={isLoading}
           emptyMessage={t("roles.noRolesFound") || "No roles found"}
-          slots={{ toolbar: RolesToolbar }}
           pageSizeOptions={[10, 25, 50, 100]}
+          columnHeaderHeight={isOpen ? 90 : 56}
         />
       </Box>
 

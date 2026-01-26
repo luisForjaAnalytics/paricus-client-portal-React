@@ -44,6 +44,7 @@ import {
   outlinedIconButton,
   typography,
 } from "../../common/styles/styles";
+import { HeaderBoxTypography } from "../../common/components/ui/HeaderBoxTypography/HeaderBoxTypography";
 
 export const ReportsManagementView = () => {
   const { t } = useTranslation();
@@ -184,7 +185,7 @@ export const ReportsManagementView = () => {
     } catch (error) {
       showNotification(
         "error",
-        error.data?.message || t("reportsManagement.upload.uploadError")
+        error.data?.message || t("reportsManagement.upload.uploadError"),
       );
     }
   };
@@ -204,10 +205,10 @@ export const ReportsManagementView = () => {
         try {
           await createLog({
             userId: authUser.id.toString(),
-            eventType: 'DOWNLOAD',
-            entity: 'Report',
+            eventType: "DOWNLOAD",
+            entity: "Report",
             description: `Downloaded report ${fileName} from folder ${folder}`,
-            status: 'SUCCESS',
+            status: "SUCCESS",
           }).unwrap();
         } catch (logErr) {
           console.error("Error logging report download:", logErr);
@@ -216,17 +217,17 @@ export const ReportsManagementView = () => {
     } catch (error) {
       showNotification(
         "error",
-        error.data?.message || t("reportsManagement.upload.downloadError")
+        error.data?.message || t("reportsManagement.upload.downloadError"),
       );
 
       // Log failed download
       try {
         await createLog({
           userId: authUser.id.toString(),
-          eventType: 'DOWNLOAD',
-          entity: 'Report',
+          eventType: "DOWNLOAD",
+          entity: "Report",
           description: `Failed to download report ${report.name} from folder ${folder}`,
-          status: 'FAILURE',
+          status: "FAILURE",
         }).unwrap();
       } catch (logErr) {
         console.error("Error logging report download failure:", logErr);
@@ -237,7 +238,7 @@ export const ReportsManagementView = () => {
   const handleDeleteReport = async (report) => {
     // La confirmación se maneja en el DeleteButton via modal
     // Extraer el folder del key del report (formato: "folder/filename")
-    const folder = report.key.split('/')[0];
+    const folder = report.key.split("/")[0];
     const fileName = report.name;
 
     await deleteReportMutation({ folder, fileName }).unwrap();
@@ -246,10 +247,10 @@ export const ReportsManagementView = () => {
     try {
       await createLog({
         userId: authUser.id.toString(),
-        eventType: 'DELETE',
-        entity: 'Report',
+        eventType: "DELETE",
+        entity: "Report",
         description: `Deleted report ${fileName} from folder ${folder}`,
-        status: 'SUCCESS',
+        status: "SUCCESS",
       }).unwrap();
     } catch (logErr) {
       console.error("Error logging report deletion:", logErr);
@@ -325,43 +326,49 @@ export const ReportsManagementView = () => {
   };
 
   // Folder access management functions
-  const handleGrantFolderAccess = async () => {
-    if (!accessForm.clientId || !accessForm.folderName) return;
+  // const handleGrantFolderAccess = async () => {
+  //   if (!accessForm.clientId || !accessForm.folderName) return;
 
-    try {
-      await grantAccess({
-        clientId: parseInt(accessForm.clientId),
-        folderName: accessForm.folderName,
-      }).unwrap();
+  //   try {
+  //     await grantAccess({
+  //       clientId: parseInt(accessForm.clientId),
+  //       folderName: accessForm.folderName,
+  //     }).unwrap();
 
-      showNotification("success", t("reportsManagement.folderAccess.grantSuccess"));
-      setAccessForm({ clientId: "", folderName: "" });
-    } catch (error) {
-      showNotification(
-        "error",
-        error.data?.message || t("reportsManagement.folderAccess.grantError")
-      );
-    }
-  };
+  //     showNotification(
+  //       "success",
+  //       t("reportsManagement.folderAccess.grantSuccess"),
+  //     );
+  //     setAccessForm({ clientId: "", folderName: "" });
+  //   } catch (error) {
+  //     showNotification(
+  //       "error",
+  //       error.data?.message || t("reportsManagement.folderAccess.grantError"),
+  //     );
+  //   }
+  // };
 
-  const handleRevokeFolderAccess = async (clientId, folderName) => {
-    if (
-      !window.confirm(
-        t("reportsManagement.folderAccess.confirmRevoke", { folderName })
-      )
-    )
-      return;
+  // const handleRevokeFolderAccess = async (clientId, folderName) => {
+  //   if (
+  //     !window.confirm(
+  //       t("reportsManagement.folderAccess.confirmRevoke", { folderName }),
+  //     )
+  //   )
+  //     return;
 
-    try {
-      await revokeAccess({ clientId, folderName }).unwrap();
-      showNotification("success", t("reportsManagement.folderAccess.revokeSuccess"));
-    } catch (error) {
-      showNotification(
-        "error",
-        error.data?.message || t("reportsManagement.folderAccess.revokeError")
-      );
-    }
-  };
+  //   try {
+  //     await revokeAccess({ clientId, folderName }).unwrap();
+  //     showNotification(
+  //       "success",
+  //       t("reportsManagement.folderAccess.revokeSuccess"),
+  //     );
+  //   } catch (error) {
+  //     showNotification(
+  //       "error",
+  //       error.data?.message || t("reportsManagement.folderAccess.revokeError"),
+  //     );
+  //   }
+  // };
 
   const openFolderAccessModal = () => {
     try {
@@ -374,17 +381,7 @@ export const ReportsManagementView = () => {
   return (
     <Container maxWidth="100%" sx={{ py: 4 }}>
       {/* Page Header */}
-      <Box sx={{ mb: 2 }}>
-        <Typography
-          variant="h5"
-          sx={{
-            fontWeight: typography.fontWeight.semibold,
-            fontFamily: typography.fontFamily,
-          }}
-        >
-          {t("reportsManagement.title")}
-        </Typography>
-      </Box>
+      <HeaderBoxTypography text={t("reportsManagement.title")} />
       <Box>
         {/* Client Folders Section with Expandable Reports */}
         <ClientFolders

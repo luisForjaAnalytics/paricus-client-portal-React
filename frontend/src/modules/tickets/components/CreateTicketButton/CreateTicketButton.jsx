@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import {
   Button,
@@ -13,7 +13,6 @@ import {
   InputLabel,
   Box,
   Typography,
-  Alert,
   IconButton,
   Tooltip,
   CircularProgress,
@@ -41,6 +40,7 @@ import { SelectMenuItem } from "../../../../common/components/ui/SelectMenuItem/
 import { priorityOptions } from "./options";
 import { ActionButton } from "../../../../common/components/ui/ActionButton/ActionButton";
 import { CancelButton } from "../../../../common/components/ui/CancelButton/CancelButton";
+import { SuccessErrorSnackbar } from "../../../../common/components/ui/SuccessErrorSnackbar/SuccessErrorSnackbar";
 
 export const CreateTickeButton = ({}) => {
   const { t } = useTranslation();
@@ -51,6 +51,16 @@ export const CreateTickeButton = ({}) => {
     useGetDepartmentsQuery();
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
+
+  // Snackbar ref for notifications
+  const snackbarRef = useRef();
+
+  // Show error snackbar when error occurs
+  useEffect(() => {
+    if (error) {
+      snackbarRef.current?.showError(error?.data?.error || t("tickets.createNewTicket.errorCreating"));
+    }
+  }, [error, t]);
 
   const MAX_CHARACTERS = 500;
   // React Hook Form
@@ -179,7 +189,8 @@ export const CreateTickeButton = ({}) => {
         }
       }
 
-      // Success - reset form and close modal
+      // Success - show notification, reset form and close modal
+      snackbarRef.current?.showSuccess(t("tickets.createNewTicket.success") || "Ticket created successfully");
       reset();
       handleCancelModal();
     } catch (err) {
@@ -221,11 +232,6 @@ export const CreateTickeButton = ({}) => {
             </Typography>
           </DialogTitle>
           <DialogContent dividers>
-            {error && (
-              <Alert severity="error" sx={{ mb: 2 }}>
-                {error?.data?.error || "Error creating ticket"}
-              </Alert>
-            )}
             <Box
               container
               sx={{
@@ -435,6 +441,9 @@ export const CreateTickeButton = ({}) => {
           </DialogActions>
         </form>
       </Dialog>
+
+      {/* Error Snackbar */}
+      <SuccessErrorSnackbar ref={snackbarRef} />
     </>
   );
 };

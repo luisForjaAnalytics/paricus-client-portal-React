@@ -1,10 +1,9 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import {
   Box,
   Chip,
   Typography,
-  Alert,
   Tooltip,
   IconButton,
 } from "@mui/material";
@@ -19,6 +18,7 @@ import { useDispatch } from "react-redux";
 import { logsApi } from "../../../../store/api/logsApi";
 import { LogsViewMobile } from "./LogsViewMobil";
 import AdvancedFilters from "./AdvancedFilters";
+import { SuccessErrorSnackbar } from "../../../../common/components/ui/SuccessErrorSnackbar/SuccessErrorSnackbar";
 
 export const LogsView = () => {
   const { t } = useTranslation();
@@ -43,6 +43,9 @@ export const LogsView = () => {
   // State for advanced filters visibility
   const [isOpen, setIsOpen] = useState(false);
 
+  // Snackbar ref for error notifications
+  const snackbarRef = useRef();
+
   // Fetch logs from backend
   const { data, isLoading, error, refetch } = useGetLogsQuery({
     page: paginationModel.page + 1,
@@ -55,6 +58,14 @@ export const LogsView = () => {
     // Invalidate the logs cache to force a refetch
     dispatch(logsApi.util.invalidateTags(["Logs"]));
   }, [dispatch]);
+
+  // Show error snackbar when error occurs
+  useEffect(() => {
+    if (error) {
+      const errorMsg = error?.data?.error || error?.error || t("userManagement.logs.unknownError");
+      snackbarRef.current?.showError(`${t("userManagement.logs.errorLoading")}: ${errorMsg}`);
+    }
+  }, [error, t]);
 
   // Clear all filters
   const clearFilters = () => {
@@ -292,16 +303,6 @@ export const LogsView = () => {
 
   return (
     <Box sx={{ px: 3 }}>
-      {/* Error Alert */}
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {t("userManagement.logs.errorLoading")}:{" "}
-          {error?.data?.error ||
-            error?.error ||
-            t("userManagement.logs.unknownError")}
-        </Alert>
-      )}
-
       {/* DataGrid */}
       <Box
         sx={{
@@ -379,6 +380,9 @@ export const LogsView = () => {
         getStatusColor={getStatusColor}
         cleanIpAddress={cleanIpAddress}
       />
+
+      {/* Error Snackbar */}
+      <SuccessErrorSnackbar ref={snackbarRef} />
     </Box>
   );
 };

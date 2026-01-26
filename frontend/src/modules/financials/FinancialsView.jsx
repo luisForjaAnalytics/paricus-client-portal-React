@@ -49,7 +49,9 @@ import {
   outlinedButton,
   colors,
   typography,
+  headerTitleBox,
 } from "../../common/styles/styles";
+import { HeaderBoxTypography } from "../../common/components/ui/HeaderBoxTypography/HeaderBoxTypography";
 
 export const FinancialsView = () => {
   // Auth store
@@ -584,19 +586,8 @@ export const FinancialsView = () => {
         sx={{ margin: "2rem 0 0 0" }}
       >
         {/* Page Header */}
-        <Box sx={{ mb: 2 }}>
-          <Typography
-            variant="h5"
-            sx={{
-              //fontSize: typography.fontSize.h4, // text-xl (20px) - Section Title
-              fontWeight: typography.fontWeight.semibold,
-              fontFamily: typography.fontFamily,
-            }}
-          >
-            {isBPOAdmin ? "Financials" : "Financials"}
-          </Typography>
-        </Box>
 
+      <HeaderBoxTypography text={isBPOAdmin ? "Financials" : "Financials"} />
         {/* CARDS CONTAINER */}
 
         <Box

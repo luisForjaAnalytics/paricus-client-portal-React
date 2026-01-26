@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { Box, Tooltip, IconButton, Chip } from "@mui/material";
 import { Outlet, useNavigate } from "react-router-dom";
 import FilterListIcon from "@mui/icons-material/FilterList";
@@ -7,11 +7,8 @@ import { useTranslation } from "react-i18next";
 import { CreateTickeButton } from "../CreateTicketButton";
 import { useGetTicketsQuery } from "../../../../store/api/ticketsApi";
 import { formatDateTime } from "../../../../common/utils/formatDateTime";
-import {
-  UniversalDataGrid,
-  useDataGridColumns,
-} from "../../../../common/components/ui/DataGrid/UniversalDataGrid";
-import { TicketAdvancedFilters } from "../AdvancedFilters/TicketAdvancedFilters";
+import { UniversalDataGrid } from "../../../../common/components/ui/DataGrid/UniversalDataGrid";
+import { ColumnHeaderFilter } from "../../../../common/components/ui/ColumnHeaderFilter";
 import { getPriorityStyles, getStatusStyles } from "../../../../common/utils/getStatusProperty";
 
 export const TicketsViewDesktop = () => {
@@ -43,6 +40,30 @@ export const TicketsViewDesktop = () => {
       lastUpdate: "",
     });
   };
+
+  // Handler para cambiar filtros desde el header
+  const handleFilterChange = useCallback(
+    (filterKey, value) => {
+      setFilters((prev) => ({
+        ...prev,
+        [filterKey]: value,
+      }));
+    },
+    [setFilters]
+  );
+
+  // Options for select filters
+  const priorities = [
+    { name: "Low", value: "low" },
+    { name: "Medium", value: "medium" },
+    { name: "High", value: "high" },
+  ];
+  const statuses = [
+    { name: "Open", value: "open" },
+    { name: "In Progress", value: "in progress" },
+    { name: "Resolved", value: "resolved" },
+    { name: "Closed", value: "closed" },
+  ];
 
   // Filter tickets based on advanced filters
   const filteredTickets = useMemo(() => {
@@ -113,74 +134,190 @@ export const TicketsViewDesktop = () => {
 
 
 
-  // DataGrid columns using helper hook
-  const columns = useDataGridColumns([
-    {
-      field: "id",
-      headerNameKey: "tickets.table.ticketId",
-      flex: 1,
-    },
-    {
-      field: "lastUpdate",
-      headerNameKey: "tickets.table.lastUpdate",
-      flex: 1,
-    },
-    {
-      field: "subject",
-      headerNameKey: "tickets.table.subject",
-      width: 400,
-      flex: 0,
-    },
-    {
-      field: "from",
-      headerNameKey: "tickets.table.from",
-      flex: 1,
-    },
-    {
-      field: "assignedTo",
-      headerNameKey: "tickets.table.assignedTo",
-      flex: 1,
-    },
-    {
-      field: "priority",
-      headerNameKey: "tickets.table.priority",
-      flex: 1,
-      renderCell: (params) => {
-        const styles = getPriorityStyles(params.value);
-        return (
-          <Chip
-            label={params.value}
-            sx={{
-              ...styles,
-              fontWeight: "medium",
-              fontSize: "0.875rem",
-              width: "100%",
-            }}
-            size="small"
+  // DataGrid columns with ColumnHeaderFilter
+  const columns = useMemo(
+    () => [
+      {
+        field: "id",
+        headerName: t("tickets.table.ticketId"),
+        flex: 1,
+        align: "center",
+        headerAlign: "center",
+        renderHeader: () => (
+          <ColumnHeaderFilter
+            headerName={t("tickets.table.ticketId")}
+            filterType="text"
+            filterKey="ticketId"
+            filterValue={filters.ticketId}
+            onFilterChange={handleFilterChange}
+            placeholder={t("tickets.filters.ticketIdPlaceholder")}
+            isOpen={isOpen}
           />
-        );
+        ),
       },
-    },
-    {
-      field: "status",
-      headerNameKey: "tickets.table.status",
-      flex: 1,
-      renderCell: (params) => {
-        const styles = getStatusStyles(params.value);
-        return (
-          <Chip
-            label={params.value}
-            sx={{
-              ...styles,
-              fontWeight: "medium",
-              fontSize: "0.875rem",
-            }}
-            size="small"
+      {
+        field: "lastUpdate",
+        headerName: t("tickets.table.lastUpdate"),
+        flex: 1,
+        align: "center",
+        headerAlign: "center",
+        renderHeader: () => (
+          <ColumnHeaderFilter
+            headerName={t("tickets.table.lastUpdate")}
+            filterType="date"
+            filterKey="lastUpdate"
+            filterValue={filters.lastUpdate}
+            onFilterChange={handleFilterChange}
+            isOpen={isOpen}
           />
-        );
+        ),
       },
-    },
-  ]);
+      {
+        field: "subject",
+        headerName: t("tickets.table.subject"),
+        width: 400,
+        flex: 0,
+        align: "left",
+        headerAlign: "center",
+        renderHeader: () => (
+          <ColumnHeaderFilter
+            headerName={t("tickets.table.subject")}
+            filterType="text"
+            filterKey="subject"
+            filterValue={filters.subject}
+            onFilterChange={handleFilterChange}
+            placeholder={t("tickets.filters.subjectPlaceholder")}
+            isOpen={isOpen}
+          />
+        ),
+      },
+      {
+        field: "from",
+        headerName: t("tickets.table.from"),
+        flex: 1,
+        align: "center",
+        headerAlign: "center",
+        renderHeader: () => (
+          <ColumnHeaderFilter
+            headerName={t("tickets.table.from")}
+            filterType="text"
+            filterKey="from"
+            filterValue={filters.from}
+            onFilterChange={handleFilterChange}
+            placeholder={t("tickets.filters.fromPlaceholder")}
+            isOpen={isOpen}
+          />
+        ),
+      },
+      {
+        field: "assignedTo",
+        headerName: t("tickets.table.assignedTo"),
+        flex: 1,
+        align: "center",
+        headerAlign: "center",
+        renderHeader: () => (
+          <ColumnHeaderFilter
+            headerName={t("tickets.table.assignedTo")}
+            filterType="text"
+            filterKey="assignedTo"
+            filterValue={filters.assignedTo}
+            onFilterChange={handleFilterChange}
+            placeholder={t("tickets.filters.assignedToPlaceholder")}
+            isOpen={isOpen}
+          />
+        ),
+      },
+      {
+        field: "priority",
+        headerName: t("tickets.table.priority"),
+        flex: 1,
+        align: "center",
+        headerAlign: "center",
+        renderHeader: () => (
+          <ColumnHeaderFilter
+            headerName={t("tickets.table.priority")}
+            filterType="select"
+            filterKey="priority"
+            filterValue={filters.priority}
+            onFilterChange={handleFilterChange}
+            options={priorities}
+            labelKey="name"
+            valueKey="value"
+            isOpen={isOpen}
+          />
+        ),
+        renderCell: (params) => {
+          const styles = getPriorityStyles(params.value);
+          return (
+            <Chip
+              label={params.value}
+              sx={{
+                ...styles,
+                fontWeight: "medium",
+                fontSize: "0.875rem",
+                width: "100%",
+              }}
+              size="small"
+            />
+          );
+        },
+      },
+      {
+        field: "status",
+        headerName: t("tickets.table.status"),
+        flex: 1,
+        align: "center",
+        headerAlign: "center",
+        renderHeader: () => (
+          <ColumnHeaderFilter
+            headerName={t("tickets.table.status")}
+            filterType="select"
+            filterKey="status"
+            filterValue={filters.status}
+            onFilterChange={handleFilterChange}
+            options={statuses}
+            labelKey="name"
+            valueKey="value"
+            isOpen={isOpen}
+          />
+        ),
+        renderCell: (params) => {
+          const styles = getStatusStyles(params.value);
+          return (
+            <Chip
+              label={params.value}
+              sx={{
+                ...styles,
+                fontWeight: "medium",
+                fontSize: "0.875rem",
+              }}
+              size="small"
+            />
+          );
+        },
+      },
+      {
+        field: "actions",
+        headerName: t("tickets.table.actions"),
+        width: 120,
+        align: "center",
+        headerAlign: "center",
+        sortable: false,
+        renderHeader: () => (
+          <ColumnHeaderFilter
+            headerName={t("tickets.table.actions")}
+            filterType="actions"
+            isOpen={isOpen}
+            onSearch={refetch}
+            onClearFilters={clearFilters}
+            loading={isLoading}
+          />
+        ),
+        renderCell: () => null,
+      },
+    ],
+    [t, filters, handleFilterChange, isOpen, priorities, statuses, isLoading, refetch, clearFilters]
+  );
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -210,30 +347,6 @@ export const TicketsViewDesktop = () => {
         </Tooltip>
       </Box>
 
-      {/* Advanced Filters - Rendered outside DataGrid */}
-      {isOpen && (
-        <Box
-          sx={{
-            padding: "0.2rem 0 1rem 0",
-            display: { xs: "none", md: "flex" },
-            justifyContent: "left",
-            alignItems: "center",
-            backgroundColor: colors.subSectionBackground,
-            borderBottom: `1px solid ${colors.subSectionBorder}`,
-            marginBottom: 1,
-          }}
-        >
-          <TicketAdvancedFilters
-            filters={filters}
-            setFilters={setFilters}
-            refetch={refetch}
-            isDebouncing={false}
-            loading={isLoading}
-            clearFilters={clearFilters}
-          />
-        </Box>
-      )}
-
       {/* DataGrid */}
       <Box
         sx={{
@@ -253,6 +366,7 @@ export const TicketsViewDesktop = () => {
             navigate(`/app/tickets/ticketTable/${params.id}`)
           }
           pageSizeOptions={[10, 25, 50, 100]}
+          columnHeaderHeight={isOpen ? 90 : 56}
           sx={{
             cursor: "pointer",
             "& .MuiDataGrid-row:hover": {

@@ -1,11 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { Box, Card, CardContent } from "@mui/material";
-import {
-  summaryCard,
-  colors,
-  spacing,
-} from "../../../../common/styles/styles";
+import { summaryCard, colors, spacing } from "../../../../common/styles/styles";
 import { AppText } from "../../../../common/components/ui/AppText";
 
 export const ClientSummaryCard = ({ payload, formatCurrency }) => {
@@ -17,7 +13,7 @@ export const ClientSummaryCard = ({ payload, formatCurrency }) => {
         gap: spacing.md / 8, // gap-6 (24px converted to MUI units)
         width: "100%",
         flexDirection: { xs: "column", md: "row" },
-              }}
+      }}
     >
       {payload.map((item, index) => {
         return (
@@ -30,7 +26,7 @@ export const ClientSummaryCard = ({ payload, formatCurrency }) => {
                 bgcolor: colors.surface,
               }}
             >
-              <CardContent sx={{padding:'1rem 0 0 1rem'  }}>
+              <CardContent sx={{ padding: "1rem 0 0 1rem" }}>
                 <Box
                   sx={{
                     display: "flex",
@@ -44,7 +40,9 @@ export const ClientSummaryCard = ({ payload, formatCurrency }) => {
                   </AppText>
                 </Box>
                 <AppText variant="h2" sx={{ mb: 0.5 }}>
-                  {formatCurrency(item.overallStatsInfo.tp1)}
+                  {item.label !== "Active Clients"
+                    ? formatCurrency(item.overallStatsInfo.tp1)
+                    : item.overallStatsInfo.tp1}
                 </AppText>
                 <AppText variant="small" color="muted">
                   {item.overallStatsInfo.tp2} {item.invoiceState}
@@ -74,7 +72,7 @@ ClientSummaryCard.propTypes = {
         icon: PropTypes.node.isRequired,
         color: PropTypes.string.isRequired,
       }),
-    })
+    }),
   ).isRequired,
   formatCurrency: PropTypes.func.isRequired,
 };

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import {
   Box,
   Typography,
@@ -11,8 +11,6 @@ import {
   DialogActions,
   Button,
   TextField,
-  Alert,
-  Snackbar,
 } from "@mui/material";
 import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -31,6 +29,7 @@ import {
 import { formatDateTime } from "../../../../common/utils/formatDateTime";
 import { colors } from "../../../../common/styles/styles";
 import { CancelButton } from "../../../../common/components/ui/CancelButton/CancelButton";
+import { SuccessErrorSnackbar } from "../../../../common/components/ui/SuccessErrorSnackbar/SuccessErrorSnackbar";
 
 export const TicketsCenter = () => {
   const { t } = useTranslation();
@@ -52,9 +51,8 @@ export const TicketsCenter = () => {
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [rejectionReason, setRejectionReason] = useState("");
 
-  // State for notifications
-  const [successMessage, setSuccessMessage] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
+  // Snackbar ref for notifications
+  const snackbarRef = useRef();
 
   // Transform data for DataGrid
   const rows = useMemo(() => {
@@ -92,13 +90,13 @@ export const TicketsCenter = () => {
   const handleApprove = async (request) => {
     try {
       await approveChangeRequest(request.id).unwrap();
-      setSuccessMessage(
+      snackbarRef.current?.showSuccess(
         t("tickets.changeRequests.approveSuccess") ||
           "Change request approved successfully"
       );
     } catch (error) {
       console.error("Error approving change request:", error);
-      setErrorMessage(
+      snackbarRef.current?.showError(
         error?.data?.error ||
           t("tickets.changeRequests.approveError") ||
           "Failed to approve change request"
@@ -122,7 +120,7 @@ export const TicketsCenter = () => {
         changeRequestId: selectedRequest.id,
         rejectionReason: rejectionReason || null,
       }).unwrap();
-      setSuccessMessage(
+      snackbarRef.current?.showSuccess(
         t("tickets.changeRequests.rejectSuccess") || "Change request rejected"
       );
       setRejectDialogOpen(false);
@@ -130,7 +128,7 @@ export const TicketsCenter = () => {
       setRejectionReason("");
     } catch (error) {
       console.error("Error rejecting change request:", error);
-      setErrorMessage(
+      snackbarRef.current?.showError(
         error?.data?.error ||
           t("tickets.changeRequests.rejectError") ||
           "Failed to reject change request"
@@ -451,29 +449,8 @@ export const TicketsCenter = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Success Snackbar */}
-      <Snackbar
-        open={!!successMessage}
-        autoHideDuration={4000}
-        onClose={() => setSuccessMessage("")}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert severity="success" onClose={() => setSuccessMessage("")}>
-          {successMessage}
-        </Alert>
-      </Snackbar>
-
-      {/* Error Snackbar */}
-      <Snackbar
-        open={!!errorMessage}
-        autoHideDuration={4000}
-        onClose={() => setErrorMessage("")}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert severity="error" onClose={() => setErrorMessage("")}>
-          {errorMessage}
-        </Alert>
-      </Snackbar>
+      {/* Success/Error Snackbar */}
+      <SuccessErrorSnackbar ref={snackbarRef} />
     </Box>
   );
 };

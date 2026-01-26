@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Box, IconButton, Typography, Tooltip } from "@mui/material";
 import {
   Edit as EditIcon,
@@ -9,13 +9,16 @@ import {
   useGetAllArticlesQuery,
   useLazyGetArticleByIdQuery,
 } from "../../../store/api/articlesApi";
+import { useGetArticleSearchQuery } from "../../../store/api/articlesSearchApi";
 import { colors } from "../../../common/styles/styles";
-import { UniversalDataGrid, useDataGridColumns } from "../../../common/components/ui/DataGrid/UniversalDataGrid";
+import { UniversalDataGrid } from "../../../common/components/ui/DataGrid/UniversalDataGrid";
+import { ColumnHeaderFilter } from "../../../common/components/ui/ColumnHeaderFilter";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { TableViewMobil } from "./TableViewMobil";
-import AdvancedFilters from "./AdvancedFilters";
 import { formatDateTime } from "../../../common/utils/formatDateTime";
+import { ArticleSearch } from "./ArticleSearch";
+import { SuccessErrorSnackbar } from "../../../common/components/ui/SuccessErrorSnackbar/SuccessErrorSnackbar";
 
 const dataStructure = (data) => {
   try {
@@ -50,8 +53,41 @@ export const TableView = () => {
     updatedAt: "",
   });
 
+  // State for search term (debounced value from ArticleSearch)
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Search query - RTK Query handles loading, error, caching automatically
+  const {
+    data: searchResults,
+    isLoading: isSearching,
+    isError: isSearchError,
+  } = useGetArticleSearchQuery(searchTerm, {
+    skip: !searchTerm.trim(), // Skip if empty
+  });
+
   // State for advanced filters visibility
   const [isOpen, setIsOpen] = useState(false);
+
+  // Snackbar ref for error notifications
+  const snackbarRef = useRef();
+
+  // Show error snackbar when errors occur
+  useEffect(() => {
+    if (isError) {
+      snackbarRef.current?.showError(t("common.errorLoadingData"));
+    }
+  }, [isError, t]);
+
+  useEffect(() => {
+    if (isSearchError) {
+      snackbarRef.current?.showError(t("knowledgeBase.searchError"));
+    }
+  }, [isSearchError, t]);
+
+  // Handler for debounced search value from ArticleSearch
+  const handleSearchTermChange = useCallback((value) => {
+    setSearchTerm(value);
+  }, []);
 
   const navigate = useNavigate();
 
@@ -64,13 +100,27 @@ export const TableView = () => {
     });
   };
 
-  // Filter articles by advanced filters
+  // Handler para cambiar filtros desde el header
+  const handleFilterChange = useCallback(
+    (filterKey, value) => {
+      setFilters((prev) => ({
+        ...prev,
+        [filterKey]: value,
+      }));
+    },
+    [setFilters]
+  );
+
+  // Filter articles by advanced filters or search results
   const filteredArticles = useMemo(() => {
+    // If searching and have results, use them; otherwise use all data
+    const sourceData = searchTerm.trim() && searchResults ? searchResults : data;
+
     if (!filters.articleName && !filters.synopsis && !filters.updatedAt) {
-      return data;
+      return sourceData;
     }
 
-    return data.filter((article) => {
+    return sourceData.filter((article) => {
       const matchesName = filters.articleName
         ? article.article_name
             ?.toLowerCase()
@@ -89,7 +139,7 @@ export const TableView = () => {
 
       return matchesName && matchesSynopsis && matchesDate;
     });
-  }, [data, filters]);
+  }, [data, filters, searchTerm, searchResults]);
 
   const rows = useMemo(
     () => dataStructure(filteredArticles),
@@ -103,6 +153,7 @@ export const TableView = () => {
       navigate(`/app/knowledge-base/editorView/${articleId}`);
     } catch (error) {
       console.error("Error fetching article:", error);
+      snackbarRef.current?.showError(t("knowledgeBase.errorFetchingArticle"));
     }
   };
 
@@ -113,63 +164,117 @@ export const TableView = () => {
       navigate(`/app/knowledge-base/articleView/${articleId}`);
     } catch (error) {
       console.error("Error fetching article:", error);
+      snackbarRef.current?.showError(t("knowledgeBase.errorFetchingArticle"));
     }
   };
 
-  const columns = useDataGridColumns([
-    {
-      field: "article_name",
-      headerNameKey: "knowledgeBase.table.articleName",
-      width: 300,
-      flex: 1,
-      align: "left",
-      renderCell: (params) => (
-        <Typography variant="body2" fontWeight="medium" sx={{ margin: "1rem" }}>
-          {params.value || "N/A"}
-        </Typography>
-      ),
-    },
-    {
-      field: "article_synopsis",
-      headerNameKey: "knowledgeBase.table.synopsis",
-      width: 400,
-      flex: 2,
-    },
-    {
-      field: "updated_at",
-      headerNameKey: "knowledgeBase.table.updatedAt",
-      width: 200,
-      flex: 1,
-    },
-    {
-      field: "actions",
-      headerNameKey: "knowledgeBase.table.actions",
-      width: 150,
-      sortable: false,
-      renderCell: (params) => (
-        <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
-          <Tooltip title={t("knowledgeBase.actions.edit")}>
-            <IconButton
-              onClick={() => handleEditClick(params.id)}
-              size="small"
-              color="primary"
-            >
-              <EditIcon />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title={t("knowledgeBase.actions.view")}>
-            <IconButton
-              onClick={() => handleViewClick(params.id)}
-              size="small"
-              sx={{ color: colors.primary }}
-            >
-              <VisibilityIcon />
-            </IconButton>
-          </Tooltip>
-        </Box>
-      ),
-    },
-  ]);
+  const columns = useMemo(
+    () => [
+      {
+        field: "article_name",
+        headerName: t("knowledgeBase.table.articleName"),
+        width: 300,
+        flex: 1,
+        align: "left",
+        headerAlign: "center",
+        renderHeader: () => (
+          <ColumnHeaderFilter
+            headerName={t("knowledgeBase.table.articleName")}
+            filterType="text"
+            filterKey="articleName"
+            filterValue={filters.articleName}
+            onFilterChange={handleFilterChange}
+            placeholder={t("knowledgeBase.filters.articleNamePlaceholder")}
+            isOpen={isOpen}
+          />
+        ),
+        renderCell: (params) => (
+          <Typography variant="body2" fontWeight="medium" sx={{ margin: "1rem" }}>
+            {params.value || "N/A"}
+          </Typography>
+        ),
+      },
+      {
+        field: "article_synopsis",
+        headerName: t("knowledgeBase.table.synopsis"),
+        width: 400,
+        flex: 2,
+        align: "center",
+        headerAlign: "center",
+        renderHeader: () => (
+          <ColumnHeaderFilter
+            headerName={t("knowledgeBase.table.synopsis")}
+            filterType="text"
+            filterKey="synopsis"
+            filterValue={filters.synopsis}
+            onFilterChange={handleFilterChange}
+            placeholder={t("knowledgeBase.filters.synopsisPlaceholder")}
+            isOpen={isOpen}
+            centerTitle
+          />
+        ),
+      },
+      {
+        field: "updated_at",
+        headerName: t("knowledgeBase.table.updatedAt"),
+        width: 200,
+        flex: 1,
+        align: "center",
+        headerAlign: "center",
+        renderHeader: () => (
+          <ColumnHeaderFilter
+            headerName={t("knowledgeBase.table.updatedAt")}
+            filterType="date"
+            filterKey="updatedAt"
+            filterValue={filters.updatedAt}
+            onFilterChange={handleFilterChange}
+            isOpen={isOpen}
+          />
+        ),
+      },
+      {
+        field: "actions",
+        headerName: t("knowledgeBase.table.actions"),
+        width: 150,
+        align: "center",
+        headerAlign: "center",
+        sortable: false,
+        renderHeader: () => (
+          <ColumnHeaderFilter
+            headerName={t("knowledgeBase.table.actions")}
+            filterType="actions"
+            isOpen={isOpen}
+            onSearch={refetch}
+            onClearFilters={clearFilters}
+            loading={isLoading}
+          />
+        ),
+        renderCell: (params) => (
+          <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
+            <Tooltip title={t("knowledgeBase.actions.edit")}>
+              <IconButton
+                onClick={() => handleEditClick(params.id)}
+                size="small"
+                color="primary"
+              >
+                <EditIcon />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title={t("knowledgeBase.actions.view")}>
+              <IconButton
+                onClick={() => handleViewClick(params.id)}
+                size="small"
+                sx={{ color: colors.primary }}
+              >
+                <VisibilityIcon />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        ),
+      },
+    ],
+    [t, filters, handleFilterChange, isOpen, isLoading, refetch, clearFilters]
+  );
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -188,8 +293,13 @@ export const TableView = () => {
             justifyContent: "flex-end",
             marginBottom: 1,
             marginRight: 2,
+            //gap:3
           }}
         >
+          <ArticleSearch
+            onDebouncedValueChange={handleSearchTermChange}
+            isLoading={isSearching}
+          />
           <Tooltip title={t("knowledgeBase.filtersButton")}>
             <IconButton
               onClick={() => setIsOpen(!isOpen)}
@@ -203,29 +313,6 @@ export const TableView = () => {
           </Tooltip>
         </Box>
 
-        {/* Advanced Filters - Rendered outside DataGrid */}
-        {isOpen && (
-          <Box
-            sx={{
-              padding: "1rem 2rem",
-              display: "flex",
-              justifyContent: "left",
-              backgroundColor: colors.subSectionBackground,
-              borderBottom: `1px solid ${colors.subSectionBorder}`,
-              marginBottom: 1,
-            }}
-          >
-            <AdvancedFilters
-              filters={filters}
-              setFilters={setFilters}
-              refetch={refetch}
-              isDebouncing={false}
-              loading={isLoading}
-              clearFilters={clearFilters}
-            />
-          </Box>
-        )}
-
         <UniversalDataGrid
           rows={rows}
           columns={columns}
@@ -233,6 +320,7 @@ export const TableView = () => {
           emptyMessage={t("knowledgeBase.noArticlesFound") || "No articles found"}
           pageSizeOptions={[10, 25, 50, 100]}
           height={'auto'}
+          columnHeaderHeight={isOpen ? 90 : 56}
         />
       </Box>
 
@@ -243,6 +331,9 @@ export const TableView = () => {
         handleEditClick={handleEditClick}
         handleViewClick={handleViewClick}
       />
+
+      {/* Error Snackbar */}
+      <SuccessErrorSnackbar ref={snackbarRef} />
     </Box>
   );
 };

@@ -23,7 +23,7 @@ export const colors = {
   drawer: "#FFFFFF",
 
   //Nav Bar
-  navBarColor: "#22c55ee8",
+  navBarColor: "#17bd54",
   // Tickets Historical Section Divider
   dividerColor: "#59cc835e",
   // Neutral colors (Grays - from Tailwind)
@@ -123,6 +123,14 @@ export const colors = {
   },
 };
 
+// ========================================
+//  HEADER TITLE BOX
+// ========================================
+export const headerTitleBox = {
+  display: { xs: "none", md: "flex" },
+  mb: 2,
+  mt: 1,
+};
 // ========================================
 // TYPOGRAPHY
 // ========================================
@@ -541,6 +549,14 @@ export const dataGridTable = {
   "& .MuiDataGrid-row:hover": {
     backgroundColor: colors.background,
   },
+  columnHeaderTitle: {
+    fontWeight: typography.fontWeight.bold,
+    textTransform: "uppercase",
+    fontSize: typography.fontSize.tableHeader,
+    fontFamily: typography.fontFamily,
+    color: colors.textMuted,
+    letterSpacing: "0.05em",
+  },
 };
 // ========================================
 // Titles Text styles
@@ -598,13 +614,17 @@ export const filterStyles = {
     },
   },
   inputFilter: {
+    //width:'15vh',
+    flex: 1,
+    mt: "0.5rem",
     "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
       borderColor: colors.focusRing,
     },
     "& .MuiOutlinedInput-root": {
       backgroundColor: colors.surface,
       borderRadius: "3rem",
-      height: "2.6rem",
+      height: "2.2rem",
+
       "&.Mui-focused fieldset": {
         borderColor: colors.focusRing,
       },
@@ -649,13 +669,15 @@ export const filterStyles = {
   },
   //Company filter Audio Recording //
   formControlSection: {
-    width: "10rem",
+    width: "15vh",
+        mt: "0.5rem",
+    //flex: 1,
     "& .MuiSelect-select": {
       display: "flex",
       alignItems: "center",
     },
     "& .MuiOutlinedInput-root": {
-      height: "2.6rem",
+      height: "2.2rem",
     },
     "& .MuiInputLabel-root": {
       top: "-0.4rem",

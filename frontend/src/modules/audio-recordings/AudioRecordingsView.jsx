@@ -40,9 +40,9 @@ import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next"; // ADDED: i18n support
 import { QuickFiltersMobile } from "./components/QuickFilters/QuickFiltersMobile.jsx";
 import { TableView } from "./components/TableView/TableView.jsx";
-import { typography } from "../../common/styles/styles.js";
 import { FilterButton } from "./components/FilterButton/FilterButton.jsx";
 import { formatDateTime } from "../../common/utils/formatDateTime";
+import { HeaderBoxTypography } from "../../common/components/ui/HeaderBoxTypography/HeaderBoxTypography.jsx";
 
 export const AudioRecordingsView = () => {
   const { t } = useTranslation(); // ADDED: Translation hook
@@ -135,7 +135,7 @@ export const AudioRecordingsView = () => {
       refetchOnFocus: true,
       // Don't refetch when reconnecting
       refetchOnReconnect: false,
-    }
+    },
   );
 
   // Lazy load call types only when dropdown is opened
@@ -172,7 +172,7 @@ export const AudioRecordingsView = () => {
   // Computed values
   const totalPages = useMemo(
     () => Math.ceil(totalCount / itemsPerPage),
-    [totalCount, itemsPerPage]
+    [totalCount, itemsPerPage],
   );
 
   const progressPercentage = useMemo(() => {
@@ -272,7 +272,7 @@ export const AudioRecordingsView = () => {
             }).catch((logErr) => {
               console.error(
                 `ERROR: toggleAudio (createLog) - ${logErr.message}`,
-                logErr
+                logErr,
               );
             });
           }
@@ -290,7 +290,7 @@ export const AudioRecordingsView = () => {
           }).catch((logErr) => {
             console.error(
               `ERROR: toggleAudio (createLog failure) - ${logErr.message}`,
-              logErr
+              logErr,
             );
           });
         } finally {
@@ -305,7 +305,7 @@ export const AudioRecordingsView = () => {
       getAudioUrl,
       createLog,
       authUser.id,
-    ]
+    ],
   );
 
   const stopAudio = useCallback(
@@ -332,7 +332,7 @@ export const AudioRecordingsView = () => {
         }).catch((logErr) => {
           console.error(
             `ERROR: stopAudio (createLog) - ${logErr.message}`,
-            logErr
+            logErr,
           );
         });
       }
@@ -341,7 +341,7 @@ export const AudioRecordingsView = () => {
       setIsPlaying(false);
       setCurrentTime(0);
     },
-    [recordings, currentlyPlaying, createLog, authUser.id]
+    [recordings, currentlyPlaying, createLog, authUser.id],
   );
 
   const togglePlayPause = () => {
@@ -396,7 +396,7 @@ export const AudioRecordingsView = () => {
       if (!audioPlayer.current) return;
       audioPlayer.current.currentTime = Math.max(
         0,
-        audioPlayer.current.currentTime - 10
+        audioPlayer.current.currentTime - 10,
       );
     } catch (err) {
       console.error(`ERROR: rewind - ${err.message}`, err);
@@ -408,7 +408,7 @@ export const AudioRecordingsView = () => {
       if (!audioPlayer.current) return;
       audioPlayer.current.currentTime = Math.min(
         duration,
-        audioPlayer.current.currentTime + 10
+        audioPlayer.current.currentTime + 10,
       );
     } catch (err) {
       console.error(`ERROR: forward - ${err.message}`, err);
@@ -515,7 +515,7 @@ export const AudioRecordingsView = () => {
         setLoadingAudioUrl(null);
       }
     },
-    [getAudioUrl]
+    [getAudioUrl],
   );
 
   // DISABLED: Prefetch audio causes performance issues - too many API calls on hover
@@ -536,19 +536,7 @@ export const AudioRecordingsView = () => {
   return (
     <Box sx={{ p: 3, pb: currentlyPlaying ? 15 : 3 }}>
       {/* Page Header */}
-      <Box sx={{ mb: 2, mt: 1 }}>
-        <Typography
-          variant="h5"
-          sx={{
-            //fontSize: typography.fontSize.h4, // text-xl (20px) - Section Title
-            fontWeight: typography.fontWeight.semibold,
-            fontFamily: typography.fontFamily,
-          }}
-        >
-          {t("audioRecordings.sectionTitle")}
-        </Typography>
-      </Box>
-
+      <HeaderBoxTypography text={t("audioRecordings.sectionTitle")} />
       {/* Database Connection Warning */}
       {!dbConfigured && (
         <Alert severity="warning" sx={{ mb: 3 }} icon={<WarningIcon />}>

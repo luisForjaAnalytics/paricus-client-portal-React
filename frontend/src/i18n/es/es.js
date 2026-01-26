@@ -217,6 +217,8 @@ export default {
     add: "Agregar",
     search: "Buscar",
     filter: "Filtrar",
+    filterBy: "Filtrar por",
+    clearFilter: "Limpiar filtro",
     clear: "Limpiar",
     loading: "Cargando...",
     error: "Error",
@@ -245,7 +247,8 @@ export default {
     view: "Ver",
     // Diálogo de confirmación de eliminación
     confirmDeleteTitle: "Eliminar {{item}}",
-    confirmDeleteMessage: "¿Está seguro que desea eliminar {{item}}? Esta acción no se puede deshacer.",
+    confirmDeleteMessage:
+      "¿Está seguro que desea eliminar {{item}}? Esta acción no se puede deshacer.",
     deleteSuccess: "{{item}} eliminado exitosamente",
     deleteError: "Error al eliminar {{item}}",
     // Mensajes de Snackbar
@@ -725,6 +728,7 @@ export default {
     noArticlesFound: "No se encontraron artículos",
     loadingArticles: "Cargando artículos...",
     filtersButton: "Filtros",
+
     table: {
       articleName: "Nombre del Artículo",
       synopsis: "Sinopsis",
@@ -732,6 +736,7 @@ export default {
       actions: "Acciones",
     },
     filters: {
+      articleSearch: "Busqueda por Articulo",
       articleName: "Nombre del Artículo",
       articleNamePlaceholder: "Buscar por nombre del artículo...",
       synopsis: "Sinopsis del Artículo",

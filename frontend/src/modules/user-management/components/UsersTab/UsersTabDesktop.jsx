@@ -1,34 +1,23 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useCallback } from "react";
 import {
   Box,
-  Button,
   Chip,
-  FormControl,
   IconButton,
-  InputLabel,
-  MenuItem,
-  Select,
-  TextField,
   Typography,
-  InputAdornment,
   Tooltip,
 } from "@mui/material";
 import {
   Add as AddIcon,
-  Search as SearchIcon,
   Block as BlockIcon,
   CheckCircle as CheckCircleIcon,
 } from "@mui/icons-material";
 import PropTypes from "prop-types";
-import { colors, filterStyles } from "../../../../common/styles/styles";
 import { useTranslation } from "react-i18next";
 import { FilterButton } from "../FilterButton/FilterButton";
 import { ActionButton } from "../../../../common/components/ui/ActionButton/ActionButton";
 import { EditButton } from "../../../../common/components/ui/EditButton/EditButton";
-import {
-  UniversalDataGrid,
-  useDataGridColumns,
-} from "../../../../common/components/ui/DataGrid/UniversalDataGrid";
+import { UniversalDataGrid } from "../../../../common/components/ui/DataGrid/UniversalDataGrid";
+import { ColumnHeaderFilter } from "../../../../common/components/ui/ColumnHeaderFilter";
 
 export const UsersTabDesktop = ({
   users,
@@ -48,108 +37,207 @@ export const UsersTabDesktop = ({
 }) => {
   const { t } = useTranslation();
 
-  // DataGrid columns
-  const columns = useDataGridColumns([
-    {
-      field: "name",
-      headerNameKey: "users.table.name",
-      flex: 1,
-      align: "left",
-      renderCell: (params) => (
-        <Typography variant="body2" fontWeight="medium" sx={{ margin: "1rem" }}>
-          {params.value || t("common.na")}
-        </Typography>
-      ),
+  // Handler para cambiar filtros desde el header
+  const handleFilterChange = useCallback(
+    (filterKey, value) => {
+      if (filterKey === "name") {
+        setSearchQuery(value);
+      } else if (filterKey === "client") {
+        setSelectedClient(value);
+      }
     },
-    {
-      field: "email",
-      headerNameKey: "users.table.email",
-      flex: 1,
-      align: "left",
-    },
-    {
-      field: "client_name",
-      headerNameKey: "users.table.client",
-      flex: 1,
-      align: "left",
-    },
-    {
-      field: "role_name",
-      headerNameKey: "users.table.role",
-      flex: 1,
-      renderCell: (params) =>
-        params.value ? (
-          <Chip label={params.value} color="primary" size="small" />
-        ) : (
-          <Chip
-            label={t("users.table.noRoleAssigned")}
-            color="default"
-            size="small"
-            variant="outlined"
+    [setSearchQuery, setSelectedClient]
+  );
+
+  // Clear all filters
+  const clearFilters = useCallback(() => {
+    setSearchQuery("");
+    setSelectedClient("");
+  }, [setSearchQuery, setSelectedClient]);
+
+  // DataGrid columns with ColumnHeaderFilter
+  const columns = useMemo(
+    () => [
+      {
+        field: "name",
+        headerName: t("users.table.name"),
+        flex: 1,
+        align: "left",
+        headerAlign: "center",
+        renderHeader: () => (
+          <ColumnHeaderFilter
+            headerName={t("users.table.name")}
+            filterType="text"
+            filterKey="name"
+            filterValue={searchQuery}
+            onFilterChange={handleFilterChange}
+            placeholder={t("users.searchPlaceholder")}
+            isOpen={isOpen}
           />
         ),
-    },
-    {
-      field: "is_active",
-      headerNameKey: "users.table.status",
-      flex: 1,
-      renderCell: (params) => (
-        <Chip
-          label={
-            params.value ? t("users.table.active") : t("users.table.inactive")
-          }
-          color={params.value ? "success" : "error"}
-          size="small"
-        />
-      ),
-    },
-    {
-      field: "created_at",
-      headerNameKey: "users.table.created",
-      flex: 1,
-      valueFormatter: (value) => formatDate(value),
-    },
-    {
-      field: "actions",
-      headerNameKey: "users.table.actions",
-      flex: 1,
-      sortable: false,
-      renderCell: (params) => (
-        <Box
-          sx={{
-            display: "flex",
-            gap: 0.5,
-            justifyContent: "center",
-            mt: "0.5rem",
-          }}
-        >
-          <EditButton
-            handleClick={openEditDialog}
-            item={params.row.original}
-            title={t("users.actions.editUser")}
+        renderCell: (params) => (
+          <Typography variant="body2" fontWeight="medium" sx={{ margin: "1rem" }}>
+            {params.value || t("common.na")}
+          </Typography>
+        ),
+      },
+      {
+        field: "email",
+        headerName: t("users.table.email"),
+        flex: 1,
+        align: "left",
+        headerAlign: "center",
+        renderHeader: () => (
+          <ColumnHeaderFilter
+            headerName={t("users.table.email")}
+            filterType="none"
+            isOpen={isOpen}
           />
-          <Tooltip
-            title={
-              params.row.is_active
-                ? t("users.actions.deactivateUser")
-                : t("users.actions.activateUser")
-            }
-          >
-            <IconButton
+        ),
+      },
+      {
+        field: "client_name",
+        headerName: t("users.table.client"),
+        flex: 1,
+        align: "left",
+        headerAlign: "center",
+        renderHeader: () =>
+          isBPOAdmin ? (
+            <ColumnHeaderFilter
+              headerName={t("users.table.client")}
+              filterType="select"
+              filterKey="client"
+              filterValue={selectedClient}
+              onFilterChange={handleFilterChange}
+              options={clientOptions.map((c) => ({ name: c.title, value: c.value }))}
+              labelKey="name"
+              valueKey="value"
+              isOpen={isOpen}
+            />
+          ) : (
+            <ColumnHeaderFilter
+              headerName={t("users.table.client")}
+              filterType="none"
+              isOpen={isOpen}
+            />
+          ),
+      },
+      {
+        field: "role_name",
+        headerName: t("users.table.role"),
+        flex: 1,
+        align: "center",
+        headerAlign: "center",
+        renderHeader: () => (
+          <ColumnHeaderFilter
+            headerName={t("users.table.role")}
+            filterType="none"
+            isOpen={isOpen}
+          />
+        ),
+        renderCell: (params) =>
+          params.value ? (
+            <Chip label={params.value} color="primary" size="small" />
+          ) : (
+            <Chip
+              label={t("users.table.noRoleAssigned")}
+              color="default"
               size="small"
-              onClick={() => toggleUserStatus(params.row.original)}
+              variant="outlined"
+            />
+          ),
+      },
+      {
+        field: "is_active",
+        headerName: t("users.table.status"),
+        flex: 1,
+        align: "center",
+        headerAlign: "center",
+        renderHeader: () => (
+          <ColumnHeaderFilter
+            headerName={t("users.table.status")}
+            filterType="none"
+            isOpen={isOpen}
+          />
+        ),
+        renderCell: (params) => (
+          <Chip
+            label={
+              params.value ? t("users.table.active") : t("users.table.inactive")
+            }
+            color={params.value ? "success" : "error"}
+            size="small"
+          />
+        ),
+      },
+      {
+        field: "created_at",
+        headerName: t("users.table.created"),
+        flex: 1,
+        align: "center",
+        headerAlign: "center",
+        renderHeader: () => (
+          <ColumnHeaderFilter
+            headerName={t("users.table.created")}
+            filterType="none"
+            isOpen={isOpen}
+          />
+        ),
+        valueFormatter: (value) => formatDate(value),
+      },
+      {
+        field: "actions",
+        headerName: t("users.table.actions"),
+        flex: 1,
+        align: "center",
+        headerAlign: "center",
+        sortable: false,
+        renderHeader: () => (
+          <ColumnHeaderFilter
+            headerName={t("users.table.actions")}
+            filterType="actions"
+            isOpen={isOpen}
+            onClearFilters={clearFilters}
+          />
+        ),
+        renderCell: (params) => (
+          <Box
+            sx={{
+              display: "flex",
+              gap: 0.5,
+              justifyContent: "center",
+              mt: "0.5rem",
+            }}
+          >
+            <EditButton
+              handleClick={openEditDialog}
+              item={params.row.original}
+              title={t("users.actions.editUser")}
+            />
+            <Tooltip
+              title={
+                params.row.is_active
+                  ? t("users.actions.deactivateUser")
+                  : t("users.actions.activateUser")
+              }
             >
-              {params.row.is_active ? (
-                <BlockIcon fontSize="small" />
-              ) : (
-                <CheckCircleIcon fontSize="small" />
-              )}
-            </IconButton>
-          </Tooltip>
-        </Box>
-      ),
-    },
-  ]);
+              <IconButton
+                size="small"
+                onClick={() => toggleUserStatus(params.row.original)}
+              >
+                {params.row.is_active ? (
+                  <BlockIcon fontSize="small" />
+                ) : (
+                  <CheckCircleIcon fontSize="small" />
+                )}
+              </IconButton>
+            </Tooltip>
+          </Box>
+        ),
+      },
+    ],
+    [t, searchQuery, selectedClient, handleFilterChange, isOpen, isBPOAdmin, clientOptions, clearFilters, openEditDialog, toggleUserStatus, formatDate]
+  );
 
   // Transform users data for DataGrid
   const rows = useMemo(() => {
@@ -171,74 +259,6 @@ export const UsersTabDesktop = ({
       return [];
     }
   }, [users, t]);
-
-  // Toolbar component with filters
-  const UsersToolbar = useMemo(() => {
-    return () => (
-      <>
-        {isOpen && (
-          <Box
-            sx={{
-              padding: "1rem 2rem",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: colors.subSectionBackground,
-              borderBottom: `1px solid ${colors.subSectionBorder}`,
-            }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 2,
-                width: "100%",
-              }}
-            >
-              <TextField
-                sx={filterStyles?.inputFilter}
-                label={t("users.searchLabel")}
-                placeholder={t("users.searchPlaceholder")}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-
-              {/* Only show client filter for BPO Admins */}
-              {isBPOAdmin && (
-                <FormControl sx={filterStyles?.formControlStyleCUR}>
-                  <InputLabel
-                    sx={filterStyles?.multiOptionFilter?.inputLabelSection}
-                  >
-                    {t("users.filterByClient")}
-                  </InputLabel>
-                  <Select
-                    value={selectedClient}
-                    onChange={(e) => setSelectedClient(e.target.value)}
-                    label={t("users.filterByClient")}
-                    sx={filterStyles?.multiOptionFilter?.selectSection}
-                  >
-                    <MenuItem value="">{t("users.allClients")}</MenuItem>
-                    {clientOptions.map((client) => (
-                      <MenuItem key={client.value} value={client.value}>
-                        {client.title}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              )}
-            </Box>
-          </Box>
-        )}
-      </>
-    );
-  }, [isOpen, isBPOAdmin, selectedClient, searchQuery, clientOptions, t]);
 
   return (
     <Box sx={{ px: 3 }}>
@@ -280,6 +300,7 @@ export const UsersTabDesktop = ({
           loading={loading}
           emptyMessage={t("users.noUsersFound") || "No users found"}
           pageSizeOptions={[10, 25, 50, 100]}
+          columnHeaderHeight={isOpen ? 90 : 56}
         />
       </Box>
     </Box>
