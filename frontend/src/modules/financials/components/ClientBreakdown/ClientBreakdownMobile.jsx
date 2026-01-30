@@ -1,256 +1,13 @@
-import React from "react";
+import { useMemo } from "react";
 import PropTypes from "prop-types";
-import {
-  Box,
-  Collapse,
-  IconButton,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-  Paper,
-  Chip,
-  Divider,
-} from "@mui/material";
-import {
-  KeyboardArrowDown as KeyboardArrowDownIcon,
-  KeyboardArrowUp as KeyboardArrowUpIcon,
-  Business as BusinessIcon,
-} from "@mui/icons-material";
+import { Box, Chip, Typography, Divider } from "@mui/material";
+import { Business as BusinessIcon } from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
+import { UniversalMobilDataTable } from "../../../../common/components/ui/UniversalMobilDataTable";
 import { InvoicesTableMobile } from "../InvoicesTable/InvoicesTableMobile";
-
-function Row({
-  client,
-  selectedFolder,
-  formatCurrency,
-  invoices,
-  isAdmin,
-  formatDate,
-  getStatusColor,
-  downloadInvoice,
-  openEditInvoiceModal,
-  handleDeleteInvoice,
-  openPaymentLink,
-  onPaymentLinkSuccess,
-  onPaymentLinkError,
-}) {
-  const [open, setOpen] = React.useState(false);
-  const isSelected = selectedFolder === client.folder;
-
-  const handleRowClick = () => {
-    // Note: We don't call selectClient here anymore because all invoices
-    // are already loaded in the invoices prop from FinancialsView
-    setOpen(!open);
-  };
-
-  // Helper to convert client name to folder format (e.g., "IM Telecom" -> "im-telecom")
-  const clientNameToFolder = (name) => name?.toLowerCase().replace(/\s+/g, '-') || '';
-
-  // Filter invoices for this client
-  const clientInvoices = invoices.filter((invoice) => {
-    // Check if invoice has folder properties (old way)
-    if (invoice.folder === client.folder || invoice.clientFolder === client.folder) {
-      return true;
-    }
-    // Match by client name converted to folder format
-    if (invoice.client?.name) {
-      return clientNameToFolder(invoice.client.name) === client.folder;
-    }
-    return false;
-  });
-
-  return (
-    <React.Fragment>
-      <TableRow
-        sx={{
-          "& > *": { borderBottom: "unset" },
-          backgroundColor: isSelected ? "action.selected" : "inherit",
-          cursor: "pointer",
-          "&:hover": {
-            backgroundColor: isSelected ? "action.selected" : "action.hover",
-          },
-        }}
-        onClick={handleRowClick}
-      >
-        <TableCell>
-          <IconButton
-            aria-label="expand row"
-            size="small"
-            onClick={(e) => {
-              e.stopPropagation();
-              setOpen(!open);
-            }}
-          >
-            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-          </IconButton>
-        </TableCell>
-        <TableCell component="th" scope="row">
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <BusinessIcon fontSize="small" color="primary" />
-            <Typography variant="body2" fontWeight="medium">
-              {client.folderDisplay}
-            </Typography>
-          </Box>
-        </TableCell>
-      </TableRow>
-      <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={2}>
-          <Collapse in={open} timeout="auto" unmountOnExit>
-            <Box sx={{ margin: 2 }}>
-              <Typography
-                variant="subtitle2"
-                gutterBottom
-                component="div"
-                fontWeight="bold"
-              >
-                {client.folderDisplay}
-              </Typography>
-
-              <Box
-                sx={{
-                  mt: 2,
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 1.5,
-                }}
-              >
-                {/* Total Invoices */}
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <Typography
-                    variant="body2"
-                    fontWeight="600"
-                    sx={{ minWidth: 120 }}
-                  >
-                    Total Invoices:
-                  </Typography>
-                  <Chip
-                    label={client.totalInvoices}
-                    size="small"
-                    color="primary"
-                  />
-                </Box>
-
-                {/* Revenue */}
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <Typography
-                    variant="body2"
-                    fontWeight="600"
-                    sx={{ minWidth: 120 }}
-                  >
-                    Revenue:
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    fontWeight="bold"
-                    color="success.main"
-                  >
-                    {formatCurrency(client.totalRevenue)}
-                  </Typography>
-                </Box>
-
-                {/* Outstanding */}
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <Typography
-                    variant="body2"
-                    fontWeight="600"
-                    sx={{ minWidth: 120 }}
-                  >
-                    Outstanding:
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    fontWeight="bold"
-                    color="warning.main"
-                  >
-                    {formatCurrency(client.outstandingBalance)}
-                  </Typography>
-                </Box>
-
-                {/* Overdue */}
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <Typography
-                    variant="body2"
-                    fontWeight="600"
-                    sx={{ minWidth: 120 }}
-                  >
-                    Overdue:
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    fontWeight="bold"
-                    color="error.main"
-                  >
-                    {formatCurrency(client.overdueAmount)}
-                  </Typography>
-                </Box>
-              </Box>
-
-              {/* Invoices Section */}
-              {clientInvoices.length > 0 && (
-                <>
-                  <Divider sx={{ my: 2 }} />
-                  <Typography
-                    variant="subtitle2"
-                    gutterBottom
-                    fontWeight="bold"
-                  >
-                    Invoices ({clientInvoices.length})
-                  </Typography>
-                  <Box sx={{ mt: 2, mx: -2 }}>
-                    <InvoicesTableMobile
-                      invoices={clientInvoices}
-                      isAdmin={isAdmin}
-                      formatDate={formatDate}
-                      formatCurrency={formatCurrency}
-                      getStatusColor={getStatusColor}
-                      downloadInvoice={downloadInvoice}
-                      openEditInvoiceModal={openEditInvoiceModal}
-                      handleDeleteInvoice={handleDeleteInvoice}
-                      openPaymentLink={openPaymentLink}
-                      onPaymentLinkSuccess={onPaymentLinkSuccess}
-                      onPaymentLinkError={onPaymentLinkError}
-                      hideHeader={true}
-                    />
-                  </Box>
-                </>
-              )}
-            </Box>
-          </Collapse>
-        </TableCell>
-      </TableRow>
-    </React.Fragment>
-  );
-}
-
-Row.propTypes = {
-  client: PropTypes.shape({
-    folder: PropTypes.string.isRequired,
-    folderDisplay: PropTypes.string.isRequired,
-    totalInvoices: PropTypes.number.isRequired,
-    totalRevenue: PropTypes.number.isRequired,
-    outstandingBalance: PropTypes.number.isRequired,
-    overdueAmount: PropTypes.number.isRequired,
-  }).isRequired,
-  selectedFolder: PropTypes.string,
-  formatCurrency: PropTypes.func.isRequired,
-  invoices: PropTypes.array.isRequired,
-  isAdmin: PropTypes.bool.isRequired,
-  formatDate: PropTypes.func.isRequired,
-  getStatusColor: PropTypes.func.isRequired,
-  downloadInvoice: PropTypes.func.isRequired,
-  openEditInvoiceModal: PropTypes.func.isRequired,
-  handleDeleteInvoice: PropTypes.func.isRequired,
-  openPaymentLink: PropTypes.func.isRequired,
-  onPaymentLinkSuccess: PropTypes.func.isRequired,
-  onPaymentLinkError: PropTypes.func.isRequired,
-};
 
 export const ClientBreakdownMobile = ({
   clientBreakdowns,
-  selectedFolder,
   formatCurrency,
   invoices,
   isAdmin,
@@ -263,13 +20,120 @@ export const ClientBreakdownMobile = ({
   onPaymentLinkSuccess,
   onPaymentLinkError,
 }) => {
+  const { t } = useTranslation();
+
+  // Helper to convert client name to folder format (e.g., "IM Telecom" -> "im-telecom")
+  const clientNameToFolder = (name) =>
+    name?.toLowerCase().replace(/\s+/g, "-") || "";
+
+  // Get invoices for a specific client
+  const getClientInvoices = (client) => {
+    return invoices.filter((invoice) => {
+      if (
+        invoice.folder === client.folder ||
+        invoice.clientFolder === client.folder
+      ) {
+        return true;
+      }
+      if (invoice.client?.name) {
+        return clientNameToFolder(invoice.client.name) === client.folder;
+      }
+      return false;
+    });
+  };
+
+  // Column definitions for expanded content
+  const columns = useMemo(
+    () => [
+      {
+        field: "totalInvoices",
+        headerName: t("financials.clientBreakdown.totalInvoices"),
+        labelWidth: 120,
+        renderCell: ({ value }) => (
+          <Chip label={value} size="small" color="primary" />
+        ),
+      },
+      {
+        field: "totalRevenue",
+        headerName: t("financials.clientBreakdown.revenue"),
+        labelWidth: 120,
+        renderCell: ({ row }) => (
+          <Typography variant="body2" fontWeight="bold" color="success.main">
+            {formatCurrency(row.totalRevenue)}
+          </Typography>
+        ),
+      },
+      {
+        field: "outstandingBalance",
+        headerName: t("financials.clientBreakdown.outstanding"),
+        labelWidth: 120,
+        renderCell: ({ row }) => (
+          <Typography variant="body2" fontWeight="bold" color="warning.main">
+            {formatCurrency(row.outstandingBalance)}
+          </Typography>
+        ),
+      },
+      {
+        field: "overdueAmount",
+        headerName: t("financials.clientBreakdown.overdue"),
+        labelWidth: 120,
+        renderCell: ({ row }) => (
+          <Typography variant="body2" fontWeight="bold" color="error.main">
+            {formatCurrency(row.overdueAmount)}
+          </Typography>
+        ),
+      },
+    ],
+    [t, formatCurrency],
+  );
+
+  // Render the nested invoices table in the expanded footer
+  const renderExpandedFooter = (row) => {
+    const clientInvoices = getClientInvoices(row);
+
+    if (clientInvoices.length === 0) return null;
+
+    return (
+      <Box sx={{ mt: 2 }}>
+        <Divider sx={{ mb: 2 }} />
+        <Typography variant="subtitle2" gutterBottom fontWeight="bold">
+          {t("financials.clientBreakdown.invoices")} ({clientInvoices.length})
+        </Typography>
+        <Box sx={{ mt: 2, mx: -2 }}>
+          <InvoicesTableMobile
+            invoices={clientInvoices}
+            isAdmin={isAdmin}
+            formatDate={formatDate}
+            formatCurrency={formatCurrency}
+            getStatusColor={getStatusColor}
+            downloadInvoice={downloadInvoice}
+            openEditInvoiceModal={openEditInvoiceModal}
+            handleDeleteInvoice={handleDeleteInvoice}
+            openPaymentLink={openPaymentLink}
+            onPaymentLinkSuccess={onPaymentLinkSuccess}
+            onPaymentLinkError={onPaymentLinkError}
+            hideHeader={true}
+          />
+        </Box>
+      </Box>
+    );
+  };
+
   return (
-    <TableContainer
-      component={Paper}
+    <UniversalMobilDataTable
+      rows={clientBreakdowns}
+      columns={columns}
+      primaryField="folderDisplay"
+      primaryIcon={<BusinessIcon fontSize="small" color="primary" />}
+      showTitle={true}
+      titleField="folderDisplay"
+      headerTitle={t("financials.clientBreakdown.title")}
+      loading={false}
+      emptyMessage={t("financials.clientBreakdown.noClients")}
+      labelWidth={120}
+      getRowId={(row) => row.folder}
+      renderExpandedFooter={renderExpandedFooter}
       sx={{
-        display: { xs: "block", md: "none" },
-        mt: 1,
-        mb: 4,
         maxHeight: "70vh",
         overflowY: "auto",
         overflowX: "hidden",
@@ -279,60 +143,13 @@ export const ClientBreakdownMobile = ({
         },
         "&::-webkit-scrollbar-thumb": {
           backgroundColor: "#c5c5c5",
-          borderRadius: "8px",
+          borderRadius: "8rem",
         },
         "&::-webkit-scrollbar-thumb:hover": {
           backgroundColor: "#9e9e9e",
         },
       }}
-    >
-      <Table aria-label="client breakdown table" stickyHeader>
-        <TableHead>
-          <TableRow>
-            <TableCell sx={{ backgroundColor: "#f5f5f5" }} />
-            <TableCell sx={{ backgroundColor: "#f5f5f5" }}>
-              <Typography variant="subtitle2" fontWeight="600">
-                Client Breakdown
-              </Typography>
-            </TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {clientBreakdowns.map((client) => (
-            <Row
-              key={client.folder}
-              client={client}
-              selectedFolder={selectedFolder}
-              formatCurrency={formatCurrency}
-              invoices={invoices}
-              isAdmin={isAdmin}
-              formatDate={formatDate}
-              getStatusColor={getStatusColor}
-              downloadInvoice={downloadInvoice}
-              openEditInvoiceModal={openEditInvoiceModal}
-              handleDeleteInvoice={handleDeleteInvoice}
-              openPaymentLink={openPaymentLink}
-              onPaymentLinkSuccess={onPaymentLinkSuccess}
-              onPaymentLinkError={onPaymentLinkError}
-            />
-          ))}
-          {clientBreakdowns.length === 0 && (
-            <TableRow>
-              <TableCell colSpan={2}>
-                <Box sx={{ textAlign: "center", py: 4 }}>
-                  <BusinessIcon
-                    sx={{ fontSize: 48, color: "text.disabled", mb: 1 }}
-                  />
-                  <Typography variant="body2" color="text.secondary">
-                    No clients found
-                  </Typography>
-                </Box>
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-    </TableContainer>
+    />
   );
 };
 
@@ -345,9 +162,8 @@ ClientBreakdownMobile.propTypes = {
       totalRevenue: PropTypes.number.isRequired,
       outstandingBalance: PropTypes.number.isRequired,
       overdueAmount: PropTypes.number.isRequired,
-    })
+    }),
   ).isRequired,
-  selectedFolder: PropTypes.string,
   formatCurrency: PropTypes.func.isRequired,
   invoices: PropTypes.array.isRequired,
   isAdmin: PropTypes.bool.isRequired,

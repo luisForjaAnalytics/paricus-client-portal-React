@@ -7,8 +7,8 @@ import {
   Chip,
   CircularProgress,
   Link,
-  Alert,
 } from "@mui/material";
+import { AlertInline } from "../../../../common/components/ui/AlertInline";
 import { Assignment } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
@@ -38,6 +38,17 @@ export const ActiveTasks = ({ selectedClientId = null, selectedUserId = null }) 
       navigate("/app/tickets/ticketTable");
     } catch (error) {
       console.error("Error navigating to tickets:", error);
+    }
+  }, [navigate]);
+
+  /**
+   * Handle click on ticket - navigate to ticket view
+   */
+  const handleTicketClick = useCallback((ticketId) => {
+    try {
+      navigate(`/app/tickets/ticketView/${ticketId}`);
+    } catch (error) {
+      console.error("Error navigating to ticket:", error);
     }
   }, [navigate]);
 
@@ -145,13 +156,12 @@ export const ActiveTasks = ({ selectedClientId = null, selectedUserId = null }) 
         {/* Error State */}
         {error && !isLoading && (
           <Box sx={{ py: 2 }}>
-            <Alert
+            <AlertInline
               severity="error"
               onClose={handleRetry}
               sx={{ cursor: "pointer" }}
-            >
-              {error?.data?.message || t("dashboard.activeTasks.errorLoading", "Error loading tasks")}
-            </Alert>
+              message={error?.data?.message || t("dashboard.activeTasks.errorLoading", "Error loading tasks")}
+            />
           </Box>
         )}
 
@@ -177,12 +187,19 @@ export const ActiveTasks = ({ selectedClientId = null, selectedUserId = null }) 
                 return (
                   <Box
                     key={ticket?.id || index}
+                    onClick={() => handleTicketClick(ticket?.id)}
                     sx={{
                       py: 1.5,
                       borderBottom:
                         index < tickets.length - 1
                           ? `1px solid ${colors.border}`
                           : "none",
+                      cursor: "pointer",
+                      borderRadius: 1,
+                      transition: "background-color 0.2s ease",
+                      "&:hover": {
+                        backgroundColor: colors.surfaceHighest || "rgba(0, 0, 0, 0.04)",
+                      },
                     }}
                   >
                     {/* Priority Indicator */}

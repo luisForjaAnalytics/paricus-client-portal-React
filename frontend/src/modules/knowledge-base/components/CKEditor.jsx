@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { useGetArticleByIdQuery } from "../../../store/api/articlesApi";
 import {
   DecoupledEditor,
@@ -277,14 +278,20 @@ export default function CKEditorComponent({
 
   // Obtener articleId de la URL
   const { articleId } = useParams();
+  const location = useLocation();
+
+  // Get kbPrefix from location state (passed from table) or from user's auth state
+  const userKbPrefix = useSelector((state) => state.auth.user?.kbPrefix);
+  const kbPrefix = location.state?.kbPrefix || userKbPrefix;
 
   const {
     data: articleData,
     isLoading,
     error,
-  } = useGetArticleByIdQuery(articleId, {
-    skip: !articleId, // Solo ejecutar si hay articleId
-  });
+  } = useGetArticleByIdQuery(
+    { kbPrefix, articleId },
+    { skip: !articleId || !kbPrefix } // Solo ejecutar si hay articleId y kbPrefix
+  );
 
   const [articleContent, setArticleContent] = useState("");
 

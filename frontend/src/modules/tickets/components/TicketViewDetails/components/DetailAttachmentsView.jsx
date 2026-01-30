@@ -8,9 +8,9 @@ import {
   Dialog,
   DialogContent,
   DialogActions,
-  Alert,
   Typography,
 } from "@mui/material";
+import { AlertInline } from "../../../../../common/components/ui/AlertInline";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
@@ -282,13 +282,13 @@ export const DetailAttachmentsView = ({ ticketId, detail }) => {
           {selectedImage && (
             <>
               {imageErrors[selectedImage.id] ? (
-                <Alert severity="error" sx={{ maxWidth: 400 }}>
+                <AlertInline severity="error" sx={{ maxWidth: 400 }}>
                   {t("tickets.ticketView.imageLoadError")}
                   <br />
                   <TicketText variant="caption">
                     {selectedImage.fileName}
                   </TicketText>
-                </Alert>
+                </AlertInline>
               ) : (
                 <CardMedia
                   component="img"

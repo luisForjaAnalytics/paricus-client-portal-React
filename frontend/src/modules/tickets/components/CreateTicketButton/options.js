@@ -5,7 +5,7 @@
 
 // Opciones de prioridad
 export const priorityOptions = [
-  { value: "low", labelKey: "priorityLevels.low" },
-  { value: "medium", labelKey: "priorityLevels.medium" },
-  { value: "high", labelKey: "priorityLevels.high" },
+  { value: "Low", labelKey: "priorityLevels.low" },
+  { value: "Medium", labelKey: "priorityLevels.medium" },
+  { value: "High", labelKey: "priorityLevels.high" },
 ];

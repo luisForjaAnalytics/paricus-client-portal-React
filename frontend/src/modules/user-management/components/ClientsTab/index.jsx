@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useBreakpoint } from "../../../../common/hooks/useBreakpoint";
 import { ClientsTabDesktop } from "./ClientsTabDesktop";
 import { ClientsTabMobile } from "./ClientsTabMobile";
+import { useClientsTableConfig } from "./useClientsTableConfig";
 import {
   useGetClientsQuery,
   useCreateClientMutation,
@@ -132,7 +133,7 @@ export const ClientsTab = () => {
     }
   };
 
-  const formatDate = (dateString) => {
+  const formatDate = useCallback((dateString) => {
     try {
       const locale = t("common.locale") || "en-US";
       return new Date(dateString).toLocaleDateString(locale);
@@ -140,7 +141,26 @@ export const ClientsTab = () => {
       console.error(`ERROR formatDate: ${err}`);
       return dateString;
     }
-  };
+  }, [t]);
+
+  // Use shared table configuration - called ONCE here and passed to children
+  const {
+    rows,
+    desktopColumns,
+    mobileColumns,
+    renderActions,
+    renderPrimaryIcon,
+    isOpen,
+    setIsOpen,
+    actionsLabel,
+    emptyMessage,
+    headerTitle,
+  } = useClientsTableConfig({
+    clients,
+    formatDate,
+    handleEdit,
+    handleDeactivate,
+  });
 
   const showNotification = (message, severity = "success") => {
     try {
@@ -162,10 +182,26 @@ export const ClientsTab = () => {
     }
   };
 
+  // Props compartidos para Desktop y Mobile
   const sharedProps = {
+    // Data from hook
+    rows,
+    renderActions,
+    actionsLabel,
+    emptyMessage,
+    headerTitle,
+    // State
+    isLoading,
+    isOpen,
+    setIsOpen,
+    // Actions
+    onAddClick: () => setShowCreateDialog(true),
+  };
+
+  // Props for modal
+  const modalProps = {
     editingClient,
     clients,
-    isLoading,
     showCreateDialog,
     showConfirmDialog,
     clientForm,
@@ -174,25 +210,28 @@ export const ClientsTab = () => {
     snackbar,
     confirmDeactivation,
     isFormValid,
-    handleEdit,
-    handleDeactivate,
-    formatDate,
     handleCloseSnackbar,
     handleCloseDialog,
     handleSave,
     setClientForm,
     setShowConfirmDialog,
-    onAddClick: () => setShowCreateDialog(true),
   };
 
   return (
     <>
       {isMobile ? (
-        <ClientsTabMobile {...sharedProps} />
+        <ClientsTabMobile
+          {...sharedProps}
+          columns={mobileColumns}
+          renderPrimaryIcon={renderPrimaryIcon}
+        />
       ) : (
-        <ClientsTabDesktop {...sharedProps} />
+        <ClientsTabDesktop
+          {...sharedProps}
+          columns={desktopColumns}
+        />
       )}
-      <AddNewClientModal {...sharedProps} />
+      <AddNewClientModal {...modalProps} />
     </>
   );
 };

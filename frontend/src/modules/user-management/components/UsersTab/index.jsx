@@ -1,10 +1,11 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import { useBreakpoint } from "../../../../common/hooks/useBreakpoint";
 import { UsersTabDesktop } from "./UsersTabDesktop";
 import { UsersTabMobile } from "./UsersTabMobile";
 import { AddNewUserModal } from "./AddNewUserModal";
+import { useUsersTableConfig } from "./useUsersTableConfig";
 import {
   useGetUsersQuery,
   useCreateUserMutation,
@@ -266,7 +267,7 @@ export const UsersTab = () => {
     }
   };
 
-  const formatDate = (dateString) => {
+  const formatDate = useCallback((dateString) => {
     if (!dateString) return t("common.na");
     try {
       const locale = t("common.locale") || "en-US";
@@ -275,7 +276,7 @@ export const UsersTab = () => {
       console.error(`ERROR formatDate: ${error}`);
       return t("common.invalidDate");
     }
-  };
+  }, [t]);
 
   const handleClientChange = (clientId) => {
     try {
@@ -285,31 +286,70 @@ export const UsersTab = () => {
     }
   };
 
-  const sharedProps = {
+  // Clear all filters
+  const clearFilters = useCallback(() => {
+    try {
+      setSearchQuery("");
+      setSelectedClient("");
+    } catch (error) {
+      console.error("clearFilters error:", error);
+    }
+  }, []);
+
+  // Use shared table configuration - called ONCE here and passed to children
+  const {
+    rows,
+    desktopColumns,
+    mobileColumns,
+    renderActions,
+    renderPrimaryIcon,
+    actionsLabel,
+    emptyMessage,
+    headerTitle,
+  } = useUsersTableConfig({
     users: filteredUsers,
-    loading,
+    formatDate,
+    openEditDialog,
+    toggleUserStatus,
     isBPOAdmin,
-    isClientAdmin,
-    authUser,
     selectedClient,
     setSelectedClient,
     searchQuery,
     setSearchQuery,
     isOpen,
-    setIsOpen,
     clientOptions,
+    clearFilters,
+  });
+
+  // Props compartidos para Desktop y Mobile
+  const sharedProps = {
+    // Data
+    rows,
+    renderActions,
+    actionsLabel,
+    emptyMessage,
+    headerTitle,
+    // State
+    loading,
+    isOpen,
+    setIsOpen,
+    // Actions
     openAddDialog,
-    openEditDialog,
-    toggleUserStatus,
-    formatDate,
   };
 
   return (
     <>
       {isMobile ? (
-        <UsersTabMobile {...sharedProps} />
+        <UsersTabMobile
+          {...sharedProps}
+          columns={mobileColumns}
+          renderPrimaryIcon={renderPrimaryIcon}
+        />
       ) : (
-        <UsersTabDesktop {...sharedProps} />
+        <UsersTabDesktop
+          {...sharedProps}
+          columns={desktopColumns}
+        />
       )}
       <AddNewUserModal
         dialog={dialog}

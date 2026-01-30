@@ -1,4 +1,3 @@
-import React from "react";
 import { useBreakpoint } from "../../../../common/hooks/useBreakpoint";
 import { ClientBreakdownDesktop } from "./ClientBreakdownDesktop";
 import { ClientBreakdownMobile } from "./ClientBreakdownMobile";

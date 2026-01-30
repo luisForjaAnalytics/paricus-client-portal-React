@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Box, Tabs, Tab, Alert } from "@mui/material";
+import { Box, Tabs, Tab } from "@mui/material";
+import { AlertInline } from "../../../../../common/components/ui/AlertInline";
 import HistoryIcon from "@mui/icons-material/History";
 import CommentIcon from "@mui/icons-material/Comment";
 import { useTranslation } from "react-i18next";
@@ -33,9 +34,10 @@ export const TicketsCoomentsText = ({ ticket }) => {
           padding: "1rem",
         }}
       >
-        <Alert severity="warning">
-          {t("common.error") || "Ticket data not available"}
-        </Alert>
+        <AlertInline
+          message={t("common.error") || "Ticket data not available"}
+          severity="warning"
+        />
       </Box>
     );
   }

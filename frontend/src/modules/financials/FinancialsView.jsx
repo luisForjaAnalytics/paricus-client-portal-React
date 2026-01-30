@@ -528,7 +528,7 @@ export const FinancialsView = () => {
           borderCol: colors.successBorder, // border-green-500
           cardColor: colors.successBackground, // bg-green-100
           textColor: colors.successText, // text-green-800
-          label: "Total Revenue",
+          label: isBPOAdmin ? "Total Revenue" : "Total Paid",
           invoiceState: "paid invoices",
           overallStatsInfo: {
             tp1: statsToDisplay.totalRevenue,

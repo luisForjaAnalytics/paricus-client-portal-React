@@ -10,6 +10,7 @@ datasource db {
 model Client {
   id                     Int                        @id @default(autoincrement())
   name                   String
+  kbPrefix               String?                    @map("kb_prefix") // Knowledge Base API prefix (e.g., PA_US_1, PA_US_2)
   isActive               Boolean                    @default(true) @map("is_active")
   isProspect             Boolean                    @default(false) @map("is_prospect")
   createdAt              DateTime                   @default(now()) @map("created_at")

@@ -5,12 +5,12 @@ import {
   ImageList,
   ImageListItem,
   ImageListItemBar,
-  Alert,
   Dialog,
   DialogContent,
   DialogActions,
   Skeleton,
 } from "@mui/material";
+import { AlertInline } from "../../../../../common/components/ui/AlertInline";
 import {
   Delete as DeleteIcon,
   Close as CloseIcon,
@@ -208,9 +208,11 @@ export const TicketAttachments = ({ ticket }) => {
   return (
     <>
       {attachments.length === 0 ? (
-        <Alert severity="info" sx={{ mt: 2 }}>
-          No attachments yet. Upload a file to get started.
-        </Alert>
+        <AlertInline
+          severity="info"
+          sx={{ mt: 2 }}
+          message="No attachments yet. Upload a file to get started."
+        />
       ) : (
         <ImageList
           sx={{ width: "100%", maxHeight: 400 }}

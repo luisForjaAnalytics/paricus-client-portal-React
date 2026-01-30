@@ -1,291 +1,70 @@
-import React from "react";
+import { Box } from "@mui/material";
+import { Add as AddIcon } from "@mui/icons-material";
 import PropTypes from "prop-types";
-import {
-  Box,
-  Collapse,
-  IconButton,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-  Paper,
-  Chip,
-  Tooltip,
-  Button,
-} from "@mui/material";
-import {
-  KeyboardArrowDown as KeyboardArrowDownIcon,
-  KeyboardArrowUp as KeyboardArrowUpIcon,
-  Business as BusinessIcon,
-  Block as BlockIcon,
-  Add as AddIcon,
-} from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
-import { titlesTypography } from "../../../../common/styles/styles";
-import { EditButton } from "../../../../common/components/ui/EditButton/EditButton";
+import { ActionButton } from "../../../../common/components/ui/ActionButton/ActionButton";
+import { UniversalMobilDataTable } from "../../../../common/components/ui/UniversalMobilDataTable";
 
-function Row({ client, handleEdit, handleDeactivate, formatDate }) {
-  const { t } = useTranslation();
-  const [open, setOpen] = React.useState(false);
-
-  const toggleOpen = () => {
-    try {
-      setOpen(!open);
-    } catch (err) {
-      console.error(`ERROR toggleOpen: ${err}`);
-    }
-  };
-
-  return (
-    <React.Fragment>
-      <TableRow sx={{ "& > *": { borderBottom: "unset" } }}>
-        <TableCell>
-          <IconButton
-            aria-label="expand row"
-            size="small"
-            onClick={toggleOpen}
-          >
-            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-          </IconButton>
-        </TableCell>
-        <TableCell component="th" scope="row">
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <BusinessIcon fontSize="small" color="primary" />
-            <Typography variant="body2" fontWeight="medium">
-              {client.name}
-            </Typography>
-          </Box>
-        </TableCell>
-      </TableRow>
-      <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={2}>
-          <Collapse in={open} timeout="auto" unmountOnExit>
-            <Box sx={{ margin: 2 }}>
-              <Typography
-                variant="subtitle2"
-                gutterBottom
-                component="div"
-                fontWeight="bold"
-              >
-                {client.name}
-              </Typography>
-
-              <Box
-                sx={{
-                  mt: 2,
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 1.5,
-                }}
-              >
-                {/* Status */}
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <Typography
-                    variant="body2"
-                    fontWeight="600"
-                    sx={{ minWidth: 100 }}
-                  >
-                    {t("clients.table.status")}:
-                  </Typography>
-                  <Chip
-                    label={client.isActive ? t("common.active") : t("common.inactive")}
-                    color={client.isActive ? "success" : "default"}
-                    size="small"
-                  />
-                </Box>
-
-                {/* Type */}
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <Typography
-                    variant="body2"
-                    fontWeight="600"
-                    sx={{ minWidth: 100 }}
-                  >
-                    {t("clients.table.type")}:
-                  </Typography>
-                  <Chip
-                    label={client.isProspect ? t("clients.table.prospect") : t("clients.table.client")}
-                    color={client.isProspect ? "warning" : "primary"}
-                    size="small"
-                  />
-                </Box>
-
-                {/* Created Date */}
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <Typography
-                    variant="body2"
-                    fontWeight="600"
-                    sx={{ minWidth: 100 }}
-                  >
-                    {t("clients.table.created")}:
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {formatDate(client.createdAt || client.created_at)}
-                  </Typography>
-                </Box>
-
-                {/* Actions */}
-                <Box
-                  sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}
-                >
-                  <Typography
-                    variant="body2"
-                    fontWeight="600"
-                    sx={{ minWidth: 100 }}
-                  >
-                    {t("clients.table.actions")}:
-                  </Typography>
-                  <Box sx={{ display: "flex", gap: 0.5 }}>
-                    <EditButton
-                      handleClick={handleEdit}
-                      item={client}
-                    />
-                    {client.isActive && (
-                      <Tooltip title={t("clients.actions.deactivate")}>
-                        <IconButton
-                          size="small"
-                          color="error"
-                          onClick={() => handleDeactivate(client)}
-                        >
-                          <BlockIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    )}
-                  </Box>
-                </Box>
-              </Box>
-            </Box>
-          </Collapse>
-        </TableCell>
-      </TableRow>
-    </React.Fragment>
-  );
-}
-
-Row.propTypes = {
-  client: PropTypes.shape({
-    id: PropTypes.number.isRequired,
-    name: PropTypes.string.isRequired,
-    isActive: PropTypes.bool.isRequired,
-    isProspect: PropTypes.bool.isRequired,
-    created_at: PropTypes.string.isRequired,
-  }).isRequired,
-  handleEdit: PropTypes.func.isRequired,
-  handleDeactivate: PropTypes.func.isRequired,
-  formatDate: PropTypes.func.isRequired,
-};
-
+/**
+ * ClientsTabMobile - Mobile view for clients table
+ * Receives all data via props from parent (index.jsx)
+ * No internal hook calls - pure presentational component
+ */
 export const ClientsTabMobile = ({
-  clients = [],
-  handleEdit,
-  handleDeactivate,
-  formatDate,
+  // Data from useClientsTableConfig (via parent)
+  rows,
+  columns,
+  renderActions,
+  renderPrimaryIcon,
+  actionsLabel,
+  emptyMessage,
+  headerTitle,
+  // State
+  isLoading,
+  // Actions
   onAddClick,
 }) => {
   const { t } = useTranslation();
 
+  // Header actions
+  const headerActions = (
+    <ActionButton
+      handleClick={onAddClick}
+      icon={<AddIcon />}
+      text={t("clients.addClient")}
+    />
+  );
+
   return (
-    <TableContainer
-      component={Paper}
-      sx={{
-        display: { xs: "block", md: "none" },
-        mt: 1,
-        maxHeight: "70vh",
-        overflowY: "auto",
-        overflowX: "hidden",
-        scrollbarWidth: "thin",
-        "&::-webkit-scrollbar": {
-          width: "6px",
-        },
-        "&::-webkit-scrollbar-thumb": {
-          backgroundColor: "#c5c5c5",
-          borderRadius: "8px",
-        },
-        "&::-webkit-scrollbar-thumb:hover": {
-          backgroundColor: "#9e9e9e",
-        },
-      }}
-    >
-      <Table aria-label="clients table" stickyHeader>
-        <TableHead>
-          <TableRow>
-            <TableCell sx={{ backgroundColor: "#f5f5f5" }} />
-            <TableCell sx={{ backgroundColor: "#f5f5f5" }}>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <Typography sx={titlesTypography.sectionTitle}>
-                  {t("userManagement.clients.title")}
-                </Typography>
-                <Tooltip title="Add Client">
-                  <IconButton color="primary" size="small" onClick={onAddClick}>
-                    <AddIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-              </Box>
-            </TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {clients.map((client) => (
-            <Row
-              key={client.id}
-              client={client}
-              handleEdit={handleEdit}
-              handleDeactivate={handleDeactivate}
-              formatDate={formatDate}
-            />
-          ))}
-          {clients.length === 0 && (
-            <TableRow>
-              <TableCell colSpan={2}>
-                <Box sx={{ textAlign: "center", py: 4 }}>
-                  <BusinessIcon
-                    sx={{ fontSize: 48, color: "text.disabled", mb: 1 }}
-                  />
-                  <Typography variant="body2" color="text.secondary">
-                    {t("clients.noClientsFound")}
-                  </Typography>
-                  <Button
-                    variant="contained"
-                    startIcon={<AddIcon />}
-                    onClick={onAddClick}
-                    sx={{ mt: 2 }}
-                  >
-                    {t("clients.addClient")}
-                  </Button>
-                </Box>
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-    </TableContainer>
+    <Box sx={{ display: { xs: "block", md: "none" }, px: 2 }}>
+      <UniversalMobilDataTable
+        rows={rows}
+        columns={columns}
+        primaryField="name"
+        primaryIcon={renderPrimaryIcon}
+        showTitle={true}
+        titleField="name"
+        headerTitle={headerTitle}
+        headerActions={headerActions}
+        loading={isLoading}
+        emptyMessage={emptyMessage}
+        renderActions={renderActions}
+        actionsLabel={actionsLabel}
+        labelWidth={100}
+        getRowId={(row) => row.id}
+      />
+    </Box>
   );
 };
 
 ClientsTabMobile.propTypes = {
-  clients: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.number.isRequired,
-      name: PropTypes.string.isRequired,
-      isActive: PropTypes.bool.isRequired,
-      isProspect: PropTypes.bool.isRequired,
-      created_at: PropTypes.string.isRequired,
-    })
-  ),
-  handleEdit: PropTypes.func.isRequired,
-  handleDeactivate: PropTypes.func.isRequired,
-  formatDate: PropTypes.func.isRequired,
-};
-
-ClientsTabMobile.defaultProps = {
-  clients: [],
+  rows: PropTypes.array.isRequired,
+  columns: PropTypes.array.isRequired,
+  renderActions: PropTypes.func.isRequired,
+  renderPrimaryIcon: PropTypes.oneOfType([PropTypes.func, PropTypes.node]),
+  actionsLabel: PropTypes.string,
+  emptyMessage: PropTypes.string,
+  headerTitle: PropTypes.string,
+  isLoading: PropTypes.bool.isRequired,
+  onAddClick: PropTypes.func.isRequired,
 };

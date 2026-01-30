@@ -5,8 +5,9 @@ import {
   CardContent,
   CircularProgress,
 } from "@mui/material";
-import { LibraryBooks} from "@mui/icons-material";
+import { LibraryBooks } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
+import { useSelector } from "react-redux";
 import { dashboardStyles, colors } from "../../../../common/styles/styles";
 import { AppText } from "../../../../common/components/ui/AppText/AppText";
 import { useGetAllArticlesQuery } from "../../../../store/api/articlesApi";
@@ -17,12 +18,24 @@ import { useNavigate } from "react-router-dom";
 export const MasterRepository = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+
+  // Get kbPrefix from user's auth state (null for BPO Admin = access all)
+  const kbPrefix = useSelector((state) => state.auth.user?.kbPrefix);
+
   const handleLink = () => {
     navigate("/app/knowledge-base/articles");
   };
 
-  // Get all articles from external API
-  const { data: allArticles = [], isLoading, error } = useGetAllArticlesQuery();
+  // Handle click on article - navigate to article view
+  const handleArticleClick = (article) => {
+    const prefix = article.kbPrefix || kbPrefix;
+    navigate(`/app/knowledge-base/articleView/${article.article_id}`, {
+      state: { kbPrefix: prefix },
+    });
+  };
+
+  // Get all articles from external API (filtered by kbPrefix)
+  const { data: allArticles = [], isLoading, error } = useGetAllArticlesQuery(kbPrefix);
 
   // Get last 3 articles
   const articles = allArticles.slice(0, 3);
@@ -46,7 +59,8 @@ export const MasterRepository = () => {
       sx={{
         ...dashboardStyles.dashboardStatsCard,
         border: `2px solid ${colors.success}`,
-        backgroundColor: colors.masterRepoBackgroundColor || "rgba(46, 125, 50, 0.08)",
+        backgroundColor:
+          colors.masterRepoBackgroundColor || "rgba(46, 125, 50, 0.08)",
       }}
     >
       <CardContent sx={{ padding: "1rem" }}>
@@ -115,12 +129,19 @@ export const MasterRepository = () => {
               articles.map((article, index) => (
                 <Box
                   key={article.article_id || index}
+                  onClick={() => handleArticleClick(article)}
                   sx={{
                     py: 1.5,
                     borderBottom:
                       index < articles.length - 1
                         ? `1px solid ${colors.border}`
                         : "none",
+                    cursor: "pointer",
+                    borderRadius: 1,
+                    transition: "background-color 0.2s ease",
+                    "&:hover": {
+                      backgroundColor: "rgba(46, 125, 50, 0.12)",
+                    },
                   }}
                 >
                   {/* Article Item */}
@@ -162,15 +183,14 @@ export const MasterRepository = () => {
                         {article.article_name || "N/A"}
                       </Typography>
                     </Box>
-                  </Box>
-
-                  {/* Metadata */}
-                  <Box sx={{ pl: 2 }}>
-                    <Typography variant="caption" color="text.secondary">
-                      {article.updated_at
-                        ? formatTimeLabel(article.updated_at)
-                        : "N/A"}
-                    </Typography>
+                    {/* Metadata */}
+                    <Box sx={{ pl: 2 }}>
+                      <Typography variant="caption" color="text.secondary">
+                        {article.updated_at
+                          ? formatTimeLabel(article.updated_at)
+                          : "N/A"}
+                      </Typography>
+                    </Box>
                   </Box>
                 </Box>
               ))

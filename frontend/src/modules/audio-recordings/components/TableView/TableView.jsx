@@ -487,4 +487,3 @@ TableView.defaultProps = {
   isDebouncing: false,
 };
 
-export default TableView;

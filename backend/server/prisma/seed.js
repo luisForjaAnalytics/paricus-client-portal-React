@@ -103,53 +103,71 @@ async function main() {
     });
   }
 
-  // Create BPO Administration client
+  // Create BPO Administration client (Super Admin - can see all KB prefixes)
   console.log("Creating BPO Administration client...");
   const bpoClient = await prisma.client.upsert({
     where: { id: 1 },
-    update: {},
+    update: { kbPrefix: null }, // BPO Admin has access to ALL prefixes
     create: {
       id: 1,
       name: "BPO Administration",
+      kbPrefix: null, // null means access to all
       isActive: true,
       isProspect: false,
     },
   });
 
-  // Create Flex Mobile client
+  // Create Flex Mobile client - PA_US_2
   console.log("Creating Flex Mobile...");
   const flexMobileClient = await prisma.client.upsert({
     where: { id: 2 },
-    update: {},
+    update: { kbPrefix: "PA_US_2" },
     create: {
       id: 2,
       name: "Flex Mobile",
+      kbPrefix: "PA_US_2",
       isActive: true,
       isProspect: false,
     },
   });
 
-  // Create IM Telecom client
+  // Create IM Telecom client - PA_US_1
   console.log("Creating IM Telecom...");
   const imTelecomClient = await prisma.client.upsert({
     where: { id: 3 },
-    update: {},
+    update: { kbPrefix: "PA_US_1" },
     create: {
       id: 3,
       name: "IM Telecom",
+      kbPrefix: "PA_US_1",
       isActive: true,
       isProspect: false,
     },
   });
 
-  // Create North American Local client
-  console.log("Creating North American Local...");
-  const northAmericanLocalClient = await prisma.client.upsert({
+  // Create Tempo Wireless client - PA_US_3
+  console.log("Creating Tempo Wireless...");
+  const tempoWirelessClient = await prisma.client.upsert({
     where: { id: 4 },
-    update: {},
+    update: { name: "Tempo Wireless", kbPrefix: "PA_US_3" },
     create: {
       id: 4,
-      name: "North American Local",
+      name: "Tempo Wireless",
+      kbPrefix: "PA_US_3",
+      isActive: true,
+      isProspect: false,
+    },
+  });
+
+  // Create Wellness Brands client - PA_US_4
+  console.log("Creating Wellness Brands...");
+  const wellnessBrandsClient = await prisma.client.upsert({
+    where: { id: 5 },
+    update: { kbPrefix: "PA_US_4" },
+    create: {
+      id: 5,
+      name: "Wellness Brands",
+      kbPrefix: "PA_US_4",
       isActive: true,
       isProspect: false,
     },
@@ -238,36 +256,69 @@ async function main() {
     },
   });
 
-  // Create roles for North American Local
-  console.log("👤 Creating North American Local Admin role...");
-  const northAmericanLocalAdminRole = await prisma.role.upsert({
+  // Create roles for Tempo Wireless
+  console.log("👤 Creating Tempo Wireless Admin role...");
+  const tempoWirelessAdminRole = await prisma.role.upsert({
     where: {
       clientId_roleName: {
-        clientId: northAmericanLocalClient.id,
+        clientId: tempoWirelessClient.id,
         roleName: "Client Admin",
       },
     },
     update: {},
     create: {
-      clientId: northAmericanLocalClient.id,
+      clientId: tempoWirelessClient.id,
       roleName: "Client Admin",
-      description: "Administrative access for North American Local users",
+      description: "Administrative access for Tempo Wireless users",
     },
   });
 
-  console.log("👤 Creating North American Local User role...");
-  const northAmericanLocalUserRole = await prisma.role.upsert({
+  console.log("👤 Creating Tempo Wireless User role...");
+  const tempoWirelessUserRole = await prisma.role.upsert({
     where: {
       clientId_roleName: {
-        clientId: northAmericanLocalClient.id,
+        clientId: tempoWirelessClient.id,
         roleName: "Client User",
       },
     },
     update: {},
     create: {
-      clientId: northAmericanLocalClient.id,
+      clientId: tempoWirelessClient.id,
       roleName: "Client User",
-      description: "Basic access for North American Local users",
+      description: "Basic access for Tempo Wireless users",
+    },
+  });
+
+  // Create roles for Wellness Brands
+  console.log("👤 Creating Wellness Brands Admin role...");
+  const wellnessBrandsAdminRole = await prisma.role.upsert({
+    where: {
+      clientId_roleName: {
+        clientId: wellnessBrandsClient.id,
+        roleName: "Client Admin",
+      },
+    },
+    update: {},
+    create: {
+      clientId: wellnessBrandsClient.id,
+      roleName: "Client Admin",
+      description: "Administrative access for Wellness Brands users",
+    },
+  });
+
+  console.log("👤 Creating Wellness Brands User role...");
+  const wellnessBrandsUserRole = await prisma.role.upsert({
+    where: {
+      clientId_roleName: {
+        clientId: wellnessBrandsClient.id,
+        roleName: "Client User",
+      },
+    },
+    update: {},
+    create: {
+      clientId: wellnessBrandsClient.id,
+      roleName: "Client User",
+      description: "Basic access for Wellness Brands users",
     },
   });
 
@@ -355,9 +406,14 @@ async function main() {
     "IM Telecom Admin"
   );
   await assignPermissionsToRole(
-    northAmericanLocalAdminRole.id,
+    tempoWirelessAdminRole.id,
     clientAdminPermissions,
-    "North American Local Admin"
+    "Tempo Wireless Admin"
+  );
+  await assignPermissionsToRole(
+    wellnessBrandsAdminRole.id,
+    clientAdminPermissions,
+    "Wellness Brands Admin"
   );
 
   // Assign permissions to all Client User roles
@@ -372,9 +428,14 @@ async function main() {
     "IM Telecom User"
   );
   await assignPermissionsToRole(
-    northAmericanLocalUserRole.id,
+    tempoWirelessUserRole.id,
     clientUserPermissions,
-    "North American Local User"
+    "Tempo Wireless User"
+  );
+  await assignPermissionsToRole(
+    wellnessBrandsUserRole.id,
+    clientUserPermissions,
+    "Wellness Brands User"
   );
 
   // Create client folder access mappings for reports
@@ -410,18 +471,33 @@ async function main() {
     },
   });
 
-  // North American Local folder access
+  // Tempo Wireless folder access
   await prisma.clientFolderAccess.upsert({
     where: {
       clientId_folderName: {
-        clientId: northAmericanLocalClient.id,
-        folderName: "north-american-local",
+        clientId: tempoWirelessClient.id,
+        folderName: "tempo-wireless",
       },
     },
     update: {},
     create: {
-      clientId: northAmericanLocalClient.id,
-      folderName: "north-american-local",
+      clientId: tempoWirelessClient.id,
+      folderName: "tempo-wireless",
+    },
+  });
+
+  // Wellness Brands folder access
+  await prisma.clientFolderAccess.upsert({
+    where: {
+      clientId_folderName: {
+        clientId: wellnessBrandsClient.id,
+        folderName: "wellness-brands",
+      },
+    },
+    update: {},
+    create: {
+      clientId: wellnessBrandsClient.id,
+      folderName: "wellness-brands",
     },
   });
 
@@ -735,33 +811,64 @@ async function main() {
     },
   });
 
-  // North American Local users
-  const nalAdminPassword = await bcrypt.hash("northam123!", 12);
+  // Tempo Wireless users
+  const tempoAdminPassword = await bcrypt.hash("tempo123!", 12);
   await prisma.user.upsert({
-    where: { email: "admin@northamericanlocal.com" },
+    where: { email: "admin@tempowireless.com" },
     update: {},
     create: {
-      email: "admin@northamericanlocal.com",
-      passwordHash: nalAdminPassword,
-      firstName: "North American",
+      email: "admin@tempowireless.com",
+      passwordHash: tempoAdminPassword,
+      firstName: "Tempo",
       lastName: "Administrator",
-      clientId: northAmericanLocalClient.id,
-      roleId: northAmericanLocalAdminRole.id,
+      clientId: tempoWirelessClient.id,
+      roleId: tempoWirelessAdminRole.id,
       isActive: true,
     },
   });
 
-  const nalUserPassword = await bcrypt.hash("naluser123!", 12);
+  const tempoUserPassword = await bcrypt.hash("tempouser123!", 12);
   await prisma.user.upsert({
-    where: { email: "user@northamericanlocal.com" },
+    where: { email: "user@tempowireless.com" },
     update: {},
     create: {
-      email: "user@northamericanlocal.com",
-      passwordHash: nalUserPassword,
-      firstName: "North American",
+      email: "user@tempowireless.com",
+      passwordHash: tempoUserPassword,
+      firstName: "Tempo",
       lastName: "User",
-      clientId: northAmericanLocalClient.id,
-      roleId: northAmericanLocalUserRole.id,
+      clientId: tempoWirelessClient.id,
+      roleId: tempoWirelessUserRole.id,
+      isActive: true,
+    },
+  });
+
+  // Wellness Brands users
+  const wellnessAdminPassword = await bcrypt.hash("wellness123!", 12);
+  await prisma.user.upsert({
+    where: { email: "admin@wellnessbrands.com" },
+    update: {},
+    create: {
+      email: "admin@wellnessbrands.com",
+      passwordHash: wellnessAdminPassword,
+      firstName: "Wellness",
+      lastName: "Administrator",
+      clientId: wellnessBrandsClient.id,
+      roleId: wellnessBrandsAdminRole.id,
+      isActive: true,
+    },
+  });
+
+  const wellnessUserPassword = await bcrypt.hash("wellnessuser123!", 12);
+  await prisma.user.upsert({
+    where: { email: "user@wellnessbrands.com" },
+    update: {},
+    create: {
+      email: "user@wellnessbrands.com",
+      passwordHash: wellnessUserPassword,
+      firstName: "Wellness",
+      lastName: "User",
+      clientId: wellnessBrandsClient.id,
+      roleId: wellnessBrandsUserRole.id,
       isActive: true,
     },
   });
@@ -874,20 +981,24 @@ async function main() {
   console.log("");
   console.log("Mockup Credentials:");
   console.log("");
-  console.log("BPO Administration:");
+  console.log("BPO Administration (KB: ALL):");
   console.log("   Admin: admin@paricus.com / admin123!");
   console.log("");
-  console.log("Flex Mobile:");
+  console.log("Flex Mobile (KB: PA_US_2):");
   console.log("   Admin: admin@flexmobile.com / flex123!");
   console.log("   User:  user@flexmobile.com / flexuser123!");
   console.log("");
-  console.log("IM Telecom:");
+  console.log("IM Telecom (KB: PA_US_1):");
   console.log("   Admin: admin@imtelecom.com / imtelecom123!");
   console.log("   User:  user@imtelecom.com / imuser123!");
   console.log("");
-  console.log("North American Local:");
-  console.log("   Admin: admin@northamericanlocal.com / northam123!");
-  console.log("   User:  user@northamericanlocal.com / naluser123!");
+  console.log("Tempo Wireless (KB: PA_US_3):");
+  console.log("   Admin: admin@tempowireless.com / tempo123!");
+  console.log("   User:  user@tempowireless.com / tempouser123!");
+  console.log("");
+  console.log("Wellness Brands (KB: PA_US_4):");
+  console.log("   Admin: admin@wellnessbrands.com / wellness123!");
+  console.log("   User:  user@wellnessbrands.com / wellnessuser123!");
 }
 
 main()

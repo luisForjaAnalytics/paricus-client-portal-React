@@ -8,6 +8,7 @@ import InputBase from "@mui/material/InputBase";
 import Badge from "@mui/material/Badge";
 import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
+import Typography from "@mui/material/Typography";
 import SearchIcon from "@mui/icons-material/Search";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import MoreIcon from "@mui/icons-material/MoreVert";
@@ -126,7 +127,7 @@ export const AppBarLayout = ({ titleState, setTitleState }) => {
       <AppBar
         position="static"
         sx={{
-          backgroundColor: { xs: colors.navBarColor, md: colors.surface },
+          background: { xs: colors.gradiantPrimaryColor, md: colors.surface },
           color: colors.textPrimary,
           boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
           borderBottom: `1px solid ${colors.border}`,
@@ -145,11 +146,30 @@ export const AppBarLayout = ({ titleState, setTitleState }) => {
         >
           <MobilMenu />
 
-          {/* Barra de búsqueda */}
+          {/* Page Title - Only visible on mobile */}
+          <Typography
+            variant="h6"
+            noWrap
+            sx={{
+              display: { xs: "block", md: "none" },
+              flexGrow: 1,
+              fontWeight: typography.fontWeight.bold,
+              color: colors.textWhite,
+              textAlign: "center",
+              fontSize: "1.2rem",
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+              fontFamily: typography.fontFamily,
+            }}
+          >
+            {t(`navigation.${titleState}`)}
+          </Typography>
+
+          {/* Barra de búsqueda - Hidden on mobile */}
           <Box
             sx={{
               flexGrow: 1,
-              display: "flex",
+              display: { xs: "none", md: "flex" },
               justifyContent: "flex-start",
             }}
           >

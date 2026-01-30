@@ -1,10 +1,11 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import { useBreakpoint } from "../../../../common/hooks/useBreakpoint";
 import { RolesTabDesktop } from "./RolesTabDesktop";
 import { RolesTabMobile } from "./RolesTabMobile";
 import { AddNewRoleModal } from "./AddNewRoleModal";
+import { useRolesTableConfig } from "./useRolesTableConfig";
 import {
   useGetRolesQuery,
   useCreateRoleMutation,
@@ -267,7 +268,7 @@ export const RolesTab = () => {
     }
   };
 
-  const formatDate = (dateString) => {
+  const formatDate = useCallback((dateString) => {
     try {
       const locale = t("common.locale") || "en-US";
       return new Date(dateString).toLocaleDateString(locale);
@@ -275,7 +276,17 @@ export const RolesTab = () => {
       console.error(`ERROR formatDate: ${err}`);
       return dateString;
     }
-  };
+  }, [t]);
+
+  // Clear all filters
+  const clearFilters = useCallback(() => {
+    try {
+      setSearchQuery("");
+      setSelectedClient("");
+    } catch (error) {
+      console.error("clearFilters error:", error);
+    }
+  }, []);
 
   const showNotification = (message, severity = "success") => {
     try {
@@ -306,25 +317,48 @@ export const RolesTab = () => {
     }
   };
 
-  const sharedProps = {
+  // Use shared table configuration - called ONCE here and passed to children
+  const {
+    rows,
+    desktopColumns,
+    mobileColumns,
+    renderActions,
+    renderPrimaryIcon,
+    actionsLabel,
+    emptyMessage,
+    headerTitle,
+  } = useRolesTableConfig({
     roles: filteredRoles,
-    isLoading,
+    clients,
+    formatDate,
+    openEditDialog,
+    handleDeleteRole,
+    openPermissionsDialog,
+    isProtectedRole,
     isBPOAdmin,
-    isClientAdmin,
-    authUser,
     selectedClient,
     setSelectedClient,
     searchQuery,
     setSearchQuery,
     isOpen,
+    clearFilters,
+  });
+
+  // Props compartidos para Desktop y Mobile
+  const sharedProps = {
+    // Data from hook
+    rows,
+    renderActions,
+    actionsLabel,
+    emptyMessage,
+    headerTitle,
+    // State
+    isLoading,
+    isOpen,
     setIsOpen,
-    clients,
+    // Actions
     openAddDialog,
-    openEditDialog,
-    handleDeleteRole,
-    openPermissionsDialog,
-    formatDate,
-    isProtectedRole,
+    // Permissions dialog props (Desktop only)
     permissions,
     selectedPermissions,
     savePermissions,
@@ -338,9 +372,16 @@ export const RolesTab = () => {
   return (
     <>
       {isMobile ? (
-        <RolesTabMobile {...sharedProps} />
+        <RolesTabMobile
+          {...sharedProps}
+          columns={mobileColumns}
+          renderPrimaryIcon={renderPrimaryIcon}
+        />
       ) : (
-        <RolesTabDesktop {...sharedProps} />
+        <RolesTabDesktop
+          {...sharedProps}
+          columns={desktopColumns}
+        />
       )}
       <AddNewRoleModal
         dialog={dialog}

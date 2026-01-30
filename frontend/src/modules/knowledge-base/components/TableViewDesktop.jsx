@@ -5,6 +5,7 @@ import {
   Visibility as VisibilityIcon,
   FilterList as FilterListIcon,
 } from "@mui/icons-material";
+import { useSelector } from "react-redux";
 import {
   useGetAllArticlesQuery,
   useLazyGetArticleByIdQuery,
@@ -31,6 +32,7 @@ const dataStructure = (data) => {
           article_name: item?.article_name || "N/A",
           article_synopsis: item?.article_synopsis || "N/A",
           updated_at: formatDateTime(item?.updated_at) || "N/A",
+          kbPrefix: item?.kbPrefix || null, // Include kbPrefix for article operations
         };
       } catch (itemError) {
         console.error(`Error processing article at index ${index}:`, itemError);
@@ -44,7 +46,11 @@ const dataStructure = (data) => {
 
 export const TableView = () => {
   const { t } = useTranslation();
-  const { data = [], isLoading, isError, refetch } = useGetAllArticlesQuery();
+
+  // Get kbPrefix from user's auth state (null for BPO Admin = access all)
+  const kbPrefix = useSelector((state) => state.auth.user?.kbPrefix);
+
+  const { data = [], isLoading, isError, refetch } = useGetAllArticlesQuery(kbPrefix);
 
   const [getArticleById] = useLazyGetArticleByIdQuery();
   const [filters, setFilters] = useState({
@@ -61,9 +67,10 @@ export const TableView = () => {
     data: searchResults,
     isLoading: isSearching,
     isError: isSearchError,
-  } = useGetArticleSearchQuery(searchTerm, {
-    skip: !searchTerm.trim(), // Skip if empty
-  });
+  } = useGetArticleSearchQuery(
+    { kbPrefix, search: searchTerm },
+    { skip: !searchTerm.trim() } // Skip if empty
+  );
 
   // State for advanced filters visibility
   const [isOpen, setIsOpen] = useState(false);
@@ -147,10 +154,14 @@ export const TableView = () => {
   );
 
   // Función para editar (navega a editorView)
-  const handleEditClick = async (articleId) => {
+  const handleEditClick = async (articleId, articleKbPrefix) => {
     try {
-      await getArticleById(articleId).unwrap();
-      navigate(`/app/knowledge-base/editorView/${articleId}`);
+      // Use article's kbPrefix or fall back to user's kbPrefix
+      const prefix = articleKbPrefix || kbPrefix;
+      await getArticleById({ kbPrefix: prefix, articleId }).unwrap();
+      navigate(`/app/knowledge-base/editorView/${articleId}`, {
+        state: { kbPrefix: prefix },
+      });
     } catch (error) {
       console.error("Error fetching article:", error);
       snackbarRef.current?.showError(t("knowledgeBase.errorFetchingArticle"));
@@ -158,10 +169,14 @@ export const TableView = () => {
   };
 
   // Función para ver (navega a articleView)
-  const handleViewClick = async (articleId) => {
+  const handleViewClick = async (articleId, articleKbPrefix) => {
     try {
-      await getArticleById(articleId).unwrap();
-      navigate(`/app/knowledge-base/articleView/${articleId}`);
+      // Use article's kbPrefix or fall back to user's kbPrefix
+      const prefix = articleKbPrefix || kbPrefix;
+      await getArticleById({ kbPrefix: prefix, articleId }).unwrap();
+      navigate(`/app/knowledge-base/articleView/${articleId}`, {
+        state: { kbPrefix: prefix },
+      });
     } catch (error) {
       console.error("Error fetching article:", error);
       snackbarRef.current?.showError(t("knowledgeBase.errorFetchingArticle"));
@@ -253,7 +268,7 @@ export const TableView = () => {
           <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
             <Tooltip title={t("knowledgeBase.actions.edit")}>
               <IconButton
-                onClick={() => handleEditClick(params.id)}
+                onClick={() => handleEditClick(params.id, params.row.kbPrefix)}
                 size="small"
                 color="primary"
               >
@@ -262,7 +277,7 @@ export const TableView = () => {
             </Tooltip>
             <Tooltip title={t("knowledgeBase.actions.view")}>
               <IconButton
-                onClick={() => handleViewClick(params.id)}
+                onClick={() => handleViewClick(params.id, params.row.kbPrefix)}
                 size="small"
                 sx={{ color: colors.primary }}
               >
@@ -273,7 +288,7 @@ export const TableView = () => {
         ),
       },
     ],
-    [t, filters, handleFilterChange, isOpen, isLoading, refetch, clearFilters]
+    [t, filters, handleFilterChange, isOpen, isLoading, refetch, clearFilters, kbPrefix]
   );
 
   return (

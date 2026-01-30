@@ -172,11 +172,11 @@ export const InvoicesTableDesktop = ({
                 <Box
                   component="span"
                   sx={{
-                    ...getStatusBadgeStyle(invoice.status),
+                    ...getStatusBadgeStyle(invoice.status || "pending"),
                     ...colors.intranetRed,
                   }}
                 >
-                  {invoice.status.toUpperCase()}
+                  {(invoice.status || "pending").toUpperCase()}
                 </Box>
               </TableCell>
               <TableCell sx={table.cell}>

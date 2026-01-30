@@ -1,4 +1,5 @@
-import { Box, Typography, Alert, Avatar } from "@mui/material";
+import { Box, Typography, Avatar } from "@mui/material";
+import { AlertInline } from "../../../../../common/components/ui/AlertInline";
 import { useTranslation } from "react-i18next";
 import { formatDateTime } from "../../../../../common/utils/formatDateTime";
 import { ticketStyle, colors } from "../../../../../common/styles/styles";
@@ -13,9 +14,10 @@ export const TicketHistoricalInfo = ({ ticket }) => {
   // Validate ticket prop
   if (!ticket) {
     return (
-      <Alert severity="warning">
-        {t("common.error") || "Ticket data not available"}
-      </Alert>
+      <AlertInline
+        message={t("common.error") || "Ticket data not available"}
+        severity="warning"
+      />
     );
   }
 
@@ -125,9 +127,11 @@ export const TicketHistoricalInfo = ({ ticket }) => {
             console.error("Error rendering detail item:", error, item);
             return (
               <Box key={item?.id || index} sx={ticketStyle.historicalContainer}>
-                <Alert severity="error" sx={{ fontSize: "0.875rem" }}>
-                  {t("common.error") || "Error displaying update"}
-                </Alert>
+                <AlertInline
+                  message={t("common.error") || "Error displaying update"}
+                  severity="error"
+                  sx={{ fontSize: "0.875rem" }}
+                />
               </Box>
             );
           }

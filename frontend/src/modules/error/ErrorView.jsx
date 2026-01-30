@@ -6,7 +6,6 @@ import {
 } from "react-router-dom";
 import { Box, Button, Container, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import { primaryIconButton } from "../../common/styles/styles";
 
 export const ErrorView = () => {
@@ -49,13 +48,29 @@ export const ErrorView = () => {
           py: 8,
         }}
       >
-        <ErrorOutlineIcon
+        <Box
           sx={{
-            fontSize: 120,
-            color: "error.main",
+            width: 220,
+            height: 220,
+            borderRadius: "50%",
+            overflow: "hidden",
             mb: 3,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
           }}
-        />
+        >
+          <Box
+            component="img"
+            src="/error.jpeg"
+            alt="Error"
+            sx={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+            }}
+          />
+        </Box>
 
         <Typography variant="h2" component="h1" fontWeight="bold" gutterBottom>
           {statusCode}

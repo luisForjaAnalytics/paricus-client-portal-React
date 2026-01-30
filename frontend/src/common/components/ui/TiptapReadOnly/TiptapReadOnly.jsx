@@ -6,7 +6,8 @@ import { Table } from "@tiptap/extension-table";
 import { TableRow } from "@tiptap/extension-table-row";
 import { TableCell } from "@tiptap/extension-table-cell";
 import { TableHeader } from "@tiptap/extension-table-header";
-import { Box, Alert } from "@mui/material";
+import { Box } from "@mui/material";
+import { AlertInline } from "../AlertInline";
 import PropTypes from "prop-types";
 import "./TiptapReadOnly.css";
 
@@ -75,9 +76,11 @@ export const TiptapReadOnly = ({
 
     if (showErrorAlert) {
       return (
-        <Alert severity="error" sx={sx}>
-          Error rendering content. Please try refreshing the page.
-        </Alert>
+        <AlertInline
+          message="Error rendering content. Please try refreshing the page."
+          severity="error"
+          sx={sx}
+        />
       );
     }
 

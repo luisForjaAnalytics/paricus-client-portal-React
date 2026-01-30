@@ -261,4 +261,3 @@ AdvancedFilters.propTypes = {
   callTypes: PropTypes.arrayOf(PropTypes.string).isRequired,
 };
 
-export default AdvancedFilters;

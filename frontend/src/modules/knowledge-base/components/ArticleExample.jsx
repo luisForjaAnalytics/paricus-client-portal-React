@@ -1,7 +1,8 @@
 import React from 'react';
-import { Box, Card, CardContent, CircularProgress, Alert } from '@mui/material';
+import { Box, Card, CardContent, CircularProgress } from '@mui/material';
 import { useGetArticleByIdQuery } from '../../../store/api/articlesApi';
 import { AppText } from '../../../common/components/ui/AppText';
+import { AlertInline } from '../../../common/components/ui/AlertInline';
 
 /**
  * Componente de ejemplo para mostrar cómo usar la API de artículos
@@ -22,9 +23,10 @@ export function ArticleExample({ articleId = "PA_US_1" }) {
 
   if (error) {
     return (
-      <Alert severity="error">
-        Error al cargar el artículo: {error.status} - {error.data?.message || 'Error desconocido'}
-      </Alert>
+      <AlertInline
+        severity="error"
+        message={`Error al cargar el artículo: ${error.status} - ${error.data?.message || 'Error desconocido'}`}
+      />
     );
   }
 
@@ -77,7 +79,7 @@ export function ArticleLazyExample() {
       </button>
 
       {isLoading && <CircularProgress />}
-      {error && <Alert severity="error">Error: {error.message}</Alert>}
+      {error && <AlertInline severity="error" message={`Error: ${error.message}`} />}
       {data && (
         <AppText component="pre" variant="small" sx={{ fontFamily: 'monospace' }}>
           {JSON.stringify(data, null, 2)}

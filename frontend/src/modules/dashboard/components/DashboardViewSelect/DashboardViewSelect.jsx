@@ -1,4 +1,5 @@
-import { Box, CircularProgress, Alert, Chip } from "@mui/material";
+import { Box, CircularProgress, Chip } from "@mui/material";
+import { AlertInline } from "../../../../common/components/ui/AlertInline";
 import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
@@ -7,6 +8,7 @@ import { AnnouncementsInbox } from "../AnnouncementsInbox";
 import { DashboardStatisticsView } from "../DashboardStatisticsView/DashboardStatisticsView";
 import { ActiveTasks } from "../ActiveTasks";
 import { MasterRepository } from "../MasterRepository";
+import { SwiperView } from "../../../../common/components/ui/Swiper/SwiperView";
 
 /**
  * DashboardViewSelect - Displays dashboard content based on selected client/user
@@ -68,17 +70,19 @@ export const DashboardViewSelect = ({
     const errorMessage =
       error?.data?.message ||
       error?.message ||
-      t("dashboard.errorLoadingData", "Error loading dashboard data. Click to retry.");
+      t(
+        "dashboard.errorLoadingData",
+        "Error loading dashboard data. Click to retry.",
+      );
 
     return (
       <Box sx={{ p: 3 }}>
-        <Alert
+        <AlertInline
+          message={errorMessage}
           severity="error"
           onClose={handleRetry}
           sx={{ cursor: "pointer" }}
-        >
-          {errorMessage}
-        </Alert>
+        />
       </Box>
     );
   }
@@ -105,15 +109,28 @@ export const DashboardViewSelect = ({
       {/* Top Stats Cards */}
       <DashboardStatisticsView stats={stats} />
 
-      {/* Main Content Grid: Quick Broadcast (60%) + Charts (40%) */}
+      {/* Main Content Grid: Announcements (50%) + Swiper (50%) */}
       <Box
         sx={{
-          mb: 2,
-          height: "25vh",
+          display: "grid",
+          gridTemplateColumns: {
+            xs: "1fr",
+            lg: "1fr 1fr",
+          },
+          mb: 3,
+          gap: 3,
+          height: "30vh",
+          // minHeight: { xs: "auto", lg: "35vh" },
+          // "& > *": {
+          //   minHeight: { xs: "250px", lg: "100%" },
+          //   height: "30vh",
+          // },
         }}
       >
         {/* Announcements Inbox */}
         <AnnouncementsInbox />
+        {/* Swiper */}
+        <SwiperView />
       </Box>
 
       <Box
@@ -121,7 +138,7 @@ export const DashboardViewSelect = ({
           display: "grid",
           gridTemplateColumns: {
             xs: "1fr",
-            lg: "1fr 1fr 1fr",
+            lg: "1fr 1fr ",
           },
           gap: 3,
         }}

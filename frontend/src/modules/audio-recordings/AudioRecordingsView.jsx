@@ -8,7 +8,6 @@ import React, {
 import {
   Box,
   Button,
-  Alert,
   IconButton,
   Paper,
   Typography,
@@ -17,6 +16,7 @@ import {
   Collapse,
   Divider,
 } from "@mui/material";
+import { AlertInline } from "../../common/components/ui/AlertInline";
 import {
   PlayArrow as PlayArrowIcon,
   Close as CloseIcon,
@@ -539,26 +539,25 @@ export const AudioRecordingsView = () => {
       <HeaderBoxTypography text={t("audioRecordings.sectionTitle")} />
       {/* Database Connection Warning */}
       {!dbConfigured && (
-        <Alert severity="warning" sx={{ mb: 3 }} icon={<WarningIcon />}>
+        <AlertInline severity="warning" sx={{ mb: 3 }} icon={<WarningIcon />}>
           <Typography variant="subtitle2" fontWeight="bold">
             {t("audioRecordings.databaseNotConfigured")}
           </Typography>
           <Typography variant="body2">
             {t("audioRecordings.databaseNotConfiguredMessage")}
           </Typography>
-        </Alert>
+        </AlertInline>
       )}
 
       {/* Error Alert */}
       {error && (
-        <Alert
+        <AlertInline
           severity="error"
           sx={{ mb: 3 }}
           onClose={() => setError(null)}
           icon={<ErrorIcon />}
-        >
-          {error}
-        </Alert>
+          message={error}
+        />
       )}
 
       {/* Filter Button */}

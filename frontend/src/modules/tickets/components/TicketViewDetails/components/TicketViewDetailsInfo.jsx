@@ -1,5 +1,6 @@
 import { useState, useContext } from "react";
 import { Box, Chip, Button, Alert, Snackbar } from "@mui/material";
+import { AlertInline } from "../../../../../common/components/ui/AlertInline";
 import InfoIcon from "@mui/icons-material/Info";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import FlagIcon from "@mui/icons-material/Flag";
@@ -633,9 +634,12 @@ const TicketInfoDetails = ({ ticket }) => {
     <>
       {/* Error Alert */}
       {error && (
-        <Alert severity="error" onClose={() => setError(null)} sx={{ mb: 2 }}>
-          {error}
-        </Alert>
+        <AlertInline
+          message={error}
+          severity="error"
+          onClose={() => setError(null)}
+          sx={{ mb: 2 }}
+        />
       )}
 
       {/* Success Snackbar */}

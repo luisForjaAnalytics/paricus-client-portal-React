@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { DataGrid } from "@mui/x-data-grid";
-import { Box, Typography, Alert, CircularProgress } from "@mui/material";
+import { Box, Typography, CircularProgress } from "@mui/material";
+import { AlertInline } from "../AlertInline";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
 import { dataGridTable } from "../../../styles/styles";
@@ -133,9 +134,11 @@ export const UniversalDataGrid = ({
   // Error state
   if (error) {
     return (
-      <Alert severity="error" sx={{ mb: 2 }}>
-        {typeof error === "string" ? error : error?.message || "Error loading data"}
-      </Alert>
+      <AlertInline
+        message={typeof error === "string" ? error : error?.message || "Error loading data"}
+        severity="error"
+        sx={{ mb: 2 }}
+      />
     );
   }
 

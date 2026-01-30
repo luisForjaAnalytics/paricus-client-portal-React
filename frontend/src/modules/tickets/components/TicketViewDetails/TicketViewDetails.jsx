@@ -1,6 +1,7 @@
 import { createContext, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
-import { Box, Typography, Divider, Alert, LinearProgress } from "@mui/material";
+import { Box, Typography, Divider, LinearProgress } from "@mui/material";
+import { AlertInline } from "../../../../common/components/ui/AlertInline";
 import { useTranslation } from "react-i18next";
 import { useGetTicketQuery } from "../../../../store/api/ticketsApi";
 import { ticketStyle } from "../../../../common/styles/styles";
@@ -70,7 +71,7 @@ export const TicketViewDetails = () => {
 
   // Don't show error if we're just refetching and already have data
   if (error && !ticket)
-    return <Alert severity="error">Error loading ticket</Alert>;
+    return <AlertInline message="Error loading ticket" severity="error" />;
 
   if (!ticket) return null;
 

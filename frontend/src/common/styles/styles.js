@@ -580,6 +580,15 @@ export const titlesTypography = {
     textTransform: "none",
     fontSize: "1.5rem",
   },
+  // Accordion/Mobile table header - matches DataGrid column header style but slightly larger
+  mobilDataTableTableHeader: {
+    fontWeight: typography.fontWeight.bold,
+    textTransform: "uppercase",
+    fontSize: "0.875rem", // 14px
+    fontFamily: typography.fontFamily,
+    color: colors.textMuted,
+    letterSpacing: "0.05em",
+  },
 };
 
 // ================================================
@@ -670,7 +679,7 @@ export const filterStyles = {
   //Company filter Audio Recording //
   formControlSection: {
     width: "15vh",
-        mt: "0.5rem",
+    mt: "0.5rem",
     //flex: 1,
     "& .MuiSelect-select": {
       display: "flex",
@@ -1292,7 +1301,9 @@ export const quickBroadcastCard = {
   border: `1px solid ${colors.border}`,
   boxShadow: "none",
   overflow: "hidden",
-  mt: 8,
+  width: { xs: "100%", md: "100%" },
+  height:{xs:'85vh', md:'auto'},
+  mt: { xs: 0, md: 8 },
   transition: "border-color 200ms ease-in-out",
   "&:hover": {
     borderColor: colors.primary,

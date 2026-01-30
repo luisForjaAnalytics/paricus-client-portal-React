@@ -1,17 +1,25 @@
 import { useGetArticleByIdQuery } from "../../../store/api/articlesApi";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { Box } from "@mui/material";
 import { TiptapReadOnly } from "../../../common/components/ui/TiptapReadOnly/TiptapReadOnly";
 
 export const ArticleView = () => {
   const { articleId } = useParams();
+  const location = useLocation();
+
+  // Get kbPrefix from location state (passed from table) or from user's auth state
+  const userKbPrefix = useSelector((state) => state.auth.user?.kbPrefix);
+  const kbPrefix = location.state?.kbPrefix || userKbPrefix;
+
   const {
     data: articleData,
     isLoading,
     error,
-  } = useGetArticleByIdQuery(articleId, {
-    skip: !articleId,
-  });
+  } = useGetArticleByIdQuery(
+    { kbPrefix, articleId },
+    { skip: !articleId || !kbPrefix }
+  );
 
   //   if (isLoading) return <p>Cargando artículo...</p>;
   //   if (error) return <p>Error cargando artículo.</p>;

@@ -5,9 +5,13 @@ export default {
     reporting: "Reporting",
     audioRetrieval: "Audio Recordings",
     knowledgeBase: "Knowledge Base",
+    tickets: "Tickets",
     financial: "Financial",
     reportsManagement: "Reports Management",
     userManagement: "Management",
+    clientManagement: "Clients",
+    usersManagement: "Users",
+    roleManagement: "Roles",
     logs: "Logs",
     myProfile: "My Profile",
     broadcast: "Broadcast",
@@ -263,6 +267,13 @@ export default {
     client: "Client",
     report: "Report",
     ticket: "Ticket",
+    // Table and data states
+    noDataAvailable: "No data available",
+    errorLoadingData: "Error loading data",
+    errorRenderingTable: "Error rendering table",
+    retry: "Retry",
+    details: "Details",
+    tryAgain: "Try again",
   },
 
   // Login
@@ -582,7 +593,13 @@ export default {
     clientBreakdown: {
       title: "Client Breakdown",
       noClientsFound: "No clients found",
+      noClients: "No clients found",
       uploadInvoicesMessage: "Upload invoices to see client data",
+      totalInvoices: "Total Invoices",
+      revenue: "Revenue",
+      outstanding: "Outstanding",
+      overdue: "Overdue",
+      invoices: "Invoices",
       columns: {
         company: "COMPANY",
         invoices: "INVOICES",
@@ -594,7 +611,7 @@ export default {
       noInvoicesFound: "No invoices found for this client",
     },
     clientSummary: {
-      title: "All Clients Summary",
+      title: "Summary",
       waveAppsButton: "Wave Apps",
       refreshButton: "Refresh All",
       loading: "Loading...",

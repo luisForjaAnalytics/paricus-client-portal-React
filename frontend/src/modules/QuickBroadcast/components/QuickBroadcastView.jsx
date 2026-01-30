@@ -199,7 +199,9 @@ export const QuickBroadcastView = () => {
       setAttachments([]);
     } catch (err) {
       console.error("Error creating announcement:", err);
-      snackbarRef.current?.showError(err?.data?.error || t("quickBroadcast.error"));
+      snackbarRef.current?.showError(
+        err?.data?.error || t("quickBroadcast.error"),
+      );
     } finally {
       setSending(false);
     }
@@ -231,7 +233,7 @@ export const QuickBroadcastView = () => {
     <Card
       sx={{
         ...quickBroadcastCard,
-        minWidth: { xs: "100%", md: "400px" },
+        //minWidth: { xs: "100%", md: "400px" },
       }}
     >
       <CardContent sx={{ padding: "1.5rem" }}>
@@ -270,7 +272,7 @@ export const QuickBroadcastView = () => {
               backgroundColor: colors.background,
               borderRadius: "0.75rem",
               border: "none",
-              minHeight: "120px",
+              height: { xs: "44vh", md: "25vh" },
               padding: "1rem",
               fontSize: "0.875rem",
               "&:focus": {
@@ -323,9 +325,9 @@ export const QuickBroadcastView = () => {
         <Box
           sx={{
             display: "flex",
-            flexDirection: "row",
+            flexDirection: { xs: "column", md: "row" },
             justifyContent: "space-between",
-            alignItems: "center",
+            alignItems: { xs: "stretch", md: "center" },
             gap: 2,
           }}
         >
@@ -334,6 +336,7 @@ export const QuickBroadcastView = () => {
               display: "flex",
               flexDirection: "row",
               alignItems: "center",
+              justifyContent: "center",
               gap: 1.5,
             }}
           >
@@ -475,10 +478,12 @@ export const QuickBroadcastView = () => {
             sx={{
               ...primaryIconButton,
               height: "36px",
+              width: { xs: "auto", md: "auto" },
               boxShadow: `0 4px 12px ${colors.primaryLight}`,
               fontSize: "0.75rem",
               fontWeight: "bold",
               px: 2,
+              mx: { xs: 3, lg: 0 },
               "&:hover": {
                 boxShadow: `0 6px 16px ${colors.primaryLight}`,
               },

@@ -10,6 +10,7 @@ import { formatDateTime } from "../../../../common/utils/formatDateTime";
 import { UniversalDataGrid } from "../../../../common/components/ui/DataGrid/UniversalDataGrid";
 import { ColumnHeaderFilter } from "../../../../common/components/ui/ColumnHeaderFilter";
 import { getPriorityStyles, getStatusStyles } from "../../../../common/utils/getStatusProperty";
+import { TicketsViewMobil } from "../TicketsViewMobil/TicketsViewMobil";
 
 export const TicketsViewDesktop = () => {
   const { t } = useTranslation();
@@ -377,15 +378,12 @@ export const TicketsViewDesktop = () => {
       </Box>
 
       {/* Mobile View */}
-      {/* <TicketsViewMobil
-        logs={logs}
+      <TicketsViewMobil
+        tickets={rows}
         isLoading={isLoading}
-        error={error}
-        formatTimestamp={formatTimestamp}
-        getEventTypeColor={getEventTypeColor}
-        getStatusColor={getStatusColor}
-        cleanIpAddress={cleanIpAddress}
-      /> */}
+        error={isError ? t("tickets.errorLoading") : null}
+        onRowClick={(row) => navigate(`/app/tickets/ticketTable/${row.id}`)}
+      />
 
       {/* Nested routes outlet */}
       <Outlet />

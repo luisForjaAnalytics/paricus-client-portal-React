@@ -7,9 +7,13 @@ export default {
     reporting: "Reportes",
     audioRetrieval: "Grabaciones de Audio",
     knowledgeBase: "Conocimientos",
+    tickets: "Tickets",
     financial: "Financiero",
     reportsManagement: "Gestión de Reportes",
     userManagement: "Gestión de Usuarios",
+    clientManagement: "Clientes",
+    usersManagement: "Usuarios",
+    roleManagement: "Roles",
     logs: "Registros",
     myProfile: "Mi Perfil",
     broadcast: "Anuncios",
@@ -264,6 +268,13 @@ export default {
     client: "Cliente",
     report: "Reporte",
     ticket: "Ticket",
+    // Estados de tabla y datos
+    noDataAvailable: "No hay datos disponibles",
+    errorLoadingData: "Error al cargar datos",
+    errorRenderingTable: "Error al mostrar la tabla",
+    retry: "Reintentar",
+    details: "Detalles",
+    tryAgain: "Intentar de nuevo",
   },
 
   // Login
@@ -585,7 +596,13 @@ export default {
     clientBreakdown: {
       title: "Desglose por Cliente",
       noClientsFound: "No se encontraron clientes",
+      noClients: "No se encontraron clientes",
       uploadInvoicesMessage: "Sube facturas para ver datos de clientes",
+      totalInvoices: "Total Facturas",
+      revenue: "Ingresos",
+      outstanding: "Pendiente",
+      overdue: "Vencido",
+      invoices: "Facturas",
       columns: {
         company: "EMPRESA",
         invoices: "FACTURAS",

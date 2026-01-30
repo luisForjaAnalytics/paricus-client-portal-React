@@ -30,7 +30,8 @@ router.post('/login',
         client: {
           select: {
             id: true,
-            name: true
+            name: true,
+            kbPrefix: true
           }
         },
         role: {
@@ -106,6 +107,7 @@ router.post('/login',
         lastName: user.lastName,
         clientId: user.clientId,
         clientName: user.client?.name || null,
+        kbPrefix: user.client?.kbPrefix || null, // Knowledge Base API prefix (null = BPO Admin, access all)
         roleId: user.roleId,
         roleName: user.role?.roleName,
         permissions: permissions

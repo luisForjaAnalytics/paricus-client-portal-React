@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import MuiDrawer from "@mui/material/Drawer";
@@ -11,7 +11,7 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import { AppBarLayout } from "./AppBar/AppBarLayout";
 import { useTranslation } from "react-i18next";
 
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { usePermissions } from "../../hooks/usePermissions";
 import { colors } from "../../styles/styles";
 import {
@@ -75,11 +75,48 @@ const Drawer = styled(MuiDrawer, {
       }),
 }));
 
+// Helper function to get label from route path
+const getLabelFromPath = (pathname) => {
+  // Remove /app/ prefix and get the main route segment
+  const path = pathname.replace("/app/", "");
+
+  // Check all menu items (common and admin) for matching route
+  const allItems = [...menuItemsCommon, ...menuItemsAdmin];
+
+  for (const item of allItems) {
+    // Check if the path starts with the item's route
+    if (path.startsWith(item.route) || path === item.route) {
+      return item.label;
+    }
+    // Check subItems if they exist
+    if (item.subItems) {
+      for (const subItem of item.subItems) {
+        if (path.startsWith(subItem.route) || path === subItem.route) {
+          return subItem.label;
+        }
+      }
+    }
+  }
+
+  // Default mappings for special routes
+  if (path.startsWith("users-profile")) return "myProfile";
+  if (path.startsWith("broadcast")) return "broadcast";
+
+  return "dashboard"; // Default fallback
+};
+
 export const LayoutAccount = () => {
   const { t } = useTranslation();
+  const location = useLocation();
   const [open, setOpen] = useState(false);
   const [titleState, setTitleState] = useState("dashboard");
   const { hasPermission } = usePermissions();
+
+  // Sync titleState with current route
+  useEffect(() => {
+    const label = getLabelFromPath(location.pathname);
+    setTitleState(label);
+  }, [location.pathname]);
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -88,7 +125,6 @@ export const LayoutAccount = () => {
   const handleDrawerClose = () => {
     setOpen(false);
   };
-
   // Filter menu items based on user permissions
   const filteredCommonItems = useMemo(
     () =>
@@ -219,7 +255,7 @@ export const LayoutAccount = () => {
         <AppBarLayout titleState={titleState} setTitleState={setTitleState} />
         <Box
           sx={{
-            margin: { xs: "0 1.2rem 0 1.2rem", md: "0 1rem 0 1rem" },
+            margin: { xs: "0 0.8rem 0 0.8rem", md: "0 1rem 0 1rem" }, //marring all sections
           }}
         >
           <Outlet context={{ setTitleState }} />

@@ -7,7 +7,7 @@ import {
   CircularProgress,
   Dialog,
   DialogContent,
-  DialogActions,
+  DialogTitle,
   IconButton,
 } from "@mui/material";
 import {
@@ -16,15 +16,14 @@ import {
   Close as CloseIcon,
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { useSelector } from "react-redux";
 import { formatDateTime } from "../../../../common/utils/formatDateTime";
 import { TiptapReadOnly } from "../../../../common/components/ui/TiptapReadOnly/TiptapReadOnly";
-import { dashboardStyles } from "../../../../common/styles/styles";
+import { dashboardStyles, colors, modalCard, titlesTypography } from "../../../../common/styles/styles";
 import { AppText } from "../../../../common/components/ui/AppText/AppText";
 import { useGetAnnouncementsQuery } from "../../../../store/api/dashboardApi";
 import { getPriorityStyles } from "../../../../common/utils/getStatusProperty";
-
 
 const getPriorityLabel = (priority, t) => {
   try {
@@ -48,8 +47,7 @@ const getPriorityLabel = (priority, t) => {
 export const AnnouncementsInbox = () => {
   const { t } = useTranslation();
   const [selectedImage, setSelectedImage] = useState(null);
-  const [containerHeight, setContainerHeight] = useState(null);
-  const firstAnnouncementRef = useRef(null);
+  const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
 
   const token = useSelector((state) => state.auth?.token);
 
@@ -59,20 +57,6 @@ export const AnnouncementsInbox = () => {
     isLoading,
     error,
   } = useGetAnnouncementsQuery();
-
-  // Measure first announcement height and set container height
-  useEffect(() => {
-    if (firstAnnouncementRef.current && announcements.length > 0) {
-      // Small delay to ensure content is rendered
-      const timer = setTimeout(() => {
-        const height = firstAnnouncementRef.current?.offsetHeight;
-        if (height) {
-          setContainerHeight(height + 16); // Add some padding
-        }
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [announcements]);
 
   // Build image URL with token (same pattern as TicketDescriptionInfo)
   const getImageUrl = (attachment) => {
@@ -91,24 +75,34 @@ export const AnnouncementsInbox = () => {
   };
 
   // Handle image click to open in dialog
-  const handleImageClick = (attachment) => {
+  const handleImageClick = (e, attachment) => {
+    e.stopPropagation();
     setSelectedImage(attachment);
   };
 
-  const handleCloseDialog = () => {
+  const handleCloseImageDialog = () => {
     setSelectedImage(null);
   };
 
+  // Handle announcement click to open modal
+  const handleAnnouncementClick = (announcement) => {
+    setSelectedAnnouncement(announcement);
+  };
+
+  const handleCloseAnnouncementModal = () => {
+    setSelectedAnnouncement(null);
+  };
+
   return (
-    <Card sx={dashboardStyles.dashboardStatsCard}>
-      <CardContent sx={{ padding: "1rem" }}>
+    <Card sx={{ ...dashboardStyles.dashboardStatsCard, height: "100%", display: "flex", flexDirection: "column" }}>
+      <CardContent sx={{ padding: "1rem", flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
         {/* Header */}
         <Box
           sx={{
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            mb: 2,
+            mb: 1,
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
@@ -123,12 +117,14 @@ export const AnnouncementsInbox = () => {
             >
               {t("dashboard.announcementsInbox.title")}
             </AppText>
-            <Chip
-              label="New"
-              color="error"
-              size="small"
-              sx={{ fontSize: "0.625rem", height: 20 }}
-            />
+            {announcements.length > 0 && (
+              <Chip
+                label="New"
+                color="error"
+                size="small"
+                sx={{ fontSize: "0.625rem", height: 20 }}
+              />
+            )}
           </Box>
         </Box>
 
@@ -148,7 +144,7 @@ export const AnnouncementsInbox = () => {
           </Box>
         )}
 
-        {/* Announcements List - Height adapts to first announcement */}
+        {/* Announcements List */}
         {!isLoading && !error && (
           <Box
             sx={{
@@ -156,10 +152,9 @@ export const AnnouncementsInbox = () => {
               flexDirection: "column",
               flex: 1,
               minHeight: 0,
-              maxHeight: containerHeight || "auto",
-              overflowY: announcements.length > 1 ? "auto" : "hidden",
+              overflowY: "auto",
               overflowX: "hidden",
-              paddingRight: announcements.length > 1 ? 1 : 0,
+              paddingRight: 1,
               "&::-webkit-scrollbar": {
                 width: "8px",
               },
@@ -188,14 +183,20 @@ export const AnnouncementsInbox = () => {
                 </Typography>
               </Box>
             ) : (
-              announcements.map((announcement, index) => (
+              announcements.map((announcement) => (
                 <Box
                   key={announcement.id}
-                  ref={index === 0 ? firstAnnouncementRef : null}
+                  onClick={() => handleAnnouncementClick(announcement)}
                   sx={{
                     mb: 2,
                     pb: 2,
                     borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
+                    cursor: "pointer",
+                    borderRadius: 1,
+                    transition: "background-color 0.2s ease",
+                    "&:hover": {
+                      backgroundColor: "rgba(0, 0, 0, 0.04)",
+                    },
                     "&:last-child": {
                       borderBottom: "none",
                     },
@@ -210,35 +211,51 @@ export const AnnouncementsInbox = () => {
                       mb: 1,
                     }}
                   >
-                    <Chip
-                      label={getPriorityLabel(announcement.priority, t)}
-                      size="small"
+                    <Box
                       sx={{
-                        fontWeight: "bold",
-                        ...getPriorityStyles(announcement.priority),
+                        display: "flex",
+                        gap: 2,
                       }}
-                    />
-                    <Typography variant="caption" color="text.secondary">
+                    >
+                      <Chip
+                        label={getPriorityLabel(announcement.priority, t)}
+                        size="small"
+                        sx={{
+                          fontWeight: "bold",
+                          ...getPriorityStyles(announcement.priority),
+                        }}
+                      />
+                      {/* Title */}
+                      <Typography
+                        variant="subtitle2"
+                        fontWeight="bold"
+                        sx={{ mt: '0.2rem', textTransform: "uppercase" }}
+                      >
+                        {announcement.title}
+                      </Typography>
+                    </Box>
+                    <Typography variant="caption" color="text.secondary" sx={{
+                      mb: '-0.2rem'
+                    }}>
                       {formatDateTime(announcement.createdAt)}
                     </Typography>
                   </Box>
 
-                  {/* Title */}
-                  <Typography
-                    variant="subtitle2"
-                    fontWeight="bold"
-                    sx={{ mb: 1, textTransform: "uppercase" }}
-                  >
-                    {announcement.title}
-                  </Typography>
-
-                  {/* Content */}
+                  {/* Content Preview - Limited to 4 lines */}
                   <Box
                     sx={{
                       backgroundColor: "white",
                       p: 1.5,
                       borderRadius: 1,
                       border: "1px solid rgba(0, 0, 0, 0.12)",
+                      overflow: "hidden",
+                      "& .ProseMirror": {
+                        display: "-webkit-box",
+                        WebkitLineClamp: 4,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      },
                     }}
                   >
                     <TiptapReadOnly
@@ -246,34 +263,16 @@ export const AnnouncementsInbox = () => {
                       showErrorAlert={false}
                     />
                   </Box>
-                  {/* Attachments - Display as clickable attachment chips */}
-                  {announcement.attachments &&
-                    announcement.attachments.length > 0 && (
-                      <Box
-                        sx={{
-                          display: "flex",
-                          flexWrap: "wrap",
-                          gap: 0.5,
-                        }}
-                      >
-                        {announcement.attachments.map((attachment) => (
-                          <Chip
-                            key={attachment.id}
-                            icon={<AttachFile />}
-                            label={attachment.fileName}
-                            onClick={() => handleImageClick(attachment)}
-                            size="small"
-                            sx={{
-                              cursor: "pointer",
-                              mt: 1,
-                              "&:hover": {
-                                backgroundColor: "action.hover",
-                              },
-                            }}
-                          />
-                        ))}
-                      </Box>
-                    )}
+
+                  {/* Attachments indicator */}
+                  {announcement.attachments && announcement.attachments.length > 0 && (
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 1 }}>
+                      <AttachFile sx={{ fontSize: "0.875rem", color: "text.secondary" }} />
+                      <Typography variant="caption" color="text.secondary">
+                        {announcement.attachments.length} {t("common.attachments", "attachment(s)")}
+                      </Typography>
+                    </Box>
+                  )}
                 </Box>
               ))
             )}
@@ -281,18 +280,106 @@ export const AnnouncementsInbox = () => {
         )}
       </CardContent>
 
-      {/* Image Preview Dialog - Same as TicketDescriptionInfo */}
+      {/* Announcement Detail Modal */}
+      <Dialog
+        open={!!selectedAnnouncement}
+        onClose={handleCloseAnnouncementModal}
+        maxWidth="lg"
+        fullWidth
+        slotProps={{
+          paper: {
+            sx: modalCard?.dialogSection,
+          },
+        }}
+      >
+        {selectedAnnouncement && (
+          <>
+            <DialogTitle>
+              <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                <IconButton onClick={handleCloseAnnouncementModal} size="small">
+                  <CloseIcon />
+                </IconButton>
+              </Box>
+              <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 2 }}>
+                <Chip
+                  label={getPriorityLabel(selectedAnnouncement.priority, t)}
+                  size="small"
+                  sx={{
+                    fontWeight: "bold",
+                    ...getPriorityStyles(selectedAnnouncement.priority),
+                  }}
+                />
+                <Typography
+                  sx={{
+                    ...titlesTypography.primaryTitle,
+                  }}
+                >
+                  {selectedAnnouncement.title}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {formatDateTime(selectedAnnouncement.createdAt)}
+                </Typography>
+              </Box>
+            </DialogTitle>
+            <DialogContent dividers>
+              {/* Full Content */}
+              <Box
+                sx={{
+                  backgroundColor: colors.background || "#f9fafb",
+                  p: 2,
+                  borderRadius: "1rem",
+                  border: "1px solid rgba(0, 0, 0, 0.12)",
+                  mb: 2,
+                }}
+              >
+                <TiptapReadOnly
+                  content={selectedAnnouncement.content}
+                  showErrorAlert={false}
+                />
+              </Box>
+
+              {/* Attachments */}
+              {selectedAnnouncement.attachments && selectedAnnouncement.attachments.length > 0 && (
+                <Box>
+                  <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 1 }}>
+                    {t("tickets.ticketView.attachments", "Attachments")}
+                  </Typography>
+                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                    {selectedAnnouncement.attachments.map((attachment) => (
+                      <Chip
+                        key={attachment.id}
+                        icon={<AttachFile />}
+                        label={attachment.fileName}
+                        onClick={(e) => handleImageClick(e, attachment)}
+                        size="small"
+                        sx={{
+                          cursor: "pointer",
+                          "&:hover": {
+                            backgroundColor: "action.hover",
+                          },
+                        }}
+                      />
+                    ))}
+                  </Box>
+                </Box>
+              )}
+            </DialogContent>
+          </>
+        )}
+      </Dialog>
+
+      {/* Image Preview Dialog */}
       <Dialog
         open={!!selectedImage}
-        onClose={handleCloseDialog}
+        onClose={handleCloseImageDialog}
         maxWidth="lg"
         fullWidth
       >
-        <DialogActions sx={{ p: 1 }}>
-          <IconButton onClick={handleCloseDialog} size="small">
+        <DialogTitle sx={{ display: "flex", justifyContent: "flex-end", p: 1 }}>
+          <IconButton onClick={handleCloseImageDialog} size="small">
             <CloseIcon />
           </IconButton>
-        </DialogActions>
+        </DialogTitle>
         <DialogContent sx={{ p: 0 }}>
           {selectedImage && (
             <Box
