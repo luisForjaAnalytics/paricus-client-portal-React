@@ -1,31 +1,9 @@
-import React, { useState, useEffect, useRef } from "react";
-import {
-  Box,
-  Container,
-  Typography,
-  Button,
-  Paper,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  Grid,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  CircularProgress,
-  Snackbar,
-  Alert,
-  IconButton,
-  Stack,
-} from "@mui/material";
+import { useState, useEffect } from "react";
+import { Box } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import { Add as AddIcon, Close as CloseIcon } from "@mui/icons-material";
 import { ClientFolders } from "./components/ClientFolders";
-import { ManageAccessModal } from "./components/ManageAccessModal";
 import {
   useGetClientFoldersQuery,
-  useGetClientReportsQuery,
   useLazyGetClientReportsQuery,
   useUploadReportMutation,
   useLazyDownloadReportQuery,
@@ -37,19 +15,21 @@ import {
 } from "../../store/api/reportsApi";
 import { useCreateLogMutation } from "../../store/api/logsApi";
 import { useSelector } from "react-redux";
-import {
-  primaryButton,
-  primaryIconButton,
-  outlinedButton,
-  outlinedIconButton,
-  typography,
-} from "../../common/styles/styles";
+import { boxTypography } from "../../common/styles/styles";
 import { HeaderBoxTypography } from "../../common/components/ui/HeaderBoxTypography/HeaderBoxTypography";
+import { AlertInline } from "../../common/components/ui/AlertInline";
+import { extractApiError } from "../../common/utils/apiHelpers";
+import { useNotification } from "../../common/hooks";
+import {
+  formatDateTime as formatDateTimeUtil,
+  formatFileSize as formatFileSizeUtil,
+} from "../../common/utils/formatters";
 
 export const ReportsManagementView = () => {
   const { t } = useTranslation();
   const authUser = useSelector((state) => state.auth.user);
   const [createLog] = useCreateLogMutation();
+  const { notificationRef, showNotification } = useNotification();
 
   // RTK Query hooks
   const {
@@ -136,7 +116,6 @@ export const ReportsManagementView = () => {
 
   // State
   const [showUploadModal, setShowUploadModal] = useState(null); // Changed to store folder name
-  const [notification, setNotification] = useState(null);
   const [accessForm, setAccessForm] = useState({
     clientId: "",
     folderName: "",
@@ -176,17 +155,14 @@ export const ReportsManagementView = () => {
 
       await uploadReport({ folder: showUploadModal, formData }).unwrap();
 
-      showNotification("success", t("reportsManagement.upload.uploadSuccess"));
+      showNotification(t("reportsManagement.upload.uploadSuccess"), "success");
       setShowUploadModal(null);
       resetUploadForm();
 
       // Refetch reports for this folder
       await fetchReportsForFolder(showUploadModal);
     } catch (error) {
-      showNotification(
-        "error",
-        error.data?.message || t("reportsManagement.upload.uploadError"),
-      );
+      showNotification(extractApiError(error, t("reportsManagement.upload.uploadError")), "error");
     }
   };
 
@@ -215,10 +191,7 @@ export const ReportsManagementView = () => {
         }
       }
     } catch (error) {
-      showNotification(
-        "error",
-        error.data?.message || t("reportsManagement.upload.downloadError"),
-      );
+      showNotification(extractApiError(error, t("reportsManagement.upload.downloadError")), "error");
 
       // Log failed download
       try {
@@ -275,55 +248,16 @@ export const ReportsManagementView = () => {
     }
   };
 
-  const formatFileSize = (bytes) => {
-    try {
-      if (bytes === 0) return `0 ${t("reportsManagement.fileSize.bytes")}`;
-      const k = 1024;
-      const sizes = [
-        t("reportsManagement.fileSize.bytes"),
-        t("reportsManagement.fileSize.kb"),
-        t("reportsManagement.fileSize.mb"),
-        t("reportsManagement.fileSize.gb"),
-      ];
-      const i = Math.floor(Math.log(bytes) / Math.log(k));
-      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-    } catch (err) {
-      console.error(`ERROR formatFileSize: ${err}`);
-      return `0 ${t("reportsManagement.fileSize.bytes")}`;
-    }
-  };
+  const locale = t("common.locale") || "en-US";
+  const fileSizeLabels = [
+    t("reportsManagement.fileSize.bytes"),
+    t("reportsManagement.fileSize.kb"),
+    t("reportsManagement.fileSize.mb"),
+    t("reportsManagement.fileSize.gb"),
+  ];
+  const formatFileSize = (bytes) => formatFileSizeUtil(bytes, fileSizeLabels);
+  const formatDate = (dateString) => formatDateTimeUtil(dateString, locale);
 
-  const formatDate = (dateString) => {
-    try {
-      const locale = t("common.locale") || "en-US";
-      return new Date(dateString).toLocaleDateString(locale, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-    } catch (err) {
-      console.error(`ERROR formatDate: ${err}`);
-      return t("reportsManagement.invalidDate");
-    }
-  };
-
-  const showNotification = (type, message) => {
-    try {
-      setNotification({ type, message });
-    } catch (err) {
-      console.error(`ERROR showNotification: ${err}`);
-    }
-  };
-
-  const handleCloseNotification = () => {
-    try {
-      setNotification(null);
-    } catch (err) {
-      console.error(`ERROR handleCloseNotification: ${err}`);
-    }
-  };
 
   // Folder access management functions
   // const handleGrantFolderAccess = async () => {
@@ -379,11 +313,12 @@ export const ReportsManagementView = () => {
   };
 
   return (
-    <Container maxWidth="100%" sx={{ py: 4 }}>
+    <Box sx={boxTypography.box}>
       {/* Page Header */}
       <HeaderBoxTypography text={t("reportsManagement.title")} />
+
+      {/* Client Folders Section with Expandable Reports */}
       <Box>
-        {/* Client Folders Section with Expandable Reports */}
         <ClientFolders
           clientFolders={clientFolders}
           loading={loading}
@@ -408,39 +343,10 @@ export const ReportsManagementView = () => {
         />
       </Box>
 
-      {/* Folder Access Management Modal */}
-      {/* <ManageAccessModal
-        showFolderAccessModal={showFolderAccessModal}
-        setShowFolderAccessModal={setShowFolderAccessModal}
-        accessForm={accessForm}
-        setAccessForm={setAccessForm}
-        clients={clients}
-        clientFolders={clientFolders}
-        handleGrantFolderAccess={handleGrantFolderAccess}
-        grantingAccess={grantingAccess}
-        loadingAccess={loadingAccess}
-        folderAccess={folderAccess}
-        handleRevokeFolderAccess={handleRevokeFolderAccess}
-      /> */}
-
-      {/* Notification Snackbar */}
-      <Snackbar
-        open={!!notification}
-        autoHideDuration={5000}
-        onClose={handleCloseNotification}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-      >
-        <Alert
-          onClose={handleCloseNotification}
-          severity={notification?.type}
-          variant="filled"
-          sx={{ width: "100%" }}
-        >
-          {notification?.message}
-        </Alert>
-      </Snackbar>
-    </Container>
+      {/* Snackbar para notificaciones */}
+      <AlertInline ref={notificationRef} asSnackbar />
+    </Box>
   );
 };
 
-export default ReportsManagementView;
+

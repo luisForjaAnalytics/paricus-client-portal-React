@@ -4,19 +4,13 @@ import {
   DialogContent,
   DialogTitle,
   TextField,
-  Button,
-  IconButton,
   Box,
   Typography,
-  Snackbar,
-  Alert,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
-  Grid,
 } from "@mui/material";
-import { Close as CloseIcon } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import {
   modalCard,
@@ -25,6 +19,7 @@ import {
 } from "../../../../common/styles/styles";
 import { ActionButton } from "../../../../common/components/ui/ActionButton/ActionButton";
 import { CancelButton } from "../../../../common/components/ui/CancelButton/CancelButton";
+import { AlertInline } from "../../../../common/components/ui/AlertInline";
 
 export const AddNewUserModal = ({
   dialog,
@@ -35,8 +30,7 @@ export const AddNewUserModal = ({
   saveUser,
   saving,
   isFormValid,
-  notification,
-  handleCloseNotification,
+  notificationRef,
   clientOptions,
   roleOptions,
   isBPOAdmin,
@@ -211,20 +205,7 @@ export const AddNewUserModal = ({
       </Dialog>
 
       {/* Notifications */}
-      <Snackbar
-        open={notification.open}
-        autoHideDuration={6000}
-        onClose={handleCloseNotification}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-      >
-        <Alert
-          onClose={handleCloseNotification}
-          severity={notification.severity}
-          variant="filled"
-        >
-          {notification.message}
-        </Alert>
-      </Snackbar>
+      <AlertInline ref={notificationRef} asSnackbar />
     </>
   );
 };

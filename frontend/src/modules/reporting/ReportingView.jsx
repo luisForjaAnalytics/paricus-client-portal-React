@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Box,
   Button,
@@ -8,11 +8,10 @@ import {
   Grid,
   IconButton,
   Paper,
-  Snackbar,
-  Alert,
   Typography,
-  Divider
 } from '@mui/material';
+import { AlertInline } from '../../common/components/ui/AlertInline';
+import { useNotification } from '../../common/hooks';
 import { useTranslation } from 'react-i18next';
 import {
   Refresh as RefreshIcon,
@@ -33,6 +32,11 @@ import {
   outlinedIconButton,
   typography,
 } from '../../common/styles/styles';
+import {
+  slugToTitle,
+  formatFileSize,
+  formatDate,
+} from '../../common/utils/formatters';
 
 // Component to display a single folder's reports using RTK Query
 const FolderReportsSection = ({ folder, downloadReport }) => {
@@ -43,28 +47,7 @@ const FolderReportsSection = ({ folder, downloadReport }) => {
     refetch
   } = useGetClientReportsQuery(folder);
 
-  const formatFolderName = (folderName) => {
-    return folderName
-      .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-  };
-
-  const formatFileSize = (bytes) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
-
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
+  const DATE_SHORT_OPTIONS = { year: 'numeric', month: 'short', day: 'numeric' };
 
   return (
     <Paper variant="outlined" sx={{ p: 2 }}>
@@ -72,7 +55,7 @@ const FolderReportsSection = ({ folder, downloadReport }) => {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <FolderIcon color="primary" />
           <Typography variant="h6" component="h3">
-            {formatFolderName(folder)}
+            {slugToTitle(folder)}
           </Typography>
         </Box>
         <Button
@@ -123,7 +106,7 @@ const FolderReportsSection = ({ folder, downloadReport }) => {
                       {formatFileSize(report.size)}
                     </Typography>
                     <Typography variant="caption" color="text.disabled" display="block">
-                      {formatDate(report.lastModified)}
+                      {formatDate(report.lastModified, 'en-US', DATE_SHORT_OPTIONS)}
                     </Typography>
                   </Box>
                   <IconButton size="small" color="primary">
@@ -158,12 +141,7 @@ export const ReportingView = () => {
 
   const [getDownloadUrl] = useLazyDownloadReportQuery();
 
-  // Snackbar state
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: '',
-    severity: 'success'
-  });
+  const { notificationRef, showNotification } = useNotification();
 
   // Derived error message
   const error = apiError?.data?.message || apiError?.error || '';
@@ -187,17 +165,6 @@ export const ReportingView = () => {
     }
   };
 
-  const showNotification = (message, severity = 'success') => {
-    setSnackbar({
-      open: true,
-      message,
-      severity
-    });
-  };
-
-  const handleCloseSnackbar = () => {
-    setSnackbar({ ...snackbar, open: false });
-  };
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -312,17 +279,8 @@ export const ReportingView = () => {
         </CardContent>
       </Card>
 
-      {/* Snackbar Notifications */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={5000}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-      >
-        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
+      {/* Snackbar for notifications */}
+      <AlertInline ref={notificationRef} asSnackbar />
     </Box>
   );
 };

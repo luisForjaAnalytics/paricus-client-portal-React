@@ -2,7 +2,7 @@ import { Box, Typography, Avatar } from "@mui/material";
 import { AlertInline } from "../../../../../common/components/ui/AlertInline";
 import { useTranslation } from "react-i18next";
 import { formatDateTime } from "../../../../../common/utils/formatDateTime";
-import { ticketStyle, colors } from "../../../../../common/styles/styles";
+import { ticketStyle, colors, scrollableContainer } from "../../../../../common/styles/styles";
 import { TicketText } from "../../../../../common/components/ui/TicketText";
 import { TiptapReadOnly } from "../../../../../common/components/ui/TiptapReadOnly/TiptapReadOnly";
 import { DetailAttachmentsView } from "./DetailAttachmentsView";
@@ -36,22 +36,7 @@ export const TicketHistoricalInfo = ({ ticket }) => {
         flex: 1,
         minHeight: 0,
         width: "100%",
-        overflowY: "auto",
-        overflowX: "hidden",
-        paddingRight: 1,
-        "&::-webkit-scrollbar": {
-          width: "8px",
-        },
-        "&::-webkit-scrollbar-track": {
-          backgroundColor: "transparent",
-        },
-        "&::-webkit-scrollbar-thumb": {
-          backgroundColor: "#888",
-          borderRadius: "4px",
-          "&:hover": {
-            backgroundColor: "#555",
-          },
-        },
+        ...scrollableContainer,
       }}
     >
       {details.length === 0 ? (
@@ -75,31 +60,51 @@ export const TicketHistoricalInfo = ({ ticket }) => {
             // Validate timestamp
             const timestamp = item.timestamp || item.createdAt || new Date();
 
-            // Safely get user information
-            const userName = ticket?.user
-              ? `${ticket.user.firstName || ""} ${
-                  ticket.user.lastName || ""
+            // Safely get user information - use comment author if available, fallback to ticket creator
+            const commentUser = item.createdBy || ticket?.user;
+            const userName = commentUser
+              ? `${commentUser.firstName || ""} ${
+                  commentUser.lastName || ""
                 }`.trim()
               : "Unknown User";
+            const userEmail = commentUser?.email || "";
 
             return (
               <Box
                 key={item.id || index}
                 sx={ticketStyle.historicalContainerTitleDate}
               >
-                <Box display="flex" flexDirection="row" gap={1}>
+                <Box
+                  display="flex"
+                  flexDirection="row"
+                  gap={1}
+                  alignItems="center"
+                >
                   <GetInitialsAvatar
                     userName={userName}
                     variantStyle={"bold"}
                   />
-                  {/* <TicketText variant="bold">{`${userName} /`}</TicketText> */}
+                  <Box display="flex" flexDirection="column">
+                    <Box
+                      display="flex"
+                      flexDirection="row"
+                      gap={0.5}
+                      alignItems="center"
+                    >
+                      {/* <TicketText variant="bold">{userName}</TicketText> */}
+                      {userEmail && (
+                        <TicketText
+                          sx={{ fontSize: "0.75rem", color: "text.secondary" }}
+                        >
+                          {` / ${userEmail}`}
+                        </TicketText>
+                      )}
+                    </Box>
+                  </Box>
                   <TicketText
-                    sx={{
-                      marginTop: "0.4rem",
-                    }}
+                    sx={{ fontSize: "0.75rem", color: "text.secondary" }}
                   >
-                    {" "}
-                    / {formatDateTime(timestamp)}
+                    {formatDateTime(timestamp)}
                   </TicketText>
                 </Box>
                 <Box sx={ticketStyle.historicalDescriptionBox}>

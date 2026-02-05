@@ -15,36 +15,16 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
 import DescriptionIcon from "@mui/icons-material/Description";
 import { useTicketAttachments } from "../../../../../common/hooks/useTicketAttachments";
-import { ticketStyle } from "../../../../../common/styles/styles";
-import { useState } from "react";
+import { ticketStyle, imagePreview } from "../../../../../common/styles/styles";
+import { getAttachmentUrl } from "../../../../../common/utils/getAttachmentUrl";
+import { useModal } from "../../../../../common/hooks";
 
 export const TicketDescriptionInfo = ({ ticket }) => {
   const { t } = useTranslation();
   const token = useSelector((state) => state.auth?.token);
-
-  const [selectedImage, setSelectedImage] = useState(null);
+  const imageModal = useModal();
 
   const { handleDelete, isDeleting } = useTicketAttachments(ticket?.id);
-
-  const getImageUrl = (attachment) => {
-    try {
-      if (!attachment?.url || !token) return null;
-      const baseUrl = import.meta.env.VITE_API_URL.replace("/api", "");
-      const fullUrl = `${baseUrl}${attachment.url}`;
-      return `${fullUrl}?token=${encodeURIComponent(token)}`;
-    } catch (error) {
-      console.error("Error building image URL:", error);
-      return null;
-    }
-  };
-
-  const handleImageClick = (attachment) => {
-    setSelectedImage(attachment);
-  };
-
-  const handleCloseDialog = () => {
-    setSelectedImage(null);
-  };
 
   if (!ticket || !ticket.description) {
     return (
@@ -101,7 +81,7 @@ export const TicketDescriptionInfo = ({ ticket }) => {
                   key={attachment.id}
                   icon={<AttachFileIcon />}
                   label={attachment.fileName}
-                  onClick={() => handleImageClick(attachment)}
+                  onClick={() => imageModal.open(attachment)}
                   onDelete={() => handleDelete(attachment.id)}
                   deleteIcon={<DeleteIcon />}
                   disabled={isDeleting}
@@ -120,29 +100,24 @@ export const TicketDescriptionInfo = ({ ticket }) => {
       </Box>
 
       <Dialog
-        open={!!selectedImage}
-        onClose={handleCloseDialog}
+        open={imageModal.isOpen}
+        onClose={imageModal.close}
         maxWidth="lg"
         fullWidth
       >
         <DialogActions sx={{ p: 1 }}>
-          <IconButton onClick={handleCloseDialog} size="small">
+          <IconButton onClick={imageModal.close} size="small">
             <CloseIcon />
           </IconButton>
         </DialogActions>
 
         <DialogContent sx={{ p: 0 }}>
-          {selectedImage && (
+          {imageModal.data && (
             <Box
               component="img"
-              src={getImageUrl(selectedImage)}
-              alt={selectedImage.fileName}
-              sx={{
-                width: "100%",
-                height: "auto",
-                maxHeight: "80vh",
-                objectFit: "contain",
-              }}
+              src={getAttachmentUrl(imageModal.data, token)}
+              alt={imageModal.data.fileName}
+              sx={imagePreview}
             />
           )}
         </DialogContent>

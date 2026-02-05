@@ -75,7 +75,7 @@ export const TableViewMobil = ({
   );
 
   return (
-    <Box sx={{ display: { xs: "block", md: "none" }, width: "100%", px: 2 }}>
+    <Box sx={{ display: { xs: "block", md: "none" }, width: "100%" }}>
       <UniversalMobilDataTable
         rows={rows}
         columns={columns}

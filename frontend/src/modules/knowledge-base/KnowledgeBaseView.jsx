@@ -21,5 +21,3 @@ export const KnowledgeBaseView = () => {
     </Box>
   );
 };
-
-export default KnowledgeBaseView;

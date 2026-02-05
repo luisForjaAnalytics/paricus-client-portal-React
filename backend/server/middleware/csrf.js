@@ -49,7 +49,16 @@ export const validateCSRFToken = (req, res, next) => {
   }
 
   // Skip CSRF for specific endpoints that don't need it
-  const skipPaths = ['/api/auth/login', '/api/errors'];
+  // Note: JWT-authenticated endpoints don't need CSRF protection since
+  // the token must be explicitly included in headers (not auto-sent like cookies)
+  const skipPaths = [
+    '/api/auth/login',
+    '/api/errors',
+    '/api/admin/roles',     // JWT protected
+    '/api/admin/users',     // JWT protected
+    '/api/admin/clients',   // JWT protected
+    '/api/admin/permissions', // JWT protected
+  ];
   if (skipPaths.some(path => req.path.startsWith(path))) {
     return next();
   }

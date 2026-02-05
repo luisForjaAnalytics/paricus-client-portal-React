@@ -24,6 +24,7 @@ import {
 } from "../../../../common/styles/styles";
 import { ActionButton } from "../../../../common/components/ui/ActionButton/ActionButton";
 import { CancelButton } from "../../../../common/components/ui/CancelButton/CancelButton";
+import { extractApiError } from "../../../../common/utils/apiHelpers";
 
 export const PendingLinkModal = ({ invoice, onSuccess, onError }) => {
   const { t } = useTranslation();
@@ -73,9 +74,6 @@ export const PendingLinkModal = ({ invoice, onSuccess, onError }) => {
       handleClose();
     } catch (err) {
       console.error("Error saving payment link:", err);
-      const errorMessage =
-        err.data?.message || t("invoices.paymentLink.errorMessage");
-
       // Log the failed payment link save
       try {
         await createLog({
@@ -90,7 +88,7 @@ export const PendingLinkModal = ({ invoice, onSuccess, onError }) => {
       }
 
       if (onError) {
-        onError(errorMessage);
+        onError(extractApiError(err, t("invoices.paymentLink.errorMessage")));
       }
     }
   };

@@ -1,0 +1,1 @@
+export { FinancialsContent } from "./FinancialsContent";

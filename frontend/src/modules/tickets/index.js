@@ -9,4 +9,3 @@ export { TicketsViewMobil } from './components/TicketsViewMobil';
 export { CreateTickeButton } from './components/CreateTicketButton';
 export { TicketAdvancedFilters } from './components/AdvancedFilters';
 export { TicketViewDetails } from './components/TicketViewDetails';
-export { TicketsCenter } from './components/TicketsCenter/TicketsCenter';

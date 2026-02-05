@@ -5,13 +5,10 @@ import {
   DialogTitle,
   TextField,
   Button,
-  IconButton,
   Box,
   Typography,
   Checkbox,
   FormControlLabel,
-  Snackbar,
-  Alert,
 } from "@mui/material";
 import { Close as CloseIcon } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
@@ -23,12 +20,12 @@ import {
 } from "../../../../common/styles/styles";
 import { ActionButton } from "../../../../common/components/ui/ActionButton/ActionButton";
 import { CancelButton } from "../../../../common/components/ui/CancelButton/CancelButton";
+import { AlertInline } from "../../../../common/components/ui/AlertInline";
 
 export const AddNewClientModal = ({
   editingClient,
   showCreateDialog,
   showConfirmDialog,
-  handleCloseSnackbar,
   handleSave,
   handleCloseDialog,
   clientForm,
@@ -36,7 +33,7 @@ export const AddNewClientModal = ({
   isFormValid,
   clientToDeactivate,
   confirmDeactivation,
-  snackbar,
+  notificationRef,
   setClientForm,
   setShowConfirmDialog
 }) => {
@@ -171,20 +168,7 @@ export const AddNewClientModal = ({
       </Dialog>
 
       {/* Snackbar Notifications */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-      >
-        <Alert
-          onClose={handleCloseSnackbar}
-          severity={snackbar.severity}
-          sx={{ width: "100%" }}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
+      <AlertInline ref={notificationRef} asSnackbar />
     </>
   );
 };

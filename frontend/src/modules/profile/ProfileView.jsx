@@ -5,13 +5,10 @@ import {
   Card,
   CardContent,
   CardHeader,
-  Divider,
   Grid,
   TextField,
   Typography,
   Avatar,
-  Snackbar,
-  Alert
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import {
@@ -23,6 +20,9 @@ import {
   outlinedButton,
   typography,
 } from '../../common/styles/styles';
+import { extractApiError } from '../../common/utils/apiHelpers';
+import { useNotification } from '../../common/hooks';
+import { AlertInline } from '../../common/components/ui/AlertInline';
 
 export const ProfileView = ({ authStore }) => {
   const { t } = useTranslation();
@@ -46,12 +46,8 @@ export const ProfileView = ({ authStore }) => {
     confirmPassword: ''
   });
 
-  // Snackbar state
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: '',
-    severity: 'success'
-  });
+  // Notification hook
+  const { notificationRef, showNotification } = useNotification();
 
   // Initialize form with user data
   useEffect(() => {
@@ -84,15 +80,7 @@ export const ProfileView = ({ authStore }) => {
   };
 
   const showMessage = (msg, severity = 'success') => {
-    setSnackbar({
-      open: true,
-      message: msg,
-      severity
-    });
-  };
-
-  const handleCloseSnackbar = () => {
-    setSnackbar({ ...snackbar, open: false });
+    showNotification(msg, severity);
   };
 
   const saveProfile = async () => {
@@ -110,7 +98,7 @@ export const ProfileView = ({ authStore }) => {
 
       showMessage(t('profile.profileUpdated'), 'success');
     } catch (error) {
-      showMessage(error.data?.error || t('profile.profileUpdateFailed'), 'error');
+      showMessage(extractApiError(error, t('profile.profileUpdateFailed')), 'error');
     }
   };
 
@@ -132,7 +120,7 @@ export const ProfileView = ({ authStore }) => {
 
       showMessage(t('profile.passwordUpdated'), 'success');
     } catch (error) {
-      showMessage(error.data?.error || t('profile.passwordUpdateFailed'), 'error');
+      showMessage(extractApiError(error, t('profile.passwordUpdateFailed')), 'error');
     }
   };
 
@@ -303,17 +291,8 @@ export const ProfileView = ({ authStore }) => {
         </CardContent>
       </Card>
 
-      {/* Snackbar Notifications */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={5000}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-      >
-        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
+      {/* Notifications */}
+      <AlertInline ref={notificationRef} asSnackbar />
     </Box>
   );
 };

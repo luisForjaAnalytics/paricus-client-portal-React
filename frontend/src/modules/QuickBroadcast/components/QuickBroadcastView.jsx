@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import {
   Box,
   Button,
@@ -35,7 +35,9 @@ import {
 } from "../../../common/styles/styles";
 import { SelectMenuItem } from "../../../common/components/ui/SelectMenuItem/SelectMenuItem";
 import { priorityOptions } from "./options";
-import { SuccessErrorSnackbar } from "../../../common/components/ui/SuccessErrorSnackbar/SuccessErrorSnackbar";
+import { AlertInline } from "../../../common/components/ui/AlertInline";
+import { extractApiError } from "../../../common/utils/apiHelpers";
+import { useNotification } from "../../../common/hooks";
 
 // Compact selector styles for Quick Broadcast
 const compactSelector = {
@@ -89,8 +91,8 @@ export const QuickBroadcastView = () => {
   const [attachments, setAttachments] = useState([]);
   const [sending, setSending] = useState(false);
 
-  // Snackbar ref for notifications
-  const snackbarRef = useRef();
+  // Notification hook
+  const { notificationRef, showSuccess, showError } = useNotification();
 
   // Get clients from API
   const { data: clients = [], isLoading: loadingClients } =
@@ -137,18 +139,18 @@ export const QuickBroadcastView = () => {
   const handleSubmit = async () => {
     // Validation
     if (!subject.trim()) {
-      snackbarRef.current?.showError(t("quickBroadcast.emptySubject"));
+      showError(t("quickBroadcast.emptySubject"));
       return;
     }
 
     const textContent = content.replace(/<[^>]*>/g, "").trim();
     if (!textContent) {
-      snackbarRef.current?.showError(t("quickBroadcast.emptyMessage"));
+      showError(t("quickBroadcast.emptyMessage"));
       return;
     }
 
     if (selectedClients.length === 0) {
-      snackbarRef.current?.showError(t("quickBroadcast.noClientsSelected"));
+      showError(t("quickBroadcast.noClientsSelected"));
       return;
     }
 
@@ -191,7 +193,7 @@ export const QuickBroadcastView = () => {
         }
       }
 
-      snackbarRef.current?.showSuccess(t("quickBroadcast.success"));
+      showSuccess(t("quickBroadcast.success"));
       setSubject("");
       setContent("");
       setSelectedClients([]);
@@ -199,9 +201,7 @@ export const QuickBroadcastView = () => {
       setAttachments([]);
     } catch (err) {
       console.error("Error creating announcement:", err);
-      snackbarRef.current?.showError(
-        err?.data?.error || t("quickBroadcast.error"),
-      );
+      showError(extractApiError(err, t("quickBroadcast.error")));
     } finally {
       setSending(false);
     }
@@ -495,7 +495,7 @@ export const QuickBroadcastView = () => {
       </CardContent>
 
       {/* Success/Error Snackbar */}
-      <SuccessErrorSnackbar ref={snackbarRef} />
+      <AlertInline ref={notificationRef} asSnackbar />
     </Card>
   );
 };

@@ -44,6 +44,7 @@ export const QuickFiltersMobile = ({
   totalCount = 0,
   onPageChange,
   onPageSizeChange,
+  hideHeader = false,
 }) => {
   const { t } = useTranslation();
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -67,29 +68,12 @@ export const QuickFiltersMobile = ({
     onPageChange(1);
   };
 
-  // Column definitions for accordion table
+  // Column definitions for expanded dropdown content
   const columns = useMemo(
     () => [
       {
         field: "interaction_id",
         headerName: t("audioRecordings.table.interactionId"),
-        labelWidth: 120,
-      },
-      {
-        field: "call_type",
-        headerName: t("audioRecordings.table.callType"),
-        labelWidth: 120,
-        renderCell: ({ value }) => (
-          <Chip
-            label={value || t("audioRecordings.table.unknown")}
-            size="small"
-            color={value ? "primary" : "default"}
-          />
-        ),
-      },
-      {
-        field: "start_time_formatted",
-        headerName: t("audioRecordings.table.startTime"),
         labelWidth: 120,
       },
       {
@@ -204,17 +188,34 @@ export const QuickFiltersMobile = ({
   };
 
   return (
-    <Box sx={{ display: { xs: "block", md: "none" }, px: 2 }}>
+    <Box sx={{ display: { xs: "block", md: "none" } }}>
       {/* Accordion Table */}
       <UniversalMobilDataTable
         rows={rows}
         columns={columns}
-        primaryField="companyName"
+        primaryField={(row) => (
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 0.25 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <Chip
+                label={row.call_type || t("audioRecordings.table.unknown")}
+                size="small"
+                variant="outlined"
+                sx={{
+                  borderColor: colors.primary,
+                  color: colors.primary,
+                }}
+              />
+              <Typography variant="caption" color="text.secondary">
+                {row.start_time_formatted}
+              </Typography>
+            </Box>
+          </Box>
+        )}
         primaryIcon={<HeadsetIcon fontSize="small" color="primary" />}
-        secondaryField={(row) => `ID: ${row.interaction_id}`}
-        showTitle={true}
-        titleField={(row) => `${row.companyName} - ${row.interaction_id}`}
-        headerTitle={t("audioRecordings.table.company")}
+        secondaryField={null}
+        showTitle={false}
+        headerTitle={t("audioRecordings.table.callRecordings", "Call Recordings")}
+        hideHeader={hideHeader}
         loading={loading}
         emptyMessage={t("audioRecordings.noRecordingsFound")}
         renderActions={renderActions}
@@ -272,4 +273,5 @@ QuickFiltersMobile.propTypes = {
   totalCount: PropTypes.number,
   onPageChange: PropTypes.func.isRequired,
   onPageSizeChange: PropTypes.func.isRequired,
+  hideHeader: PropTypes.bool,
 };

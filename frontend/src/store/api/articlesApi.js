@@ -6,7 +6,7 @@ const ALL_KB_PREFIXES = ["PA_US_1", "PA_US_2", "PA_US_3", "PA_US_4"];
 export const articlesApi = createApi({
   reducerPath: "articlesApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "https://api.test.intranet.paricus.com/api/v1/external",
+    baseUrl: `${import.meta.env.VITE_INTRANET_API_URL}`,
     prepareHeaders: (headers) => {
       // API Key para autenticación externa
       headers.set("X-API-Key", `${import.meta.env.VITE_API_KEY}`);

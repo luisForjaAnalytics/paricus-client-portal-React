@@ -5,17 +5,13 @@ import {
   DialogTitle,
   TextField,
   Button,
-  IconButton,
   Box,
   Typography,
-  Snackbar,
-  Alert,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
 } from "@mui/material";
-import { Close as CloseIcon } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import {
   primaryButton,
@@ -35,8 +31,6 @@ export const AddNewRoleModal = ({
   saveRole,
   isSaving,
   isFormValid,
-  snackbar,
-  handleCloseSnackbar,
   clients,
   isBPOAdmin,
   isProtectedRole,
@@ -205,22 +199,6 @@ export const AddNewRoleModal = ({
           </Button>
         </DialogActions>
       </Dialog>
-
-      {/* Snackbar Notifications */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={snackbar.severity === "success" ? 3000 : 5000}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-      >
-        <Alert
-          onClose={handleCloseSnackbar}
-          severity={snackbar.severity}
-          sx={{ width: "100%" }}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
     </>
   );
 };

@@ -83,6 +83,7 @@ export const useUsersTableConfig = ({
       <Chip
         label={isActive ? t("users.table.active") : t("users.table.inactive")}
         color={isActive ? "success" : "error"}
+        variant="outlined"
         size="small"
       />
     ),

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import PropTypes from "prop-types";
 import {
   Box,
   IconButton,
@@ -11,6 +12,7 @@ import {
   Skeleton,
 } from "@mui/material";
 import { AlertInline } from "../../../../../common/components/ui/AlertInline";
+import { useNotification } from "../../../../../common/hooks";
 import {
   Delete as DeleteIcon,
   Close as CloseIcon,
@@ -23,6 +25,8 @@ import {
 } from "@mui/icons-material";
 import { useTicketAttachments } from "../../../../../common/hooks/useTicketAttachments";
 import { useLazyGetAttachmentUrlQuery } from "../../../../../store/api/ticketsApi";
+import { logger } from "../../../../../common/utils/logger";
+import { imagePreview } from "../../../../../common/styles/styles";
 
 // Helper function to get file icon based on mime type
 const getFileIcon = (mimeType) => {
@@ -53,7 +57,7 @@ const getFileIcon = (mimeType) => {
         return <FileIcon sx={{ fontSize: 60, color: "#999" }} />;
     }
   } catch (error) {
-    console.error('Error getting file icon:', error);
+    logger.error('Error getting file icon:', error);
     return <FileIcon sx={{ fontSize: 60, color: "#999" }} />;
   }
 };
@@ -63,7 +67,7 @@ const isImageFile = (mimeType) => {
   try {
     return mimeType?.startsWith('image/') || false;
   } catch (error) {
-    console.error('Error checking if file is image:', error);
+    logger.error('Error checking if file is image:', error);
     return false;
   }
 };
@@ -95,7 +99,7 @@ const AttachmentThumbnail = ({ attachment, ticketId }) => {
         setThumbnailUrl(url);
         setLoading(false);
       } catch (err) {
-        console.error('Error loading thumbnail:', err);
+        logger.error('Error loading thumbnail:', err);
         setError(true);
         setLoading(false);
       }
@@ -171,6 +175,8 @@ const AttachmentThumbnail = ({ attachment, ticketId }) => {
 };
 
 export const TicketAttachments = ({ ticket }) => {
+  const { notificationRef, showSuccess, showError } = useNotification();
+
   const {
     isDeleting,
     selectedImage,
@@ -179,7 +185,10 @@ export const TicketAttachments = ({ ticket }) => {
     handleDelete,
     handleImageClick,
     handleCloseDialog,
-  } = useTicketAttachments(ticket?.id, ticket?.attachments || []);
+  } = useTicketAttachments(ticket?.id, ticket?.attachments || [], {
+    onError: (msg) => showError(msg),
+    onSuccess: (msg) => showSuccess(msg),
+  });
 
   const attachments = ticket?.attachments || [];
 
@@ -187,7 +196,7 @@ export const TicketAttachments = ({ ticket }) => {
   const handleAttachmentClick = async (attachment) => {
     try {
       if (!attachment || !ticket) {
-        console.error('Missing attachment or ticket data');
+        logger.error('Missing attachment or ticket data');
         return;
       }
 
@@ -200,8 +209,8 @@ export const TicketAttachments = ({ ticket }) => {
         window.open(url, '_blank');
       }
     } catch (error) {
-      console.error('Error handling attachment click:', error);
-      alert('Failed to open file. Please try again.');
+      logger.error('Error handling attachment click:', error);
+      showError('Failed to open file. Please try again.');
     }
   };
 
@@ -274,16 +283,28 @@ export const TicketAttachments = ({ ticket }) => {
               component="img"
               src={imageUrl}
               alt={selectedImage?.fileName}
-              sx={{
-                width: "100%",
-                height: "auto",
-                maxHeight: "80vh",
-                objectFit: "contain",
-              }}
+              sx={imagePreview}
             />
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Snackbar for notifications */}
+      <AlertInline ref={notificationRef} asSnackbar />
     </>
   );
+};
+
+TicketAttachments.propTypes = {
+  ticket: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    attachments: PropTypes.arrayOf(
+      PropTypes.shape({
+        id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+        fileName: PropTypes.string,
+        fileSize: PropTypes.number,
+        mimeType: PropTypes.string,
+      })
+    ),
+  }),
 };

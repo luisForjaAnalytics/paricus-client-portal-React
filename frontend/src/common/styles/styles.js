@@ -197,6 +197,38 @@ export const layout = {
 };
 
 // ========================================
+// COMMON LAYOUT STYLES
+// ========================================
+
+// Scrollbar styling for scrollable containers (transparent track variant)
+export const scrollableContainer = {
+  overflowY: "auto",
+  overflowX: "hidden",
+  paddingRight: 1,
+  "&::-webkit-scrollbar": {
+    width: "8px",
+  },
+  "&::-webkit-scrollbar-track": {
+    backgroundColor: "transparent",
+  },
+  "&::-webkit-scrollbar-thumb": {
+    backgroundColor: "#888",
+    borderRadius: "4px",
+    "&:hover": {
+      backgroundColor: "#555",
+    },
+  },
+};
+
+// Image/file preview inside a Dialog (full-width, constrained height)
+export const imagePreview = {
+  width: "100%",
+  height: "auto",
+  maxHeight: "80vh",
+  objectFit: "contain",
+};
+
+// ========================================
 // TRANSITIONS
 // ========================================
 export const transitions = {

@@ -1,5 +1,8 @@
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import Underline from "@tiptap/extension-underline";
+import Highlight from "@tiptap/extension-highlight";
+import TextAlign from "@tiptap/extension-text-align";
 import { Image } from "@tiptap/extension-image";
 import { Link } from "@tiptap/extension-link";
 import { Table } from "@tiptap/extension-table";
@@ -28,52 +31,57 @@ export const TiptapReadOnly = ({
   sx = {},
   showErrorAlert = false
 }) => {
-  // Validate content
-  if (!content || typeof content !== 'string') {
+  // Validate content - provide empty string fallback to allow hook to run
+  const safeContent = content && typeof content === 'string' ? content : '';
+
+  // Always call useEditor unconditionally (React Hooks rule)
+  const editor = useEditor({
+    extensions: [
+      StarterKit.configure({
+        link: false,
+        underline: false,
+      }),
+      Underline,
+      Highlight.configure({ multicolor: false }),
+      TextAlign.configure({
+        types: ["heading", "paragraph"],
+      }),
+      Image.configure({
+        inline: true,
+        allowBase64: true,
+        HTMLAttributes: {
+          class: 'tiptap-image',
+        },
+      }),
+      Link.configure({
+        openOnClick: false,
+        HTMLAttributes: {
+          class: 'tiptap-link',
+        },
+      }),
+      Table.configure({
+        resizable: false,
+      }),
+      TableRow,
+      TableHeader,
+      TableCell,
+    ],
+    content: safeContent,
+    editable: false,
+    editorProps: {
+      attributes: {
+        class: 'tiptap-readonly',
+      },
+    },
+  });
+
+  // Return null for empty/invalid content after hook call
+  if (!safeContent) {
     return null;
   }
 
-  let editor;
-
-  try {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    editor = useEditor({
-      extensions: [
-        StarterKit.configure({
-          // Exclude Link from StarterKit since we're configuring it manually
-          link: false,
-        }),
-        Image.configure({
-          inline: true,
-          allowBase64: true,
-          HTMLAttributes: {
-            class: 'tiptap-image',
-          },
-        }),
-        Link.configure({
-          openOnClick: false,
-          HTMLAttributes: {
-            class: 'tiptap-link',
-          },
-        }),
-        Table.configure({
-          resizable: false,
-        }),
-        TableRow,
-        TableHeader,
-        TableCell,
-      ],
-      content: content,
-      editable: false,
-      editorProps: {
-        attributes: {
-          class: 'tiptap-readonly',
-        },
-      },
-    });
-  } catch (error) {
-    console.error('Error initializing TiptapReadOnly editor:', error);
-
+  // Handle editor initialization failure
+  if (!editor) {
     if (showErrorAlert) {
       return (
         <AlertInline
@@ -83,11 +91,6 @@ export const TiptapReadOnly = ({
         />
       );
     }
-
-    return null;
-  }
-
-  if (!editor) {
     return null;
   }
 

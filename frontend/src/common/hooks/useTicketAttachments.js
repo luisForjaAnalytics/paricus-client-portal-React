@@ -5,8 +5,19 @@ import {
   useDeleteTicketAttachmentMutation,
   useLazyGetAttachmentUrlQuery,
 } from "../../store/api/ticketsApi";
+import { logger } from "../utils/logger";
+import { extractApiError } from "../utils/apiHelpers";
 
-export const useTicketAttachments = (ticketId, existingAttachments = []) => {
+/**
+ * Hook for managing ticket attachments
+ * @param {string} ticketId - The ticket ID
+ * @param {Array} existingAttachments - Existing attachments array
+ * @param {Object} options - Optional configuration
+ * @param {Function} options.onError - Callback for error notifications (receives message string)
+ * @param {Function} options.onSuccess - Callback for success notifications (receives message string)
+ */
+export const useTicketAttachments = (ticketId, existingAttachments = [], options = {}) => {
+  const { onError, onSuccess } = options;
   const { t } = useTranslation();
   const [selectedImage, setSelectedImage] = useState(null);
   const [imageUrl, setImageUrl] = useState(null);
@@ -17,6 +28,22 @@ export const useTicketAttachments = (ticketId, existingAttachments = []) => {
   const [deleteAttachment, { isLoading: isDeleting }] =
     useDeleteTicketAttachmentMutation();
   const [getAttachmentUrl] = useLazyGetAttachmentUrlQuery();
+
+  // Helper to show error notification
+  const showError = (message) => {
+    if (onError) {
+      onError(message);
+    } else {
+      logger.error(message);
+    }
+  };
+
+  // Helper to show success notification
+  const showSuccess = (message) => {
+    if (onSuccess) {
+      onSuccess(message);
+    }
+  };
 
   // Calculate total size of existing attachments
   const getTotalAttachmentsSize = () => {
@@ -49,7 +76,7 @@ export const useTicketAttachments = (ticketId, existingAttachments = []) => {
     ];
 
     if (!allowedTypes.includes(file.type)) {
-      alert(
+      showError(
         t("tickets.attachments.invalidFileType") ||
         "Only images, PDFs, and Office documents (Word, Excel, PowerPoint) are allowed"
       );
@@ -63,7 +90,7 @@ export const useTicketAttachments = (ticketId, existingAttachments = []) => {
 
     if (newTotalSize > MAX_TOTAL_SIZE) {
       const remainingMB = ((MAX_TOTAL_SIZE - currentTotalSize) / (1024 * 1024)).toFixed(2);
-      alert(
+      showError(
         t("tickets.attachments.totalSizeExceeded", { remaining: remainingMB }) ||
         `Total attachment size cannot exceed 5MB. You have ${remainingMB}MB remaining.`
       );
@@ -75,10 +102,10 @@ export const useTicketAttachments = (ticketId, existingAttachments = []) => {
         ticketId,
         file,
       }).unwrap();
+      showSuccess(t("tickets.attachments.uploadSuccess") || "File uploaded successfully");
     } catch (error) {
-      console.error("Error uploading file:", error);
-      const errorMsg = error?.data?.error || error?.message || "Failed to upload file";
-      alert(errorMsg);
+      logger.error("Error uploading file:", error);
+      showError(extractApiError(error, "Failed to upload file"));
     }
 
     // Reset input
@@ -86,16 +113,17 @@ export const useTicketAttachments = (ticketId, existingAttachments = []) => {
   };
 
   const handleDelete = async (attachmentId) => {
-    if (!confirm("Are you sure you want to delete this image?")) return;
+    if (!confirm(t("tickets.attachments.confirmDelete") || "Are you sure you want to delete this file?")) return;
 
     try {
       await deleteAttachment({
         ticketId,
         attachmentId,
       }).unwrap();
+      showSuccess(t("tickets.attachments.deleteSuccess") || "File deleted successfully");
     } catch (error) {
-      console.error("Error deleting image:", error);
-      alert("Failed to delete image");
+      logger.error("Error deleting file:", error);
+      showError(t("tickets.attachments.deleteFailed") || "Failed to delete file");
     }
   };
 
@@ -123,9 +151,8 @@ export const useTicketAttachments = (ticketId, existingAttachments = []) => {
       setSelectedImage(attachment);
       setOpenDialog(true);
     } catch (error) {
-      console.error(`useTicketAttachments handleImageClick: ${error}`);
-      const errorMessage = error?.data?.error || error?.message || "Failed to load image";
-      alert(errorMessage);
+      logger.error(`useTicketAttachments handleImageClick: ${error}`);
+      showError(extractApiError(error, "Failed to load file"));
     }
   };
 

@@ -1,6 +1,7 @@
 import { useState, useContext } from "react";
-import { Box, Chip, Button, Alert, Snackbar } from "@mui/material";
+import { Box, Chip, Button } from "@mui/material";
 import { AlertInline } from "../../../../../common/components/ui/AlertInline";
+import { useNotification } from "../../../../../common/hooks";
 import InfoIcon from "@mui/icons-material/Info";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import FlagIcon from "@mui/icons-material/Flag";
@@ -12,7 +13,7 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import LinkIcon from "@mui/icons-material/Link";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
-import { formatDateTime } from "../../../../../common/utils/formatDateTime";
+import { formatDateTime, capitalizeFirst } from "../../../../../common/utils/formatters";
 import {
   TicketPriorityContext,
   TicketStatusContext,
@@ -42,12 +43,6 @@ const fieldIcons = {
   id: BookmarkIcon,
   createdAt: AccessTimeIcon,
   url: LinkIcon,
-};
-
-// Helper function to capitalize first letter only
-const capitalizeFirst = (str) => {
-  if (!str) return str;
-  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 };
 
 // Helper function to get priority styles
@@ -355,7 +350,7 @@ const TicketInfoDetails = ({ ticket }) => {
   const [openStatusModal, setOpenStatusModal] = useState(false);
   const [openAssignedToModal, setOpenAssignedToModal] = useState(false);
   const [error, setError] = useState(null);
-  const [successMessage, setSuccessMessage] = useState(false);
+  const { notificationRef, showSuccess } = useNotification();
 
   const { setPendingPriority, pendingPriority, clearPendingPriority } =
     useContext(TicketPriorityContext);
@@ -523,7 +518,7 @@ const TicketInfoDetails = ({ ticket }) => {
         }
 
         // Show success message for change request
-        setSuccessMessage(true);
+        showSuccess(t("tickets.ticketView.updateSuccess") || "Update added successfully!");
 
         // Navigate after short delay
         setTimeout(() => {
@@ -590,7 +585,7 @@ const TicketInfoDetails = ({ ticket }) => {
       }
 
       // Show success
-      setSuccessMessage(true);
+      showSuccess(t("tickets.ticketView.updateSuccess") || "Update added successfully!");
 
       // Navigate after short delay
       setTimeout(() => {
@@ -642,18 +637,8 @@ const TicketInfoDetails = ({ ticket }) => {
         />
       )}
 
-      {/* Success Snackbar */}
-      <Snackbar
-        open={successMessage}
-        autoHideDuration={3000}
-        onClose={() => setSuccessMessage(false)}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert severity="success" onClose={() => setSuccessMessage(false)}>
-          {t("tickets.ticketView.updateSuccess") ||
-            "Update added successfully!"}
-        </Alert>
-      </Snackbar>
+      {/* Success Notification */}
+      <AlertInline ref={notificationRef} asSnackbar />
 
       <Box sx={ticketStyle.ticketDetailsContainer}>
         <Box

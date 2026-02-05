@@ -9,45 +9,75 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
+  Tooltip,
 } from "@mui/material";
 import {
   Notifications,
   AttachFile,
   Close as CloseIcon,
+  PriorityHigh as PriorityHighIcon,
+  Warning as WarningIcon,
+  ArrowDownward as LowPriorityIcon,
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
-import { useState } from "react";
 import { useSelector } from "react-redux";
+import { useModal } from "../../../../common/hooks";
 import { formatDateTime } from "../../../../common/utils/formatDateTime";
+import { getAttachmentUrl } from "../../../../common/utils/getAttachmentUrl";
 import { TiptapReadOnly } from "../../../../common/components/ui/TiptapReadOnly/TiptapReadOnly";
-import { dashboardStyles, colors, modalCard, titlesTypography } from "../../../../common/styles/styles";
+import { dashboardStyles, colors, modalCard, titlesTypography, scrollableContainer, imagePreview } from "../../../../common/styles/styles";
 import { AppText } from "../../../../common/components/ui/AppText/AppText";
 import { useGetAnnouncementsQuery } from "../../../../store/api/dashboardApi";
 import { getPriorityStyles } from "../../../../common/utils/getStatusProperty";
 
-const getPriorityLabel = (priority, t) => {
-  try {
-    if (!priority || typeof priority !== "string") return "N/A";
-    switch (priority.toLowerCase()) {
-      case "high":
-        return t("dashboard.announcementsInbox.highPriority");
-      case "medium":
-        return t("dashboard.announcementsInbox.mediumPriority");
-      case "low":
-        return t("dashboard.announcementsInbox.lowPriority");
-      default:
-        return priority;
-    }
-  } catch (error) {
-    console.error("Error getting priority label:", error);
-    return priority || "N/A";
-  }
+const priorityConfig = {
+  high: {
+    icon: PriorityHighIcon,
+    labelKey: "dashboard.announcementsInbox.highPriority",
+  },
+  medium: {
+    icon: WarningIcon,
+    labelKey: "dashboard.announcementsInbox.mediumPriority",
+  },
+  low: {
+    icon: LowPriorityIcon,
+    labelKey: "dashboard.announcementsInbox.lowPriority",
+  },
+};
+
+const PriorityIndicator = ({ priority, t }) => {
+  const key = priority?.toLowerCase() || "default";
+  const config = priorityConfig[key];
+  const styles = getPriorityStyles(priority);
+
+  if (!config) return null;
+
+  const Icon = config.icon;
+
+  return (
+    <Tooltip title={t(config.labelKey)} arrow placement="top">
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: 28,
+          height: 28,
+          borderRadius: "50%",
+          backgroundColor: styles.backgroundColor,
+          cursor: "default",
+        }}
+      >
+        <Icon sx={{ fontSize: "1rem", color: styles.color }} />
+      </Box>
+    </Tooltip>
+  );
 };
 
 export const AnnouncementsInbox = () => {
   const { t } = useTranslation();
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
+  const imageModal = useModal();
+  const announcementModal = useModal();
 
   const token = useSelector((state) => state.auth?.token);
 
@@ -58,39 +88,10 @@ export const AnnouncementsInbox = () => {
     error,
   } = useGetAnnouncementsQuery();
 
-  // Build image URL with token (same pattern as TicketDescriptionInfo)
-  const getImageUrl = (attachment) => {
-    try {
-      if (!attachment?.url || !token) {
-        return null;
-      }
-      const baseUrl = import.meta.env.VITE_API_URL.replace("/api", "");
-      const fullUrl = `${baseUrl}${attachment.url}`;
-      const finalUrl = `${fullUrl}?token=${encodeURIComponent(token)}`;
-      return finalUrl;
-    } catch (error) {
-      console.error(`AnnouncementsInbox getImageUrl: ${error}`);
-      return null;
-    }
-  };
-
-  // Handle image click to open in dialog
+  // Handle image click (needs stopPropagation to avoid triggering parent click)
   const handleImageClick = (e, attachment) => {
     e.stopPropagation();
-    setSelectedImage(attachment);
-  };
-
-  const handleCloseImageDialog = () => {
-    setSelectedImage(null);
-  };
-
-  // Handle announcement click to open modal
-  const handleAnnouncementClick = (announcement) => {
-    setSelectedAnnouncement(announcement);
-  };
-
-  const handleCloseAnnouncementModal = () => {
-    setSelectedAnnouncement(null);
+    imageModal.open(attachment);
   };
 
   return (
@@ -152,22 +153,7 @@ export const AnnouncementsInbox = () => {
               flexDirection: "column",
               flex: 1,
               minHeight: 0,
-              overflowY: "auto",
-              overflowX: "hidden",
-              paddingRight: 1,
-              "&::-webkit-scrollbar": {
-                width: "8px",
-              },
-              "&::-webkit-scrollbar-track": {
-                backgroundColor: "transparent",
-              },
-              "&::-webkit-scrollbar-thumb": {
-                backgroundColor: "#888",
-                borderRadius: "4px",
-                "&:hover": {
-                  backgroundColor: "#555",
-                },
-              },
+              ...scrollableContainer,
             }}
           >
             {announcements.length === 0 ? (
@@ -186,16 +172,17 @@ export const AnnouncementsInbox = () => {
               announcements.map((announcement) => (
                 <Box
                   key={announcement.id}
-                  onClick={() => handleAnnouncementClick(announcement)}
+                  onClick={() => announcementModal.open(announcement)}
                   sx={{
                     mb: 2,
-                    pb: 2,
-                    borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
+                    p: '0.5rem',
+                    //px:'0.5',
+                    //borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
                     cursor: "pointer",
-                    borderRadius: 1,
+                    borderRadius: '1rem',
                     transition: "background-color 0.2s ease",
                     "&:hover": {
-                      backgroundColor: "rgba(0, 0, 0, 0.04)",
+                      backgroundColor: "#4ee78611",
                     },
                     "&:last-child": {
                       borderBottom: "none",
@@ -217,14 +204,7 @@ export const AnnouncementsInbox = () => {
                         gap: 2,
                       }}
                     >
-                      <Chip
-                        label={getPriorityLabel(announcement.priority, t)}
-                        size="small"
-                        sx={{
-                          fontWeight: "bold",
-                          ...getPriorityStyles(announcement.priority),
-                        }}
-                      />
+                      <PriorityIndicator priority={announcement.priority} t={t} />
                       {/* Title */}
                       <Typography
                         variant="subtitle2"
@@ -246,7 +226,8 @@ export const AnnouncementsInbox = () => {
                     sx={{
                       backgroundColor: "white",
                       p: 1.5,
-                      borderRadius: 1,
+                      mx:'0.5rem',
+                      borderRadius: '1rem',
                       border: "1px solid rgba(0, 0, 0, 0.12)",
                       overflow: "hidden",
                       "& .ProseMirror": {
@@ -282,8 +263,8 @@ export const AnnouncementsInbox = () => {
 
       {/* Announcement Detail Modal */}
       <Dialog
-        open={!!selectedAnnouncement}
-        onClose={handleCloseAnnouncementModal}
+        open={announcementModal.isOpen}
+        onClose={announcementModal.close}
         maxWidth="lg"
         fullWidth
         slotProps={{
@@ -292,32 +273,25 @@ export const AnnouncementsInbox = () => {
           },
         }}
       >
-        {selectedAnnouncement && (
+        {announcementModal.data && (
           <>
             <DialogTitle>
               <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-                <IconButton onClick={handleCloseAnnouncementModal} size="small">
+                <IconButton onClick={announcementModal.close} size="small">
                   <CloseIcon />
                 </IconButton>
               </Box>
               <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 2 }}>
-                <Chip
-                  label={getPriorityLabel(selectedAnnouncement.priority, t)}
-                  size="small"
-                  sx={{
-                    fontWeight: "bold",
-                    ...getPriorityStyles(selectedAnnouncement.priority),
-                  }}
-                />
+                <PriorityIndicator priority={announcementModal.data.priority} t={t} />
                 <Typography
                   sx={{
                     ...titlesTypography.primaryTitle,
                   }}
                 >
-                  {selectedAnnouncement.title}
+                  {announcementModal.data.title}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
-                  {formatDateTime(selectedAnnouncement.createdAt)}
+                  {formatDateTime(announcementModal.data.createdAt)}
                 </Typography>
               </Box>
             </DialogTitle>
@@ -333,19 +307,19 @@ export const AnnouncementsInbox = () => {
                 }}
               >
                 <TiptapReadOnly
-                  content={selectedAnnouncement.content}
+                  content={announcementModal.data.content}
                   showErrorAlert={false}
                 />
               </Box>
 
               {/* Attachments */}
-              {selectedAnnouncement.attachments && selectedAnnouncement.attachments.length > 0 && (
+              {announcementModal.data.attachments && announcementModal.data.attachments.length > 0 && (
                 <Box>
                   <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 1 }}>
                     {t("tickets.ticketView.attachments", "Attachments")}
                   </Typography>
                   <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                    {selectedAnnouncement.attachments.map((attachment) => (
+                    {announcementModal.data.attachments.map((attachment) => (
                       <Chip
                         key={attachment.id}
                         icon={<AttachFile />}
@@ -370,28 +344,23 @@ export const AnnouncementsInbox = () => {
 
       {/* Image Preview Dialog */}
       <Dialog
-        open={!!selectedImage}
-        onClose={handleCloseImageDialog}
+        open={imageModal.isOpen}
+        onClose={imageModal.close}
         maxWidth="lg"
         fullWidth
       >
         <DialogTitle sx={{ display: "flex", justifyContent: "flex-end", p: 1 }}>
-          <IconButton onClick={handleCloseImageDialog} size="small">
+          <IconButton onClick={imageModal.close} size="small">
             <CloseIcon />
           </IconButton>
         </DialogTitle>
         <DialogContent sx={{ p: 0 }}>
-          {selectedImage && (
+          {imageModal.data && (
             <Box
               component="img"
-              src={getImageUrl(selectedImage)}
-              alt={selectedImage.fileName}
-              sx={{
-                width: "100%",
-                height: "auto",
-                maxHeight: "80vh",
-                objectFit: "contain",
-              }}
+              src={getAttachmentUrl(imageModal.data, token)}
+              alt={imageModal.data.fileName}
+              sx={imagePreview}
             />
           )}
         </DialogContent>

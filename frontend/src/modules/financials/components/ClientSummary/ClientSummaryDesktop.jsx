@@ -23,6 +23,7 @@ export const ClientSummaryDesktop = ({
   refetchAllClients,
   formatCurrency,
   payload,
+  isAdmin
 }) => {
   const { t } = useTranslation();
 
@@ -44,17 +45,19 @@ export const ClientSummaryDesktop = ({
           {t("financials.clientSummary.title")}
         </Typography>
         <Stack direction="row" spacing={1}>
-          <Button
-            variant="contained"
-            color="secondary"
-            startIcon={<OpenIcon />}
-            href="https://my.waveapps.com/login_external/"
-            target="_blank"
-            rel="noopener noreferrer"
-            sx={primaryIconButton}
-          >
-            {t("financials.clientSummary.waveAppsButton")}
-          </Button>
+          {isAdmin && (
+            <Button
+              variant="contained"
+              color="secondary"
+              startIcon={<OpenIcon />}
+              href="https://my.waveapps.com/login_external/"
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={primaryIconButton}
+            >
+              {t("financials.clientSummary.waveAppsButton")}
+            </Button>
+          )}
           <Button
             variant="outlined"
             startIcon={
@@ -64,7 +67,9 @@ export const ClientSummaryDesktop = ({
             disabled={loading}
             sx={outlinedIconButton}
           >
-            {loading ? t("financials.clientSummary.loading") : t("financials.clientSummary.refreshButton")}
+            {loading
+              ? t("financials.clientSummary.loading")
+              : t("financials.clientSummary.refreshButton")}
           </Button>
         </Stack>
       </Box>
@@ -92,7 +97,7 @@ ClientSummaryDesktop.propTypes = {
         icon: PropTypes.node.isRequired,
         color: PropTypes.string.isRequired,
       }).isRequired,
-    })
+    }),
   ).isRequired,
 };
 

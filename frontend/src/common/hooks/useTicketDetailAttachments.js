@@ -5,8 +5,19 @@ import {
   useDeleteDetailAttachmentMutation,
   useLazyGetDetailAttachmentUrlQuery,
 } from "../../store/api/ticketsApi";
+import { logger } from "../utils/logger";
+import { extractApiError } from "../utils/apiHelpers";
 
-export const useTicketDetailAttachments = (ticketId, detailId) => {
+/**
+ * Hook for managing ticket detail attachments
+ * @param {string} ticketId - The ticket ID
+ * @param {string} detailId - The detail ID
+ * @param {Object} options - Optional configuration
+ * @param {Function} options.onError - Callback for error notifications (receives message string)
+ * @param {Function} options.onSuccess - Callback for success notifications (receives message string)
+ */
+export const useTicketDetailAttachments = (ticketId, detailId, options = {}) => {
+  const { onError, onSuccess } = options;
   const { t } = useTranslation();
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -18,6 +29,22 @@ export const useTicketDetailAttachments = (ticketId, detailId) => {
   const [deleteAttachment, { isLoading: isDeleting }] =
     useDeleteDetailAttachmentMutation();
   const [getAttachmentUrl] = useLazyGetDetailAttachmentUrlQuery();
+
+  // Helper to show error notification
+  const showError = (message) => {
+    if (onError) {
+      onError(message);
+    } else {
+      logger.error(message);
+    }
+  };
+
+  // Helper to show success notification
+  const showSuccess = (message) => {
+    if (onSuccess) {
+      onSuccess(message);
+    }
+  };
 
   // Calculate total size of selected files
   const getTotalSelectedSize = () => {
@@ -51,7 +78,7 @@ export const useTicketDetailAttachments = (ticketId, detailId) => {
     ];
 
     if (!allowedTypes.includes(file.type)) {
-      alert(
+      showError(
         t("tickets.attachments.invalidFileType") ||
         "Only images, PDFs, and Office documents (Word, Excel, PowerPoint) are allowed"
       );
@@ -65,7 +92,7 @@ export const useTicketDetailAttachments = (ticketId, detailId) => {
 
     if (newTotalSize > MAX_TOTAL_SIZE) {
       const remainingMB = ((MAX_TOTAL_SIZE - currentTotalSize) / (1024 * 1024)).toFixed(2);
-      alert(
+      showError(
         t("tickets.attachments.totalSizeExceeded", { remaining: remainingMB }) ||
         `Total attachment size cannot exceed 5MB. You have ${remainingMB}MB remaining.`
       );
@@ -80,15 +107,16 @@ export const useTicketDetailAttachments = (ticketId, detailId) => {
   };
 
   // Upload all selected files after detail is created
-  const uploadAllFiles = async (detailId) => {
-    if (!ticketId || !detailId || selectedFiles.length === 0) {
+  const uploadAllFiles = async (detailIdParam) => {
+    const targetDetailId = detailIdParam || detailId;
+    if (!ticketId || !targetDetailId || selectedFiles.length === 0) {
       return;
     }
 
     const uploadPromises = selectedFiles.map((file) => {
       return uploadAttachment({
         ticketId,
-        detailId,
+        detailId: targetDetailId,
         file,
       }).unwrap();
     });
@@ -96,8 +124,9 @@ export const useTicketDetailAttachments = (ticketId, detailId) => {
     try {
       await Promise.all(uploadPromises);
       setSelectedFiles([]); // Clear after successful upload
+      showSuccess(t("tickets.attachments.uploadSuccess") || "Files uploaded successfully");
     } catch (error) {
-      console.error(`useTicketDetailAttachments uploadAllFiles: ${error}`);
+      logger.error(`useTicketDetailAttachments uploadAllFiles: ${error}`);
       throw error;
     }
   };
@@ -111,7 +140,7 @@ export const useTicketDetailAttachments = (ticketId, detailId) => {
   };
 
   const handleDelete = async (attachmentId) => {
-    if (!confirm("Are you sure you want to delete this image?")) return;
+    if (!confirm(t("tickets.attachments.confirmDelete") || "Are you sure you want to delete this file?")) return;
 
     try {
       await deleteAttachment({
@@ -119,9 +148,10 @@ export const useTicketDetailAttachments = (ticketId, detailId) => {
         detailId,
         attachmentId,
       }).unwrap();
+      showSuccess(t("tickets.attachments.deleteSuccess") || "File deleted successfully");
     } catch (error) {
-      console.error("Error deleting image:", error);
-      alert("Failed to delete image");
+      logger.error("Error deleting file:", error);
+      showError(t("tickets.attachments.deleteFailed") || "Failed to delete file");
     }
   };
 
@@ -150,9 +180,8 @@ export const useTicketDetailAttachments = (ticketId, detailId) => {
       setSelectedImage(attachment);
       setOpenDialog(true);
     } catch (error) {
-      console.error(`useTicketDetailAttachments handleImageClick: ${error}`);
-      const errorMessage = error?.data?.error || error?.message || "Failed to load image";
-      alert(errorMessage);
+      logger.error(`useTicketDetailAttachments handleImageClick: ${error}`);
+      showError(extractApiError(error, "Failed to load file"));
     }
   };
 

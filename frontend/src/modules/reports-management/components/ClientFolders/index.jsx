@@ -1,5 +1,11 @@
 import PropTypes from "prop-types";
-import { Box, Typography, Stack, Button, CircularProgress } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Stack,
+  Button,
+  CircularProgress,
+} from "@mui/material";
 import {
   Folder as FolderIcon,
   Refresh as RefreshIcon,
@@ -136,7 +142,7 @@ export const ClientFolders = ({
       {/* Header */}
       <Box
         sx={{
-          display: "flex",
+          display: { xs: "none", md: "flex" },
           justifyContent: "space-between",
           alignItems: "center",
           mb: 2,
@@ -157,10 +163,7 @@ export const ClientFolders = ({
           renderPrimaryIcon={renderPrimaryIcon}
         />
       ) : (
-        <ClientFoldersDesktop
-          {...sharedProps}
-          columns={desktopColumns}
-        />
+        <ClientFoldersDesktop {...sharedProps} columns={desktopColumns} />
       )}
 
       {/* Upload Modal - shared between views */}
@@ -191,8 +194,8 @@ ClientFolders.propTypes = {
         name: PropTypes.string.isRequired,
         size: PropTypes.number.isRequired,
         lastModified: PropTypes.string.isRequired,
-      })
-    )
+      }),
+    ),
   ),
   loadingReports: PropTypes.bool,
   fetchReportsForFolder: PropTypes.func.isRequired,

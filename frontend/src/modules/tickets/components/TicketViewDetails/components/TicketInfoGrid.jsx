@@ -7,7 +7,7 @@ import EmailIcon from "@mui/icons-material/Email";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { useTranslation } from "react-i18next";
-import { formatDateTime } from "../../../../../common/utils/formatDateTime";
+import { formatDateTime, capitalizeFirst } from "../../../../../common/utils/formatters";
 import { TicketText } from "../../../../../common/components/ui/TicketText";
 import { ticketStyle } from "../../../../../common/styles/styles";
 
@@ -20,12 +20,6 @@ const fieldIcons = {
   email: EmailIcon,
   id: BookmarkIcon,
   createdAt: AccessTimeIcon,
-};
-
-// Helper function to capitalize first letter only
-const capitalizeFirst = (str) => {
-  if (!str) return str;
-  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 };
 
 // Formatters for specific field types

@@ -11,6 +11,7 @@ import {
   TicketFilesContext,
 } from "../TicketViewDetails";
 import "../../../../../common/components/ui/TiptapEditor/tiptap-editor.css";
+import { scrollableContainer } from "../../../../../common/styles/styles";
 
 export const TicketUpdateStatus = () => {
   const { t } = useTranslation();
@@ -89,24 +90,8 @@ export const TicketUpdateStatus = () => {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        //gap: 1,
         height: "120%",
-        overflowY: "auto",
-        overflowX: "hidden",
-        paddingRight: 1,
-        "&::-webkit-scrollbar": {
-          width: "8px",
-        },
-        "&::-webkit-scrollbar-track": {
-          backgroundColor: "transparent",
-        },
-        "&::-webkit-scrollbar-thumb": {
-          backgroundColor: "#888",
-          borderRadius: "4px",
-          "&:hover": {
-            backgroundColor: "#555",
-          },
-        },
+        ...scrollableContainer,
       }}
     >
       {/* Selected Files Preview */}

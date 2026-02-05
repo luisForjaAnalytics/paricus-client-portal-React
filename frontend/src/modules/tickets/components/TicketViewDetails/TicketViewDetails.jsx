@@ -128,8 +128,8 @@ export const TicketViewDetails = () => {
             display: "flex",
             flexDirection: "column",
             gap: 2,
-            paddingBottom: 2,
-            pt: { xs: 2, md: 4 },
+            paddingBottom: 1,
+            pt: { xs: 2, md: 1 },
             pl: { xs: 2, md: 3 },
             pr: { xs: 2, md: 3 },
           }}

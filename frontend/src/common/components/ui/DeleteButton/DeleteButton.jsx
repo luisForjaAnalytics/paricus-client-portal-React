@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import PropTypes from "prop-types";
 import {
   Dialog,
@@ -17,7 +17,8 @@ import {
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import { colors, modalCard } from "../../../styles/styles";
-import { SuccessErrorSnackbar } from "../SuccessErrorSnackbar/SuccessErrorSnackbar";
+import { AlertInline } from "../AlertInline";
+import { useNotification } from "../../../hooks";
 import { ActionButton } from "../ActionButton/ActionButton";
 import { CancelButton } from "../CancelButton/CancelButton";
 
@@ -56,7 +57,7 @@ export const DeleteButton = ({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const snackbarRef = useRef();
+  const { notificationRef, showSuccess, showError } = useNotification();
 
   const handleClickOpen = () => {
     if (disabled) return;
@@ -87,7 +88,7 @@ export const DeleteButton = ({
         t("common.deleteSuccess", {
           item: itemName || t(`common.${itemType}`) || t("common.item"),
         });
-      snackbarRef.current?.showSuccess(successMsg);
+      showSuccess(successMsg);
 
       // Callback de éxito
       if (onSuccess) {
@@ -104,7 +105,7 @@ export const DeleteButton = ({
         t("common.deleteError", {
           item: itemName || t(`common.${itemType}`) || t("common.item"),
         });
-      snackbarRef.current?.showError(errorMsg);
+      showError(errorMsg);
 
       // Callback de error
       if (onError) {
@@ -190,7 +191,7 @@ export const DeleteButton = ({
         </DialogActions>
       </Dialog>
 
-      <SuccessErrorSnackbar ref={snackbarRef} />
+      <AlertInline ref={notificationRef} asSnackbar />
     </>
   );
 };

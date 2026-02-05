@@ -12,7 +12,11 @@ import {
   OpenInNew as OpenIcon,
   Refresh as RefreshIcon,
 } from "@mui/icons-material";
-import { summaryCard, colors, titlesTypography } from "../../../../common/styles/styles";
+import {
+  summaryCard,
+  colors,
+  titlesTypography,
+} from "../../../../common/styles/styles";
 import { AppText } from "../../../../common/components/ui/AppText";
 import { useTranslation } from "react-i18next";
 
@@ -136,7 +140,7 @@ export const ClientSummaryMobile = ({
         <Typography
           variant="subtitle2"
           //fontWeight="600"
-          sx={titlesTypography.mobilDataTableTableHeader}
+          sx={{ ...titlesTypography.mobilDataTableTableHeader, mb: 1 }}
         >
           {t("financials.clientSummary.title")}
         </Typography>

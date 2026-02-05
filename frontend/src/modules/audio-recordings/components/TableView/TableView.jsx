@@ -19,6 +19,7 @@ import { useSelector } from "react-redux";
 import { companies } from "../AdvancedFilters/company.js";
 import { UniversalDataGrid } from "../../../../common/components/ui/DataGrid/UniversalDataGrid";
 import { ColumnHeaderFilter } from "../../../../common/components/ui/ColumnHeaderFilter";
+import { colors } from "../../../../common/styles/styles";
 import { useCallback, useMemo } from "react";
 
 const transformRecordings = (rowsTable, formatDate) => {
@@ -167,8 +168,12 @@ export const TableView = ({
         renderCell: (params) => (
           <Chip
             label={params.value || t("audioRecordings.table.unknown")}
-            color="success"
+            variant="outlined"
             size="small"
+            sx={{
+              borderColor: colors.primary,
+              color: colors.primary,
+            }}
           />
         ),
       },

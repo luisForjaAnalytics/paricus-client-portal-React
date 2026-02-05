@@ -18,6 +18,7 @@ import audioRecordingsRoutes from './routes/audio-recordings.js';
 import logsRoutes from './routes/logs-prisma.js';
 import ticketsRoutes from './routes/tickets.js';
 import dashboardRoutes from './routes/dashboard-prisma.js';
+import carouselRoutes from './routes/carousel.js';
 
 // Import security middleware
 import { validateCSRFToken, getCSRFToken } from './middleware/csrf.js';
@@ -200,6 +201,7 @@ app.use('/api/audio-recordings', audioRecordingsRoutes);
 app.use('/api/logs', logsRoutes);
 app.use('/api/tickets', ticketsRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/carousel', carouselRoutes);
 
 // S3 test endpoint
 app.get('/api/s3-test', async (req, res) => {

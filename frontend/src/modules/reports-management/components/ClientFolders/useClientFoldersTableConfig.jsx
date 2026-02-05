@@ -1,7 +1,7 @@
 import { useMemo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { Box, Typography, Chip } from "@mui/material";
-import { Folder as FolderIcon } from "@mui/icons-material";
+import { Folder as FolderIcon, FolderOpen as FolderOpenIcon } from "@mui/icons-material";
 import { colors, typography } from "../../../../common/styles/styles";
 
 /**
@@ -103,7 +103,7 @@ export const useClientFoldersTableConfig = ({
   // Render primary icon for mobile accordion
   const renderPrimaryIcon = useCallback(() => {
     try {
-      return <FolderIcon sx={{ fontSize: 28, color: colors.primary }} />;
+      return <FolderOpenIcon sx={{ fontSize: 28, color: colors.primary }} />;
     } catch (err) {
       console.error(`ERROR renderPrimaryIcon: ${err}`);
       return null;

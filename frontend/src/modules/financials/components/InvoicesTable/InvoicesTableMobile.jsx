@@ -112,7 +112,6 @@ export const InvoicesTableMobile = ({
         field: "paymentLink",
         headerName: t("invoices.table.paymentLink"),
         labelWidth: 120,
-        hide: () => !isAdmin,
         renderCell: ({ row }) => (
           <PendingLinkModal
             invoice={row}
@@ -133,8 +132,9 @@ export const InvoicesTableMobile = ({
           variant="contained"
           color="success"
           size="small"
-          startIcon={<PaymentIcon />}
+          startIcon={<PaymentIcon sx={{ fontSize: "1rem" }} />}
           onClick={() => openPaymentLink(invoice.paymentLink)}
+          sx={{ fontSize: "0.75rem", py: 0.5, px: 1.5 }}
         >
           {t("invoices.actions.payNow")}
         </Button>

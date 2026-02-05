@@ -9,6 +9,8 @@ import { DashboardStatisticsView } from "../DashboardStatisticsView/DashboardSta
 import { ActiveTasks } from "../ActiveTasks";
 import { MasterRepository } from "../MasterRepository";
 import { SwiperView } from "../../../../common/components/ui/Swiper/SwiperView";
+import { useGetCarouselImagesQuery } from "../../../../store/api/carouselApi";
+import { getAttachmentUrl } from "../../../../common/utils/getAttachmentUrl";
 
 /**
  * DashboardViewSelect - Displays dashboard content based on selected client/user
@@ -22,9 +24,13 @@ export const DashboardViewSelect = ({
 }) => {
   const { t } = useTranslation();
 
-  // Get user permissions to check if BPO Admin
+  // Get user permissions and token
   const permissions = useSelector((state) => state.auth?.permissions);
+  const token = useSelector((state) => state.auth?.token);
   const isBPOAdmin = permissions?.includes("admin_clients") ?? false;
+
+  // Fetch carousel images
+  const { data: carouselImages = [] } = useGetCarouselImagesQuery();
 
   const {
     data: stats,
@@ -119,7 +125,7 @@ export const DashboardViewSelect = ({
           },
           mb: 3,
           gap: 3,
-          height: "30vh",
+          height: "32vh",
           // minHeight: { xs: "auto", lg: "35vh" },
           // "& > *": {
           //   minHeight: { xs: "250px", lg: "100%" },
@@ -129,8 +135,17 @@ export const DashboardViewSelect = ({
       >
         {/* Announcements Inbox */}
         <AnnouncementsInbox />
-        {/* Swiper */}
-        <SwiperView />
+        {/* Swiper — map API data into fixed 4-slot array */}
+        <SwiperView
+          images={Array.from({ length: 4 }, (_, i) => {
+            const img = carouselImages.find((c) => c.slotIndex === i);
+            if (!img) return null;
+            return {
+              previewUrl: getAttachmentUrl(img, token),
+              name: img.fileName,
+            };
+          })}
+        />
       </Box>
 
       <Box

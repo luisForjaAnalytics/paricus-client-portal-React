@@ -2,10 +2,13 @@ import { useState, useMemo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import { useBreakpoint } from "../../../../common/hooks/useBreakpoint";
+import { useNotification } from "../../../../common/hooks";
 import { RolesTabDesktop } from "./RolesTabDesktop";
 import { RolesTabMobile } from "./RolesTabMobile";
 import { AddNewRoleModal } from "./AddNewRoleModal";
 import { useRolesTableConfig } from "./useRolesTableConfig";
+import { AlertInline } from "../../../../common/components/ui/AlertInline";
+import { formatDate as formatDateUtil } from "../../../../common/utils/formatters";
 import {
   useGetRolesQuery,
   useCreateRoleMutation,
@@ -16,6 +19,7 @@ import {
   useLazyGetRolePermissionsQuery,
   useUpdateRolePermissionsMutation,
 } from "../../../../store/api/adminApi";
+import { extractApiError } from "../../../../common/utils/apiHelpers";
 
 /**
  * Componente unificado RolesTab que maneja la lógica de datos
@@ -25,6 +29,7 @@ export const RolesTab = () => {
   const { t } = useTranslation();
   const { isMobile } = useBreakpoint();
   const authUser = useSelector((state) => state.auth.user);
+  const { notificationRef, showNotification } = useNotification();
 
   // Check if user is BPO Admin or Client Admin
   const isBPOAdmin = authUser?.permissions?.includes("admin_users");
@@ -61,13 +66,6 @@ export const RolesTab = () => {
     role_name: "",
     description: "",
     client_id: null,
-  });
-
-  // Snackbar state
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success",
   });
 
   // Computed values
@@ -209,11 +207,7 @@ export const RolesTab = () => {
 
       closeDialog();
     } catch (error) {
-      const errorMessage =
-        error.data?.error ||
-        error.data?.message ||
-        t("roles.messages.roleSaveFailed");
-      showNotification(errorMessage, "error");
+      showNotification(extractApiError(error, t("roles.messages.roleSaveFailed")), "error");
     }
   };
 
@@ -232,9 +226,7 @@ export const RolesTab = () => {
       showNotification(t("roles.messages.permissionsUpdated"), "success");
       closePermissionsDialog();
     } catch (error) {
-      const errorMessage =
-        error.data?.error || t("roles.messages.permissionsUpdateFailed");
-      showNotification(errorMessage, "error");
+      showNotification(extractApiError(error, t("roles.messages.permissionsUpdateFailed")), "error");
     }
   };
 
@@ -268,15 +260,8 @@ export const RolesTab = () => {
     }
   };
 
-  const formatDate = useCallback((dateString) => {
-    try {
-      const locale = t("common.locale") || "en-US";
-      return new Date(dateString).toLocaleDateString(locale);
-    } catch (err) {
-      console.error(`ERROR formatDate: ${err}`);
-      return dateString;
-    }
-  }, [t]);
+  const locale = t("common.locale") || "en-US";
+  const formatDate = useCallback((ds) => formatDateUtil(ds, locale), [locale]);
 
   // Clear all filters
   const clearFilters = useCallback(() => {
@@ -287,26 +272,6 @@ export const RolesTab = () => {
       console.error("clearFilters error:", error);
     }
   }, []);
-
-  const showNotification = (message, severity = "success") => {
-    try {
-      setSnackbar({
-        open: true,
-        message,
-        severity,
-      });
-    } catch (err) {
-      console.error(`ERROR showNotification: ${err}`);
-    }
-  };
-
-  const handleCloseSnackbar = () => {
-    try {
-      setSnackbar({ ...snackbar, open: false });
-    } catch (err) {
-      console.error(`ERROR handleCloseSnackbar: ${err}`);
-    }
-  };
 
   const isProtectedRole = (roleName) => {
     try {
@@ -392,12 +357,13 @@ export const RolesTab = () => {
         saveRole={saveRole}
         isSaving={isSaving}
         isFormValid={isFormValid}
-        snackbar={snackbar}
-        handleCloseSnackbar={handleCloseSnackbar}
         clients={clients}
         isBPOAdmin={isBPOAdmin}
         isProtectedRole={isProtectedRole}
       />
+
+      {/* Snackbar para notificaciones */}
+      <AlertInline ref={notificationRef} asSnackbar />
     </>
   );
 };

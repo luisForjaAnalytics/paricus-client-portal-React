@@ -97,7 +97,7 @@ export const LogsViewMobile = ({
       headerName: t("userManagement.logs.status"),
       labelWidth: 100,
       renderCell: ({ value }) => (
-        <Chip label={value} color={getStatusColor(value)} size="small" />
+        <Chip label={value} variant="outlined" color={getStatusColor(value)} size="small" />
       ),
     },
   ], [t, getEventTypeColor, getStatusColor]);
@@ -106,7 +106,7 @@ export const LogsViewMobile = ({
   const renderPrimaryIcon = <ListAltIcon fontSize="small" color="primary" />;
 
   return (
-    <Box sx={{ display: { xs: "block", md: "none" }, px: 2 }}>
+    <Box sx={{ display: { xs: "block", md: "none" } }}>
       <UniversalMobilDataTable
         rows={rows}
         columns={columns}

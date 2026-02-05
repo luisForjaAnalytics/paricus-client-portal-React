@@ -81,6 +81,7 @@ model User {
   changeRequestsCreated         TicketChangeRequest[] @relation("ChangeRequestedBy")
   changeRequestsReviewed        TicketChangeRequest[] @relation("ChangeReviewedBy")
   changeRequestsAssignedTo      TicketChangeRequest[] @relation("ChangeRequestedAssignee")
+  ticketDetailsCreated          TicketDetail[]        @relation("TicketDetailCreator")
   departmentsResponsible        Department[]          @relation("DepartmentResponsible")
 
   @@index([email])
@@ -303,12 +304,15 @@ model TicketDetail {
   id          Int                    @id @default(autoincrement())
   ticketId    String                 @map("ticket_id")
   detailData  String                 @map("detail_data")
+  createdById Int?                   @map("created_by_id")
   timestamp   DateTime               @default(now())
   ticket      Ticket                 @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  createdBy   User?                  @relation("TicketDetailCreator", fields: [createdById], references: [id], onDelete: SetNull)
   attachments TicketDetailAttachment[]
 
   @@index([ticketId])
   @@index([timestamp])
+  @@index([createdById])
   @@map("ticket_details")
 }
 
@@ -386,4 +390,18 @@ model AnnouncementAttachment {
   @@index([announcementId])
   @@index([uploadedAt])
   @@map("announcement_attachments")
+}
+
+model CarouselImage {
+  id        Int      @id @default(autoincrement())
+  slotIndex Int      @unique @map("slot_index") // 0-3
+  fileName  String   @map("file_name")
+  filePath  String   @map("file_path")
+  mimeType  String   @map("mime_type")
+  fileSize  Int?     @map("file_size")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@index([slotIndex])
+  @@map("carousel_images")
 }

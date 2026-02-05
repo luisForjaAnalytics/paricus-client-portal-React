@@ -1,5 +1,5 @@
 // Export main view
-export { default as KnowledgeBaseView } from "./KnowledgeBaseView";
+export { KnowledgeBaseView } from "./KnowledgeBaseView";
 
 // Export components
 export { default as CKEditor } from "./components/CKEditor";

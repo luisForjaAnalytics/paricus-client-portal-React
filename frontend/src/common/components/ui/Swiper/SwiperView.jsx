@@ -1,18 +1,13 @@
 import React, { useRef } from "react";
-// Import Swiper React components
 import { Swiper, SwiperSlide } from "swiper/react";
-
-// Import Swiper styles
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
-
-// import required modules
 import { Autoplay, Pagination, Navigation } from "swiper/modules";
-import { Box, Card, CardContent } from "@mui/material";
-import { dashboardStyles } from "../../../styles/styles";
+import { Box, Card, CardContent, IconButton, Typography } from "@mui/material";
+import { Close } from "@mui/icons-material";
+import { dashboardStyles, colors } from "../../../styles/styles";
 
-// Swiper styles
 const swiperStyles = {
   container: {
     width: "100%",
@@ -30,12 +25,14 @@ const swiperStyles = {
       justifyContent: "center",
       alignItems: "center",
       borderRadius: "0.5rem",
+      position: "relative",
+      overflow: "hidden",
     },
     "& .swiper-slide img": {
       display: "block",
       width: "100%",
       height: "100%",
-      objectFit: "cover",
+      objectFit: "contain",
     },
     "& .swiper-button-next, & .swiper-button-prev": {
       color: "#1976d2",
@@ -45,35 +42,9 @@ const swiperStyles = {
       backgroundColor: "#1976d2",
     },
   },
-  autoplayProgress: {
-    position: "absolute",
-    right: 16,
-    bottom: 16,
-    zIndex: 10,
-    width: 48,
-    height: 48,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontWeight: "bold",
-    color: "#1976d2",
-    "& svg": {
-      position: "absolute",
-      left: 0,
-      top: 0,
-      zIndex: 10,
-      width: "100%",
-      height: "100%",
-      strokeWidth: "4px",
-      stroke: "#1976d2",
-      fill: "none",
-      strokeDasharray: 125.6,
-      transform: "rotate(-90deg)",
-    },
-  },
 };
 
-export const SwiperView = () => {
+export const SwiperView = ({ images = [], onRemove }) => {
   const progressCircle = useRef(null);
   const progressContent = useRef(null);
 
@@ -86,6 +57,8 @@ export const SwiperView = () => {
     }
   };
 
+  const hasImages = images.some(Boolean);
+
   return (
     <Card sx={dashboardStyles.dashboardStatsCard}>
       <CardContent
@@ -96,47 +69,58 @@ export const SwiperView = () => {
           flexDirection: "column",
         }}
       >
-        {/* Header */}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 1.5,
-            mb: 1,
-          }}
-        ></Box>
-
-        {/* Swiper Container */}
         <Box sx={{ ...swiperStyles.container, flex: 1, minHeight: 0 }}>
           <Swiper
             spaceBetween={30}
             centeredSlides={true}
-            autoplay={{
-              delay: 2500,
-              disableOnInteraction: false,
-            }}
-            // pagination={{
-            //   clickable: true,
-            // }}
-            // navigation={true}
+            autoplay={
+              hasImages
+                ? { delay: 3000, disableOnInteraction: false }
+                : false
+            }
+            pagination={{ clickable: true }}
+            navigation={true}
             modules={[Autoplay, Pagination, Navigation]}
             onAutoplayTimeLeft={onAutoplayTimeLeft}
           >
-            <SwiperSlide>Slide 1</SwiperSlide>
-            <SwiperSlide>Slide 2</SwiperSlide>
-            <SwiperSlide>Slide 3</SwiperSlide>
-            <SwiperSlide>Slide 4</SwiperSlide>
-            <SwiperSlide>Slide 5</SwiperSlide>
-            <SwiperSlide>Slide 6</SwiperSlide>
-            <SwiperSlide>Slide 7</SwiperSlide>
-            <SwiperSlide>Slide 8</SwiperSlide>
-            <SwiperSlide>Slide 9</SwiperSlide>
-            {/* <Box slot="container-end" sx={swiperStyles.autoplayProgress}>
-              <svg viewBox="0 0 48 48">
-                <circle cx="24" cy="24" r="20" ref={progressCircle} />
-              </svg>
-              <span ref={progressContent}></span>
-            </Box> */}
+            {images.map((image, index) => (
+              <SwiperSlide key={`slide-${index}`}>
+                {image ? (
+                  <>
+                    <img src={image.previewUrl} alt={image.name} />
+                    {onRemove && (
+                      <IconButton
+                        size="small"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onRemove(index);
+                        }}
+                        sx={{
+                          position: "absolute",
+                          top: 8,
+                          right: 8,
+                          zIndex: 10,
+                          backgroundColor: "rgba(0,0,0,0.5)",
+                          color: "#fff",
+                          "&:hover": {
+                            backgroundColor: "rgba(0,0,0,0.7)",
+                          },
+                        }}
+                      >
+                        <Close fontSize="small" />
+                      </IconButton>
+                    )}
+                  </>
+                ) : (
+                  <Typography
+                    variant="h6"
+                    sx={{ color: colors.textMuted, userSelect: "none" }}
+                  >
+                    Slide {index + 1}
+                  </Typography>
+                )}
+              </SwiperSlide>
+            ))}
           </Swiper>
         </Box>
       </CardContent>

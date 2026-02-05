@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useBreakpoint } from "../../../../common/hooks/useBreakpoint";
+import { useNotification } from "../../../../common/hooks";
 import { ClientsTabDesktop } from "./ClientsTabDesktop";
 import { ClientsTabMobile } from "./ClientsTabMobile";
 import { useClientsTableConfig } from "./useClientsTableConfig";
@@ -11,6 +12,8 @@ import {
   useDeleteClientMutation,
 } from "../../../../store/api/adminApi";
 import { AddNewClientModal } from "./AddNewClientModal";
+import { extractApiError } from "../../../../common/utils/apiHelpers";
+import { formatDate as formatDateUtil } from "../../../../common/utils/formatters";
 
 /**
  * Componente unificado ClientsTab que maneja la lógica de datos
@@ -19,6 +22,7 @@ import { AddNewClientModal } from "./AddNewClientModal";
 export const ClientsTab = () => {
   const { t } = useTranslation();
   const { isMobile } = useBreakpoint();
+  const { notificationRef, showNotification } = useNotification();
 
   // RTK Query hooks
   const { data: allClients = [], isLoading, error } = useGetClientsQuery();
@@ -42,13 +46,6 @@ export const ClientsTab = () => {
     name: "",
     isProspect: false,
     isActive: true,
-  });
-
-  // Snackbar state
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success",
   });
 
   // Computed values
@@ -104,9 +101,7 @@ export const ClientsTab = () => {
       handleCloseDialog();
     } catch (error) {
       console.error(`ERROR handleSave: ${error}`);
-      const errorMessage =
-        error.data?.error || t("clients.messages.clientSaveFailed");
-      showNotification(errorMessage, "error");
+      showNotification(extractApiError(error, t("clients.messages.clientSaveFailed")), "error");
     }
   };
 
@@ -133,15 +128,8 @@ export const ClientsTab = () => {
     }
   };
 
-  const formatDate = useCallback((dateString) => {
-    try {
-      const locale = t("common.locale") || "en-US";
-      return new Date(dateString).toLocaleDateString(locale);
-    } catch (err) {
-      console.error(`ERROR formatDate: ${err}`);
-      return dateString;
-    }
-  }, [t]);
+  const locale = t("common.locale") || "en-US";
+  const formatDate = useCallback((ds) => formatDateUtil(ds, locale), [locale]);
 
   // Use shared table configuration - called ONCE here and passed to children
   const {
@@ -161,26 +149,6 @@ export const ClientsTab = () => {
     handleEdit,
     handleDeactivate,
   });
-
-  const showNotification = (message, severity = "success") => {
-    try {
-      setSnackbar({
-        open: true,
-        message,
-        severity,
-      });
-    } catch (err) {
-      console.error(`ERROR showNotification: ${err}`);
-    }
-  };
-
-  const handleCloseSnackbar = () => {
-    try {
-      setSnackbar({ ...snackbar, open: false });
-    } catch (err) {
-      console.error(`ERROR handleCloseSnackbar: ${err}`);
-    }
-  };
 
   // Props compartidos para Desktop y Mobile
   const sharedProps = {
@@ -207,10 +175,9 @@ export const ClientsTab = () => {
     clientForm,
     isSaving,
     clientToDeactivate,
-    snackbar,
+    notificationRef,
     confirmDeactivation,
     isFormValid,
-    handleCloseSnackbar,
     handleCloseDialog,
     handleSave,
     setClientForm,

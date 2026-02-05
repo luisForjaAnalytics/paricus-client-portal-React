@@ -183,6 +183,46 @@ export const ClientBreakdownDesktop = ({
     );
   }
 
+  // For non-admin users: show invoices directly without client breakdown table
+  if (!isAdmin) {
+    return (
+      <Box sx={{ display: { xs: "none", md: "block" }, mb: 4 }}>
+        <Typography
+          sx={{
+            ...titlesTypography.primaryTitle,
+            mb: 2,
+          }}
+        >
+          {t("financials.clientBreakdown.invoices")}
+        </Typography>
+
+        {invoices.length > 0 ? (
+          <InvoicesTableDesktop
+            invoices={invoices}
+            isAdmin={isAdmin}
+            formatDate={formatDate}
+            formatCurrency={formatCurrency}
+            getStatusColor={getStatusColor}
+            viewInvoice={viewInvoice}
+            downloadInvoice={downloadInvoice}
+            openEditInvoiceModal={openEditInvoiceModal}
+            handleDeleteInvoice={handleDeleteInvoice}
+            openPaymentLink={openPaymentLink}
+            onPaymentLinkSuccess={onPaymentLinkSuccess}
+            onPaymentLinkError={onPaymentLinkError}
+          />
+        ) : (
+          <Box sx={{ textAlign: "center", py: 8 }}>
+            <BusinessIcon sx={{ fontSize: 64, color: "text.disabled", mb: 2 }} />
+            <Typography variant="h6" fontWeight="medium" gutterBottom>
+              {t("financials.clientBreakdown.noInvoicesFound")}
+            </Typography>
+          </Box>
+        )}
+      </Box>
+    );
+  }
+
   return (
     <Box sx={{ display: { xs: "none", md: "block" }, mb: 4 }}>
       <Typography

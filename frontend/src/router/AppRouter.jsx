@@ -35,7 +35,6 @@ import {
   TicketsView,
   TicketsViewDesktop,
   TicketViewDetails,
-  TicketsCenter,
 } from "../modules/tickets";
 import { QuickBroadcast } from "../modules/QuickBroadcast";
 
@@ -118,10 +117,6 @@ const router = createBrowserRouter(
             {
               path: "ticketTable/:ticketId",
               element: <TicketViewDetails />,
-            },
-            {
-              path: "changeRequests",
-              element: <TicketsCenter />,
             },
           ],
         },

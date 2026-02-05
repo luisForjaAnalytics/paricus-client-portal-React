@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect } from "react";
 import PropTypes from "prop-types";
 import {
   Box,
@@ -14,15 +14,14 @@ import {
 import { UniversalDataGrid, useDataGridColumns } from "../../../../common/components/ui/DataGrid/UniversalDataGrid";
 import { useTranslation } from "react-i18next";
 import { useGetLogsQuery } from "../../../../store/api/logsApi";
-import { useDispatch } from "react-redux";
-import { logsApi } from "../../../../store/api/logsApi";
 import { LogsViewMobile } from "./LogsViewMobil";
 import AdvancedFilters from "./AdvancedFilters";
-import { SuccessErrorSnackbar } from "../../../../common/components/ui/SuccessErrorSnackbar/SuccessErrorSnackbar";
+import { AlertInline } from "../../../../common/components/ui/AlertInline";
+import { useNotification } from "../../../../common/hooks";
+import { formatTimestamp as formatTimestampUtil } from "../../../../common/utils/formatters";
 
 export const LogsView = () => {
   const { t } = useTranslation();
-  const dispatch = useDispatch();
 
   // Pagination and filter states
   const [paginationModel, setPaginationModel] = useState({
@@ -43,27 +42,24 @@ export const LogsView = () => {
   // State for advanced filters visibility
   const [isOpen, setIsOpen] = useState(false);
 
-  // Snackbar ref for error notifications
-  const snackbarRef = useRef();
+  // Notification hook
+  const { notificationRef, showError } = useNotification();
 
-  // Fetch logs from backend
-  const { data, isLoading, error, refetch } = useGetLogsQuery({
-    page: paginationModel.page + 1,
-    limit: paginationModel.pageSize,
-    search: "", // We'll filter on frontend
-  });
-
-  // Invalidate logs cache when component mounts to force fresh data
-  useEffect(() => {
-    // Invalidate the logs cache to force a refetch
-    dispatch(logsApi.util.invalidateTags(["Logs"]));
-  }, [dispatch]);
+  // Fetch logs from backend with automatic refetch on mount
+  const { data, isLoading, error, refetch } = useGetLogsQuery(
+    {
+      page: paginationModel.page + 1,
+      limit: paginationModel.pageSize,
+      search: "", // We'll filter on frontend
+    },
+    { refetchOnMountOrArgChange: true }
+  );
 
   // Show error snackbar when error occurs
   useEffect(() => {
     if (error) {
       const errorMsg = error?.data?.error || error?.error || t("userManagement.logs.unknownError");
-      snackbarRef.current?.showError(`${t("userManagement.logs.errorLoading")}: ${errorMsg}`);
+      showError(`${t("userManagement.logs.errorLoading")}: ${errorMsg}`);
     }
   }, [error, t]);
 
@@ -150,24 +146,8 @@ export const LogsView = () => {
   const logs = filteredLogs;
   const totalRows = filteredLogs.length;
 
-  // Format timestamp
-  const formatTimestamp = (timestamp) => {
-    try {
-      const locale = t("common.locale") || "en-US";
-      const date = new Date(timestamp);
-      return date.toLocaleString(locale, {
-        year: "numeric",
-        month: "short",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-      });
-    } catch (err) {
-      console.error(`ERROR formatTimestamp: ${err}`);
-      return timestamp;
-    }
-  };
+  const locale = t("common.locale") || "en-US";
+  const formatTimestamp = (ts) => formatTimestampUtil(ts, locale);
 
   // Clean IPv6-mapped IPv4 addresses
   const cleanIpAddress = (ip) => {
@@ -294,6 +274,7 @@ export const LogsView = () => {
       renderCell: (params) => (
         <Chip
           label={params.value}
+          variant="outlined"
           color={getStatusColor(params.value)}
           size="small"
         />
@@ -382,7 +363,7 @@ export const LogsView = () => {
       />
 
       {/* Error Snackbar */}
-      <SuccessErrorSnackbar ref={snackbarRef} />
+      <AlertInline ref={notificationRef} asSnackbar />
     </Box>
   );
 };

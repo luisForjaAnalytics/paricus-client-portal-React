@@ -160,6 +160,12 @@
   font-weight: 600;
 }
 
+/* Highlight (mark) */
+.tiptap-readonly-wrapper .tiptap-readonly mark {
+  background-color: #fff59d;
+  padding: 0.1em 0;
+}
+
 /* Asegurar que el contenedor no crezca innecesariamente */
 .tiptap-readonly-wrapper {
   max-width: 100%;

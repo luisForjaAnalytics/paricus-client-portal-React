@@ -255,7 +255,7 @@ export const ClientFoldersMobile = ({
   ];
 
   return (
-    <Box sx={{ display: { xs: "block", md: "none" }, px: 2 }}>
+    <Box sx={{ display: { xs: "block", md: "none" } }}>
       <UniversalMobilDataTable
         rows={rows}
         columns={enhancedColumns}

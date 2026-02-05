@@ -1,5 +1,5 @@
 // Export main view
-export { default as ReportsManagementView } from "./ReportsManagementView";
+export { ReportsManagementView } from "./ReportsManagementView";
 
 // Export components
 export { default as ClientFolders } from "./components/ClientFolders";

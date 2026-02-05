@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import {
   Button,
@@ -40,7 +40,9 @@ import { SelectMenuItem } from "../../../../common/components/ui/SelectMenuItem/
 import { priorityOptions } from "./options";
 import { ActionButton } from "../../../../common/components/ui/ActionButton/ActionButton";
 import { CancelButton } from "../../../../common/components/ui/CancelButton/CancelButton";
-import { SuccessErrorSnackbar } from "../../../../common/components/ui/SuccessErrorSnackbar/SuccessErrorSnackbar";
+import { AlertInline } from "../../../../common/components/ui/AlertInline";
+import { extractApiError } from "../../../../common/utils/apiHelpers";
+import { useNotification } from "../../../../common/hooks";
 
 export const CreateTickeButton = ({}) => {
   const { t } = useTranslation();
@@ -52,13 +54,13 @@ export const CreateTickeButton = ({}) => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
 
-  // Snackbar ref for notifications
-  const snackbarRef = useRef();
+  // Notification hook
+  const { notificationRef, showSuccess, showError } = useNotification();
 
   // Show error snackbar when error occurs
   useEffect(() => {
     if (error) {
-      snackbarRef.current?.showError(error?.data?.error || t("tickets.createNewTicket.errorCreating"));
+      showError(extractApiError(error, t("tickets.createNewTicket.errorCreating")));
     }
   }, [error, t]);
 
@@ -190,7 +192,7 @@ export const CreateTickeButton = ({}) => {
       }
 
       // Success - show notification, reset form and close modal
-      snackbarRef.current?.showSuccess(t("tickets.createNewTicket.success") || "Ticket created successfully");
+      showSuccess(t("tickets.createNewTicket.success") || "Ticket created successfully");
       reset();
       handleCancelModal();
     } catch (err) {
@@ -443,7 +445,7 @@ export const CreateTickeButton = ({}) => {
       </Dialog>
 
       {/* Error Snackbar */}
-      <SuccessErrorSnackbar ref={snackbarRef} />
+      <AlertInline ref={notificationRef} asSnackbar />
     </>
   );
 };

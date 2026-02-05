@@ -565,6 +565,14 @@ router.get('/:id', authenticateToken, async (req, res) => {
             attachments: {
               orderBy: { uploadedAt: 'desc' },
             },
+            createdBy: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                email: true,
+              },
+            },
           },
         },
         attachments: {
@@ -971,6 +979,7 @@ router.post('/:id/details', authenticateToken, async (req, res) => {
       data: {
         ticketId: id,
         detailData: detail,
+        createdById: req.user.userId,
       },
     });
 
@@ -985,6 +994,14 @@ router.post('/:id/details', authenticateToken, async (req, res) => {
           include: {
             attachments: {
               orderBy: { uploadedAt: 'desc' },
+            },
+            createdBy: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                email: true,
+              },
             },
           },
         },

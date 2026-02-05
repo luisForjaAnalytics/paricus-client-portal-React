@@ -297,25 +297,25 @@ export const TicketsViewDesktop = () => {
           );
         },
       },
-      {
-        field: "actions",
-        headerName: t("tickets.table.actions"),
-        width: 120,
-        align: "center",
-        headerAlign: "center",
-        sortable: false,
-        renderHeader: () => (
-          <ColumnHeaderFilter
-            headerName={t("tickets.table.actions")}
-            filterType="actions"
-            isOpen={isOpen}
-            onSearch={refetch}
-            onClearFilters={clearFilters}
-            loading={isLoading}
-          />
-        ),
-        renderCell: () => null,
-      },
+      // {
+      //   field: "actions",
+      //   headerName: t("tickets.table.actions"),
+      //   width: 120,
+      //   align: "center",
+      //   headerAlign: "center",
+      //   sortable: false,
+      //   renderHeader: () => (
+      //     <ColumnHeaderFilter
+      //       headerName={t("tickets.table.actions")}
+      //       filterType="actions"
+      //       isOpen={isOpen}
+      //       onSearch={refetch}
+      //       onClearFilters={clearFilters}
+      //       loading={isLoading}
+      //     />
+      //   ),
+      //   renderCell: () => null,
+      // },
     ],
     [t, filters, handleFilterChange, isOpen, priorities, statuses, isLoading, refetch, clearFilters]
   );

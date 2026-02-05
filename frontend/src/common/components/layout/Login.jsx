@@ -8,10 +8,7 @@ import {
   Button,
   Typography,
   Link,
-  Alert,
-  Snackbar,
   CircularProgress,
-  Avatar,
 } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
@@ -19,6 +16,9 @@ import { useLoginMutation } from "../../../store/api/authApi";
 import { setCredentials } from "../../../store/auth/authSlice";
 import { colors, primaryIconButton } from "../../styles/styles";
 import LanguageMenu from "./AppBar/LanguageMenu";
+import { extractApiError } from "../../utils/apiHelpers";
+import { useNotification } from "../../hooks";
+import { AlertInline } from "../ui/AlertInline";
 
 const LoginView = () => {
   const { t } = useTranslation();
@@ -30,16 +30,14 @@ const LoginView = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  // Error handling
-  const [showError, setShowError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  // Notification hook
+  const { notificationRef, showError } = useNotification();
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
     if (!email || !password) {
-      setErrorMessage(t("login.fillAllFields"));
-      setShowError(true);
+      showError(t("login.fillAllFields"));
       return;
     }
 
@@ -48,14 +46,9 @@ const LoginView = () => {
       dispatch(setCredentials(result));
       navigate("/app/dashboard", { replace: true });
     } catch (error) {
-      console.error("❌ Login error:", error);
-      setErrorMessage(error?.data?.error || t("login.invalidCredentials"));
-      setShowError(true);
+      console.error("Login error:", error);
+      showError(extractApiError(error, t("login.invalidCredentials")));
     }
-  };
-
-  const handleCloseError = () => {
-    setShowError(false);
   };
 
   return (
@@ -208,22 +201,8 @@ const LoginView = () => {
         </Paper>
       </Container>
 
-      {/* Error Snackbar */}
-      <Snackbar
-        open={showError}
-        autoHideDuration={6000}
-        onClose={handleCloseError}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-      >
-        <Alert
-          onClose={handleCloseError}
-          severity="error"
-          variant="filled"
-          sx={{ width: "100%" }}
-        >
-          {errorMessage}
-        </Alert>
-      </Snackbar>
+      {/* Notifications */}
+      <AlertInline ref={notificationRef} asSnackbar />
     </Box>
   );
 };

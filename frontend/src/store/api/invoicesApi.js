@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { slugToTitle } from "../../common/utils/formatters";
 
 export const invoicesApi = createApi({
   reducerPath: "invoicesApi",
@@ -21,10 +22,7 @@ export const invoicesApi = createApi({
       query: (folder) => `/stats/${folder}`,
       transformResponse: (data, meta, folder) => ({
         folder,
-        folderDisplay: folder
-          .split("-")
-          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(" "),
+        folderDisplay: slugToTitle(folder),
         hasAccess: true,
         ...data.stats,
       }),
@@ -129,10 +127,7 @@ export const invoicesApi = createApi({
 
               return {
                 folder,
-                folderDisplay: folder
-                  .split("-")
-                  .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                  .join(" "),
+                folderDisplay: slugToTitle(folder),
                 hasAccess: true,
                 ...statsRes.data.stats,
                 invoices: invoicesRes.data?.invoices || [],
@@ -143,10 +138,7 @@ export const invoicesApi = createApi({
               }
               return {
                 folder,
-                folderDisplay: folder
-                  .split("-")
-                  .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                  .join(" "),
+                folderDisplay: slugToTitle(folder),
                 hasAccess: true,
                 totalRevenue: 0,
                 outstandingBalance: 0,

@@ -96,11 +96,16 @@ export const InvoicesTableDesktop = ({
             <TableCell sx={table.headerCell}>
               {t("invoices.table.paymentDate")}
             </TableCell>
-            {isAdmin && (
+            {/* {isAdmin && (
               <TableCell sx={table.headerCellInvoice}>
                 {t("invoices.table.paymentLink")}
               </TableCell>
-            )}
+            )} */}
+
+            <TableCell sx={table.headerCellInvoice}>
+              {t("invoices.table.paymentLink")}
+            </TableCell>
+
             <TableCell
               sx={{
                 ...table.headerCell,
@@ -213,7 +218,7 @@ export const InvoicesTableDesktop = ({
                   </Typography>
                 )}
               </TableCell>
-              {isAdmin && (
+              {/* {isAdmin && (
                 <TableCell sx={table.cell}>
                   <PendingLinkModal
                     invoice={invoice}
@@ -221,7 +226,16 @@ export const InvoicesTableDesktop = ({
                     onError={onPaymentLinkError}
                   />
                 </TableCell>
-              )}
+              )}               */}
+
+              <TableCell sx={table.cell}>
+                <PendingLinkModal
+                  invoice={invoice}
+                  onSuccess={onPaymentLinkSuccess}
+                  onError={onPaymentLinkError}
+                />
+              </TableCell>
+
               <TableCell sx={{ ...table.cell, textAlign: "right" }}>
                 <Stack direction="row" spacing={1} justifyContent="flex-end">
                   {!isAdmin && invoice.paymentLink && (

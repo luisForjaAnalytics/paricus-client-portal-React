@@ -1,4 +1,5 @@
 import { useState } from "react";
+import PropTypes from "prop-types";
 import {
   Box,
   Card,
@@ -11,9 +12,9 @@ import {
   Typography,
 } from "@mui/material";
 import { AlertInline } from "../../../../../common/components/ui/AlertInline";
+import { useNotification } from "../../../../../common/hooks";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
-import AttachFileIcon from "@mui/icons-material/AttachFile";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
@@ -27,13 +28,17 @@ import {
 } from "@mui/icons-material";
 import { useTicketDetailAttachments } from "../../../../../common/hooks/useTicketDetailAttachments";
 import { TicketText } from "../../../../../common/components/ui/TicketText";
+import { logger } from "../../../../../common/utils/logger";
+import { getAttachmentUrl } from "../../../../../common/utils/getAttachmentUrl";
+import { imagePreview } from "../../../../../common/styles/styles";
+import { useModal } from "../../../../../common/hooks";
 
 // Helper function to check if file is an image
 const isImageFile = (mimeType) => {
   try {
     return mimeType?.startsWith('image/') || false;
   } catch (error) {
-    console.error('Error checking if file is image:', error);
+    logger.error('Error checking if file is image:', error);
     return false;
   }
 };
@@ -67,7 +72,7 @@ const getFileIcon = (mimeType, size = "medium") => {
         return <FileIcon sx={{ fontSize: iconSize, color: "#999" }} />;
     }
   } catch (error) {
-    console.error('Error getting file icon:', error);
+    logger.error('Error getting file icon:', error);
     return <FileIcon sx={{ fontSize: iconSize, color: "#999" }} />;
   }
 };
@@ -75,62 +80,47 @@ const getFileIcon = (mimeType, size = "medium") => {
 export const DetailAttachmentsView = ({ ticketId, detail }) => {
   const { t } = useTranslation();
   const token = useSelector((state) => state.auth?.token);
+  const { notificationRef, showSuccess, showError } = useNotification();
 
-  const [selectedImage, setSelectedImage] = useState(null);
+  const imageModal = useModal();
   const [imageErrors, setImageErrors] = useState({});
 
   const { handleDelete, isDeleting } = useTicketDetailAttachments(
     ticketId,
-    detail.id
+    detail?.id,
+    {
+      onError: (msg) => showError(msg),
+      onSuccess: (msg) => showSuccess(msg),
+    }
   );
 
   const attachments = detail?.attachments || [];
 
-  // Helper function to build file URL with token
-  const getFileUrl = (attachment) => {
-    try {
-      if (!attachment?.url || !token) return null;
-
-      const baseUrl = import.meta.env.VITE_API_URL.replace('/api', '');
-      const fullUrl = `${baseUrl}${attachment.url}`;
-
-      // Add token as query parameter for authentication
-      return `${fullUrl}?token=${encodeURIComponent(token)}`;
-    } catch (error) {
-      console.error('Error building file URL:', error);
-      return null;
-    }
-  };
-
   const handleAttachmentClick = (attachment) => {
     try {
       if (!attachment) {
-        console.error('Missing attachment data');
+        logger.error('Missing attachment data');
         return;
       }
 
       // For images, show preview dialog
       if (isImageFile(attachment.mimeType)) {
-        setSelectedImage(attachment);
+        imageModal.open(attachment);
       } else {
         // For non-images (PDFs, Office docs), download the file
-        const url = getFileUrl(attachment);
+        const url = getAttachmentUrl(attachment, token);
         if (url) {
           window.open(url, '_blank');
         }
       }
     } catch (error) {
-      console.error('Error handling attachment click:', error);
-      alert('Failed to open file. Please try again.');
+      logger.error('Error handling attachment click:', error);
+      showError('Failed to open file. Please try again.');
     }
   };
 
-  const handleCloseDialog = () => {
-    setSelectedImage(null);
-  };
-
   const handleImageError = (attachmentId) => {
-    console.error(`Failed to load detail attachment image ${attachmentId}`);
+    logger.error(`Failed to load detail attachment image ${attachmentId}`);
     setImageErrors(prev => ({ ...prev, [attachmentId]: true }));
   };
 
@@ -149,7 +139,7 @@ export const DetailAttachmentsView = ({ ticketId, detail }) => {
     <>
       <Box mt={1} display="flex" flexDirection="row" gap={2} flexWrap="wrap">
         {attachments.map((attachment) => {
-          const fileUrl = getFileUrl(attachment);
+          const fileUrl = getAttachmentUrl(attachment, token);
           const hasError = imageErrors[attachment.id];
           const isImage = isImageFile(attachment.mimeType);
 
@@ -260,13 +250,13 @@ export const DetailAttachmentsView = ({ ticketId, detail }) => {
 
       {/* Image Preview Dialog */}
       <Dialog
-        open={!!selectedImage}
-        onClose={handleCloseDialog}
+        open={imageModal.isOpen}
+        onClose={imageModal.close}
         maxWidth="lg"
         fullWidth
       >
         <DialogActions sx={{ p: 1 }}>
-          <IconButton onClick={handleCloseDialog} size="small">
+          <IconButton onClick={imageModal.close} size="small">
             <CloseIcon />
           </IconButton>
         </DialogActions>
@@ -279,35 +269,48 @@ export const DetailAttachmentsView = ({ ticketId, detail }) => {
             minHeight: "300px",
           }}
         >
-          {selectedImage && (
+          {imageModal.data && (
             <>
-              {imageErrors[selectedImage.id] ? (
+              {imageErrors[imageModal.data.id] ? (
                 <AlertInline severity="error" sx={{ maxWidth: 400 }}>
                   {t("tickets.ticketView.imageLoadError")}
                   <br />
                   <TicketText variant="caption">
-                    {selectedImage.fileName}
+                    {imageModal.data.fileName}
                   </TicketText>
                 </AlertInline>
               ) : (
                 <CardMedia
                   component="img"
-                  image={getFileUrl(selectedImage)}
-                  alt={selectedImage.fileName}
-                  sx={{
-                    width: "100%",
-                    height: "auto",
-                    maxHeight: "80vh",
-                    objectFit: "contain",
-                  }}
-                  onError={() => handleImageError(selectedImage.id)}
-                  onLoad={() => handleImageLoad(selectedImage.id)}
+                  image={getAttachmentUrl(imageModal.data, token)}
+                  alt={imageModal.data.fileName}
+                  sx={imagePreview}
+                  onError={() => handleImageError(imageModal.data.id)}
+                  onLoad={() => handleImageLoad(imageModal.data.id)}
                 />
               )}
             </>
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Snackbar for notifications */}
+      <AlertInline ref={notificationRef} asSnackbar />
     </>
   );
+};
+
+DetailAttachmentsView.propTypes = {
+  ticketId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  detail: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    attachments: PropTypes.arrayOf(
+      PropTypes.shape({
+        id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+        fileName: PropTypes.string,
+        mimeType: PropTypes.string,
+        url: PropTypes.string,
+      })
+    ),
+  }).isRequired,
 };

@@ -31,6 +31,7 @@ import {
   paymentMethodOptions,
 } from "./options";
 import { SelectMenuItem } from "../../../../common/components/ui/SelectMenuItem/SelectMenuItem";
+import { extractApiError } from "../../../../common/utils/apiHelpers";
 
 export const UploadInvoiceButton = ({ selectedFolder, onSuccess, onError }) => {
   const { t } = useTranslation();
@@ -158,11 +159,7 @@ export const UploadInvoiceButton = ({ selectedFolder, onSuccess, onError }) => {
       handleCancelModal();
     } catch (err) {
       console.error("Error uploading invoice:", err);
-      const errorMessage =
-        err.data?.errors?.map((e) => e.msg).join(", ") ||
-        err.data?.error ||
-        t("financials.messages.invoiceUploadFailed");
-      onError(errorMessage);
+      onError(extractApiError(err, t("financials.messages.invoiceUploadFailed")));
     }
   };
 

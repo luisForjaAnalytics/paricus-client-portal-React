@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -9,6 +9,7 @@ import {
   Link,
 } from "@mui/material";
 import { AlertInline } from "../../../../common/components/ui/AlertInline";
+import { useNotification } from "../../../../common/hooks";
 import { Assignment } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
@@ -26,40 +27,29 @@ import { getPriorityStyles } from "../../../../common/utils/getStatusProperty";
  * @param {number|null} props.selectedClientId - Client ID to filter tickets
  * @param {number|null} props.selectedUserId - User ID to simulate user view
  */
-export const ActiveTasks = ({ selectedClientId = null, selectedUserId = null }) => {
+export const ActiveTasks = ({
+  selectedClientId = null,
+  selectedUserId = null,
+}) => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const { notificationRef, showError } = useNotification();
 
-  /**
-   * Handle navigation to ticket manager
-   */
-  const handleLink = useCallback(() => {
-    try {
-      navigate("/app/tickets/ticketTable");
-    } catch (error) {
-      console.error("Error navigating to tickets:", error);
-    }
-  }, [navigate]);
-
-  /**
-   * Handle click on ticket - navigate to ticket view
-   */
-  const handleTicketClick = useCallback((ticketId) => {
-    try {
-      navigate(`/app/tickets/ticketView/${ticketId}`);
-    } catch (error) {
-      console.error("Error navigating to ticket:", error);
-    }
-  }, [navigate]);
+  // Get locale for date formatting
+  const locale = i18n.language === "es" ? es : enUS;
 
   // Build query params - userId takes priority to simulate user view
-  const queryParams = useMemo(() => ({
-    limit: 3,
-    sortBy: "createdAt",
-    sortOrder: "desc",
-    ...(selectedUserId && { userId: selectedUserId }),
-    ...(selectedClientId && !selectedUserId && { clientId: selectedClientId }),
-  }), [selectedClientId, selectedUserId]);
+  const queryParams = useMemo(
+    () => ({
+      limit: 3,
+      sortBy: "createdAt",
+      sortOrder: "desc",
+      ...(selectedUserId && { userId: selectedUserId }),
+      ...(selectedClientId &&
+        !selectedUserId && { clientId: selectedClientId }),
+    }),
+    [selectedClientId, selectedUserId],
+  );
 
   // Get last 3 tickets (filtered by userId or clientId if provided)
   const {
@@ -69,57 +59,34 @@ export const ActiveTasks = ({ selectedClientId = null, selectedUserId = null }) 
     refetch,
   } = useGetTicketsQuery(queryParams);
 
-  // Get locale for date formatting
-  const locale = useMemo(() =>
-    i18n.language === "es" ? es : enUS,
-    [i18n.language]
-  );
+  // Navigation handlers
+  const handleLink = () => navigate("/app/tickets/ticketTable");
+  const handleTicketClick = (ticketId) =>
+    navigate(`/app/tickets/ticketTable/${ticketId}`);
+  const handleRetry = () => refetch();
 
-  /**
-   * Format date to relative time (e.g., "2 hours ago")
-   * @param {string|Date} date - Date to format
-   * @returns {string} Formatted relative time
-   */
-  const formatTimeLabel = useCallback((date) => {
-    try {
-      if (!date) return t("common.notAvailable", "N/A");
-
-      const parsedDate = new Date(date);
-      if (isNaN(parsedDate.getTime())) {
-        return t("common.notAvailable", "N/A");
-      }
-
-      return formatDistanceToNow(parsedDate, { locale, addSuffix: false });
-    } catch (error) {
-      console.error("Error formatting date:", error);
-      return t("common.notAvailable", "N/A");
+  // Show error via snackbar when error occurs
+  useEffect(() => {
+    if (error && !isLoading) {
+      showError(
+        error?.data?.message ||
+          t("dashboard.activeTasks.errorLoading", "Error loading tasks"),
+      );
     }
-  }, [locale, t]);
+  }, [error, isLoading, t]);
 
-  /**
-   * Get priority styles safely
-   * @param {string} priority - Priority level
-   * @returns {Object} Style object
-   */
-  const getSafePriorityStyles = useCallback((priority) => {
-    try {
-      return getPriorityStyles(priority) || { color: colors.textSecondary };
-    } catch (error) {
-      console.error("Error getting priority styles:", error);
-      return { color: colors.textSecondary };
-    }
-  }, []);
+  // Format date to relative time (e.g., "2 hours ago")
+  const formatTimeLabel = (date) => {
+    if (!date) return t("common.notAvailable", "N/A");
+    const parsedDate = new Date(date);
+    if (isNaN(parsedDate.getTime())) return t("common.notAvailable", "N/A");
+    return formatDistanceToNow(parsedDate, { locale, addSuffix: false });
+  };
 
-  /**
-   * Handle retry on error
-   */
-  const handleRetry = useCallback(() => {
-    try {
-      refetch();
-    } catch (error) {
-      console.error("Error refetching tickets:", error);
-    }
-  }, [refetch]);
+  // Get priority styles safely
+  const getSafePriorityStyles = (priority) => {
+    return getPriorityStyles(priority) || { color: colors.textSecondary };
+  };
 
   return (
     <Card sx={dashboardStyles.dashboardStatsCard}>
@@ -137,10 +104,7 @@ export const ActiveTasks = ({ selectedClientId = null, selectedUserId = null }) 
             <Box sx={dashboardStyles.dashboardIconContainer}>
               <Assignment sx={{ fontSize: "1.25rem" }} />
             </Box>
-            <AppText
-              variant="body"
-              sx={dashboardStyles.dashboardSectionTitle}
-            >
+            <AppText variant="body" sx={dashboardStyles.dashboardSectionTitle}>
               {t("dashboard.activeTasks.title")}
             </AppText>
           </Box>
@@ -153,15 +117,38 @@ export const ActiveTasks = ({ selectedClientId = null, selectedUserId = null }) 
           </Box>
         )}
 
-        {/* Error State */}
+        {/* Error State - Show empty state with retry option */}
         {error && !isLoading && (
-          <Box sx={{ py: 2 }}>
-            <AlertInline
-              severity="error"
-              onClose={handleRetry}
-              sx={{ cursor: "pointer" }}
-              message={error?.data?.message || t("dashboard.activeTasks.errorLoading", "Error loading tasks")}
-            />
+          <Box
+            sx={{
+              textAlign: "center",
+              py: 4,
+              color: "text.secondary",
+            }}
+          >
+            <Typography variant="body2" sx={{ mb: 1 }}>
+              {t("dashboard.activeTasks.errorLoading", "Error loading tasks")}
+            </Typography>
+            <Link
+              component="button"
+              variant="caption"
+              onClick={handleRetry}
+              underline="none"
+              sx={{
+                color: colors.primary,
+                textTransform: "uppercase",
+                fontWeight: "600",
+                letterSpacing: "0.05em",
+                cursor: "pointer",
+                border: "none",
+                background: "none",
+                "&:hover": {
+                  textDecoration: "underline",
+                },
+              }}
+            >
+              {t("common.retry", "Retry")}
+            </Link>
           </Box>
         )}
 
@@ -198,7 +185,8 @@ export const ActiveTasks = ({ selectedClientId = null, selectedUserId = null }) 
                       borderRadius: 1,
                       transition: "background-color 0.2s ease",
                       "&:hover": {
-                        backgroundColor: colors.surfaceHighest || "rgba(0, 0, 0, 0.04)",
+                        backgroundColor:
+                          colors.surfaceHighest || "rgba(0, 0, 0, 0.04)",
                       },
                     }}
                   >
@@ -220,13 +208,25 @@ export const ActiveTasks = ({ selectedClientId = null, selectedUserId = null }) 
                           minWidth: 0,
                         }}
                       >
-                        <Box
+                        {/* <Box
                           sx={{
                             width: 6,
                             height: 6,
                             borderRadius: "50%",
                             backgroundColor: priorityStyles.color,
                             flexShrink: 0,
+                          }}
+                        /> */}
+                        <Chip
+                          label={ticket?.priority || "Medium"}
+                          size="small"
+                          sx={{
+                            width:'3.5rem',
+                            fontSize: "0.625rem",
+                            height: 20,
+                            flexShrink: 0,
+                            ml: 1,
+                            ...priorityStyles,
                           }}
                         />
                         <Typography
@@ -241,27 +241,16 @@ export const ActiveTasks = ({ selectedClientId = null, selectedUserId = null }) 
                           {ticket?.subject || t("common.untitled", "Untitled")}
                         </Typography>
                       </Box>
-                      <Chip
-                        label={ticket?.priority || "Medium"}
-                        size="small"
-                        sx={{
-                          fontSize: "0.625rem",
-                          height: 20,
-                          flexShrink: 0,
-                          ml: 1,
-                          ...priorityStyles,
-                        }}
-                      />
-                    </Box>
 
-                    {/* Metadata */}
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{ pl: 2 }}
-                    >
-                      {formatTimeLabel(ticket?.createdAt)}
-                    </Typography>
+                      {/* Metadata */}
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ px: 2 }}
+                      >
+                        {formatTimeLabel(ticket?.createdAt)}
+                      </Typography>
+                    </Box>
                   </Box>
                 );
               })
@@ -295,6 +284,9 @@ export const ActiveTasks = ({ selectedClientId = null, selectedUserId = null }) 
           </Box>
         )}
       </CardContent>
+
+      {/* Snackbar para notificaciones */}
+      <AlertInline ref={notificationRef} asSnackbar />
     </Card>
   );
 };

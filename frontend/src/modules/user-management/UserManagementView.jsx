@@ -22,5 +22,3 @@ export const UserManagementView = () => {
     </Box>
   );
 };
-
-export default UserManagementView;

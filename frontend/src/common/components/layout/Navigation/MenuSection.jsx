@@ -112,14 +112,14 @@ export const MenuSectionsAvatar = ({
         }}
       >
         <Typography sx={{ textAlign: "justify", fontWeight: "bold" }}>
-          {`${userAuth.firstName} ${userAuth.lastName}`}
+          {`${userAuth?.firstName || ""} ${userAuth?.lastName || ""}`}
         </Typography>
 
         <Typography
           variant="body2"
           sx={{ textAlign: "justify", color: "text.secondary" }}
         >
-          {userAuth.email}
+          {userAuth?.email || ""}
         </Typography>
       </MenuItem>
 

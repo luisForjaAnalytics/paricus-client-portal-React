@@ -2,6 +2,9 @@ import { useState, useMemo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import { useBreakpoint } from "../../../../common/hooks/useBreakpoint";
+import { useNotification } from "../../../../common/hooks";
+import { extractApiError } from "../../../../common/utils/apiHelpers";
+import { formatDate as formatDateUtil } from "../../../../common/utils/formatters";
 import { UsersTabDesktop } from "./UsersTabDesktop";
 import { UsersTabMobile } from "./UsersTabMobile";
 import { AddNewUserModal } from "./AddNewUserModal";
@@ -22,6 +25,7 @@ export const UsersTab = () => {
   const { t } = useTranslation();
   const { isMobile } = useBreakpoint();
   const authUser = useSelector((state) => state.auth.user);
+  const { notificationRef, showNotification } = useNotification();
 
   // Check if user is BPO Admin or Client Admin
   const isBPOAdmin = authUser?.permissions?.includes("admin_users");
@@ -52,13 +56,6 @@ export const UsersTab = () => {
     client_id: null,
     role_id: null,
     password: "",
-  });
-
-  // Notifications
-  const [notification, setNotification] = useState({
-    open: false,
-    message: "",
-    severity: "success",
   });
 
   // Computed values
@@ -223,7 +220,7 @@ export const UsersTab = () => {
     } catch (error) {
       console.error("Error saving user:", error);
       showNotification(
-        error.data?.error || t("users.messages.saveFailed"),
+        extractApiError(error, t("users.messages.saveFailed")),
         "error"
       );
     }
@@ -245,38 +242,15 @@ export const UsersTab = () => {
     } catch (error) {
       console.error("Error toggling user status:", error);
       showNotification(
-        error.data?.error || t("users.messages.statusUpdateFailed"),
+        extractApiError(error, t("users.messages.statusUpdateFailed")),
         "error"
       );
     }
   };
 
-  const showNotification = (message, severity) => {
-    try {
-      setNotification({ open: true, message, severity });
-    } catch (err) {
-      console.error(`ERROR showNotification: ${err}`);
-    }
-  };
 
-  const handleCloseNotification = () => {
-    try {
-      setNotification({ ...notification, open: false });
-    } catch (err) {
-      console.error(`ERROR handleCloseNotification: ${err}`);
-    }
-  };
-
-  const formatDate = useCallback((dateString) => {
-    if (!dateString) return t("common.na");
-    try {
-      const locale = t("common.locale") || "en-US";
-      return new Date(dateString).toLocaleDateString(locale);
-    } catch (error) {
-      console.error(`ERROR formatDate: ${error}`);
-      return t("common.invalidDate");
-    }
-  }, [t]);
+  const locale = t("common.locale") || "en-US";
+  const formatDate = useCallback((ds) => formatDateUtil(ds, locale), [locale]);
 
   const handleClientChange = (clientId) => {
     try {
@@ -360,8 +334,7 @@ export const UsersTab = () => {
         saveUser={saveUser}
         saving={saving}
         isFormValid={isFormValid}
-        notification={notification}
-        handleCloseNotification={handleCloseNotification}
+        notificationRef={notificationRef}
         clientOptions={clientOptions}
         roleOptions={roleOptions}
         isBPOAdmin={isBPOAdmin}

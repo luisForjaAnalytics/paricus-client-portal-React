@@ -255,7 +255,7 @@ export const LayoutAccount = () => {
         <AppBarLayout titleState={titleState} setTitleState={setTitleState} />
         <Box
           sx={{
-            margin: { xs: "0 0.8rem 0 0.8rem", md: "0 1rem 0 1rem" }, //marring all sections
+            margin: { xs: 0, md: "0 1rem 0 1rem" }, // Mobile: sin margin (controlado por boxTypography.box), Desktop: margin lateral
           }}
         >
           <Outlet context={{ setTitleState }} />

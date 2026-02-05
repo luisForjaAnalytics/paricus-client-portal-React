@@ -144,6 +144,7 @@ export const useClientsTableConfig = ({
           <Chip
             label={isActive ? t("common.active") : t("common.inactive")}
             color={isActive ? "success" : "error"}
+            variant="outlined"
             size="small"
           />
         );
@@ -164,6 +165,7 @@ export const useClientsTableConfig = ({
               isProspect ? t("clients.table.prospect") : t("clients.table.client")
             }
             color={isProspect ? "warning" : "primary"}
+            variant="outlined"
             size="small"
           />
         );

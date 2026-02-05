@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Box, IconButton, Typography, Tooltip } from "@mui/material";
 import {
   Edit as EditIcon,
@@ -19,7 +19,8 @@ import { useTranslation } from "react-i18next";
 import { TableViewMobil } from "./TableViewMobil";
 import { formatDateTime } from "../../../common/utils/formatDateTime";
 import { ArticleSearch } from "./ArticleSearch";
-import { SuccessErrorSnackbar } from "../../../common/components/ui/SuccessErrorSnackbar/SuccessErrorSnackbar";
+import { AlertInline } from "../../../common/components/ui/AlertInline";
+import { useNotification } from "../../../common/hooks";
 
 const dataStructure = (data) => {
   try {
@@ -75,19 +76,19 @@ export const TableView = () => {
   // State for advanced filters visibility
   const [isOpen, setIsOpen] = useState(false);
 
-  // Snackbar ref for error notifications
-  const snackbarRef = useRef();
+  // Notification hook
+  const { notificationRef, showError } = useNotification();
 
   // Show error snackbar when errors occur
   useEffect(() => {
     if (isError) {
-      snackbarRef.current?.showError(t("common.errorLoadingData"));
+      showError(t("common.errorLoadingData"));
     }
   }, [isError, t]);
 
   useEffect(() => {
     if (isSearchError) {
-      snackbarRef.current?.showError(t("knowledgeBase.searchError"));
+      showError(t("knowledgeBase.searchError"));
     }
   }, [isSearchError, t]);
 
@@ -164,7 +165,7 @@ export const TableView = () => {
       });
     } catch (error) {
       console.error("Error fetching article:", error);
-      snackbarRef.current?.showError(t("knowledgeBase.errorFetchingArticle"));
+      showError(t("knowledgeBase.errorFetchingArticle"));
     }
   };
 
@@ -179,7 +180,7 @@ export const TableView = () => {
       });
     } catch (error) {
       console.error("Error fetching article:", error);
-      snackbarRef.current?.showError(t("knowledgeBase.errorFetchingArticle"));
+      showError(t("knowledgeBase.errorFetchingArticle"));
     }
   };
 
@@ -348,7 +349,7 @@ export const TableView = () => {
       />
 
       {/* Error Snackbar */}
-      <SuccessErrorSnackbar ref={snackbarRef} />
+      <AlertInline ref={notificationRef} asSnackbar />
     </Box>
   );
 };
