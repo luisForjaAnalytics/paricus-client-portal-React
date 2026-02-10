@@ -36,7 +36,7 @@ import {
   TicketsViewDesktop,
   TicketViewDetails,
 } from "../modules/tickets";
-import { QuickBroadcast } from "../modules/QuickBroadcast";
+import { QuickBroadcast, QuickBroadcastView, SwiperControl } from "../modules/QuickBroadcast";
 
 const router = createBrowserRouter(
   [
@@ -189,6 +189,20 @@ const router = createBrowserRouter(
               <QuickBroadcast />
             </ProtectedRoute>
           ),
+          children: [
+            {
+              index: true,
+              element: <QuickBroadcastView />,
+            },
+            {
+              path: "quick-broadcast",
+              element: <QuickBroadcastView />,
+            },
+            {
+              path: "swiper-control",
+              element: <SwiperControl />,
+            },
+          ],
         },
       ],
     },

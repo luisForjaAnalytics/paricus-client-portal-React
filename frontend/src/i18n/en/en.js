@@ -15,6 +15,8 @@ export default {
     logs: "Logs",
     myProfile: "My Profile",
     broadcast: "Broadcast",
+    quickBroadcast: "Quick Broadcast",
+    swiperControl: "Swiper Control",
   },
 
   // Navigation tooltips (when sidebar is collapsed)
@@ -980,6 +982,22 @@ export default {
     emptySubject: "Please enter a subject",
     noClientsSelected: "Please select at least one client",
     filesAttached: "file(s) attached",
+  },
+  swiperControl: {
+    selectClient: "Select Client",
+    globalImages: "Global (All Clients)",
+    selectAll: "Select All",
+    slide: "Slide {{number}}",
+    invalidType: "Only image files are allowed (JPG, PNG, GIF, WEBP)",
+    fileTooLarge: "File exceeds the 5MB limit",
+    noChanges: "No changes to save",
+    saveSuccess: "Carousel images saved successfully",
+    saveError: "Error saving images",
+    saving: "Saving...",
+    save: "Save",
+  },
+  selectMenuItem: {
+    selected: "selected",
   },
   priorityLevels: {
     low: "Low",

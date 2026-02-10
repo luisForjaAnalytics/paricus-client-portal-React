@@ -27,10 +27,20 @@ export const DashboardViewSelect = ({
   // Get user permissions and token
   const permissions = useSelector((state) => state.auth?.permissions);
   const token = useSelector((state) => state.auth?.token);
+  const user = useSelector((state) => state.auth?.user);
   const isBPOAdmin = permissions?.includes("admin_clients") ?? false;
 
-  // Fetch carousel images
-  const { data: carouselImages = [] } = useGetCarouselImagesQuery();
+  // Fetch carousel images for the appropriate client
+  // BPO Admin with selected client → that client's images
+  // BPO Admin with no client selected → all available images
+  // Regular user → their own client's images
+  // Backend handles fallback to global if no client-specific images exist
+  const carouselClientId = isBPOAdmin
+    ? selectedClientId || undefined
+    : user?.clientId;
+  const { data: carouselImages = [] } =
+    useGetCarouselImagesQuery(carouselClientId);
+  const hasCarouselImages = carouselImages.length > 0;
 
   const {
     data: stats,
@@ -115,37 +125,34 @@ export const DashboardViewSelect = ({
       {/* Top Stats Cards */}
       <DashboardStatisticsView stats={stats} />
 
-      {/* Main Content Grid: Announcements (50%) + Swiper (50%) */}
+      {/* Main Content Grid: Announcements + Swiper (if images exist) */}
       <Box
         sx={{
           display: "grid",
           gridTemplateColumns: {
             xs: "1fr",
-            lg: "1fr 1fr",
+            lg: hasCarouselImages ? "1fr 1fr" : "1fr",
           },
           mb: 3,
           gap: 3,
-          height: "32vh",
-          // minHeight: { xs: "auto", lg: "35vh" },
-          // "& > *": {
-          //   minHeight: { xs: "250px", lg: "100%" },
-          //   height: "30vh",
-          // },
+          height: { xs: "40vh", md: "32vh" },
         }}
       >
         {/* Announcements Inbox */}
         <AnnouncementsInbox />
-        {/* Swiper — map API data into fixed 4-slot array */}
-        <SwiperView
-          images={Array.from({ length: 4 }, (_, i) => {
-            const img = carouselImages.find((c) => c.slotIndex === i);
-            if (!img) return null;
-            return {
-              previewUrl: getAttachmentUrl(img, token),
-              name: img.fileName,
-            };
-          })}
-        />
+        {/* Swiper — only render if there are saved images */}
+        {hasCarouselImages && (
+          <SwiperView
+            images={Array.from({ length: 4 }, (_, i) => {
+              const img = carouselImages.find((c) => c.slotIndex === i);
+              if (!img) return null;
+              return {
+                previewUrl: getAttachmentUrl(img, token),
+                name: img.fileName,
+              };
+            })}
+          />
+        )}
       </Box>
 
       <Box

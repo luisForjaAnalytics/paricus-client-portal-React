@@ -76,18 +76,53 @@ function authenticateTokenFlexible(req, res, next) {
 }
 
 // ========================================
-// GET ALL CAROUSEL IMAGES
+// GET CAROUSEL IMAGES (client-aware with fallback)
 // ========================================
 router.get(
   '/',
   authenticateToken,
   async (req, res) => {
     try {
-      const images = await prisma.carouselImage.findMany({
-        orderBy: { slotIndex: 'asc' }
-      });
+      const { clientId: queryClientId } = req.query;
+      const userClientId = req.user.clientId;
+      const isAdmin = req.user.permissions.includes('admin_dashboard_config');
 
-      // Add URL to each image
+      let images;
+
+      if (isAdmin && queryClientId === undefined) {
+        // BPO Admin with no client filter → return ALL images
+        images = await prisma.carouselImage.findMany({
+          orderBy: [{ clientId: 'asc' }, { slotIndex: 'asc' }]
+        });
+      } else if (isAdmin && queryClientId !== undefined) {
+        // BPO Admin filtering by specific client
+        const targetClientId = queryClientId === 'null' ? null : parseInt(queryClientId);
+
+        if (targetClientId !== null) {
+          const clientImages = await prisma.carouselImage.findMany({
+            where: { clientId: targetClientId },
+            orderBy: { slotIndex: 'asc' }
+          });
+          images = clientImages.length > 0
+            ? clientImages
+            : await prisma.carouselImage.findMany({ where: { clientId: null }, orderBy: { slotIndex: 'asc' } });
+        } else {
+          images = await prisma.carouselImage.findMany({
+            where: { clientId: null },
+            orderBy: { slotIndex: 'asc' }
+          });
+        }
+      } else {
+        // Regular user → their own client's images, fallback to global
+        const clientImages = await prisma.carouselImage.findMany({
+          where: { clientId: userClientId },
+          orderBy: { slotIndex: 'asc' }
+        });
+        images = clientImages.length > 0
+          ? clientImages
+          : await prisma.carouselImage.findMany({ where: { clientId: null }, orderBy: { slotIndex: 'asc' } });
+      }
+
       const imagesWithUrls = images.map(img => ({
         ...img,
         url: `/api/carousel/${img.id}/file`
@@ -113,6 +148,12 @@ router.post(
     try {
       const files = req.files || [];
       const slotIndices = req.body.slotIndices;
+      const { clientId } = req.body;
+
+      // Parse clientId: "null" or empty → null (global), otherwise integer
+      const targetClientId = (!clientId || clientId === 'null' || clientId === '')
+        ? null
+        : parseInt(clientId);
 
       if (files.length === 0) {
         return res.status(400).json({ success: false, error: 'No images uploaded' });
@@ -139,10 +180,15 @@ router.post(
           continue;
         }
 
-        // Check if there's an existing image in this slot
-        const existing = await prisma.carouselImage.findUnique({
-          where: { slotIndex }
-        });
+        // Check if there's an existing image in this client+slot
+        // findUnique doesn't support null in composite keys, use findFirst for global
+        const existing = targetClientId !== null
+          ? await prisma.carouselImage.findUnique({
+              where: { clientId_slotIndex: { clientId: targetClientId, slotIndex } }
+            })
+          : await prisma.carouselImage.findFirst({
+              where: { clientId: null, slotIndex }
+            });
 
         // Delete old file from disk if replacing
         if (existing) {
@@ -156,6 +202,7 @@ router.post(
         // Create new record
         const record = await prisma.carouselImage.create({
           data: {
+            clientId: targetClientId,
             slotIndex,
             fileName: file.originalname,
             filePath: file.filename,
@@ -180,7 +227,7 @@ router.post(
           if (fs.existsSync(f.path)) fs.unlinkSync(f.path);
         });
       }
-      res.status(500).json({ success: false, error: 'Error saving carousel images' });
+      res.status(500).json({ success: false, error: 'Error saving carousel images', details: error.message });
     }
   }
 );

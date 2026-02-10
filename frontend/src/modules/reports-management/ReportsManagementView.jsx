@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Box } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { ClientFolders } from "./components/ClientFolders";

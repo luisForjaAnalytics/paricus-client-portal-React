@@ -1279,13 +1279,26 @@ export const dashboardStyles = {
       },
     },
   },
+};
 
-  // Compact selectors for Quick Broadcast (same style but smaller height)
+// Quick Broadcast Card (special styling for admin actions)
+export const quickBroadcastCard = {
+  backgroundColor: colors.surface,
+  borderRadius: "1rem",
+  border: `1px solid ${colors.border}`,
+  boxShadow: "none",
+  overflow: "hidden",
+  width: { xs: "100%", md: "100%" },
+  height: { xs: "85vh", md: "auto" },
+  mt: { xs: 0, md: 8 },
+  transition: "border-color 200ms ease-in-out",
+  "&:hover": {
+    borderColor: colors.primary,
+  },
+    // Compact selectors for Quick Broadcast (same style but smaller height)
   compactSelector: {
     inputLabelSection: {
       fontSize: "0.75rem",
-      fontWeight: typography.fontWeight.semibold,
-      color: colors.textSecondary,
       top: "-2px",
       "&.MuiInputLabel-shrink": {
         top: "0",
@@ -1296,8 +1309,8 @@ export const dashboardStyles = {
     },
     selectSection: {
       height: "36px",
-      backgroundColor: colors.surface,
-      borderRadius: borderRadiusSection,
+      backgroundColor: "white",
+      borderRadius: "0.75rem",
       fontSize: "0.75rem",
       "& .MuiSelect-select": {
         padding: "6px 12px",
@@ -1325,20 +1338,69 @@ export const dashboardStyles = {
     },
   },
 };
-
-// Quick Broadcast Card (special styling for admin actions)
-export const quickBroadcastCard = {
+// ========================================
+// Swiper Control styles
+// ========================================
+export const swiperControlStyles = {
+  display: "grid",
+  gridTemplateColumns: { xs: "1fr", md: "auto 1fr" },
+  gridTemplateRows: { md: "1fr auto" },
   backgroundColor: colors.surface,
   borderRadius: "1rem",
   border: `1px solid ${colors.border}`,
   boxShadow: "none",
   overflow: "hidden",
-  width: { xs: "100%", md: "100%" },
-  height:{xs:'85vh', md:'auto'},
-  mt: { xs: 0, md: 8 },
+  width: { xs: "100%", md: "100%", lg: "66%" },
+  height: { xs: "auto", md: "auto" },
+  mt: { xs: 5, md: 8 },
+  mx: { xs: 0, md: "auto" },
+  my: 3,
+  p: 3,
   transition: "border-color 200ms ease-in-out",
   "&:hover": {
     borderColor: colors.primary,
+  },
+    // Compact selectors for Quick Broadcast (same style but smaller height)
+  compactSelector: {
+    inputLabelSection: {
+      fontSize: "0.75rem",
+      top: "-2px",
+      "&.MuiInputLabel-shrink": {
+        top: "0",
+      },
+      "&.Mui-focused": {
+        color: colors.primary,
+      },
+    },
+    selectSection: {
+      height: "36px",
+      backgroundColor: "white",
+      borderRadius: "0.75rem",
+      fontSize: "0.75rem",
+      "& .MuiSelect-select": {
+        padding: "6px 12px",
+        display: "flex",
+        alignItems: "center",
+      },
+      "& .MuiOutlinedInput-notchedOutline": {
+        borderColor: colors.border,
+        transition: "border-color 0.2s ease",
+      },
+      "&:hover .MuiOutlinedInput-notchedOutline": {
+        borderColor: colors.primary,
+      },
+      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+        borderColor: colors.primary,
+        borderWidth: "2px",
+      },
+    },
+    menuItem: {
+      fontSize: "0.75rem",
+    },
+    chip: {
+      fontSize: "0.65rem",
+      height: "20px",
+    },
   },
 };
 

@@ -39,49 +39,6 @@ import { AlertInline } from "../../../common/components/ui/AlertInline";
 import { extractApiError } from "../../../common/utils/apiHelpers";
 import { useNotification } from "../../../common/hooks";
 
-// Compact selector styles for Quick Broadcast
-const compactSelector = {
-  inputLabelSection: {
-    fontSize: "0.75rem",
-    top: "-2px",
-    "&.MuiInputLabel-shrink": {
-      top: "0",
-    },
-    "&.Mui-focused": {
-      color: colors.primary,
-    },
-  },
-  selectSection: {
-    height: "36px",
-    backgroundColor: "white",
-    borderRadius: "0.75rem",
-    fontSize: "0.75rem",
-    "& .MuiSelect-select": {
-      padding: "6px 12px",
-      display: "flex",
-      alignItems: "center",
-    },
-    "& .MuiOutlinedInput-notchedOutline": {
-      borderColor: colors.border,
-      transition: "border-color 0.2s ease",
-    },
-    "&:hover .MuiOutlinedInput-notchedOutline": {
-      borderColor: colors.primary,
-    },
-    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-      borderColor: colors.primary,
-      borderWidth: "2px",
-    },
-  },
-  menuItem: {
-    fontSize: "0.75rem",
-  },
-  chip: {
-    fontSize: "0.65rem",
-    height: "20px",
-  },
-};
-
 export const QuickBroadcastView = () => {
   const { t } = useTranslation();
   const [subject, setSubject] = useState("");
@@ -349,7 +306,7 @@ export const QuickBroadcastView = () => {
                   <FormControl size="small" fullWidth>
                     <InputLabel
                       id="clients-select-label"
-                      sx={compactSelector.inputLabelSection}
+                      sx={quickBroadcastCard.compactSelector.inputLabelSection}
                     >
                       {t("quickBroadcast.selectClients")}
                     </InputLabel>
@@ -374,7 +331,7 @@ export const QuickBroadcastView = () => {
                               label={t("quickBroadcast.selectAll")}
                               size="small"
                               color="primary"
-                              sx={compactSelector.chip}
+                              sx={quickBroadcastCard.compactSelector.chip}
                             />
                           ) : selected.length > 0 ? (
                             <Chip
@@ -383,15 +340,15 @@ export const QuickBroadcastView = () => {
                                 "selected"
                               }`}
                               size="small"
-                              sx={compactSelector.chip}
+                              sx={quickBroadcastCard.qcompactSelector.chip}
                             />
                           ) : null}
                         </Box>
                       )}
-                      sx={compactSelector.selectSection}
+                      sx={quickBroadcastCard.compactSelector.selectSection}
                     >
                       {/* Select All Option */}
-                      <MenuItem value="all" sx={compactSelector.menuItem}>
+                      <MenuItem value="all" sx={quickBroadcastCard.compactSelector.menuItem}>
                         <Box
                           sx={{
                             display: "flex",
@@ -418,7 +375,7 @@ export const QuickBroadcastView = () => {
                         <MenuItem
                           key={client.id}
                           value={client.id}
-                          sx={compactSelector.menuItem}
+                          sx={quickBroadcastCard.compactSelector.menuItem}
                         >
                           <Box
                             sx={{
@@ -456,9 +413,9 @@ export const QuickBroadcastView = () => {
                 onChange={setPriority}
                 size="small"
                 showDot={true}
-                sx={compactSelector.selectSection}
-                inputLabelSx={compactSelector.inputLabelSection}
-                menuItemSx={compactSelector.menuItem}
+                sx={quickBroadcastCard.compactSelector.selectSection}
+                inputLabelSx={quickBroadcastCard.compactSelector.inputLabelSection}
+                menuItemSx={quickBroadcastCard.compactSelector.menuItem}
               />
             </Box>
           </Box>

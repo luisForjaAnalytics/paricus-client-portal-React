@@ -14,11 +14,16 @@ export const carouselApi = createApi({
   }),
   tagTypes: ["CarouselImages"],
   endpoints: (builder) => ({
-    // Get all carousel images
+    // Get carousel images (optionally filtered by clientId)
     getCarouselImages: builder.query({
-      query: () => "/",
+      query: (clientId) => ({
+        url: "/",
+        params: clientId != null ? { clientId } : {},
+      }),
       transformResponse: (response) => response.data || [],
-      providesTags: ["CarouselImages"],
+      providesTags: (result, error, clientId) => [
+        { type: "CarouselImages", id: clientId ?? "GLOBAL" },
+      ],
       keepUnusedDataFor: 300,
     }),
 

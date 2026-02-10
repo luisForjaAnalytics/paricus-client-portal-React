@@ -1,11 +1,10 @@
-import React, { useRef } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
 import { Autoplay, Pagination, Navigation } from "swiper/modules";
-import { Box, Card, CardContent, IconButton, Typography } from "@mui/material";
-import { Close } from "@mui/icons-material";
+import { Box, Card, CardContent, Typography } from "@mui/material";
+import { useTranslation } from "react-i18next";
 import { dashboardStyles, colors } from "../../../styles/styles";
 
 const swiperStyles = {
@@ -20,7 +19,7 @@ const swiperStyles = {
     "& .swiper-slide": {
       textAlign: "center",
       fontSize: "18px",
-      background: "#f5f5f5",
+      background: colors.surfaceHighest,
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
@@ -35,27 +34,17 @@ const swiperStyles = {
       objectFit: "contain",
     },
     "& .swiper-button-next, & .swiper-button-prev": {
-      color: "#1976d2",
+      color: colors.primary,
       transform: "scale(0.7)",
     },
     "& .swiper-pagination-bullet-active": {
-      backgroundColor: "#1976d2",
+      backgroundColor: colors.primary,
     },
   },
 };
 
-export const SwiperView = ({ images = [], onRemove }) => {
-  const progressCircle = useRef(null);
-  const progressContent = useRef(null);
-
-  const onAutoplayTimeLeft = (s, time, progress) => {
-    if (progressCircle.current) {
-      progressCircle.current.style.strokeDashoffset = `${125.6 * (1 - progress)}px`;
-    }
-    if (progressContent.current) {
-      progressContent.current.textContent = `${Math.ceil(time / 1000)}s`;
-    }
-  };
+export const SwiperView = ({ images = [] }) => {
+  const { t } = useTranslation();
 
   const hasImages = images.some(Boolean);
 
@@ -81,42 +70,17 @@ export const SwiperView = ({ images = [], onRemove }) => {
             pagination={{ clickable: true }}
             navigation={true}
             modules={[Autoplay, Pagination, Navigation]}
-            onAutoplayTimeLeft={onAutoplayTimeLeft}
           >
             {images.map((image, index) => (
               <SwiperSlide key={`slide-${index}`}>
                 {image ? (
-                  <>
-                    <img src={image.previewUrl} alt={image.name} />
-                    {onRemove && (
-                      <IconButton
-                        size="small"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onRemove(index);
-                        }}
-                        sx={{
-                          position: "absolute",
-                          top: 8,
-                          right: 8,
-                          zIndex: 10,
-                          backgroundColor: "rgba(0,0,0,0.5)",
-                          color: "#fff",
-                          "&:hover": {
-                            backgroundColor: "rgba(0,0,0,0.7)",
-                          },
-                        }}
-                      >
-                        <Close fontSize="small" />
-                      </IconButton>
-                    )}
-                  </>
+                  <img src={image.previewUrl} alt={image.name} />
                 ) : (
                   <Typography
                     variant="h6"
                     sx={{ color: colors.textMuted, userSelect: "none" }}
                   >
-                    Slide {index + 1}
+                    {t("swiperControl.slide", { number: index + 1 })}
                   </Typography>
                 )}
               </SwiperSlide>

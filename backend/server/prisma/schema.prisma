@@ -23,6 +23,7 @@ model Client {
   invoices               Invoice[]
   tickets                Ticket[]
   announcementRecipients AnnouncementRecipient[]
+  carouselImages         CarouselImage[]
 
   @@index([isActive])
   @@index([isProspect])
@@ -394,7 +395,8 @@ model AnnouncementAttachment {
 
 model CarouselImage {
   id        Int      @id @default(autoincrement())
-  slotIndex Int      @unique @map("slot_index") // 0-3
+  clientId  Int?     @map("client_id")
+  slotIndex Int      @map("slot_index") // 0-3
   fileName  String   @map("file_name")
   filePath  String   @map("file_path")
   mimeType  String   @map("mime_type")
@@ -402,6 +404,10 @@ model CarouselImage {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
+  client Client? @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@unique([clientId, slotIndex])
+  @@index([clientId])
   @@index([slotIndex])
   @@map("carousel_images")
 }

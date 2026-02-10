@@ -17,6 +17,8 @@ export default {
     logs: "Registros",
     myProfile: "Mi Perfil",
     broadcast: "Anuncios",
+    quickBroadcast: "Difusión Rápida",
+    swiperControl: "Control de Slides",
   },
 
   // Tooltips de navegación (cuando el sidebar está colapsado)
@@ -983,6 +985,22 @@ export default {
     emptySubject: "Por favor ingrese un asunto",
     noClientsSelected: "Por favor selecciona al menos un cliente",
     filesAttached: "archivo(s) adjunto(s)",
+  },
+  swiperControl: {
+    selectClient: "Seleccionar Cliente",
+    globalImages: "Global (Todos los Clientes)",
+    selectAll: "Seleccionar Todos",
+    slide: "Slide {{number}}",
+    invalidType: "Solo se permiten archivos de imagen (JPG, PNG, GIF, WEBP)",
+    fileTooLarge: "El archivo excede el limite de 5MB",
+    noChanges: "No hay cambios para guardar",
+    saveSuccess: "Imagenes del carrusel guardadas correctamente",
+    saveError: "Error al guardar las imagenes",
+    saving: "Guardando...",
+    save: "Guardar",
+  },
+  selectMenuItem: {
+    selected: "seleccionados",
   },
   priorityLevels: {
     low: "Baja",

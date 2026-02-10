@@ -1,37 +1,40 @@
-import { forwardRef } from "react";
+import { forwardRef, useMemo, useCallback } from "react";
 import {
   Box,
+  Chip,
   FormControl,
   InputLabel,
   MenuItem,
+  OutlinedInput,
   Select,
   Typography,
 } from "@mui/material";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
-import { selectMenuProps, modalCard } from "../../../styles/styles";
+import { CheckBox, CheckBoxOutlineBlank } from "@mui/icons-material";
+import { selectMenuProps, modalCard, colors } from "../../../styles/styles";
 import { getPriorityStyles } from "../../../utils/getStatusProperty";
 
+const CHECK_ICON_SX = { fontSize: "1rem", color: colors.primary };
+const UNCHECK_ICON_SX = { fontSize: "1rem" };
+const DOT_BASE_SX = {
+  width: 6,
+  height: 6,
+  borderRadius: "50%",
+  marginRight: "0.3rem",
+};
+
 /**
- * SelectMenuItem - Componente reutilizable para Select con opciones
+ * SelectMenuItem - Reusable Select component with normalized options
  *
- * @param {Object} props
- * @param {string} props.name - Nombre del campo (para id y labelId)
- * @param {string} props.label - Key de traducción para el label
- * @param {Array} props.options - Array de opciones: [{ value, labelKey, dot? }] o strings
- * @param {string|number} props.value - Valor seleccionado
- * @param {Function} props.onChange - Función callback cuando cambia el valor
- * @param {Object} props.field - Props de React Hook Form field (opcional)
- * @param {boolean} props.error - Si hay error de validación
- * @param {boolean} props.required - Si es campo requerido
- * @param {boolean} props.disabled - Si está deshabilitado
- * @param {boolean} props.fullWidth - Si ocupa todo el ancho
- * @param {string} props.size - Tamaño del select ("small" | "medium")
- * @param {Object} props.sx - Estilos adicionales para el Select
- * @param {Object} props.formControlSx - Estilos adicionales para el FormControl
- * @param {Object} props.menuItemSx - Estilos adicionales para los MenuItem
- * @param {boolean} props.showDot - Mostrar indicador de color (para priority)
- * @param {string} props.dotColorKey - Key para obtener color del dot (default: usa getPriorityStyles)
+ * Supports single/multiple selection, checkmarks, priority dots, and Select All.
+ * Compatible with React Hook Form via `field` prop.
+ *
+ * @example Single select
+ * <SelectMenuItem name="status" label="Status" options={statusOptions} value={status} onChange={setStatus} />
+ *
+ * @example Multiple select with Select All
+ * <SelectMenuItem name="clients" label="Clients" options={clientOptions} value={selected} onChange={setSelected} multiple showCheck selectAllLabel="selectAll" />
  */
 export const SelectMenuItem = forwardRef(
   (
@@ -52,49 +55,131 @@ export const SelectMenuItem = forwardRef(
       menuItemSx,
       inputLabelSx,
       showDot = false,
+      showCheck = false,
+      multiple = false,
+      selectAllLabel,
+      chipSx,
     },
     ref
   ) => {
     const { t } = useTranslation();
 
-    // Validación de props
-    if (!options || !Array.isArray(options)) {
-      console.warn("SelectMenuItem: options debe ser un array");
+    // Normalize options — supports both strings and objects
+    const normalizedOptions = useMemo(() => {
+      if (!Array.isArray(options)) return [];
+      return options.map((opt) =>
+        typeof opt === "string" ? { value: opt, labelKey: opt } : opt
+      );
+    }, [options]);
+
+    // Early return after hooks
+    if (normalizedOptions.length === 0 && !Array.isArray(options)) {
+      console.warn("SelectMenuItem: options must be an array");
       return null;
     }
 
-    // Normalizar opciones - soporta tanto objetos como strings
-    const normalizedOptions = options.map((opt) => {
-      if (typeof opt === "string") {
-        return { value: opt, labelKey: opt };
-      }
-      return opt;
-    });
+    // Resolve the current value safely
+    const currentValue = value ?? (multiple ? [] : "");
 
-    // Manejar cambio de valor
-    const handleChange = (event) => {
-      try {
-        const newValue = event.target.value;
-        if (field?.onChange) {
-          field.onChange(newValue);
-        } else if (onChange) {
-          onChange(newValue);
+    // Check if all options are selected (multiple mode)
+    const allValues = useMemo(
+      () => normalizedOptions.map((o) => o.value),
+      [normalizedOptions]
+    );
+    const allSelected =
+      multiple &&
+      normalizedOptions.length > 0 &&
+      Array.isArray(currentValue) &&
+      allValues.every((v) => currentValue.includes(v));
+
+    // Dispatch value to either field (React Hook Form) or onChange
+    const dispatch = useCallback(
+      (newValue) => {
+        try {
+          if (field?.onChange) {
+            field.onChange(newValue);
+          } else if (onChange) {
+            onChange(newValue);
+          }
+        } catch (err) {
+          console.error("SelectMenuItem: dispatch error", err);
         }
-      } catch (err) {
-        console.error(`SelectMenuItem: onChange Error ${err}`);
-      }
-    };
+      },
+      [field, onChange]
+    );
 
-    // Obtener color del dot basado en el valor
-    const getDotColor = (optionValue) => {
+    const handleChange = useCallback(
+      (event) => {
+        try {
+          const newValue = event.target.value;
+
+          // Handle "Select All" toggle in multiple mode
+          if (multiple && selectAllLabel && newValue.includes("__select_all__")) {
+            dispatch(allSelected ? [] : allValues);
+            return;
+          }
+
+          dispatch(newValue);
+        } catch (err) {
+          console.error("SelectMenuItem: onChange error", err);
+        }
+      },
+      [multiple, selectAllLabel, allSelected, allValues, dispatch]
+    );
+
+    // Check if a specific option is selected
+    const isSelected = useCallback(
+      (optionValue) => {
+        if (multiple) {
+          return Array.isArray(currentValue) && currentValue.includes(optionValue);
+        }
+        return currentValue === optionValue;
+      },
+      [multiple, currentValue]
+    );
+
+    // Get dot color for priority indicators
+    const getDotColor = useCallback((optionValue) => {
       try {
-        const styles = getPriorityStyles(optionValue.toLowerCase());
+        const key = String(optionValue).toLowerCase();
+        const styles = getPriorityStyles(key);
         return styles?.color || "#757575";
       } catch {
         return "#757575";
       }
-    };
+    }, []);
 
+    // Render check icon based on selection state
+    const renderCheckIcon = (selected) =>
+      selected ? (
+        <CheckBox sx={CHECK_ICON_SX} />
+      ) : (
+        <CheckBoxOutlineBlank sx={UNCHECK_ICON_SX} />
+      );
+
+    // Render chip(s) for multiple select display
+    const renderMultipleValue = useCallback(
+      (selected) => {
+        if (!selected || selected.length === 0) return null;
+        return (
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+            <Chip
+              label={
+                allSelected && selectAllLabel
+                  ? t(selectAllLabel)
+                  : `${selected.length} ${t("selectMenuItem.selected", "selected")}`
+              }
+              size="small"
+              color={allSelected ? "primary" : "default"}
+              sx={chipSx}
+            />
+          </Box>
+        );
+      },
+      [allSelected, selectAllLabel, chipSx, t]
+    );
+
+    const fontSize = size === "small" ? "0.75rem" : "inherit";
     const labelId = `${name}-select-label`;
     const selectId = `${name}-select`;
 
@@ -117,13 +202,18 @@ export const SelectMenuItem = forwardRef(
           ref={ref}
           labelId={labelId}
           id={selectId}
-          value={value ?? ""}
+          value={currentValue}
           onChange={handleChange}
           label={t(label)}
           MenuProps={selectMenuProps}
+          multiple={multiple}
+          {...(multiple && {
+            input: <OutlinedInput label={t(label)} />,
+            renderValue: renderMultipleValue,
+          })}
           sx={{
             ...modalCard?.multiOptionFilter?.selectSection,
-            height: "3rem",
+            height: multiple ? "auto" : "3rem",
             ...sx,
           }}
           {...(field && {
@@ -131,27 +221,39 @@ export const SelectMenuItem = forwardRef(
             onBlur: field.onBlur,
           })}
         >
+          {/* Select All option (multiple mode only) */}
+          {multiple && selectAllLabel && (
+            <MenuItem
+              value="__select_all__"
+              sx={{ color: "text.primary", ...menuItemSx }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                {showCheck && renderCheckIcon(allSelected)}
+                <Typography fontSize={fontSize} fontWeight="bold">
+                  {t(selectAllLabel)}
+                </Typography>
+              </Box>
+            </MenuItem>
+          )}
+
+          {/* Option items */}
           {normalizedOptions.map((option, index) => (
             <MenuItem
-              key={option.value || index}
+              key={option.value ?? index}
               value={option.value}
               sx={{ color: "text.primary", ...menuItemSx }}
             >
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                {showCheck && renderCheckIcon(isSelected(option.value))}
                 {showDot && (
                   <Box
                     sx={{
-                      width: 6,
-                      height: 6,
-                      borderRadius: "50%",
-                      marginRight: "0.3rem",
+                      ...DOT_BASE_SX,
                       backgroundColor: getDotColor(option.value),
                     }}
                   />
                 )}
-                <Typography
-                  fontSize={size === "small" ? "0.75rem" : "inherit"}
-                >
+                <Typography fontSize={fontSize}>
                   {t(option.labelKey)}
                 </Typography>
               </Box>
@@ -178,7 +280,13 @@ SelectMenuItem.propTypes = {
       }),
     ])
   ).isRequired,
-  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  value: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.number,
+    PropTypes.arrayOf(
+      PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+    ),
+  ]),
   onChange: PropTypes.func,
   field: PropTypes.object,
   error: PropTypes.bool,
@@ -191,4 +299,8 @@ SelectMenuItem.propTypes = {
   menuItemSx: PropTypes.object,
   inputLabelSx: PropTypes.object,
   showDot: PropTypes.bool,
+  showCheck: PropTypes.bool,
+  multiple: PropTypes.bool,
+  selectAllLabel: PropTypes.string,
+  chipSx: PropTypes.object,
 };

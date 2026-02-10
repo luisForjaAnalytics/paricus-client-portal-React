@@ -96,8 +96,22 @@ export const menuItemsAdmin = [
   {
     label: "broadcast",
     icon: <CampaignIcon fontSize="medium" />,
-    route: "broadcast",
+    route: "broadcast/quick-broadcast",
     permission: "admin_broadcast",
+    subItems: [
+      {
+        label: "quickBroadcast",
+        icon: <CampaignIcon fontSize="medium" />,
+        route: "broadcast/quick-broadcast",
+        permission: "admin_broadcast",
+      },
+      {
+        label: "swiperControl",
+        icon: <AppRegistrationIcon fontSize="medium" />,
+        route: "broadcast/swiper-control",
+        permission: "admin_broadcast",
+      },
+    ],
   },
 ];
 

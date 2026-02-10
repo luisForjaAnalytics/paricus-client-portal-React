@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Box,
   Button,
@@ -9,34 +8,34 @@ import {
   IconButton,
   Paper,
   Typography,
-} from '@mui/material';
-import { AlertInline } from '../../common/components/ui/AlertInline';
-import { useNotification } from '../../common/hooks';
-import { useTranslation } from 'react-i18next';
+} from "@mui/material";
+import { AlertInline } from "../../common/components/ui/AlertInline";
+import { useNotification } from "../../common/hooks";
+import { useTranslation } from "react-i18next";
 import {
   Refresh as RefreshIcon,
   PictureAsPdf as PdfIcon,
   Download as DownloadIcon,
   Error as ErrorIcon,
   Description as DescriptionIcon,
-  Folder as FolderIcon
-} from '@mui/icons-material';
+  Folder as FolderIcon,
+} from "@mui/icons-material";
 import {
   useGetAccessibleFoldersQuery,
   useGetClientReportsQuery,
   useLazyDownloadReportQuery,
-} from '../../store/api/reportsApi';
+} from "../../store/api/reportsApi";
 import {
   primaryButton,
   primaryIconButton,
   outlinedIconButton,
   typography,
-} from '../../common/styles/styles';
+} from "../../common/styles/styles";
 import {
   slugToTitle,
   formatFileSize,
   formatDate,
-} from '../../common/utils/formatters';
+} from "../../common/utils/formatters";
 
 // Component to display a single folder's reports using RTK Query
 const FolderReportsSection = ({ folder, downloadReport }) => {
@@ -44,15 +43,26 @@ const FolderReportsSection = ({ folder, downloadReport }) => {
   const {
     data: reports = [],
     isLoading,
-    refetch
+    refetch,
   } = useGetClientReportsQuery(folder);
 
-  const DATE_SHORT_OPTIONS = { year: 'numeric', month: 'short', day: 'numeric' };
+  const DATE_SHORT_OPTIONS = {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  };
 
   return (
     <Paper variant="outlined" sx={{ p: 2 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 2,
+        }}
+      >
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <FolderIcon color="primary" />
           <Typography variant="h6" component="h3">
             {slugToTitle(folder)}
@@ -61,12 +71,14 @@ const FolderReportsSection = ({ folder, downloadReport }) => {
         <Button
           size="small"
           variant="outlined"
-          startIcon={isLoading ? <CircularProgress size={16} /> : <RefreshIcon />}
+          startIcon={
+            isLoading ? <CircularProgress size={16} /> : <RefreshIcon />
+          }
           onClick={() => refetch()}
           disabled={isLoading}
           sx={outlinedIconButton}
         >
-          {isLoading ? t('common.loading') : t('reporting.refreshReports')}
+          {isLoading ? t("common.loading") : t("reporting.refreshReports")}
         </Button>
       </Box>
 
@@ -79,34 +91,48 @@ const FolderReportsSection = ({ folder, downloadReport }) => {
                 variant="outlined"
                 sx={{
                   p: 2,
-                  cursor: 'pointer',
-                  '&:hover': {
+                  cursor: "pointer",
+                  "&:hover": {
                     boxShadow: 2,
-                    bgcolor: 'action.hover'
+                    bgcolor: "action.hover",
                   },
-                  transition: 'all 0.2s'
+                  transition: "all 0.2s",
                 }}
                 onClick={() => downloadReport(report, folder)}
               >
-                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
-                  <PdfIcon sx={{ fontSize: 32, color: 'error.main', flexShrink: 0 }} />
+                <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2 }}>
+                  <PdfIcon
+                    sx={{ fontSize: 32, color: "error.main", flexShrink: 0 }}
+                  />
                   <Box sx={{ flexGrow: 1, minWidth: 0 }}>
                     <Typography
                       variant="body2"
                       fontWeight={500}
                       sx={{
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap'
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
                       }}
                     >
                       {report.name}
                     </Typography>
-                    <Typography variant="caption" color="text.secondary" display="block">
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      display="block"
+                    >
                       {formatFileSize(report.size)}
                     </Typography>
-                    <Typography variant="caption" color="text.disabled" display="block">
-                      {formatDate(report.lastModified, 'en-US', DATE_SHORT_OPTIONS)}
+                    <Typography
+                      variant="caption"
+                      color="text.disabled"
+                      display="block"
+                    >
+                      {formatDate(
+                        report.lastModified,
+                        "en-US",
+                        DATE_SHORT_OPTIONS,
+                      )}
                     </Typography>
                   </Box>
                   <IconButton size="small" color="primary">
@@ -118,9 +144,9 @@ const FolderReportsSection = ({ folder, downloadReport }) => {
           ))}
         </Grid>
       ) : !isLoading ? (
-        <Box sx={{ textAlign: 'center', py: 4 }}>
+        <Box sx={{ textAlign: "center", py: 4 }}>
           <Typography variant="body2" color="text.secondary">
-            {t('reporting.noReportsInFolder')}
+            {t("reporting.noReportsInFolder")}
           </Typography>
         </Box>
       ) : null}
@@ -144,30 +170,32 @@ export const ReportingView = () => {
   const { notificationRef, showNotification } = useNotification();
 
   // Derived error message
-  const error = apiError?.data?.message || apiError?.error || '';
+  const error = apiError?.data?.message || apiError?.error || "";
 
   const downloadReport = async (report, folder) => {
     try {
       const fileName = report.name;
-      showNotification(t('reporting.generatingLink'), 'info');
+      showNotification(t("reporting.generatingLink"), "info");
 
       const result = await getDownloadUrl({ folder, fileName }).unwrap();
 
       if (result.downloadUrl) {
-        window.open(result.downloadUrl, '_blank');
-        showNotification(t('reporting.downloadStarted'), 'success');
+        window.open(result.downloadUrl, "_blank");
+        showNotification(t("reporting.downloadStarted"), "success");
       } else {
-        throw new Error('No download URL received');
+        throw new Error("No download URL received");
       }
     } catch (err) {
-      console.error('Error downloading report:', err);
-      showNotification(err.data?.message || t('reporting.downloadFailed'), 'error');
+      console.error("Error downloading report:", err);
+      showNotification(
+        err.data?.message || t("reporting.downloadFailed"),
+        "error",
+      );
     }
   };
 
-
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
       {/* Page Header */}
       <Box sx={{ mb: 2 }}>
         <Typography
@@ -177,7 +205,7 @@ export const ReportingView = () => {
             fontFamily: typography.fontFamily,
           }}
         >
-          {t('reporting.title')}
+          {t("reporting.title")}
         </Typography>
       </Box>
 
@@ -185,15 +213,15 @@ export const ReportingView = () => {
       <Card>
         <CardContent sx={{ p: 3 }}>
           <Typography variant="h6" component="h2" fontWeight={600} gutterBottom>
-            {t('reporting.title')}
+            {t("reporting.title")}
           </Typography>
           <Box
             sx={{
-              width: '100%',
-              overflow: 'hidden',
+              width: "100%",
+              overflow: "hidden",
               borderRadius: 2,
-              border: '1px solid',
-              borderColor: 'divider'
+              border: "1px solid",
+              borderColor: "divider",
             }}
           >
             <iframe
@@ -203,7 +231,7 @@ export const ReportingView = () => {
               src="https://app.powerbi.com/reportEmbed?reportId=ba4c808d-3d64-428e-94a0-ccc0be060f40&autoAuth=true&ctid=b850aa77-85c3-4720-80ca-97ae75dca583"
               frameBorder="0"
               allowFullScreen={true}
-              style={{ width: '100%' }}
+              style={{ width: "100%" }}
             />
           </Box>
         </CardContent>
@@ -212,48 +240,67 @@ export const ReportingView = () => {
       {/* PDF Reports Section */}
       <Card>
         <CardContent sx={{ p: 3 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: 3,
+            }}
+          >
             <Typography variant="h6" component="h2" fontWeight={600}>
-              {t('reporting.clientTitle')}
+              {t("reporting.clientTitle")}
             </Typography>
             <Button
               variant="contained"
-              startIcon={loading ? <CircularProgress size={16} color="inherit" /> : <RefreshIcon />}
+              startIcon={
+                loading ? (
+                  <CircularProgress size={16} color="inherit" />
+                ) : (
+                  <RefreshIcon />
+                )
+              }
               onClick={() => refetch()}
               disabled={loading}
               sx={primaryIconButton}
             >
-              {loading ? t('common.loading') : t('reporting.refreshReports')}
+              {loading ? t("common.loading") : t("reporting.refreshReports")}
             </Button>
           </Box>
 
           {/* Loading State */}
           {loading && (
-            <Box sx={{ textAlign: 'center', py: 8 }}>
+            <Box sx={{ textAlign: "center", py: 8 }}>
               <CircularProgress size={40} sx={{ mb: 2 }} />
-              <Typography color="text.secondary">{t('reporting.loadingReports')}</Typography>
+              <Typography color="text.secondary">
+                {t("reporting.loadingReports")}
+              </Typography>
             </Box>
           )}
 
           {/* Error State */}
           {!loading && error && (
-            <Box sx={{ textAlign: 'center', py: 8 }}>
-              <ErrorIcon sx={{ fontSize: 48, color: 'error.main', mb: 2 }} />
+            <Box sx={{ textAlign: "center", py: 8 }}>
+              <ErrorIcon sx={{ fontSize: 48, color: "error.main", mb: 2 }} />
               <Typography variant="h6" gutterBottom>
-                {t('reporting.errorLoading')}
+                {t("reporting.errorLoading")}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                 {error}
               </Typography>
-              <Button variant="contained" onClick={() => refetch()} sx={primaryButton}>
-                {t('common.tryAgain')}
+              <Button
+                variant="contained"
+                onClick={() => refetch()}
+                sx={primaryButton}
+              >
+                {t("common.tryAgain")}
               </Button>
             </Box>
           )}
 
           {/* Folders Section */}
           {!loading && !error && accessibleFolders.length > 0 && (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
               {accessibleFolders.map((folder) => (
                 <FolderReportsSection
                   key={folder}
@@ -266,13 +313,15 @@ export const ReportingView = () => {
 
           {/* No Reports State */}
           {!loading && !error && accessibleFolders.length === 0 && (
-            <Box sx={{ textAlign: 'center', py: 8 }}>
-              <DescriptionIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 2 }} />
+            <Box sx={{ textAlign: "center", py: 8 }}>
+              <DescriptionIcon
+                sx={{ fontSize: 48, color: "text.disabled", mb: 2 }}
+              />
               <Typography variant="h6" gutterBottom>
-                {t('reporting.noReports')}
+                {t("reporting.noReports")}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {t('reporting.noReportsMessage')}
+                {t("reporting.noReportsMessage")}
               </Typography>
             </Box>
           )}
@@ -284,6 +333,5 @@ export const ReportingView = () => {
     </Box>
   );
 };
-
 
 export default ReportingView;
