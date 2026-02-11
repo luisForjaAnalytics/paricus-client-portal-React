@@ -17,6 +17,9 @@ export default {
     broadcast: "Broadcast",
     quickBroadcast: "Quick Broadcast",
     swiperControl: "Swiper Control",
+    dashboardApk: "APK",
+    dashboardSwiper: "Swiper",
+    dashboardGeneralInfo: "General Information",
   },
 
   // Navigation tooltips (when sidebar is collapsed)
@@ -898,6 +901,8 @@ export default {
 
   dashboard: {
     title: "Dashboard",
+    viewing: "Viewing",
+    errorLoadingData: "Error loading dashboard data. Click to retry.",
     selectClient: "View Client",
     allClients: "All Clients",
     selectUser: "View User",

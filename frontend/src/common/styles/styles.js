@@ -1166,7 +1166,7 @@ export const dashboardStyles = {
   // Dashboard Stats Card (clean, modern design without left border)
   dashboardStatsCard: {
     backgroundColor: colors.surface,
-    borderRadius: "1rem", // rounded-2xl for modern look
+    borderRadius: { xs: "2rem", md: "1.5rem" }, // rounded-2xl for modern look
     border: `1px solid ${colors.border}`, // Subtle border
     boxShadow: "none", // No heavy shadows
     overflow: "hidden",
@@ -1295,7 +1295,7 @@ export const quickBroadcastCard = {
   "&:hover": {
     borderColor: colors.primary,
   },
-    // Compact selectors for Quick Broadcast (same style but smaller height)
+  // Compact selectors for Quick Broadcast (same style but smaller height)
   compactSelector: {
     inputLabelSection: {
       fontSize: "0.75rem",
@@ -1360,7 +1360,7 @@ export const swiperControlStyles = {
   "&:hover": {
     borderColor: colors.primary,
   },
-    // Compact selectors for Quick Broadcast (same style but smaller height)
+  // Compact selectors for Quick Broadcast (same style but smaller height)
   compactSelector: {
     inputLabelSection: {
       fontSize: "0.75rem",

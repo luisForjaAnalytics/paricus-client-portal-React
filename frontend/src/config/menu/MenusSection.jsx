@@ -12,14 +12,37 @@ import PersonIcon from "@mui/icons-material/Person";
 import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
 import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
 import DashboardIcon from "@mui/icons-material/Dashboard";
+import BackupTableIcon from "@mui/icons-material/BackupTable";
+import SwipeRightIcon from "@mui/icons-material/SwipeRight";
+import AnnouncementIcon from "@mui/icons-material/Announcement";
 
 // Drawer menu - Common items (visible based on permission)
 export const menuItemsCommon = [
   {
     label: "dashboard",
     icon: <DashboardIcon fontSize="medium" />,
-    route: "dashboard",
+    route: "dashboard/apk",
     permission: "view_dashboard",
+    subItems: [
+      {
+        label: "dashboardApk",
+        icon: <BackupTableIcon fontSize="medium" />,
+        route: "dashboard/apk",
+        permission: "view_dashboard",
+      },
+      {
+        label: "dashboardSwiper",
+        icon: <SwipeRightIcon fontSize="medium" />,
+        route: "dashboard/swiper",
+        permission: "view_dashboard",
+      },
+      {
+        label: "dashboardGeneralInfo",
+        icon: <AnnouncementIcon fontSize="medium" />,
+        route: "dashboard/general-info",
+        permission: "view_dashboard",
+      },
+    ],
   },
   {
     label: "reporting",

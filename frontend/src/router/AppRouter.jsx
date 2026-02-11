@@ -10,7 +10,7 @@ import { LayoutAccount, Login } from "../common/components/layout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
 // Module views
-import { DashboardView } from "../modules/dashboard";
+import { DashboardView, DashboardViewSelect } from "../modules/dashboard";
 import { FinancialsView } from "../modules/financials";
 import { AudioRecordingsView } from "../modules/audio-recordings";
 import {
@@ -57,6 +57,24 @@ const router = createBrowserRouter(
               <DashboardView />
             </ProtectedRoute>
           ),
+          children: [
+            {
+              index: true,
+              element: <DashboardViewSelect />,
+            },
+            {
+              path: "apk",
+              element: <DashboardViewSelect />,
+            },
+            {
+              path: "swiper",
+              element: <DashboardViewSelect />,
+            },
+            {
+              path: "general-info",
+              element: <DashboardViewSelect />,
+            },
+          ],
         },
         {
           path: "reporting",

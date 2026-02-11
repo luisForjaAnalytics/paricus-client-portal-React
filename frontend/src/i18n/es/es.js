@@ -19,6 +19,9 @@ export default {
     broadcast: "Anuncios",
     quickBroadcast: "Difusión Rápida",
     swiperControl: "Control de Slides",
+    dashboardApk: "APK",
+    dashboardSwiper: "Swiper",
+    dashboardGeneralInfo: "Información General",
   },
 
   // Tooltips de navegación (cuando el sidebar está colapsado)
@@ -900,6 +903,8 @@ export default {
   },
   dashboard: {
     title: "Dashboard",
+    viewing: "Viendo",
+    errorLoadingData: "Error al cargar los datos del dashboard. Haz clic para reintentar.",
     selectClient: "Ver Cliente",
     allClients: "Todos los Clientes",
     selectUser: "Ver Usuario",

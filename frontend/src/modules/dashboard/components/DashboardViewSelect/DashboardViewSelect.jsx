@@ -1,8 +1,8 @@
 import { Box, CircularProgress, Chip } from "@mui/material";
+import { useOutletContext, useLocation } from "react-router-dom";
 import { AlertInline } from "../../../../common/components/ui/AlertInline";
 import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
-import PropTypes from "prop-types";
 import { useGetDashboardStatsQuery } from "../../../../store/api/dashboardApi";
 import { AnnouncementsInbox } from "../AnnouncementsInbox";
 import { DashboardStatisticsView } from "../DashboardStatisticsView/DashboardStatisticsView";
@@ -14,15 +14,20 @@ import { getAttachmentUrl } from "../../../../common/utils/getAttachmentUrl";
 
 /**
  * DashboardViewSelect - Displays dashboard content based on selected client/user
- * @param {Object} props
- * @param {number|null} props.selectedClientId - Client ID to filter data
- * @param {number|null} props.selectedUserId - User ID to simulate user view
+ * Desktop: all sections visible (no changes)
+ * Mobile: shows only the active section based on current route
+ *   - /apk → DashboardStatisticsView
+ *   - /swiper → SwiperView
+ *   - /general-info → AnnouncementsInbox + ActiveTasks + MasterRepository
  */
-export const DashboardViewSelect = ({
-  selectedClientId = null,
-  selectedUserId = null,
-}) => {
+export const DashboardViewSelect = () => {
+  const { selectedClientId = null, selectedUserId = null } =
+    useOutletContext() || {};
   const { t } = useTranslation();
+  const location = useLocation();
+
+  // Determine active mobile section from route
+  const section = location.pathname.split("/").pop();
 
   // Get user permissions and token
   const permissions = useSelector((state) => state.auth?.permissions);
@@ -30,11 +35,7 @@ export const DashboardViewSelect = ({
   const user = useSelector((state) => state.auth?.user);
   const isBPOAdmin = permissions?.includes("admin_clients") ?? false;
 
-  // Fetch carousel images for the appropriate client
-  // BPO Admin with selected client → that client's images
-  // BPO Admin with no client selected → all available images
-  // Regular user → their own client's images
-  // Backend handles fallback to global if no client-specific images exist
+  // Fetch carousel images
   const carouselClientId = isBPOAdmin
     ? selectedClientId || undefined
     : user?.clientId;
@@ -48,15 +49,10 @@ export const DashboardViewSelect = ({
     error,
     refetch,
   } = useGetDashboardStatsQuery(selectedClientId, {
-    // Refetch every 5 minutes
     pollingInterval: 300000,
-    // Refetch when window regains focus
     refetchOnFocus: true,
   });
 
-  /**
-   * Handle retry on error
-   */
   const handleRetry = () => {
     try {
       refetch();
@@ -86,10 +82,7 @@ export const DashboardViewSelect = ({
     const errorMessage =
       error?.data?.message ||
       error?.message ||
-      t(
-        "dashboard.errorLoadingData",
-        "Error loading dashboard data. Click to retry.",
-      );
+      t("dashboard.errorLoadingData");
 
     return (
       <Box sx={{ p: 3 }}>
@@ -114,7 +107,7 @@ export const DashboardViewSelect = ({
       {isBPOAdmin && stats?.selectedClient && (
         <Box sx={{ mb: 2 }}>
           <Chip
-            label={`${t("dashboard.viewing", "Viewing")}: ${stats.selectedClient.name}`}
+            label={`${t("dashboard.viewing")}: ${stats.selectedClient.name}`}
             color="primary"
             variant="outlined"
             size="small"
@@ -122,13 +115,28 @@ export const DashboardViewSelect = ({
         </Box>
       )}
 
-      {/* Top Stats Cards */}
-      <DashboardStatisticsView stats={stats} />
-
-      {/* Main Content Grid: Announcements + Swiper (if images exist) */}
+      {/* Section APK: Statistics — mobile: only on /apk, desktop: always */}
       <Box
         sx={{
-          display: "grid",
+          display: {
+            xs: section === "apk" ? "block" : "none",
+            md: "block",
+          },
+        }}
+      >
+        <DashboardStatisticsView stats={stats} />
+      </Box>
+
+      {/* Announcements + Swiper grid */}
+      <Box
+        sx={{
+          display: {
+            xs:
+              section === "swiper" || section === "general-info"
+                ? "grid"
+                : "none",
+            md: "grid",
+          },
           gridTemplateColumns: {
             xs: "1fr",
             lg: hasCarouselImages ? "1fr 1fr" : "1fr",
@@ -138,47 +146,66 @@ export const DashboardViewSelect = ({
           height: { xs: "40vh", md: "32vh" },
         }}
       >
-        {/* Announcements Inbox */}
-        <AnnouncementsInbox />
-        {/* Swiper — only render if there are saved images */}
+        {/* Announcements — mobile: only on /general-info, desktop: always */}
+        <Box
+          sx={{
+            display: {
+              xs: section === "general-info" ? "block" : "none",
+              md: "block",
+            },
+            minHeight: 0,
+            overflow: "hidden",
+          }}
+        >
+          <AnnouncementsInbox />
+        </Box>
+
+        {/* Section Swiper — mobile: only on /swiper, desktop: always */}
         {hasCarouselImages && (
-          <SwiperView
-            images={Array.from({ length: 4 }, (_, i) => {
-              const img = carouselImages.find((c) => c.slotIndex === i);
-              if (!img) return null;
-              return {
-                previewUrl: getAttachmentUrl(img, token),
-                name: img.fileName,
-              };
-            }).filter(Boolean)}
-          />
+          <Box
+            sx={{
+              display: {
+                xs: section === "swiper" ? "block" : "none",
+                md: "block",
+              },
+              minHeight: 0,
+              overflow: "hidden",
+            }}
+          >
+            <SwiperView
+              images={Array.from({ length: 4 }, (_, i) => {
+                const img = carouselImages.find((c) => c.slotIndex === i);
+                if (!img) return null;
+                return {
+                  previewUrl: getAttachmentUrl(img, token),
+                  name: img.fileName,
+                };
+              }).filter(Boolean)}
+            />
+          </Box>
         )}
       </Box>
 
+      {/* Section General Info: Active Tasks + Master Repository */}
       <Box
         sx={{
-          display: "grid",
+          display: {
+            xs: section === "general-info" ? "grid" : "none",
+            md: "grid",
+          },
           gridTemplateColumns: {
             xs: "1fr",
-            lg: "1fr 1fr ",
+            lg: "1fr 1fr",
           },
           gap: 3,
         }}
       >
-        {/* Active Tasks */}
         <ActiveTasks
           selectedClientId={selectedClientId}
           selectedUserId={selectedUserId}
         />
-
-        {/* Master Repository */}
         <MasterRepository />
       </Box>
     </Box>
   );
-};
-
-DashboardViewSelect.propTypes = {
-  selectedClientId: PropTypes.number,
-  selectedUserId: PropTypes.number,
 };
