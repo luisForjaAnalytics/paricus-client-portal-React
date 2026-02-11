@@ -150,7 +150,7 @@ export const DashboardViewSelect = ({
                 previewUrl: getAttachmentUrl(img, token),
                 name: img.fileName,
               };
-            })}
+            }).filter(Boolean)}
           />
         )}
       </Box>
