@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { colors, modalCard } from "../../../../../common/styles/styles";
-import { CancelButton } from "../../../../../common/components/ui/CancelButton/CancelButton";
+import { CancelButton } from "../../../../../common/components/ui/CancelButton";
 import { useGetDepartmentsQuery } from "../../../../../store/api/ticketsApi";
 
 /**

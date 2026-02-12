@@ -6,7 +6,7 @@ import { ticketStyle, colors, scrollableContainer } from "../../../../../common/
 import { TicketText } from "../../../../../common/components/ui/TicketText";
 import { TiptapReadOnly } from "../../../../../common/components/ui/TiptapReadOnly/TiptapReadOnly";
 import { DetailAttachmentsView } from "./DetailAttachmentsView";
-import { GetInitialsAvatar } from "../../../../../common/components/ui/GetInitialsAvatar/GetInitialsAvatar";
+import { GetInitialsAvatar } from "../../../../../common/components/ui/GetInitialsAvatar";
 
 export const TicketHistoricalInfo = ({ ticket }) => {
   const { t } = useTranslation();

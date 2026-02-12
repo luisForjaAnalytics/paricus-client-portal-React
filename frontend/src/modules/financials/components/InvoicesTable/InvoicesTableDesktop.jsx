@@ -25,10 +25,10 @@ import {
   typography,
   statusBadges,
 } from "../../../../common/styles/styles";
-import { DeleteButton } from "../../../../common/components/ui/DeleteButton/DeleteButton";
-import { DownloadButton } from "../../../../common/components/ui/DownloadButton/DownloadButton";
-import { EditButton } from "../../../../common/components/ui/EditButton/EditButton";
-import { ViewButton } from "../../../../common/components/ui/ViewButton/ViewButton";
+import { DeleteButton } from "../../../../common/components/ui/DeleteButton";
+import { DownloadButton } from "../../../../common/components/ui/DownloadButton";
+import { EditButton } from "../../../../common/components/ui/EditButton";
+import { ViewButton } from "../../../../common/components/ui/ViewButton";
 
 export const InvoicesTableDesktop = ({
   invoices,

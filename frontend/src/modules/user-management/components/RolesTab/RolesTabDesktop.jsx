@@ -4,7 +4,7 @@ import { UniversalDataGrid } from "../../../../common/components/ui/DataGrid/Uni
 import { useTranslation } from "react-i18next";
 import { PermissionsModal } from "./PermissionsModal";
 import { FilterButton } from "../FilterButton/FilterButton";
-import { ActionButton } from "../../../../common/components/ui/ActionButton/ActionButton";
+import { ActionButton } from "../../../../common/components/ui/ActionButton";
 
 /**
  * RolesTabDesktop - Desktop view for roles table

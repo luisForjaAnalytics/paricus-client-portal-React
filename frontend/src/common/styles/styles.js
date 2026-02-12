@@ -364,6 +364,16 @@ export const buttonIconNoLabel = {
 };
 
 // ========================================
+// Nav Bar  STYLES
+// ========================================
+export const navBar = {
+  menuAvatar: {
+    mt: "40px",
+    ml: { xs: "0.3rem", md: "1rem" },
+    "& .MuiMenu-paper": { borderRadius: "1rem" },
+  },
+};
+// ========================================
 // CARD STYLES
 // ========================================
 // Based on STYLE_GUIDE.md card components

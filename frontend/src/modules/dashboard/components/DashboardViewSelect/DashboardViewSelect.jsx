@@ -8,7 +8,7 @@ import { AnnouncementsInbox } from "../AnnouncementsInbox";
 import { DashboardStatisticsView } from "../DashboardStatisticsView/DashboardStatisticsView";
 import { ActiveTasks } from "../ActiveTasks";
 import { MasterRepository } from "../MasterRepository";
-import { SwiperView } from "../../../../common/components/ui/Swiper/SwiperView";
+import { SwiperView } from "../../../../common/components/ui/Swiper";
 import { useGetCarouselImagesQuery } from "../../../../store/api/carouselApi";
 import { getAttachmentUrl } from "../../../../common/utils/getAttachmentUrl";
 
@@ -16,7 +16,7 @@ import { getAttachmentUrl } from "../../../../common/utils/getAttachmentUrl";
  * DashboardViewSelect - Displays dashboard content based on selected client/user
  * Desktop: all sections visible (no changes)
  * Mobile: shows only the active section based on current route
- *   - /apk → DashboardStatisticsView
+ *   - /kpi → DashboardStatisticsView
  *   - /swiper → SwiperView
  *   - /general-info → AnnouncementsInbox + ActiveTasks + MasterRepository
  */
@@ -80,9 +80,7 @@ export const DashboardViewSelect = () => {
   // Error state
   if (error) {
     const errorMessage =
-      error?.data?.message ||
-      error?.message ||
-      t("dashboard.errorLoadingData");
+      error?.data?.message || error?.message || t("dashboard.errorLoadingData");
 
     return (
       <Box sx={{ p: 3 }}>
@@ -115,11 +113,11 @@ export const DashboardViewSelect = () => {
         </Box>
       )}
 
-      {/* Section APK: Statistics — mobile: only on /apk, desktop: always */}
+      {/* Section KPI: Statistics — mobile: only on /kpi, desktop: always */}
       <Box
         sx={{
           display: {
-            xs: section === "apk" ? "block" : "none",
+            xs: section === "kpi" ? "block" : "none",
             md: "block",
           },
         }}
@@ -127,14 +125,11 @@ export const DashboardViewSelect = () => {
         <DashboardStatisticsView stats={stats} />
       </Box>
 
-      {/* Announcements + Swiper grid */}
+      {/* Announcements + Swiper grid — mobile: both on /swiper, desktop: always */}
       <Box
         sx={{
           display: {
-            xs:
-              section === "swiper" || section === "general-info"
-                ? "grid"
-                : "none",
+            xs: section === "swiper" ? "grid" : "none",
             md: "grid",
           },
           gridTemplateColumns: {
@@ -143,16 +138,12 @@ export const DashboardViewSelect = () => {
           },
           mb: 3,
           gap: 3,
-          height: { xs: "40vh", md: "32vh" },
+          height: { xs: "auto", md: "32vh" },
         }}
       >
-        {/* Announcements — mobile: only on /general-info, desktop: always */}
         <Box
           sx={{
-            display: {
-              xs: section === "general-info" ? "block" : "none",
-              md: "block",
-            },
+            display: { xs: "none", md: "flex" },
             minHeight: 0,
             overflow: "hidden",
           }}
@@ -160,18 +151,8 @@ export const DashboardViewSelect = () => {
           <AnnouncementsInbox />
         </Box>
 
-        {/* Section Swiper — mobile: only on /swiper, desktop: always */}
         {hasCarouselImages && (
-          <Box
-            sx={{
-              display: {
-                xs: section === "swiper" ? "block" : "none",
-                md: "block",
-              },
-              minHeight: 0,
-              overflow: "hidden",
-            }}
-          >
+          <Box sx={{ minHeight: 0, overflow: "hidden" }}>
             <SwiperView
               images={Array.from({ length: 4 }, (_, i) => {
                 const img = carouselImages.find((c) => c.slotIndex === i);
@@ -184,6 +165,16 @@ export const DashboardViewSelect = () => {
             />
           </Box>
         )}
+
+        <Box
+          sx={{
+            display: { xs: "flex", md: "none" },
+            minHeight: 0,
+            overflow: "hidden",
+          }}
+        >
+          <AnnouncementsInbox />
+        </Box>
       </Box>
 
       {/* Section General Info: Active Tasks + Master Repository */}

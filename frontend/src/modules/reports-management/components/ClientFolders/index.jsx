@@ -21,7 +21,7 @@ import {
   titlesTypography,
   outlinedIconButton,
 } from "../../../../common/styles/styles";
-import { ActionButton } from "../../../../common/components/ui/ActionButton/ActionButton";
+import { ActionButton } from "../../../../common/components/ui/ActionButton";
 
 /**
  * ClientFolders - Main component that coordinates Desktop/Mobile views

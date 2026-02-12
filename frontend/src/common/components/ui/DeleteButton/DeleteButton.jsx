@@ -19,8 +19,8 @@ import { useTranslation } from "react-i18next";
 import { colors, modalCard } from "../../../styles/styles";
 import { AlertInline } from "../AlertInline";
 import { useNotification } from "../../../hooks";
-import { ActionButton } from "../ActionButton/ActionButton";
-import { CancelButton } from "../CancelButton/CancelButton";
+import { ActionButton } from "../ActionButton";
+import { CancelButton } from "../CancelButton";
 
 /**
  * DeleteButton - Botón de eliminación con diálogo de confirmación y snackbar integrado

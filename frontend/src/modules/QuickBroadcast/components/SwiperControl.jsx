@@ -1,6 +1,6 @@
 import { Box, Button, CircularProgress } from "@mui/material";
 import { AddPhotoAlternate, Image, Save } from "@mui/icons-material";
-import { SwiperView } from "../../../common/components/ui/Swiper/SwiperView";
+import { SwiperView } from "../../../common/components/ui/Swiper";
 import { useTranslation } from "react-i18next";
 import { useState, useCallback, useRef, useMemo, useEffect } from "react";
 import { useSelector } from "react-redux";
@@ -20,7 +20,7 @@ import { getAttachmentUrl } from "../../../common/utils/getAttachmentUrl";
 import { useNotification } from "../../../common/hooks";
 import { AlertInline } from "../../../common/components/ui/AlertInline";
 import { extractApiError } from "../../../common/utils/apiHelpers";
-import { DeleteButton } from "../../../common/components/ui/DeleteButton/DeleteButton";
+import { DeleteButton } from "../../../common/components/ui/DeleteButton";
 import { useGetClientsQuery } from "../../../store/api/adminApi";
 
 const MAX_IMAGES = 4;

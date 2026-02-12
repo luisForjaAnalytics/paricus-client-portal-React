@@ -16,9 +16,9 @@ import {
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import { PendingLinkModal } from "./PendingLinkModal";
-import { EditButton } from "../../../../common/components/ui/EditButton/EditButton";
-import { DeleteButton } from "../../../../common/components/ui/DeleteButton/DeleteButton";
-import { DownloadButton } from "../../../../common/components/ui/DownloadButton/DownloadButton";
+import { EditButton } from "../../../../common/components/ui/EditButton";
+import { DeleteButton } from "../../../../common/components/ui/DeleteButton";
+import { DownloadButton } from "../../../../common/components/ui/DownloadButton";
 import { UniversalMobilDataTable } from "../../../../common/components/ui/UniversalMobilDataTable";
 
 export const InvoicesTableMobile = ({

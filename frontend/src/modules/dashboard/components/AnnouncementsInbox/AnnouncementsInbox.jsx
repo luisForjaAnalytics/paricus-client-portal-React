@@ -25,7 +25,14 @@ import { useModal } from "../../../../common/hooks";
 import { formatDateTime } from "../../../../common/utils/formatDateTime";
 import { getAttachmentUrl } from "../../../../common/utils/getAttachmentUrl";
 import { TiptapReadOnly } from "../../../../common/components/ui/TiptapReadOnly/TiptapReadOnly";
-import { dashboardStyles, colors, modalCard, titlesTypography, scrollableContainer, imagePreview } from "../../../../common/styles/styles";
+import {
+  dashboardStyles,
+  colors,
+  modalCard,
+  titlesTypography,
+  scrollableContainer,
+  imagePreview,
+} from "../../../../common/styles/styles";
 import { AppText } from "../../../../common/components/ui/AppText/AppText";
 import { useGetAnnouncementsQuery } from "../../../../store/api/dashboardApi";
 import { getPriorityStyles } from "../../../../common/utils/getStatusProperty";
@@ -62,8 +69,10 @@ const PriorityIndicator = ({ priority, t }) => {
           alignItems: "center",
           justifyContent: "center",
           width: 28,
+          minWidth: 28,
           height: 28,
           borderRadius: "50%",
+          flexShrink: 0,
           backgroundColor: styles.backgroundColor,
           cursor: "default",
         }}
@@ -95,8 +104,24 @@ export const AnnouncementsInbox = () => {
   };
 
   return (
-    <Card sx={{ ...dashboardStyles.dashboardStatsCard, height: "100%", display: "flex", flexDirection: "column" }}>
-      <CardContent sx={{ padding: "1rem", flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <Card
+      sx={{
+        ...dashboardStyles.dashboardStatsCard,
+        height: { xs: "auto", md: "100%" },
+        maxHeight: { xs: "25rem", md: "none" },
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <CardContent
+        sx={{
+          padding: "1rem",
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+        }}
+      >
         {/* Header */}
         <Box
           sx={{
@@ -175,11 +200,11 @@ export const AnnouncementsInbox = () => {
                   onClick={() => announcementModal.open(announcement)}
                   sx={{
                     mb: 2,
-                    p: '0.5rem',
+                    p: "0.5rem",
                     //px:'0.5',
                     //borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
                     cursor: "pointer",
-                    borderRadius: '1rem',
+                    borderRadius: "1rem",
                     transition: "background-color 0.2s ease",
                     "&:hover": {
                       backgroundColor: "#4ee78611",
@@ -204,30 +229,38 @@ export const AnnouncementsInbox = () => {
                         gap: 2,
                       }}
                     >
-                      <PriorityIndicator priority={announcement.priority} t={t} />
+                      <PriorityIndicator
+                        priority={announcement.priority}
+                        t={t}
+                      />
                       {/* Title */}
                       <Typography
                         variant="subtitle2"
                         fontWeight="bold"
-                        sx={{ mt: '0.2rem', textTransform: "uppercase" }}
+                        sx={{ mt: "0.2rem", textTransform: "uppercase" }}
                       >
                         {announcement.title}
                       </Typography>
                     </Box>
-                    <Typography variant="caption" color="text.secondary" sx={{
-                      mb: '-0.2rem'
-                    }}>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{
+                        mb: "-0.2rem",
+                      }}
+                    >
                       {formatDateTime(announcement.createdAt)}
                     </Typography>
                   </Box>
 
-                  {/* Content Preview - Limited to 4 lines */}
+                  {/* Content Preview - Limited to 4 lines (hidden on mobile) */}
                   <Box
                     sx={{
+                      display: { xs: "none", md: "block" },
                       backgroundColor: "white",
                       p: 1.5,
-                      mx:'0.5rem',
-                      borderRadius: '1rem',
+                      mx: "0.5rem",
+                      borderRadius: "1rem",
                       border: "1px solid rgba(0, 0, 0, 0.12)",
                       overflow: "hidden",
                       "& .ProseMirror": {
@@ -245,15 +278,26 @@ export const AnnouncementsInbox = () => {
                     />
                   </Box>
 
-                  {/* Attachments indicator */}
-                  {announcement.attachments && announcement.attachments.length > 0 && (
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 1 }}>
-                      <AttachFile sx={{ fontSize: "0.875rem", color: "text.secondary" }} />
-                      <Typography variant="caption" color="text.secondary">
-                        {announcement.attachments.length} {t("common.attachments", "attachment(s)")}
-                      </Typography>
-                    </Box>
-                  )}
+                  {/* Attachments indicator (hidden on mobile) */}
+                  {announcement.attachments &&
+                    announcement.attachments.length > 0 && (
+                      <Box
+                        sx={{
+                          display: { xs: "none", md: "flex" },
+                          alignItems: "center",
+                          gap: 0.5,
+                          mt: 1,
+                        }}
+                      >
+                        <AttachFile
+                          sx={{ fontSize: "0.875rem", color: "text.secondary" }}
+                        />
+                        <Typography variant="caption" color="text.secondary">
+                          {announcement.attachments.length}{" "}
+                          {t("common.attachments", "attachment(s)")}
+                        </Typography>
+                      </Box>
+                    )}
                 </Box>
               ))
             )}
@@ -281,8 +325,18 @@ export const AnnouncementsInbox = () => {
                   <CloseIcon />
                 </IconButton>
               </Box>
-              <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 2 }}>
-                <PriorityIndicator priority={announcementModal.data.priority} t={t} />
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: 2,
+                }}
+              >
+                <PriorityIndicator
+                  priority={announcementModal.data.priority}
+                  t={t}
+                />
                 <Typography
                   sx={{
                     ...titlesTypography.primaryTitle,
@@ -313,30 +367,35 @@ export const AnnouncementsInbox = () => {
               </Box>
 
               {/* Attachments */}
-              {announcementModal.data.attachments && announcementModal.data.attachments.length > 0 && (
-                <Box>
-                  <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 1 }}>
-                    {t("tickets.ticketView.attachments", "Attachments")}
-                  </Typography>
-                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                    {announcementModal.data.attachments.map((attachment) => (
-                      <Chip
-                        key={attachment.id}
-                        icon={<AttachFile />}
-                        label={attachment.fileName}
-                        onClick={(e) => handleImageClick(e, attachment)}
-                        size="small"
-                        sx={{
-                          cursor: "pointer",
-                          "&:hover": {
-                            backgroundColor: "action.hover",
-                          },
-                        }}
-                      />
-                    ))}
+              {announcementModal.data.attachments &&
+                announcementModal.data.attachments.length > 0 && (
+                  <Box>
+                    <Typography
+                      variant="subtitle2"
+                      fontWeight="bold"
+                      sx={{ mb: 1 }}
+                    >
+                      {t("tickets.ticketView.attachments", "Attachments")}
+                    </Typography>
+                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                      {announcementModal.data.attachments.map((attachment) => (
+                        <Chip
+                          key={attachment.id}
+                          icon={<AttachFile />}
+                          label={attachment.fileName}
+                          onClick={(e) => handleImageClick(e, attachment)}
+                          size="small"
+                          sx={{
+                            cursor: "pointer",
+                            "&:hover": {
+                              backgroundColor: "action.hover",
+                            },
+                          }}
+                        />
+                      ))}
+                    </Box>
                   </Box>
-                </Box>
-              )}
+                )}
             </DialogContent>
           </>
         )}

@@ -63,7 +63,7 @@ const router = createBrowserRouter(
               element: <DashboardViewSelect />,
             },
             {
-              path: "apk",
+              path: "kpi",
               element: <DashboardViewSelect />,
             },
             {

@@ -5,8 +5,8 @@ import {
   Shield as ShieldIcon,
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
-import { EditButton } from "../../../../common/components/ui/EditButton/EditButton";
-import { DeleteButton } from "../../../../common/components/ui/DeleteButton/DeleteButton";
+import { EditButton } from "../../../../common/components/ui/EditButton";
+import { DeleteButton } from "../../../../common/components/ui/DeleteButton";
 import { ColumnHeaderFilter } from "../../../../common/components/ui/ColumnHeaderFilter";
 
 /**

@@ -7,6 +7,7 @@ import Tooltip from "@mui/material/Tooltip";
 import PropTypes from "prop-types";
 import { MenuSectionsAvatar } from "../Navigation/MenuSection";
 import { useSelector } from "react-redux";
+import { navBar } from "../../../styles/styles";
 
 export const AvatarButton = ({ setTitleState }) => {
   const [anchorElUser, setAnchorElUser] = React.useState(null);
@@ -36,11 +37,7 @@ export const AvatarButton = ({ setTitleState }) => {
         </IconButton>
       </Tooltip>
       <Menu
-        sx={{
-          mt: "40px",
-          ml: "1rem",
-          "& .MuiMenu-paper": { borderRadius: "1rem" },
-        }}
+       sx={navBar.menuAvatar}
         id="menu-appbar"
         anchorEl={anchorElUser}
         anchorOrigin={{

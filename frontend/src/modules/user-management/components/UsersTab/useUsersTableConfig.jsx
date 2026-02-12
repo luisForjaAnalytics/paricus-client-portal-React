@@ -8,7 +8,7 @@ import {
   Shield as ShieldIcon,
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
-import { EditButton } from "../../../../common/components/ui/EditButton/EditButton";
+import { EditButton } from "../../../../common/components/ui/EditButton";
 import { ColumnHeaderFilter } from "../../../../common/components/ui/ColumnHeaderFilter";
 
 /**

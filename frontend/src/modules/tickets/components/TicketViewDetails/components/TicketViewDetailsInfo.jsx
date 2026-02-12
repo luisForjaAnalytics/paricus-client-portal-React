@@ -31,7 +31,7 @@ import {
   useCreateChangeRequestMutation,
 } from "../../../../../store/api/ticketsApi";
 import { useTicketDetailAttachments } from "../../../../../common/hooks/useTicketDetailAttachments";
-import { CancelButton } from "../../../../../common/components/ui/CancelButton/CancelButton";
+import { CancelButton } from "../../../../../common/components/ui/CancelButton";
 
 // Icon mapping for each field
 const fieldIcons = {

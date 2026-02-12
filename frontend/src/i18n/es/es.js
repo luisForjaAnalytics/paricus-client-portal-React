@@ -19,7 +19,7 @@ export default {
     broadcast: "Anuncios",
     quickBroadcast: "Difusión Rápida",
     swiperControl: "Control de Slides",
-    dashboardApk: "APK",
+    dashboardKpi: "KPI",
     dashboardSwiper: "Swiper",
     dashboardGeneralInfo: "Información General",
   },
@@ -904,7 +904,8 @@ export default {
   dashboard: {
     title: "Dashboard",
     viewing: "Viendo",
-    errorLoadingData: "Error al cargar los datos del dashboard. Haz clic para reintentar.",
+    errorLoadingData:
+      "Error al cargar los datos del dashboard. Haz clic para reintentar.",
     selectClient: "Ver Cliente",
     allClients: "Todos los Clientes",
     selectUser: "Ver Usuario",

@@ -2,7 +2,7 @@ import { Box, Typography } from "@mui/material";
 import { useOutletContext } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
-import { SwiperView } from "../../../../common/components/ui/Swiper/SwiperView";
+import { SwiperView } from "../../../../common/components/ui/Swiper";
 import { useGetCarouselImagesQuery } from "../../../../store/api/carouselApi";
 import { getAttachmentUrl } from "../../../../common/utils/getAttachmentUrl";
 import { colors } from "../../../../common/styles/styles";

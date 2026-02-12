@@ -36,8 +36,8 @@ import {
   titlesTypography,
   reportsCardSelected,
 } from "../../../common/styles/styles";
-import { DownloadButton } from "../../../common/components/ui/DownloadButton/DownloadButton";
-import { DeleteButton } from "../../../common/components/ui/DeleteButton/DeleteButton";
+import { DownloadButton } from "../../../common/components/ui/DownloadButton";
+import { DeleteButton } from "../../../common/components/ui/DeleteButton";
 
 export const ClientReports = ({
   selectedFolder,

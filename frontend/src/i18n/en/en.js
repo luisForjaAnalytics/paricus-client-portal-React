@@ -17,7 +17,7 @@ export default {
     broadcast: "Broadcast",
     quickBroadcast: "Quick Broadcast",
     swiperControl: "Swiper Control",
-    dashboardApk: "APK",
+    dashboardKpi: "KPI",
     dashboardSwiper: "Swiper",
     dashboardGeneralInfo: "General Information",
   },

@@ -31,9 +31,9 @@ import {
   typography,
   table,
 } from "../../../../common/styles/styles";
-import { ActionButton } from "../../../../common/components/ui/ActionButton/ActionButton";
-import { DownloadButton } from "../../../../common/components/ui/DownloadButton/DownloadButton";
-import { DeleteButton } from "../../../../common/components/ui/DeleteButton/DeleteButton";
+import { ActionButton } from "../../../../common/components/ui/ActionButton";
+import { DownloadButton } from "../../../../common/components/ui/DownloadButton";
+import { DeleteButton } from "../../../../common/components/ui/DeleteButton";
 
 /**
  * ClientFoldersDesktop - Desktop view for client folders table

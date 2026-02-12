@@ -18,7 +18,7 @@ import { useTranslation } from "react-i18next";
 import LanguageMenu from "./LanguageMenu";
 import { MobilMenu } from "../Navigation/MobilMenu";
 import { MenuSectionsAvatar } from "../Navigation/MenuSection";
-import { colors, layout, typography } from "../../../styles/styles";
+import { colors, layout, navBar, typography } from "../../../styles/styles";
 import { useSelector } from "react-redux";
 
 // 🔹 Estilo de la barra de búsqueda (basado en STYLE_GUIDE.md)
@@ -96,7 +96,7 @@ export const AppBarLayout = ({ titleState, setTitleState }) => {
   ///  Menu Mobil ///
   const renderMobileMenu = (
     <Menu
-      sx={{ mt: "45px" }}
+      sx={navBar.menuAvatar}
       anchorEl={mobileMoreAnchorEl}
       anchorOrigin={{ vertical: "top", horizontal: "right" }}
       id={mobileMenuId}
@@ -259,7 +259,6 @@ export const AppBarLayout = ({ titleState, setTitleState }) => {
         </Toolbar>
       </AppBar>
       {renderMobileMenu}
-      
     </Box>
   );
 };

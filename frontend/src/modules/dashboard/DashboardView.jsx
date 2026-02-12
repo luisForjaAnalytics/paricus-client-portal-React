@@ -22,7 +22,7 @@ function a11yProps(index) {
 }
 
 const tabs = [
-  { route: "apk", label: "dashboardApk" },
+  { route: "kpi", label: "dashboardKpi" },
   { route: "swiper", label: "dashboardSwiper" },
   { route: "general-info", label: "dashboardGeneralInfo" },
 ];

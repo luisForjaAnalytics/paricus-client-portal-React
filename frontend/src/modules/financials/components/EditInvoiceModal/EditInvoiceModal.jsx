@@ -20,7 +20,7 @@ import {
   titlesTypography,
   primaryIconButton,
 } from "../../../../common/styles/styles";
-import { CancelButton } from "../../../../common/components/ui/CancelButton/CancelButton";
+import { CancelButton } from "../../../../common/components/ui/CancelButton";
 
 export const EditInvoiceModal = ({
   showEditInvoiceModal,

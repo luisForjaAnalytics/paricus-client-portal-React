@@ -29,7 +29,7 @@ import {
 import { InvoicesTableDesktop } from "../InvoicesTable/InvoicesTableDesktop";
 import { UploadInvoiceButton } from "../UploadInvoiceButton/UploadInvoiceButton";
 import { useTranslation } from "react-i18next";
-import { GetInitialsAvatar } from "../../../../common/components/ui/GetInitialsAvatar/GetInitialsAvatar";
+import { GetInitialsAvatar } from "../../../../common/components/ui/GetInitialsAvatar";
 
 export const ClientBreakdownDesktop = ({
   clientBreakdowns,

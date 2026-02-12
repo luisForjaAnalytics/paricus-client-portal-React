@@ -17,8 +17,8 @@ import {
   titlesTypography,
   selectMenuProps,
 } from "../../../../common/styles/styles";
-import { ActionButton } from "../../../../common/components/ui/ActionButton/ActionButton";
-import { CancelButton } from "../../../../common/components/ui/CancelButton/CancelButton";
+import { ActionButton } from "../../../../common/components/ui/ActionButton";
+import { CancelButton } from "../../../../common/components/ui/CancelButton";
 import { AlertInline } from "../../../../common/components/ui/AlertInline";
 
 export const AddNewUserModal = ({

@@ -21,13 +21,13 @@ export const menuItemsCommon = [
   {
     label: "dashboard",
     icon: <DashboardIcon fontSize="medium" />,
-    route: "dashboard/apk",
+    route: "dashboard/kpi",
     permission: "view_dashboard",
     subItems: [
       {
-        label: "dashboardApk",
+        label: "dashboardKpi",
         icon: <BackupTableIcon fontSize="medium" />,
-        route: "dashboard/apk",
+        route: "dashboard/kpi",
         permission: "view_dashboard",
       },
       {
