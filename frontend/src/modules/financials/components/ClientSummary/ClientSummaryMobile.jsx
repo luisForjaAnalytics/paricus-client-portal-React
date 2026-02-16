@@ -4,14 +4,7 @@ import {
   Card,
   CardContent,
   Typography,
-  IconButton,
-  Tooltip,
-  CircularProgress,
 } from "@mui/material";
-import {
-  OpenInNew as OpenIcon,
-  Refresh as RefreshIcon,
-} from "@mui/icons-material";
 import {
   summaryCard,
   colors,

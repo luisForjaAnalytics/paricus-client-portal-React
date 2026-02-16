@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import {
-  Button,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -15,7 +14,6 @@ import {
   Typography,
   IconButton,
   Tooltip,
-  CircularProgress,
   Chip,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
@@ -23,8 +21,6 @@ import AttachFileIcon from "@mui/icons-material/AttachFile";
 import CloseIcon from "@mui/icons-material/Close";
 import { useTranslation } from "react-i18next";
 import {
-  primaryIconButton,
-  outlinedButton,
   modalCard,
   titlesTypography,
   selectMenuProps,
@@ -43,6 +39,7 @@ import { CancelButton } from "../../../../common/components/ui/CancelButton";
 import { AlertInline } from "../../../../common/components/ui/AlertInline";
 import { extractApiError } from "../../../../common/utils/apiHelpers";
 import { useNotification } from "../../../../common/hooks";
+import { LoadingProgress } from "../../../../common/components/ui/LoadingProgress";
 
 export const CreateTickeButton = ({}) => {
   const { t } = useTranslation();
@@ -60,7 +57,9 @@ export const CreateTickeButton = ({}) => {
   // Show error snackbar when error occurs
   useEffect(() => {
     if (error) {
-      showError(extractApiError(error, t("tickets.createNewTicket.errorCreating")));
+      showError(
+        extractApiError(error, t("tickets.createNewTicket.errorCreating")),
+      );
     }
   }, [error, t]);
 
@@ -141,7 +140,7 @@ export const CreateTickeButton = ({}) => {
           }}
         >
           {isUploading ? (
-            <CircularProgress size={20} />
+            <LoadingProgress size={20} />
           ) : (
             <AttachFileIcon fontSize="small" />
           )}
@@ -192,7 +191,9 @@ export const CreateTickeButton = ({}) => {
       }
 
       // Success - show notification, reset form and close modal
-      showSuccess(t("tickets.createNewTicket.success") || "Ticket created successfully");
+      showSuccess(
+        t("tickets.createNewTicket.success") || "Ticket created successfully",
+      );
       reset();
       handleCancelModal();
     } catch (err) {

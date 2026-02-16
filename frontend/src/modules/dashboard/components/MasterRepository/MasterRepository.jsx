@@ -3,7 +3,6 @@ import {
   Typography,
   Card,
   CardContent,
-  CircularProgress,
 } from "@mui/material";
 import { LibraryBooks } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
@@ -14,6 +13,7 @@ import { useGetAllArticlesQuery } from "../../../../store/api/articlesApi";
 import { formatDistanceToNow } from "date-fns";
 import { es, enUS } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
+import { LoadingProgress } from "../../../../common/components/ui/LoadingProgress";
 
 export const MasterRepository = () => {
   const { t, i18n } = useTranslation();
@@ -97,7 +97,7 @@ export const MasterRepository = () => {
         {/* Loading State */}
         {isLoading && (
           <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-            <CircularProgress size={40} />
+            <LoadingProgress size={40} />
           </Box>
         )}
 

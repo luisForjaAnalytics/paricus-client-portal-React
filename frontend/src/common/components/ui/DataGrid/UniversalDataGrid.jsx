@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
 import { DataGrid } from "@mui/x-data-grid";
-import { Box, Typography, CircularProgress } from "@mui/material";
+import { Box, Typography} from "@mui/material";
 import { AlertInline } from "../AlertInline";
 import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
 import { dataGridTable } from "../../../styles/styles";
+import { LoadingProgress } from "../LoadingProgress";
 
 /**
  * UniversalDataGrid - Componente reutilizable para tablas con DataGrid de MUI
@@ -126,7 +127,7 @@ export const UniversalDataGrid = ({
           ...sx,
         }}
       >
-        <CircularProgress />
+        <LoadingProgress />
       </Box>
     );
   }

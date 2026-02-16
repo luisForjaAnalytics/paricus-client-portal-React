@@ -1,5 +1,5 @@
 import { useState, useContext, useEffect } from "react";
-import { Box, IconButton, CircularProgress, Tooltip, Chip } from "@mui/material";
+import { Box, IconButton, Tooltip, Chip } from "@mui/material";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import CloseIcon from "@mui/icons-material/Close";
 import { useTranslation } from "react-i18next";
@@ -12,6 +12,7 @@ import {
 } from "../TicketViewDetails";
 import "../../../../../common/components/ui/TiptapEditor/tiptap-editor.css";
 import { scrollableContainer } from "../../../../../common/styles/styles";
+import { LoadingProgress } from "../../../../../common/components/ui/LoadingProgress";
 
 export const TicketUpdateStatus = () => {
   const { t } = useTranslation();
@@ -69,7 +70,7 @@ export const TicketUpdateStatus = () => {
           }}
         >
           {isUploading ? (
-            <CircularProgress size={20} />
+            <LoadingProgress size={20} />
           ) : (
             <AttachFileIcon fontSize="small" />
           )}
@@ -96,7 +97,7 @@ export const TicketUpdateStatus = () => {
     >
       {/* Selected Files Preview */}
       {selectedFiles.length > 0 && (
-        <Box sx={{ width: '100%', display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+        <Box sx={{ width: "100%", display: "flex", flexWrap: "wrap", gap: 1 }}>
           {selectedFiles.map((file, index) => (
             <Chip
               key={index}

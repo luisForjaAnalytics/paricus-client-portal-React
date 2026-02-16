@@ -15,7 +15,6 @@ import {
   DialogContent,
   DialogActions,
   TextField,
-  CircularProgress,
   IconButton,
   Stack,
 } from "@mui/material";
@@ -38,6 +37,7 @@ import {
 } from "../../../common/styles/styles";
 import { DownloadButton } from "../../../common/components/ui/DownloadButton";
 import { DeleteButton } from "../../../common/components/ui/DeleteButton";
+import { LoadingProgress } from "../../../common/components/ui/LoadingProgress";
 
 export const ClientReports = ({
   selectedFolder,
@@ -65,9 +65,9 @@ export const ClientReports = ({
 
   return (
     <Box
-    sx={{
-      ...reportsCardSelected,
-    }}
+      sx={{
+        ...reportsCardSelected,
+      }}
     >
       <Box sx={{ mb: 4 }}>
         <Box
@@ -109,8 +109,10 @@ export const ClientReports = ({
 
         {loadingReports ? (
           <Box sx={{ textAlign: "center", py: 6 }}>
-            <CircularProgress size={48} sx={{ mb: 2 }} />
-            <Typography>{t("reportsManagement.reports.loadingReports")}</Typography>
+            <LoadingProgress size={48} sx={{ mb: 2 }} />
+            <Typography>
+              {t("reportsManagement.reports.loadingReports")}
+            </Typography>
           </Box>
         ) : reports.length === 0 ? (
           <Box sx={{ textAlign: "center", py: 6 }}>
@@ -137,9 +139,15 @@ export const ClientReports = ({
             <Table>
               <TableHead sx={table.header}>
                 <TableRow>
-                  <TableCell sx={table.headerCell}>{t("reportsManagement.reports.fileName")}</TableCell>
-                  <TableCell sx={table.headerCell}>{t("reportsManagement.reports.size")}</TableCell>
-                  <TableCell sx={table.headerCell}>{t("reportsManagement.reports.lastModified")}</TableCell>
+                  <TableCell sx={table.headerCell}>
+                    {t("reportsManagement.reports.fileName")}
+                  </TableCell>
+                  <TableCell sx={table.headerCell}>
+                    {t("reportsManagement.reports.size")}
+                  </TableCell>
+                  <TableCell sx={table.headerCell}>
+                    {t("reportsManagement.reports.lastModified")}
+                  </TableCell>
                   <TableCell sx={{ ...table.headerCell, textAlign: "right" }}>
                     {t("reportsManagement.reports.actions")}
                   </TableCell>
@@ -240,7 +248,9 @@ export const ClientReports = ({
               alignItems: "center",
             }}
           >
-            <Typography variant="h6">{t("reportsManagement.upload.title")}</Typography>
+            <Typography variant="h6">
+              {t("reportsManagement.upload.title")}
+            </Typography>
             <IconButton onClick={() => setShowUploadModal(false)} size="small">
               <CloseIcon />
             </IconButton>
@@ -295,7 +305,9 @@ export const ClientReports = ({
                   fullWidth
                   sx={outlinedIconButton}
                 >
-                  {uploadForm.file ? uploadForm.file.name : t("reportsManagement.upload.chooseFile")}
+                  {uploadForm.file
+                    ? uploadForm.file.name
+                    : t("reportsManagement.upload.chooseFile")}
                 </Button>
               </label>
               <Typography
@@ -320,11 +332,13 @@ export const ClientReports = ({
             onClick={handleUploadReport}
             disabled={uploading || !uploadForm.file}
             startIcon={
-              uploading ? <CircularProgress size={20} /> : <UploadIcon />
+              uploading ? <LoadingProgress size={20} /> : <UploadIcon />
             }
             sx={primaryIconButton}
           >
-            {uploading ? t("reportsManagement.upload.uploading") : t("reportsManagement.upload.upload")}
+            {uploading
+              ? t("reportsManagement.upload.uploading")
+              : t("reportsManagement.upload.upload")}
           </Button>
         </DialogActions>
       </Dialog>
@@ -340,7 +354,7 @@ ClientReports.propTypes = {
       name: PropTypes.string.isRequired,
       size: PropTypes.number.isRequired,
       lastModified: PropTypes.string.isRequired,
-    })
+    }),
   ),
   loadingReports: PropTypes.bool,
   refetchReports: PropTypes.func.isRequired,

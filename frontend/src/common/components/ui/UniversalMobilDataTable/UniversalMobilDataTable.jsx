@@ -11,7 +11,6 @@ import {
   Box,
   Paper,
   Collapse,
-  CircularProgress,
   Stack,
 } from "@mui/material";
 import {
@@ -22,6 +21,7 @@ import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
 import { colors, titlesTypography } from "../../../styles/styles";
 import { AlertInline } from "../AlertInline";
+import { LoadingProgress } from "../LoadingProgress";
 
 // ============================================================================
 // SAFE RENDER UTILITIES
@@ -397,7 +397,7 @@ const LoadingContent = ({ sx = {} }) => {
         ...sx,
       }}
     >
-      <CircularProgress />
+      <LoadingProgress />
     </Box>
   );
 };

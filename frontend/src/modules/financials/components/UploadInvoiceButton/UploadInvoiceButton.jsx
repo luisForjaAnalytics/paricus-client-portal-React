@@ -8,7 +8,6 @@ import {
   DialogActions,
   TextField,
   Box,
-  CircularProgress,
   LinearProgress,
   Typography,
 } from "@mui/material";
@@ -32,6 +31,7 @@ import {
 } from "./options";
 import { SelectMenuItem } from "../../../../common/components/ui/SelectMenuItem/SelectMenuItem";
 import { extractApiError } from "../../../../common/utils/apiHelpers";
+import { LoadingProgress } from "../../../../common/components/ui/LoadingProgress";
 
 export const UploadInvoiceButton = ({ selectedFolder, onSuccess, onError }) => {
   const { t } = useTranslation();
@@ -241,7 +241,7 @@ export const UploadInvoiceButton = ({ selectedFolder, onSuccess, onError }) => {
                   fullWidth
                   disabled={ocrLoading}
                   sx={{ ...outlinedIconButton, height: "auto", width: "50%" }}
-                  startIcon={ocrLoading ? <CircularProgress size={20} /> : null}
+                  startIcon={ocrLoading ? <LoadingProgress size={20} /> : null}
                 >
                   {ocrLoading
                     ? t("financials.messages.processingFile")

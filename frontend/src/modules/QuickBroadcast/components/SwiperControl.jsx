@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress } from "@mui/material";
+import { Box, Button } from "@mui/material";
 import { AddPhotoAlternate, Image, Save } from "@mui/icons-material";
 import { SwiperView } from "../../../common/components/ui/Swiper";
 import { useTranslation } from "react-i18next";
@@ -22,6 +22,7 @@ import { AlertInline } from "../../../common/components/ui/AlertInline";
 import { extractApiError } from "../../../common/utils/apiHelpers";
 import { DeleteButton } from "../../../common/components/ui/DeleteButton";
 import { useGetClientsQuery } from "../../../store/api/adminApi";
+import { LoadingProgress } from "../../../common/components/ui/LoadingProgress";
 
 const MAX_IMAGES = 4;
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
@@ -366,7 +367,7 @@ export const SwiperControl = () => {
           onClick={handleSubmit}
           startIcon={
             saving ? (
-              <CircularProgress size={14} color="inherit" />
+              <LoadingProgress size={14} />
             ) : (
               <Save sx={{ fontSize: "1rem" }} />
             )

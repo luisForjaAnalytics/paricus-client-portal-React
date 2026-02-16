@@ -554,6 +554,16 @@ export const dataGridTable = {
   "& .MuiDataGrid-sortIcon": {
     color: colors.primary,
   },
+  "& .MuiDataGrid-iconButtonContainer": {
+    position: "absolute",
+    bottom: 4,
+    right: 0,
+  },
+  "& .MuiDataGrid-menuIcon": {
+    position: "absolute",
+    bottom: 4,
+    right: 24,
+  },
   "& .MuiDataGrid-columnHeader--sorted": {
     backgroundColor: `${colors.primaryLight} !important`,
   },

@@ -1,10 +1,11 @@
 import { useGetArticleByIdQuery } from "../../../store/api/articlesApi";
 import { useParams, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { Box, CircularProgress, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { TiptapReadOnly } from "../../../common/components/ui/TiptapReadOnly/TiptapReadOnly";
 import { scrollableContainer } from "../../../common/styles/styles";
+import { LoadingProgress } from "../../../common/components/ui/LoadingProgress";
 
 export const ArticleView = () => {
   const { articleId } = useParams();
@@ -21,14 +22,21 @@ export const ArticleView = () => {
     error,
   } = useGetArticleByIdQuery(
     { kbPrefix, articleId },
-    { skip: !articleId || !kbPrefix }
+    { skip: !articleId || !kbPrefix },
   );
 
   // Loading state
   if (isLoading) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: 200 }}>
-        <CircularProgress />
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: 200,
+        }}
+      >
+        <LoadingProgress />
       </Box>
     );
   }
@@ -36,7 +44,14 @@ export const ArticleView = () => {
   // Error state
   if (error) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: 200 }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: 200,
+        }}
+      >
         <Typography color="error">
           {t("knowledgeBase.errorLoadingArticle", "Error loading article")}
         </Typography>
@@ -54,7 +69,14 @@ export const ArticleView = () => {
   // Empty or invalid content
   if (!html || typeof html !== "string") {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: 200 }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: 200,
+        }}
+      >
         <Typography color="text.secondary">
           {t("knowledgeBase.noContent", "No content available")}
         </Typography>

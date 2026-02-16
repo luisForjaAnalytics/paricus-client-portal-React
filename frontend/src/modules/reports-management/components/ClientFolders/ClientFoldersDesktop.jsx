@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 import {
   Box,
   Typography,
-  CircularProgress,
   Stack,
   IconButton,
   Table,
@@ -34,6 +33,7 @@ import {
 import { ActionButton } from "../../../../common/components/ui/ActionButton";
 import { DownloadButton } from "../../../../common/components/ui/DownloadButton";
 import { DeleteButton } from "../../../../common/components/ui/DeleteButton";
+import { LoadingProgress } from "../../../../common/components/ui/LoadingProgress";
 
 /**
  * ClientFoldersDesktop - Desktop view for client folders table
@@ -131,7 +131,7 @@ export const ClientFoldersDesktop = ({
     try {
       return sortedData.slice(
         page * rowsPerPage,
-        page * rowsPerPage + rowsPerPage
+        page * rowsPerPage + rowsPerPage,
       );
     } catch (err) {
       console.error(`ERROR paginatedData: ${err}`);
@@ -311,14 +311,16 @@ export const ClientFoldersDesktop = ({
                               <ActionButton
                                 handleClick={() => onUploadClick(row.folder)}
                                 icon={<UploadIcon />}
-                                text={t("reportsManagement.reports.uploadReport")}
+                                text={t(
+                                  "reportsManagement.reports.uploadReport",
+                                )}
                               />
                             </Stack>
                           </Box>
 
                           {loadingReports ? (
                             <Box sx={{ textAlign: "center", py: 4 }}>
-                              <CircularProgress size={36} sx={{ mb: 1 }} />
+                              <LoadingProgress size={36} sx={{ mb: 1 }} />
                               <Typography variant="body2">
                                 {t("reportsManagement.reports.loadingReports")}
                               </Typography>
@@ -332,8 +334,13 @@ export const ClientFoldersDesktop = ({
                                   mb: 1,
                                 }}
                               />
-                              <Typography variant="body2" color="text.secondary">
-                                {t("reportsManagement.reports.noReportsForFolder")}
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                              >
+                                {t(
+                                  "reportsManagement.reports.noReportsForFolder",
+                                )}
                               </Typography>
                             </Box>
                           ) : (
@@ -354,7 +361,9 @@ export const ClientFoldersDesktop = ({
                                       {t("reportsManagement.reports.size")}
                                     </TableCell>
                                     <TableCell sx={table.headerCell}>
-                                      {t("reportsManagement.reports.lastModified")}
+                                      {t(
+                                        "reportsManagement.reports.lastModified",
+                                      )}
                                     </TableCell>
                                     <TableCell
                                       sx={{
@@ -385,8 +394,10 @@ export const ClientFoldersDesktop = ({
                                           />
                                           <Typography
                                             sx={{
-                                              fontSize: typography.fontSize.small,
-                                              fontWeight: typography.fontWeight.medium,
+                                              fontSize:
+                                                typography.fontSize.small,
+                                              fontWeight:
+                                                typography.fontWeight.medium,
                                               fontFamily: typography.fontFamily,
                                               color: colors.textPrimary,
                                             }}
@@ -430,9 +441,14 @@ export const ClientFoldersDesktop = ({
                                         >
                                           <DownloadButton
                                             handleClick={() =>
-                                              handleDownloadReport(row.folder, report)
+                                              handleDownloadReport(
+                                                row.folder,
+                                                report,
+                                              )
                                             }
-                                            title={t("reportsManagement.reports.download")}
+                                            title={t(
+                                              "reportsManagement.reports.download",
+                                            )}
                                           />
                                           <DeleteButton
                                             handleDelete={handleDeleteReport}

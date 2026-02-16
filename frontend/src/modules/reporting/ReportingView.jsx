@@ -3,7 +3,6 @@ import {
   Button,
   Card,
   CardContent,
-  CircularProgress,
   Grid,
   IconButton,
   Paper,
@@ -36,6 +35,7 @@ import {
   formatFileSize,
   formatDate,
 } from "../../common/utils/formatters";
+import { LoadingProgress } from "../../common/components/ui/LoadingProgress";
 
 // Component to display a single folder's reports using RTK Query
 const FolderReportsSection = ({ folder, downloadReport }) => {
@@ -72,7 +72,7 @@ const FolderReportsSection = ({ folder, downloadReport }) => {
           size="small"
           variant="outlined"
           startIcon={
-            isLoading ? <CircularProgress size={16} /> : <RefreshIcon />
+            isLoading ? <LoadingProgress size={16} /> : <RefreshIcon />
           }
           onClick={() => refetch()}
           disabled={isLoading}
@@ -255,7 +255,7 @@ export const ReportingView = () => {
               variant="contained"
               startIcon={
                 loading ? (
-                  <CircularProgress size={16} color="inherit" />
+                  <LoadingProgress size={16} />
                 ) : (
                   <RefreshIcon />
                 )
@@ -271,7 +271,7 @@ export const ReportingView = () => {
           {/* Loading State */}
           {loading && (
             <Box sx={{ textAlign: "center", py: 8 }}>
-              <CircularProgress size={40} sx={{ mb: 2 }} />
+              <LoadingProgress size={40} sx={{ mb: 2 }} />
               <Typography color="text.secondary">
                 {t("reporting.loadingReports")}
               </Typography>

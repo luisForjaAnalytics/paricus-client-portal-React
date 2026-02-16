@@ -8,7 +8,6 @@ import {
   Box,
   Typography,
   Stack,
-  CircularProgress,
 } from "@mui/material";
 import { Upload as UploadIcon } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
@@ -19,6 +18,7 @@ import {
 } from "../../../../common/styles/styles";
 import { ActionButton } from "../../../../common/components/ui/ActionButton";
 import { CancelButton } from "../../../../common/components/ui/CancelButton";
+import { LoadingProgress } from "../../../../common/components/ui/LoadingProgress";
 
 export const UploadReportModal = ({
   showUploadModal,
@@ -150,8 +150,12 @@ export const UploadReportModal = ({
         <ActionButton
           handleClick={handleUploadReport}
           disabled={uploading || !uploadForm.file || isOverLimit}
-          icon={uploading ? <CircularProgress size={20} /> : <UploadIcon />}
-          text={uploading ? t("reportsManagement.upload.uploading") : t("reportsManagement.upload.upload")}
+          icon={uploading ? <LoadingProgress size={20} /> : <UploadIcon />}
+          text={
+            uploading
+              ? t("reportsManagement.upload.uploading")
+              : t("reportsManagement.upload.upload")
+          }
           sx={{ width: "10rem" }}
         />
         <CancelButton

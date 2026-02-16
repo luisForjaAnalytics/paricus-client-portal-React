@@ -7,5 +7,4 @@ export { TicketsViewMobil } from './components/TicketsViewMobil';
 
 // Components
 export { CreateTickeButton } from './components/CreateTicketButton';
-export { TicketAdvancedFilters } from './components/AdvancedFilters';
 export { TicketViewDetails } from './components/TicketViewDetails';

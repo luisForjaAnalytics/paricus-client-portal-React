@@ -8,7 +8,6 @@ import {
   DialogTitle,
   IconButton,
   Tooltip,
-  CircularProgress,
   Box,
 } from "@mui/material";
 import {
@@ -21,6 +20,7 @@ import { AlertInline } from "../AlertInline";
 import { useNotification } from "../../../hooks";
 import { ActionButton } from "../ActionButton";
 import { CancelButton } from "../CancelButton";
+import { LoadingProgress } from "../LoadingProgress";
 
 /**
  * DeleteButton - Botón de eliminación con diálogo de confirmación y snackbar integrado
@@ -181,7 +181,7 @@ export const DeleteButton = ({
             text={isDeleting ? t("common.deleting") : t("common.delete")}
             icon={
               isDeleting ? (
-                <CircularProgress size={16} color="inherit" />
+               <LoadingProgress size={16} />
               ) : (
                 <DeleteIcon />
               )

@@ -10,7 +10,6 @@ import {
   Select,
   MenuItem,
   ListSubheader,
-  CircularProgress,
 } from "@mui/material";
 import {
   boxTypography,
@@ -23,6 +22,7 @@ import {
 } from "../../../../store/api/adminApi";
 import { AlertInline } from "../../../../common/components/ui/AlertInline";
 import { useNotification } from "../../../../common/hooks";
+import { LoadingProgress } from "../../../../common/components/ui/LoadingProgress";
 
 /**
  * DashboardHeader - Header component with user/client selector for BPO Admin
@@ -241,7 +241,7 @@ export const DashboardHeader = ({ onSelectionChange }) => {
         </Typography>
 
         {/* Loading indicator for selector data */}
-        {isLoading && <CircularProgress size={24} />}
+        {isLoading && <LoadingProgress size={24} />}
 
         {/* Grouped Client/User Selector - Only visible for BPO Admin */}
         {isBPOAdmin &&

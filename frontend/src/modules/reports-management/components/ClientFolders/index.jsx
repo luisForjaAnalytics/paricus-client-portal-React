@@ -1,11 +1,5 @@
 import PropTypes from "prop-types";
-import {
-  Box,
-  Typography,
-  Stack,
-  Button,
-  CircularProgress,
-} from "@mui/material";
+import { Box, Typography, Stack, Button } from "@mui/material";
 import {
   Folder as FolderIcon,
   Refresh as RefreshIcon,
@@ -22,6 +16,7 @@ import {
   outlinedIconButton,
 } from "../../../../common/styles/styles";
 import { ActionButton } from "../../../../common/components/ui/ActionButton";
+import { LoadingProgress } from "../../../../common/components/ui/LoadingProgress";
 
 /**
  * ClientFolders - Main component that coordinates Desktop/Mobile views
@@ -111,7 +106,7 @@ export const ClientFolders = ({
             <Button
               variant="outlined"
               startIcon={
-                loading ? <CircularProgress size={20} /> : <RefreshIcon />
+                loading ? <LoadingProgress size={20} /> : <RefreshIcon />
               }
               onClick={() => refetchFolders()}
               disabled={loading}

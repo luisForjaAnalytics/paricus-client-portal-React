@@ -1,4 +1,4 @@
-import { Box, CircularProgress, Chip } from "@mui/material";
+import { Box, Chip } from "@mui/material";
 import { useOutletContext, useLocation } from "react-router-dom";
 import { AlertInline } from "../../../../common/components/ui/AlertInline";
 import { useSelector } from "react-redux";
@@ -11,6 +11,7 @@ import { MasterRepository } from "../MasterRepository";
 import { SwiperView } from "../../../../common/components/ui/Swiper";
 import { useGetCarouselImagesQuery } from "../../../../store/api/carouselApi";
 import { getAttachmentUrl } from "../../../../common/utils/getAttachmentUrl";
+import { LoadingProgress } from "../../../../common/components/ui/LoadingProgress";
 
 /**
  * DashboardViewSelect - Displays dashboard content based on selected client/user
@@ -72,7 +73,7 @@ export const DashboardViewSelect = () => {
           minHeight: 400,
         }}
       >
-        <CircularProgress />
+        <LoadingProgress />
       </Box>
     );
   }

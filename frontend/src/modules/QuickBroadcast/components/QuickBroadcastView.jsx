@@ -10,7 +10,6 @@ import {
   MenuItem,
   Chip,
   Typography,
-  CircularProgress,
   OutlinedInput,
   TextField,
   IconButton,
@@ -38,6 +37,7 @@ import { priorityOptions } from "./options";
 import { AlertInline } from "../../../common/components/ui/AlertInline";
 import { extractApiError } from "../../../common/utils/apiHelpers";
 import { useNotification } from "../../../common/hooks";
+import { LoadingProgress } from "../../../common/components/ui/LoadingProgress";
 
 export const QuickBroadcastView = () => {
   const { t } = useTranslation();
@@ -301,7 +301,7 @@ export const QuickBroadcastView = () => {
             {isBPOAdmin && (
               <Box sx={{ minWidth: "140px" }}>
                 {loadingClients ? (
-                  <CircularProgress size={16} />
+                  <LoadingProgress size={16} />
                 ) : (
                   <FormControl size="small" fullWidth>
                     <InputLabel
@@ -425,7 +425,7 @@ export const QuickBroadcastView = () => {
             variant="contained"
             startIcon={
               sending ? (
-                <CircularProgress size={16} color="inherit" />
+                <LoadingProgress size={16} />
               ) : (
                 <Send sx={{ fontSize: "1rem" }} />
               )

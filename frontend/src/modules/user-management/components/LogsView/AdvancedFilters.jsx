@@ -1,7 +1,6 @@
 import PropTypes from "prop-types";
 import {
   Box,
-  CircularProgress,
   FormControl,
   IconButton,
   InputLabel,
@@ -20,6 +19,7 @@ import {
   filterStyles,
   buttonIconNoLabel,
 } from "../../../../common/styles/styles";
+import { LoadingProgress } from "../../../../common/components/ui/LoadingProgress";
 
 export const AdvancedFilters = ({
   filters,
@@ -299,7 +299,7 @@ export const AdvancedFilters = ({
                 sx={buttonIconNoLabel}
               >
                 {loading ? (
-                  <CircularProgress size={20} />
+                  <LoadingProgress size={20} />
                 ) : (
                   <SearchIcon fontSize="small" />
                 )}

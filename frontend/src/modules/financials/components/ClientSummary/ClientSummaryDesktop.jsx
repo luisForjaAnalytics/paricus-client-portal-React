@@ -2,7 +2,6 @@ import PropTypes from "prop-types";
 import {
   Box,
   Button,
-  CircularProgress,
   Stack,
   Typography,
 } from "@mui/material";
@@ -17,6 +16,7 @@ import {
   titlesTypography,
 } from "../../../../common/styles/styles";
 import { useTranslation } from "react-i18next";
+import { LoadingProgress } from "../../../../common/components/ui/LoadingProgress";
 
 export const ClientSummaryDesktop = ({
   loading,
@@ -61,7 +61,7 @@ export const ClientSummaryDesktop = ({
           <Button
             variant="outlined"
             startIcon={
-              loading ? <CircularProgress size={16} /> : <RefreshIcon />
+              loading ? <LoadingProgress size={16} /> : <RefreshIcon />
             }
             onClick={refetchAllClients}
             disabled={loading}

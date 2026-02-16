@@ -12,7 +12,6 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  CircularProgress,
   Stack,
 } from "@mui/material";
 import { Add as AddIcon } from "@mui/icons-material";
@@ -23,6 +22,7 @@ import {
   modalCard,
   titlesTypography,
 } from "../../../../common/styles/styles";
+import { LoadingProgress } from "../../../../common/components/ui/LoadingProgress";
 
 export const ManageAccessModal = ({
   showFolderAccessModal,
@@ -149,11 +149,7 @@ export const ManageAccessModal = ({
                 }
                 fullWidth
                 startIcon={
-                  grantingAccess ? (
-                    <CircularProgress size={20} />
-                  ) : (
-                    <AddIcon />
-                  )
+                  grantingAccess ? <LoadingProgress size={20} /> : <AddIcon />
                 }
                 sx={primaryIconButton}
               >
@@ -172,7 +168,7 @@ export const ManageAccessModal = ({
 
         {loadingAccess ? (
           <Box sx={{ textAlign: "center", py: 4 }}>
-            <CircularProgress />
+            <LoadingProgress />
             <Typography sx={{ mt: 2 }}>
               {t("reportsManagement.folderAccess.loadingPermissions")}
             </Typography>
@@ -214,7 +210,7 @@ export const ManageAccessModal = ({
                     onClick={() =>
                       handleRevokeFolderAccess(
                         access.clientId,
-                        access.folderName
+                        access.folderName,
                       )
                     }
                     sx={outlinedButton}

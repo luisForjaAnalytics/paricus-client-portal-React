@@ -3,6 +3,7 @@ import { CKEditor } from "@ckeditor/ckeditor5-react";
 import { useParams, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useGetArticleByIdQuery } from "../../../store/api/articlesApi";
+import { LoadingProgress } from "../../../common/components/ui/LoadingProgress";
 import {
   DecoupledEditor,
   Alignment,
@@ -320,8 +321,8 @@ export default function CKEditorComponent({
   if (isLoading) {
     return (
       <div className="main-container">
-        <div style={{ padding: "2rem", textAlign: "center" }}>
-          Loading article...
+        <div style={{ padding: "2rem", display: "flex", justifyContent: "center" }}>
+          <LoadingProgress size={40} />
         </div>
       </div>
     );

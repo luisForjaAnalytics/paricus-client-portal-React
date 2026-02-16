@@ -81,7 +81,6 @@ export const DashboardView = () => {
     <Box sx={boxTypography.box}>
       {/* Page Header with Selector */}
       <DashboardHeader onSelectionChange={handleSelectionChange} />
-
       {/* Tabs - hidden (mobile uses drawer, desktop shows all content) */}
       <Box sx={{ display: "none" }}>
         <Tabs

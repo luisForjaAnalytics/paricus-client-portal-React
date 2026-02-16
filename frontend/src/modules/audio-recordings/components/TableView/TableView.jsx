@@ -3,7 +3,6 @@ import Tooltip from "@mui/material/Tooltip";
 import {
   Box,
   IconButton,
-  CircularProgress,
   Chip,
   Typography,
 } from "@mui/material";
@@ -21,6 +20,7 @@ import { UniversalDataGrid } from "../../../../common/components/ui/DataGrid/Uni
 import { ColumnHeaderFilter } from "../../../../common/components/ui/ColumnHeaderFilter";
 import { colors } from "../../../../common/styles/styles";
 import { useCallback, useMemo } from "react";
+import { LoadingProgress } from "../../../../common/components/ui/LoadingProgress";
 
 const transformRecordings = (rowsTable, formatDate) => {
   try {
@@ -340,7 +340,7 @@ export const TableView = ({
                     }
                   >
                     {isLoadingUrl ? (
-                      <CircularProgress size={20} />
+                     <LoadingProgress size={20} />
                     ) : isPlaying ? (
                       <StopIcon />
                     ) : (

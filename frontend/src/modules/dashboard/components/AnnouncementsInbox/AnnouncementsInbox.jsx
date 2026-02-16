@@ -4,7 +4,6 @@ import {
   Chip,
   Card,
   CardContent,
-  CircularProgress,
   Dialog,
   DialogContent,
   DialogTitle,
@@ -36,6 +35,7 @@ import {
 import { AppText } from "../../../../common/components/ui/AppText/AppText";
 import { useGetAnnouncementsQuery } from "../../../../store/api/dashboardApi";
 import { getPriorityStyles } from "../../../../common/utils/getStatusProperty";
+import { LoadingProgress } from "../../../../common/components/ui/LoadingProgress";
 
 const priorityConfig = {
   high: {
@@ -157,7 +157,7 @@ export const AnnouncementsInbox = () => {
         {/* Loading State */}
         {isLoading && (
           <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-            <CircularProgress size={40} />
+            <LoadingProgress size={40} />
           </Box>
         )}
 

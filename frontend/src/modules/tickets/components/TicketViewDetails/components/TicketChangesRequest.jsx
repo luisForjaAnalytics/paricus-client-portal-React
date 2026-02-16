@@ -9,14 +9,14 @@ import {
   ListItem,
   ListItemButton,
   Chip,
-  CircularProgress,
   Box,
   Typography,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import { colors, modalCard } from "../../../../../common/styles/styles";
+import { modalCard } from "../../../../../common/styles/styles";
 import { CancelButton } from "../../../../../common/components/ui/CancelButton";
 import { useGetDepartmentsQuery } from "../../../../../store/api/ticketsApi";
+import { LoadingProgress } from "../../../../../common/components/ui/LoadingProgress";
 
 /**
  * Configuration for different change types
@@ -169,7 +169,7 @@ export const TicketChangesRequest = ({
       <DialogContent>
         {loadingDepartments ? (
           <Box display="flex" justifyContent="center" py={4}>
-            <CircularProgress size={40} />
+            <LoadingProgress size={40} />
           </Box>
         ) : (
           <List sx={{ pt: 1 }}>

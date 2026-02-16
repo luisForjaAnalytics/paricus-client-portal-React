@@ -1,13 +1,6 @@
 import { useState } from "react";
 import PropTypes from "prop-types";
-import {
-  Box,
-  Typography,
-  CircularProgress,
-  Stack,
-  Collapse,
-  IconButton,
-} from "@mui/material";
+import { Box, Typography, Stack, Collapse, IconButton } from "@mui/material";
 import {
   Folder as FolderIcon,
   Upload as UploadIcon,
@@ -22,6 +15,7 @@ import { ActionButton } from "../../../../common/components/ui/ActionButton";
 import { DownloadButton } from "../../../../common/components/ui/DownloadButton";
 import { DeleteButton } from "../../../../common/components/ui/DeleteButton";
 import { colors, typography, card } from "../../../../common/styles/styles";
+import { LoadingProgress } from "../../../../common/components/ui/LoadingProgress";
 
 /**
  * ReportsSection - Sub-accordion for reports inside a folder
@@ -59,7 +53,7 @@ const ReportsSection = ({
       {/* Reports list */}
       {loadingReports ? (
         <Box sx={{ textAlign: "center", py: 3 }}>
-          <CircularProgress size={28} sx={{ mb: 1 }} />
+          <LoadingProgress size={28} sx={{ mb: 1 }} />
           <Typography variant="body2" color="text.secondary">
             {t("reportsManagement.reports.loadingReports")}
           </Typography>

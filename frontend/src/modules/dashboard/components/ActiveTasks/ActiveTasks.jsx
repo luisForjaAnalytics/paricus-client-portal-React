@@ -5,8 +5,7 @@ import {
   Card,
   CardContent,
   Chip,
-  CircularProgress,
-  Link,
+   Link,
 } from "@mui/material";
 import { AlertInline } from "../../../../common/components/ui/AlertInline";
 import { useNotification } from "../../../../common/hooks";
@@ -20,6 +19,7 @@ import { formatDistanceToNow } from "date-fns";
 import { es, enUS } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
 import { getPriorityStyles } from "../../../../common/utils/getStatusProperty";
+import { LoadingProgress } from "../../../../common/components/ui/LoadingProgress";
 
 /**
  * ActiveTasks - Displays recent tickets/tasks on the dashboard
@@ -113,7 +113,7 @@ export const ActiveTasks = ({
         {/* Loading State */}
         {isLoading && (
           <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-            <CircularProgress size={40} />
+            <LoadingProgress size={40} />
           </Box>
         )}
 

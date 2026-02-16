@@ -2,6 +2,7 @@ import { createContext, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { Box, Typography, Divider, LinearProgress } from "@mui/material";
 import { AlertInline } from "../../../../common/components/ui/AlertInline";
+import { LoadingProgress } from "../../../../common/components/ui/LoadingProgress";
 import { useTranslation } from "react-i18next";
 import { useGetTicketQuery } from "../../../../store/api/ticketsApi";
 import { ticketStyle } from "../../../../common/styles/styles";
@@ -67,7 +68,12 @@ export const TicketViewDetails = () => {
   });
 
   // Show loading only on initial load, not on refetch
-  if (isLoading && !ticket) return <Box>Loading...</Box>;
+  if (isLoading && !ticket)
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+        <LoadingProgress size={48} />
+      </Box>
+    );
 
   // Don't show error if we're just refetching and already have data
   if (error && !ticket)

@@ -1,24 +1,22 @@
 import { useState, useMemo, useEffect } from "react";
 import PropTypes from "prop-types";
-import {
-  Box,
-  Chip,
-  Typography,
-  Tooltip,
-  IconButton,
-} from "@mui/material";
+import { Box, Chip, Typography, Tooltip, IconButton } from "@mui/material";
 import FilterListIcon from "@mui/icons-material/FilterList";
+import { colors } from "../../../../common/styles/styles";
 import {
-  colors,
-} from "../../../../common/styles/styles";
-import { UniversalDataGrid, useDataGridColumns } from "../../../../common/components/ui/DataGrid/UniversalDataGrid";
+  UniversalDataGrid,
+  useDataGridColumns,
+} from "../../../../common/components/ui/DataGrid/UniversalDataGrid";
 import { useTranslation } from "react-i18next";
 import { useGetLogsQuery } from "../../../../store/api/logsApi";
 import { LogsViewMobile } from "./LogsViewMobil";
-import AdvancedFilters from "./AdvancedFilters";
+//import AdvancedFilters from "./AdvancedFilters";
 import { AlertInline } from "../../../../common/components/ui/AlertInline";
 import { useNotification } from "../../../../common/hooks";
 import { formatTimestamp as formatTimestampUtil } from "../../../../common/utils/formatters";
+
+import { LoadingProgress } from "../../../../common/components/ui/LoadingProgress";
+import { useLogsTableConfig } from "./useLogsTableConfig";
 
 export const LogsView = () => {
   const { t } = useTranslation();
@@ -28,7 +26,7 @@ export const LogsView = () => {
     page: 0,
     pageSize: 10,
   });
-  const [filters, setFilters] = useState({
+  const [filterss, setFilters] = useState({
     eventId: "",
     userId: "",
     eventType: "",
@@ -40,7 +38,6 @@ export const LogsView = () => {
   });
 
   // State for advanced filters visibility
-  const [isOpen, setIsOpen] = useState(false);
 
   // Notification hook
   const { notificationRef, showError } = useNotification();
@@ -52,13 +49,16 @@ export const LogsView = () => {
       limit: paginationModel.pageSize,
       search: "", // We'll filter on frontend
     },
-    { refetchOnMountOrArgChange: true }
+    { refetchOnMountOrArgChange: true },
   );
 
   // Show error snackbar when error occurs
   useEffect(() => {
     if (error) {
-      const errorMsg = error?.data?.error || error?.error || t("userManagement.logs.unknownError");
+      const errorMsg =
+        error?.data?.error ||
+        error?.error ||
+        t("userManagement.logs.unknownError");
       showError(`${t("userManagement.logs.errorLoading")}: ${errorMsg}`);
     }
   }, [error, t]);
@@ -77,229 +77,125 @@ export const LogsView = () => {
     });
   };
 
-  // Filter logs based on advanced filters
-  const filteredLogs = useMemo(() => {
-    const allLogs = data?.logs || [];
-
-    // If no filters are active, return all logs
-    if (
-      !filters.eventId &&
-      !filters.userId &&
-      !filters.eventType &&
-      !filters.entity &&
-      !filters.description &&
-      !filters.ipAddress &&
-      !filters.status &&
-      !filters.timestamp
-    ) {
-      return allLogs;
-    }
-
-    return allLogs.filter((log) => {
-      const matchesEventId = filters.eventId
-        ? log.id?.toLowerCase().includes(filters.eventId.toLowerCase())
-        : true;
-
-      const matchesUserId = filters.userId
-        ? String(log.userId)?.includes(filters.userId)
-        : true;
-
-      const matchesEventType = filters.eventType
-        ? log.eventType === filters.eventType
-        : true;
-
-      const matchesEntity = filters.entity
-        ? log.entity?.toLowerCase().includes(filters.entity.toLowerCase())
-        : true;
-
-      const matchesDescription = filters.description
-        ? log.description
-            ?.toLowerCase()
-            .includes(filters.description.toLowerCase())
-        : true;
-
-      const matchesIpAddress = filters.ipAddress
-        ? log.ipAddress?.includes(filters.ipAddress)
-        : true;
-
-      const matchesStatus = filters.status
-        ? log.status === filters.status
-        : true;
-
-      const matchesTimestamp = filters.timestamp
-        ? log.timestamp?.startsWith(filters.timestamp)
-        : true;
-
-      return (
-        matchesEventId &&
-        matchesUserId &&
-        matchesEventType &&
-        matchesEntity &&
-        matchesDescription &&
-        matchesIpAddress &&
-        matchesStatus &&
-        matchesTimestamp
-      );
-    });
-  }, [data?.logs, filters]);
-
-  const logs = filteredLogs;
-  const totalRows = filteredLogs.length;
-
-  const locale = t("common.locale") || "en-US";
-  const formatTimestamp = (ts) => formatTimestampUtil(ts, locale);
-
-  // Clean IPv6-mapped IPv4 addresses
-  const cleanIpAddress = (ip) => {
-    try {
-      if (!ip) return "N/A";
-      // Remove ::ffff: prefix if present
-      return ip.startsWith("::ffff:") ? ip.replace("::ffff:", "") : ip;
-    } catch (err) {
-      console.error(`ERROR cleanIpAddress: ${err}`);
-      return "N/A";
-    }
-  };
-
-  // Get status color
-  const getStatusColor = (status) => {
-    try {
-      switch (status) {
-        case "SUCCESS":
-          return "success";
-        case "FAILURE":
-          return "error";
-        case "WARNING":
-          return "warning";
-        default:
-          return "default";
-      }
-    } catch (err) {
-      console.error(`ERROR getStatusColor: ${err}`);
-      return "default";
-    }
-  };
-
-  // Get event type color
-  const getEventTypeColor = (eventType) => {
-    try {
-      switch (eventType) {
-        case "CREATE":
-          return "success";
-        case "UPDATE":
-          return "info";
-        case "DELETE":
-          return "error";
-        case "LOGIN":
-          return "primary";
-        case "LOGOUT":
-          return "default";
-        case "AUDIO_PLAYBACK":
-          return "secondary";
-        default:
-          return "default";
-      }
-    } catch (err) {
-      console.error(`ERROR getEventTypeColor: ${err}`);
-      return "default";
-    }
-  };
+  // const logs = filteredLogs;
+  // const totalRows = filteredLogs.length;
+  // const locale = t("common.locale") || "en-US";
 
   // DataGrid columns
-  const columns = useDataGridColumns([
-    {
-      field: "id",
-      headerNameKey: "userManagement.logs.eventId",
-      width: 280,
-    },
-    {
-      field: "timestamp",
-      headerNameKey: "userManagement.logs.timestamp",
-      width: 200,
-      valueFormatter: (value) => formatTimestamp(value),
-    },
-    {
-      field: "userId",
-      headerNameKey: "userManagement.logs.userId",
-      width: 100,
-    },
-    {
-      field: "eventType",
-      headerNameKey: "userManagement.logs.eventType",
-      width: 140,
-      renderCell: (params) => (
-        <Chip
-          label={params.value}
-          color={getEventTypeColor(params.value)}
-          size="small"
-          variant="outlined"
-          sx={{ marginTop: 0.5 }}
-        />
-      ),
-    },
-    {
-      field: "entity",
-      headerNameKey: "userManagement.logs.entity",
-      width: 120,
-      renderCell: (params) => (
-        <Typography variant="body2" fontWeight={500} sx={{ marginTop: 2 }}>
-          {params.value}
-        </Typography>
-      ),
-    },
-    {
-      field: "description",
-      headerNameKey: "userManagement.logs.description",
-      flex: 1,
-      minWidth: 300,
-      align: "left",
-    },
-    {
-      field: "ipAddress",
-      headerNameKey: "userManagement.logs.ipAddress",
-      width: 150,
-      renderCell: (params) => (
-        <Typography
-          variant="body2"
-          sx={{ fontFamily: "monospace", marginTop: 2 }}
-        >
-          {cleanIpAddress(params.value)}
-        </Typography>
-      ),
-    },
-    {
-      field: "status",
-      headerNameKey: "userManagement.logs.status",
-      width: 200,
-      renderCell: (params) => (
-        <Chip
-          label={params.value}
-          variant="outlined"
-          color={getStatusColor(params.value)}
-          size="small"
-        />
-      ),
-    },
-  ]);
+  // const columns = useDataGridColumns([
+  //   {
+  //     field: "id",
+  //     headerNameKey: "userManagement.logs.eventId",
+  //     width: 280,
+  //   },
+  //   {
+  //     field: "timestamp",
+  //     headerNameKey: "userManagement.logs.timestamp",
+  //     width: 200,
+  //     valueFormatter: (value) => formatTimestamp(value),
+  //   },
+  //   {
+  //     field: "userId",
+  //     headerNameKey: "userManagement.logs.userId",
+  //     width: 100,
+  //   },
+  //   {
+  //     field: "eventType",
+  //     headerNameKey: "userManagement.logs.eventType",
+  //     width: 140,
+  //     renderCell: (params) => (
+  //       <Chip
+  //         label={params.value}
+  //         color={getEventTypeColor(params.value)}
+  //         size="small"
+  //         variant="outlined"
+  //         sx={{ marginTop: 0.5 }}
+  //       />
+  //     ),
+  //   },
+  //   {
+  //     field: "entity",
+  //     headerNameKey: "userManagement.logs.entity",
+  //     width: 120,
+  //     renderCell: (params) => (
+  //       <Typography variant="body2" fontWeight={500} sx={{ marginTop: 2 }}>
+  //         {params.value}
+  //       </Typography>
+  //     ),
+  //   },
+  //   {
+  //     field: "description",
+  //     headerNameKey: "userManagement.logs.description",
+  //     flex: 1,
+  //     minWidth: 300,
+  //     align: "left",
+  //   },
+  //   {
+  //     field: "ipAddress",
+  //     headerNameKey: "userManagement.logs.ipAddress",
+  //     width: 150,
+  //     renderCell: (params) => (
+  //       <Typography
+  //         variant="body2"
+  //         sx={{ fontFamily: "monospace", marginTop: 2 }}
+  //       >
+  //         {cleanIpAddress(params.value)}
+  //       </Typography>
+  //     ),
+  //   },
+  //   {
+  //     field: "status",
+  //     headerNameKey: "userManagement.logs.status",
+  //     width: 200,
+  //     renderCell: (params) => (
+  //       <Chip
+  //         label={params.value}
+  //         variant="outlined"
+  //         color={getStatusColor(params.value)}
+  //         size="small"
+  //       />
+  //     ),
+  //   },
+  // ]);
+
+  const logs = data ?? [];
+  const {
+    filteredLogs,
+    desktopColumns,
+    mobileColumns,
+    mobileRows,
+    renderPrimaryIcon,
+    filters,
+    isOpen,
+    setIsOpen,
+    rows,
+    formatTimestamp,
+    getEventTypeColor,
+    getStatusColor,
+    cleanIpAddress,
+    emptyMessage,
+    totalRows,
+  } = useLogsTableConfig(logs);
 
   return (
     <Box sx={{ px: 3 }}>
-      {/* DataGrid */}
+      {/* Mobile Header with Filter Button */}
       <Box
         sx={{
-          display: { xs: "none", md: "block" },
-          minHeight: "auto",
-          width: "100%",
+          display: { xs: "flex", md: "none" },
+          position: "relative",
+          justifyContent: "center",
+          alignItems: "center",
+          mb: 2,
         }}
       >
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "flex-end",
-            marginBottom: 1,
-            marginRight: 2,
-          }}
+        <Typography
+          variant="h6"
+          sx={{ fontWeight: 600, fontSize: "1.1rem", color: colors.textPrimary }}
         >
+          {t("userManagement.logs.label")}
+        </Typography>
+        <Box sx={{ position: "absolute", right: 0 }}>
           <Tooltip title={t("userManagement.logs.filters")}>
             <IconButton
               onClick={() => setIsOpen(!isOpen)}
@@ -312,34 +208,42 @@ export const LogsView = () => {
             </IconButton>
           </Tooltip>
         </Box>
+      </Box>
 
-        {/* Advanced Filters - Rendered outside DataGrid */}
-        {isOpen && (
-          <Box
+      {/* Desktop Filter Button */}
+      <Box
+        sx={{
+          display: { xs: "none", md: "flex" },
+          justifyContent: "flex-end",
+          alignItems: "center",
+          marginBottom: 1,
+          marginRight: 2,
+        }}
+      >
+        <Tooltip title={t("userManagement.logs.filters")}>
+          <IconButton
+            onClick={() => setIsOpen(!isOpen)}
+            size="small"
             sx={{
-              padding: "0.2rem 0 1rem 0",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: colors.subSectionBackground,
-              borderBottom: `1px solid ${colors.subSectionBorder}`,
-              marginBottom: 1,
+              backgroundColor: colors?.backgroundOpenSubSection,
             }}
           >
-            <AdvancedFilters
-              filters={filters}
-              setFilters={setFilters}
-              refetch={refetch}
-              isDebouncing={false}
-              loading={isLoading}
-              clearFilters={clearFilters}
-            />
-          </Box>
-        )}
+            <FilterListIcon fontSize="medium" />
+          </IconButton>
+        </Tooltip>
+      </Box>
 
+      {/* Desktop DataGrid */}
+      <Box
+        sx={{
+          display: { xs: "none", md: "block" },
+          height: "auto",
+          width: { md: "95%", lg: "100%" },
+        }}
+      >
         <UniversalDataGrid
-          rows={logs}
-          columns={columns}
+          rows={rows}
+          columns={desktopColumns}
           loading={isLoading}
           emptyMessage={t("userManagement.logs.noLogsFound") || "No logs found"}
           rowCount={totalRows}
@@ -347,13 +251,14 @@ export const LogsView = () => {
           paginationModel={paginationModel}
           onPaginationModelChange={setPaginationModel}
           pageSizeOptions={[10, 25, 50, 100]}
+          columnHeaderHeight={isOpen ? 90 : 56}
           autoHeight
         />
       </Box>
 
       {/* Mobile View */}
       <LogsViewMobile
-        logs={logs}
+        logs={filteredLogs}
         isLoading={isLoading}
         error={error}
         formatTimestamp={formatTimestamp}

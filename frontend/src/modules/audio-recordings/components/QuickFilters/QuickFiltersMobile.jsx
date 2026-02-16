@@ -2,12 +2,10 @@ import { useMemo, useState } from "react";
 import PropTypes from "prop-types";
 import {
   Box,
-  Collapse,
   IconButton,
   Typography,
   Paper,
   Chip,
-  CircularProgress,
   Tooltip,
   TablePagination,
 } from "@mui/material";
@@ -148,7 +146,7 @@ export const QuickFiltersMobile = ({
               }
             >
               {isLoadingUrl ? (
-                <CircularProgress size={20} />
+                <LoadingProgress size={20} />
               ) : isPlaying ? (
                 <StopIcon />
               ) : (

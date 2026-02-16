@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
-import { TextField, InputAdornment, CircularProgress } from "@mui/material";
+import { TextField, InputAdornment } from "@mui/material";
 import { Search as SearchIcon } from "@mui/icons-material";
-import { colors, filterStyles } from "../../../common/styles/styles";
+import { filterStyles } from "../../../common/styles/styles";
 import { useTranslation } from "react-i18next";
 
 // Custom hook for debounced value
@@ -51,7 +51,7 @@ export const ArticleSearch = ({
           startAdornment: (
             <InputAdornment position="end">
               {isLoading ? (
-                <CircularProgress size={20} sx={{ color: colors.primary }} />
+                <LoadingProgress size={20} />
               ) : (
                 <SearchIcon
                   sx={{ color: "action.active", marginRight: "0.5rem" }}
