@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
 import {
   Box,
@@ -8,10 +7,12 @@ import {
   Button,
   Typography,
   Link,
-  CircularProgress,
 } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { useLoginMutation } from "../../../store/api/authApi";
 import { setCredentials } from "../../../store/auth/authSlice";
 import { colors, primaryIconButton } from "../../styles/styles";
@@ -19,6 +20,19 @@ import LanguageMenu from "./AppBar/LanguageMenu";
 import { extractApiError } from "../../utils/apiHelpers";
 import { useNotification } from "../../hooks";
 import { AlertInline } from "../ui/AlertInline";
+import { LoadingProgress } from "../ui/LoadingProgress";
+
+// Zod validation schema
+const loginSchema = z.object({
+  email: z
+    .string()
+    .min(1, "login.emailRequired")
+    .email("login.emailInvalid"),
+  password: z
+    .string()
+    .min(1, "login.passwordRequired")
+    .min(6, "login.passwordMinLength"),
+});
 
 const LoginView = () => {
   const { t } = useTranslation();
@@ -26,23 +40,26 @@ const LoginView = () => {
   const dispatch = useDispatch();
   const [login, { isLoading }] = useLoginMutation();
 
-  // Form state
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
   // Notification hook
   const { notificationRef, showError } = useNotification();
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
+  // React Hook Form with Zod validation
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(loginSchema),
+    mode: "onBlur",
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
-    if (!email || !password) {
-      showError(t("login.fillAllFields"));
-      return;
-    }
-
+  const onSubmit = async (data) => {
     try {
-      const result = await login({ email, password }).unwrap();
+      const result = await login(data).unwrap();
       dispatch(setCredentials(result));
       navigate("/app/dashboard", { replace: true });
     } catch (error) {
@@ -115,42 +132,70 @@ const LoginView = () => {
           </Box>
 
           {/* Login Form */}
-          <Box component="form" onSubmit={handleLogin} sx={{ mt: 3 }}>
+          <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ mt: 3 }}>
             <TextField
               id="email-login"
-              name="email"
               label={t("login.email")}
               type="email"
               fullWidth
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
               margin="normal"
               autoComplete="email"
               autoFocus
+              error={!!errors.email}
+              helperText={errors.email ? t(errors.email.message) : ""}
+              {...register("email")}
               sx={{
                 mb: 2,
                 "& .MuiOutlinedInput-root": {
-                  borderRadius: "1.5rem",
+                  backgroundColor: colors.surface,
+                  borderRadius: "3rem",
+                  "& fieldset": {
+                    borderColor: errors.email ? colors.error : colors.textIcon,
+                  },
+                  "&:hover fieldset": {
+                    borderColor: errors.email ? colors.error : colors.focusRing,
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: errors.email ? colors.error : colors.focusRing,
+                  },
+                },
+                "& .MuiInputLabel-root": {
+                  "&.Mui-focused": {
+                    color: errors.email ? colors.error : colors.focusRing,
+                  },
                 },
               }}
             />
 
             <TextField
               id="password-login"
-              name="password"
               label={t("login.password")}
               type="password"
               fullWidth
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
               margin="normal"
               autoComplete="current-password"
+              error={!!errors.password}
+              helperText={errors.password ? t(errors.password.message) : ""}
+              {...register("password")}
               sx={{
                 mb: 2,
                 "& .MuiOutlinedInput-root": {
-                  borderRadius: "1.5rem",
+                  backgroundColor: colors.surface,
+                  borderRadius: "3rem",
+                  "& fieldset": {
+                    borderColor: errors.password ? colors.error : colors.textIcon,
+                  },
+                  "&:hover fieldset": {
+                    borderColor: errors.password ? colors.error : colors.focusRing,
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: errors.password ? colors.error : colors.focusRing,
+                  },
+                },
+                "& .MuiInputLabel-root": {
+                  "&.Mui-focused": {
+                    color: errors.password ? colors.error : colors.focusRing,
+                  },
                 },
               }}
             />
@@ -190,7 +235,7 @@ const LoginView = () => {
             >
               {isLoading ? (
                 <>
-                  <CircularProgress size={20} color="inherit" sx={{ mr: 1 }} />
+                  <LoadingProgress size={20} sx={{ mr: 1 }} />
                   {t("login.signingIn")}
                 </>
               ) : (

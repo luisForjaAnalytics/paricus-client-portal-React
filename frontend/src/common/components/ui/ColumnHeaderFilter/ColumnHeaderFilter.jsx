@@ -8,7 +8,6 @@ import {
   MenuItem,
   Typography,
   IconButton,
-  CircularProgress,
   Tooltip,
   Divider,
 } from "@mui/material";
@@ -22,6 +21,7 @@ import {
   colors,
   dataGridTable,
   filterStyles,
+  selectMenuProps,
 } from "../../../styles/styles";
 import { SelectMenuItem } from "../SelectMenuItem/SelectMenuItem";
 
@@ -95,7 +95,7 @@ export const ColumnHeaderFilter = ({
                   sx={buttonIconNoLabel}
                 >
                   {loading ? (
-                    <CircularProgress size={20} />
+                    <LoadingProgress size={20} />
                   ) : (
                     <SearchIcon fontSize="small" />
                   )}
@@ -133,6 +133,7 @@ export const ColumnHeaderFilter = ({
               onChange={(e) => handleFilterChange(e.target.value)}
               label={label || headerName}
               onOpen={onOpen}
+              MenuProps={selectMenuProps}
               sx={filterStyles.multiOptionFilter?.selectSection}
             >
               <MenuItem value="">
@@ -160,7 +161,12 @@ export const ColumnHeaderFilter = ({
             slotProps={{ inputLabel: { shrink: true } }}
             value={filterValue || ""}
             onChange={(e) => handleFilterChange(e.target.value)}
-            sx={filterStyles.inputFilter}
+            sx={{
+              ...filterStyles.inputFilter,
+              "& .MuiOutlinedInput-input": {
+                color: filterValue ? colors.textPrimary : colors.textMuted,
+              },
+            }}
           />
         );
 

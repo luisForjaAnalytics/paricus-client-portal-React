@@ -292,6 +292,10 @@ export default {
     signingIn: "Signing in...",
     fillAllFields: "Please fill in all fields",
     invalidCredentials: "Invalid credentials",
+    emailRequired: "Email is required",
+    emailInvalid: "Please enter a valid email address",
+    passwordRequired: "Password is required",
+    passwordMinLength: "Password must be at least 6 characters",
   },
 
   // Profile

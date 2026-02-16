@@ -293,6 +293,10 @@ export default {
     signingIn: "Iniciando sesión...",
     fillAllFields: "Por favor complete todos los campos",
     invalidCredentials: "Credenciales inválidas",
+    emailRequired: "El correo electrónico es requerido",
+    emailInvalid: "Por favor ingrese un correo electrónico válido",
+    passwordRequired: "La contraseña es requerida",
+    passwordMinLength: "La contraseña debe tener al menos 6 caracteres",
   },
 
   // Perfil
