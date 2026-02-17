@@ -6,7 +6,9 @@ import {
   CheckCircle,
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
+import { useSelector } from "react-redux";
 import { dashboardStyles, colors } from "../../../../common/styles/styles";
+import { isTargetAchieved } from "../../../../store/kpi/kpiSlice";
 
 /**
  * StatCard - Desktop version with full details
@@ -16,9 +18,11 @@ const StatCard = ({
   value,
   label,
   badge,
-  badgeColor = "success",
+  achieved,
   viewReportsText,
 }) => {
+  const badgeColor = achieved ? "success" : "error";
+
   return (
     <Card sx={dashboardStyles.dashboardStatsCard}>
       <CardContent
@@ -48,7 +52,7 @@ const StatCard = ({
           <Box
             sx={{
               display: { xs: "flex", md: "none" },
-              flexDirection:'column'
+              flexDirection: "column",
             }}
           >
             {/* Value */}
@@ -69,7 +73,7 @@ const StatCard = ({
               {label}
             </Typography>
           </Box>
-          {/* Badge (if exists) */}
+          {/* Badge */}
           {badge && (
             <Box sx={{ mt: 1 }}>
               <Chip
@@ -77,7 +81,6 @@ const StatCard = ({
                 color={badgeColor}
                 size="small"
                 sx={{
-                  ...dashboardStyles.dashboardIconContainer,
                   fontSize: { xs: "0.5rem", md: "0.8rem" },
                   fontWeight: "bold",
                   borderRadius: "1rem",
@@ -89,8 +92,7 @@ const StatCard = ({
         <Box
           sx={{
             display: { xs: "none", md: "flex" },
-            flexDirection:'column'
-
+            flexDirection: "column",
           }}
         >
           {/* Value */}
@@ -142,47 +144,36 @@ const StatCard = ({
 
 export const DashboardStatisticsView = ({ stats }) => {
   const { t } = useTranslation();
+  const kpi = useSelector((state) => state.kpi);
 
-  // Mock data for the stats cards
-  const mockStats = {
-    callsOffered: 1482,
-    callsAnswered: 1314,
-    answerRate: "88.6%",
-    slaCompliance: "99.4%",
-    callsOfferedChange: "+12.5%",
-    callsAnsweredChange: "+8.2%",
-    answerRateChange: "+2.4%",
-  };
-
-  // Card data with colors for mobile
   const cardsData = [
     {
       icon: <Phone />,
-      value: mockStats.callsOffered.toLocaleString(),
+      value: Number(kpi.callsOffered.value).toLocaleString(),
       label: t("dashboard.statistics.callsOffered"),
-      badge: mockStats.callsOfferedChange,
-      borderColor: colors.primary,
+      badge: kpi.callsOffered.change,
+      achieved: isTargetAchieved(kpi.callsOffered.value, kpi.callsOffered.target),
     },
     {
       icon: <PhoneCallback />,
-      value: mockStats.callsAnswered.toLocaleString(),
+      value: Number(kpi.callsAnswered.value).toLocaleString(),
       label: t("dashboard.statistics.callsAnswered"),
-      badge: mockStats.callsAnsweredChange,
-      borderColor: colors.success,
+      badge: kpi.callsAnswered.change,
+      achieved: isTargetAchieved(kpi.callsAnswered.value, kpi.callsAnswered.target),
     },
     {
       icon: <TrendingUp />,
-      value: mockStats.answerRate,
+      value: `${kpi.answerRate.value}%`,
       label: t("dashboard.statistics.answerRate"),
-      badge: mockStats.answerRateChange,
-      borderColor: colors.warning || "#f59e0b",
+      badge: kpi.answerRate.change,
+      achieved: isTargetAchieved(kpi.answerRate.value, kpi.answerRate.target),
     },
     {
       icon: <CheckCircle />,
-      value: mockStats.slaCompliance,
+      value: `${kpi.slaCompliance.value}%`,
       label: t("dashboard.statistics.slaCompliance"),
-      badge: "EXCELLENT",
-      borderColor: colors.info || "#3b82f6",
+      badge: kpi.slaCompliance.change,
+      achieved: isTargetAchieved(kpi.slaCompliance.value, kpi.slaCompliance.target),
     },
   ];
 
@@ -202,7 +193,7 @@ export const DashboardStatisticsView = ({ stats }) => {
           value={card.value}
           label={card.label}
           badge={card.badge}
-          badgeColor="success"
+          achieved={card.achieved}
           viewReportsText={t("dashboard.statistics.viewReports")}
         />
       ))}

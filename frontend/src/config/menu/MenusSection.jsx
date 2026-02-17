@@ -134,6 +134,12 @@ export const menuItemsAdmin = [
         route: "broadcast/swiper-control",
         permission: "admin_broadcast",
       },
+      {
+        label: "kpiControl",
+        icon: <AppRegistrationIcon fontSize="medium" />,
+        route: "broadcast/kpi-control",
+        permission: "admin_broadcast",
+      },
     ],
   },
 ];

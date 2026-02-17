@@ -15,6 +15,12 @@ import {
   Search as SearchIcon,
   FilterListOff as FilterListOffIcon,
 } from "@mui/icons-material";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
+import "dayjs/locale/es";
+import "dayjs/locale/en";
 import { useTranslation } from "react-i18next";
 import {
   buttonIconNoLabel,
@@ -24,6 +30,7 @@ import {
   selectMenuProps,
 } from "../../../styles/styles";
 import { SelectMenuItem } from "../SelectMenuItem/SelectMenuItem";
+import { LoadingProgress } from "../LoadingProgress";
 
 /**
  * ColumnHeaderFilter - Componente de filtro para headers de DataGrid
@@ -60,9 +67,9 @@ export const ColumnHeaderFilter = ({
 }) => {
   const { t } = useTranslation();
 
-  const OPTIONAL_STYLE ={
-    SYNOPSIS:'synopsis'
-  }
+  const OPTIONAL_STYLE = {
+    SYNOPSIS: "synopsis",
+  };
 
   const handleFilterChange = (value) => {
     onFilterChange?.(filterKey, value);
@@ -152,22 +159,193 @@ export const ColumnHeaderFilter = ({
         );
 
       case "date":
+        const locale = t("common.locale") === "es-ES" ? "es" : "en";
+
         return (
-          <TextField
-            fullWidth
-            size="small"
-            type="date"
-            label={label || headerName}
-            slotProps={{ inputLabel: { shrink: true } }}
-            value={filterValue || ""}
-            onChange={(e) => handleFilterChange(e.target.value)}
-            sx={{
-              ...filterStyles.inputFilter,
-              "& .MuiOutlinedInput-input": {
-                color: filterValue ? colors.textPrimary : colors.textMuted,
-              },
-            }}
-          />
+          <LocalizationProvider
+            dateAdapter={AdapterDayjs}
+            adapterLocale={locale}
+          >
+            <DatePicker
+              label={label || headerName}
+              value={filterValue ? dayjs(filterValue) : null}
+              onChange={(newValue) => {
+                const formattedDate = newValue
+                  ? newValue.format("YYYY-MM-DD")
+                  : "";
+                handleFilterChange(formattedDate);
+              }}
+              slotProps={{
+                textField: {
+                  size: "small",
+                  fullWidth: true,
+                  InputProps: {
+                    sx: {
+                      backgroundColor: colors.surface,
+                      borderRadius: "3rem",
+                      height: "2.2rem",
+                      "&.Mui-focused .MuiPickersOutlinedInput-notchedOutline": {
+                        borderColor: `${colors.focusRing} !important`,
+                      },
+                      "&:hover .MuiPickersOutlinedInput-notchedOutline": {
+                        borderColor: colors.focusRing,
+                      },
+                    },
+                  },
+                  InputLabelProps: {
+                    sx: {
+                      top: "-0.4rem",
+                      "&.Mui-focused": {
+                        color: colors.focusRing,
+                      },
+                      "&.MuiInputLabel-shrink": {
+                        top: "0",
+                      },
+                    },
+                  },
+                  sx: {
+                    flex: 1,
+                    mt: "0.5rem",
+                    "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline":
+                      {
+                        borderColor: colors.focusRing,
+                      },
+                    "& .MuiInputBase-input": {
+                      color: filterValue
+                        ? colors.textPrimary
+                        : colors.textMuted,
+                      padding: "0 14px",
+                    },
+                  },
+                },
+                popper: {
+                  sx: {
+                    "& .MuiPaper-root": {
+                      borderRadius: "1.5rem",
+                      boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12)",
+                      padding: "0rem",
+                      border: `1px solid ${colors.border}`,
+                    },
+                    "& .MuiPickersCalendarHeader-root": {
+                      display: "flex",
+                      alignItems: "center",
+                      paddingTop: "0.5rem",
+                      marginTop: 0,
+                    },
+                    "& .MuiPickersCalendarHeader-label": {
+                      color: colors.primary,
+                      fontWeight: 500,
+                      fontSize: "0.8rem",
+                      margin: 0,
+                    },
+                    "& .MuiPickersCalendarHeader-switchViewButton": {
+                      color: colors.primary,
+                      "&:hover": {
+                        backgroundColor: colors.primaryLight,
+                      },
+                    },
+                    "& .MuiPickersArrowSwitcher-button": {
+                      color: colors.primary,
+                      "&:hover": {
+                        backgroundColor: colors.primaryLight,
+                      },
+                    },
+                    "& .MuiDayCalendar-weekDayLabel": {
+                      color: colors.textSecondary,
+                      fontWeight: 600,
+                      fontSize: "0.875rem",
+                      margin: "0.25rem",
+                    },
+                    "& .MuiPickersDay-root": {
+                      borderRadius: "0.75rem",
+                      fontSize: "0.875rem",
+                      fontWeight: 500,
+                      color: colors.textPrimary,
+                      margin: "0.15rem",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        backgroundColor: colors.primaryLight,
+                        transform: "scale(1.05)",
+                      },
+                      "&.Mui-selected": {
+                        backgroundColor: colors.primary,
+                        color: colors.textWhite,
+                        fontWeight: 700,
+                        boxShadow: `0 2px 8px ${colors.primary}40`,
+                        "&:hover": {
+                          backgroundColor: colors.primaryHover,
+                        },
+                        "&:focus": {
+                          backgroundColor: colors.primary,
+                        },
+                      },
+                      "&.MuiPickersDay-today": {
+                        border: `2px solid ${colors.primary}`,
+                        backgroundColor: "transparent",
+                        fontWeight: 600,
+                        "&:not(.Mui-selected)": {
+                          color: colors.primary,
+                        },
+                      },
+                      "&.Mui-disabled": {
+                        color: colors.textIcon,
+                        opacity: 0.4,
+                      },
+                    },
+                    "& .MuiDialogActions-root": {
+                      paddingTop: "1rem",
+                    },
+                    "& .MuiButton-root": {
+                      borderRadius: "0.75rem",
+                      fontWeight: 600,
+                      textTransform: "none",
+                      padding: "0.5rem 1.5rem",
+                      "&.MuiButton-text": {
+                        color: colors.primary,
+                        "&:hover": {
+                          backgroundColor: colors.primaryLight,
+                        },
+                      },
+                    },
+                    "& .MuiYearCalendar-root": {
+                      "& .MuiPickersYear-yearButton": {
+                        borderRadius: "0.75rem",
+                        fontSize: "0.875rem",
+                        "&.Mui-selected": {
+                          backgroundColor: colors.primary,
+                          color: colors.textWhite,
+                          fontWeight: 700,
+                          "&:hover": {
+                            backgroundColor: colors.primaryHover,
+                          },
+                        },
+                        "&:hover": {
+                          backgroundColor: colors.primaryLight,
+                        },
+                      },
+                    },
+                    "& .MuiMonthCalendar-root": {
+                      "& .MuiPickersMonth-monthButton": {
+                        borderRadius: "0.75rem",
+                        fontSize: "0.875rem",
+                        "&.Mui-selected": {
+                          backgroundColor: colors.primary,
+                          color: colors.textWhite,
+                          fontWeight: 700,
+                          "&:hover": {
+                            backgroundColor: colors.primaryHover,
+                          },
+                        },
+                        "&:hover": {
+                          backgroundColor: colors.primaryLight,
+                        },
+                      },
+                    },
+                  },
+                },
+              }}
+            />
+          </LocalizationProvider>
         );
 
       case "text":

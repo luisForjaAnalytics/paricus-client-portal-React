@@ -14,6 +14,7 @@ function a11yProps(index) {
 const tabs = [
   { route: "quick-broadcast", label: "quickBroadcast" },
   { route: "swiper-control", label: "swiperControl" },
+  { route: "kpi-control", label: "kpiControl" },
 ];
 
 export const QuickBroadcast = () => {

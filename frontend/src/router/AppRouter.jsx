@@ -36,7 +36,7 @@ import {
   TicketsViewDesktop,
   TicketViewDetails,
 } from "../modules/tickets";
-import { QuickBroadcast, QuickBroadcastView, SwiperControl } from "../modules/QuickBroadcast";
+import { QuickBroadcast, QuickBroadcastView, SwiperControl, KpiControl } from "../modules/QuickBroadcast";
 
 const router = createBrowserRouter(
   [
@@ -219,6 +219,10 @@ const router = createBrowserRouter(
             {
               path: "swiper-control",
               element: <SwiperControl />,
+            },
+            {
+              path: "kpi-control",
+              element: <KpiControl />,
             },
           ],
         },

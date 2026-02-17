@@ -1,6 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { authApi } from "./api/authApi";
 import { authReducer, clearCredentials } from "./auth/authSlice";
+import { kpiReducer } from "./kpi/kpiSlice";
 import { invoicesApi } from "./api/invoicesApi";
 import { reportsApi } from "./api/reportsApi";
 import { adminApi } from "./api/adminApi";
@@ -41,6 +42,7 @@ const resetCacheMiddleware = (storeAPI) => (next) => (action) => {
 export const store = configureStore({
   reducer: {
     auth: authReducer,
+    kpi: kpiReducer,
     [authApi.reducerPath]: authApi.reducer,
     [invoicesApi.reducerPath]: invoicesApi.reducer,
     [reportsApi.reducerPath]: reportsApi.reducer,

@@ -88,11 +88,11 @@ const getLabelFromPath = (pathname) => {
     if (path.startsWith(item.route) || path === item.route) {
       return item.label;
     }
-    // Check subItems if they exist
+    // Check subItems if they exist - return parent label to keep parent menu active
     if (item.subItems) {
       for (const subItem of item.subItems) {
         if (path.startsWith(subItem.route) || path === subItem.route) {
-          return subItem.label;
+          return item.label;
         }
       }
     }
