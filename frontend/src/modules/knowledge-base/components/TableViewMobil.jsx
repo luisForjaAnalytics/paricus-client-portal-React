@@ -17,6 +17,7 @@ export const TableViewMobil = ({
   handleViewClick,
   headerActions,
   subHeader,
+  topContent,
 }) => {
   const { t } = useTranslation();
 
@@ -79,6 +80,11 @@ export const TableViewMobil = ({
 
   return (
     <Box sx={{ display: { xs: "block", md: "none" }, width: "100%" }}>
+      {topContent && (
+        <Box sx={{ display: "flex", justifyContent: "center", px: 6, mb: 1 }}>
+          {topContent}
+        </Box>
+      )}
       <UniversalMobilDataTable
         rows={rows}
         columns={columns}
@@ -116,6 +122,7 @@ TableViewMobil.propTypes = {
   handleViewClick: PropTypes.func.isRequired,
   headerActions: PropTypes.node,
   subHeader: PropTypes.node,
+  topContent: PropTypes.node,
 };
 
 TableViewMobil.defaultProps = {

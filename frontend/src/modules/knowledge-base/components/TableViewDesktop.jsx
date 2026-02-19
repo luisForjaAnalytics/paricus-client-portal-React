@@ -339,6 +339,8 @@ export const TableView = () => {
 
   return (
     <Box sx={{ width: "100%" }}>
+      {/* Mobile Filter Panel + Search are rendered via subHeader in TableViewMobil */}
+
       {/* Articles Table */}
       <Box
         sx={{
@@ -388,6 +390,7 @@ export const TableView = () => {
       </Box>
 
       {/* Mobile View */}
+
       <TableViewMobil
         articles={rows}
         isLoading={isLoading}
@@ -403,6 +406,12 @@ export const TableView = () => {
               <FilterListIcon fontSize="medium" />
             </IconButton>
           </Tooltip>
+        }
+        topContent={
+          <ArticleSearch
+            onDebouncedValueChange={handleSearchTermChange}
+            isLoading={isSearching}
+          />
         }
         subHeader={
           <MobileFilterPanel

@@ -19,7 +19,7 @@ export default {
     broadcast: "Anuncios",
     quickBroadcast: "Difusión Rápida",
     swiperControl: "Control de Slides",
-    kpiControl: "Kpi Controler",
+    kpiControl: "Control de KPI",
     dashboardKpi: "KPI",
     dashboardSwiper: "Swiper",
     dashboardGeneralInfo: "Información General",

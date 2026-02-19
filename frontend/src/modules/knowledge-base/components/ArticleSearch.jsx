@@ -4,6 +4,7 @@ import { TextField, InputAdornment } from "@mui/material";
 import { Search as SearchIcon } from "@mui/icons-material";
 import { filterStyles } from "../../../common/styles/styles";
 import { useTranslation } from "react-i18next";
+import { LoadingProgress } from "../../../common/components/ui/LoadingProgress";
 
 // Custom hook for debounced value
 const useDebounce = (value, delay) => {
@@ -45,7 +46,7 @@ export const ArticleSearch = ({
       }
       value={searchValue}
       onChange={(e) => setSearchValue(e.target.value)}
-      sx={{ ...filterStyles.inputFilter, padding: "0 40vh 0 40vh" }}
+      sx={{ ...filterStyles.inputFilter, padding: { xs: 0, md: "0 40vh 0 40vh" } }}
       slotProps={{
         input: {
           startAdornment: (

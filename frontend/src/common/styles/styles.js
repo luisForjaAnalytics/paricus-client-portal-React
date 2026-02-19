@@ -679,7 +679,7 @@ export const filterStyles = {
     //width:'15vh',
     flex: 1,
     mt: "0.5rem",
-    width: { xs: "18vh", md: "auto" },
+    width: { xs: "20vh", md: "auto" },
     "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
       borderColor: colors.focusRing,
     },

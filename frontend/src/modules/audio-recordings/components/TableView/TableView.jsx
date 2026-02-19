@@ -415,7 +415,7 @@ export const TableView = ({
         columns={columns}
         loading={loading}
         emptyMessage={
-          t("audioRecordings.noRecordings") || "No recordings found"
+          t("audioRecordings.results.noRecordings") || "No recordings found"
         }
         paginationMode="server"
         rowCount={totalCount}
