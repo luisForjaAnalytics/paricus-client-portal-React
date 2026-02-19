@@ -1,7 +1,13 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
+import {
+  FilterList as FilterListIcon,
+  Add as AddIcon,
+} from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import { useBreakpoint } from "../../../../common/hooks/useBreakpoint";
 import { useNotification } from "../../../../common/hooks";
+import { MobileFilterPanel } from "../../../../common/components/ui/MobileFilterPanel";
+import { MobileSpeedDial } from "../../../../common/components/ui/MobileSpeedDial";
 import { ClientsTabDesktop } from "./ClientsTabDesktop";
 import { ClientsTabMobile } from "./ClientsTabMobile";
 import { useClientsTableConfig } from "./useClientsTableConfig";
@@ -140,6 +146,10 @@ export const ClientsTab = () => {
     renderPrimaryIcon,
     isOpen,
     setIsOpen,
+    filters,
+    handleFilterChange,
+    clearFilters,
+    statusOptions,
     actionsLabel,
     emptyMessage,
     headerTitle,
@@ -149,6 +159,26 @@ export const ClientsTab = () => {
     handleEdit,
     handleDeactivate,
   });
+
+  // Mobile filter config
+  const mobileFilterConfig = useMemo(
+    () => [
+      {
+        key: "name",
+        label: t("clients.table.clientName"),
+        type: "text",
+        value: filters.name,
+      },
+      {
+        key: "status",
+        label: t("clients.table.status"),
+        type: "select",
+        value: filters.status,
+        options: statusOptions.map((opt) => ({ label: opt.name, value: opt.value })),
+      },
+    ],
+    [t, filters, statusOptions]
+  );
 
   // Props compartidos para Desktop y Mobile
   const sharedProps = {
@@ -191,6 +221,31 @@ export const ClientsTab = () => {
           {...sharedProps}
           columns={mobileColumns}
           renderPrimaryIcon={renderPrimaryIcon}
+          headerActions={
+            <MobileSpeedDial
+              actions={[
+                {
+                  icon: <FilterListIcon />,
+                  name: t("clients.filters"),
+                  onClick: () => setIsOpen(!isOpen),
+                },
+                {
+                  icon: <AddIcon />,
+                  name: t("clients.addClient"),
+                  onClick: () => setShowCreateDialog(true),
+                },
+              ]}
+            />
+          }
+          subHeader={
+            <MobileFilterPanel
+              isOpen={isOpen}
+              filters={mobileFilterConfig}
+              onFilterChange={handleFilterChange}
+              onClear={clearFilters}
+              loading={isLoading}
+            />
+          }
         />
       ) : (
         <ClientsTabDesktop

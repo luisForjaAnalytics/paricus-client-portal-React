@@ -5,6 +5,7 @@ import {
   Shield as ShieldIcon,
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
+import { colors } from "../../../../common/styles/styles";
 import { EditButton } from "../../../../common/components/ui/EditButton";
 import { DeleteButton } from "../../../../common/components/ui/DeleteButton";
 import { ColumnHeaderFilter } from "../../../../common/components/ui/ColumnHeaderFilter";
@@ -112,12 +113,12 @@ export const useRolesTableConfig = ({
     try {
       return (
         <Badge badgeContent={count || 0} color="info">
-          <ShieldIcon color="action" fontSize="small" />
+          <ShieldIcon sx={{ color: colors.primary }} fontSize="small" />
         </Badge>
       );
     } catch (error) {
       console.error("useRolesTableConfig renderPermissionsBadge error:", error);
-      return <ShieldIcon color="action" fontSize="small" />;
+      return <ShieldIcon sx={{ color: colors.primary }} fontSize="small" />;
     }
   }, []);
 
@@ -363,7 +364,7 @@ export const useRolesTableConfig = ({
 
   // Mobile primary icon
   const renderPrimaryIcon = useCallback(
-    () => <ShieldIcon fontSize="small" color="primary" />,
+    () => <ShieldIcon fontSize="small" sx={{ color: colors.primary }} />,
     []
   );
 

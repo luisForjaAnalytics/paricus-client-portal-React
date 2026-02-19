@@ -4,6 +4,7 @@ import { Box, Chip, Typography } from "@mui/material";
 import { ListAlt as ListAltIcon } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import { UniversalMobilDataTable } from "../../../../common/components/ui/UniversalMobilDataTable";
+import { colors } from "../../../../common/styles/styles";
 
 export const LogsViewMobile = ({
   logs = [],
@@ -13,6 +14,8 @@ export const LogsViewMobile = ({
   getEventTypeColor,
   getStatusColor,
   cleanIpAddress,
+  headerActions,
+  subHeader,
 }) => {
   const { t } = useTranslation();
 
@@ -103,7 +106,7 @@ export const LogsViewMobile = ({
   ], [t, getEventTypeColor, getStatusColor]);
 
   // Primary icon for each row
-  const renderPrimaryIcon = <ListAltIcon fontSize="small" color="primary" />;
+  const renderPrimaryIcon = <ListAltIcon fontSize="small" sx={{ color: colors.primary }} />;
 
   return (
     <Box sx={{ display: { xs: "block", md: "none" } }}>
@@ -114,7 +117,9 @@ export const LogsViewMobile = ({
         primaryIcon={renderPrimaryIcon}
         showTitle={true}
         titleField="description"
-        headerTitle={t("userManagement.logs.label")}
+        headerTitle={t("userManagement.logs.title")}
+        headerActions={headerActions}
+        subHeader={subHeader}
         loading={isLoading}
         error={error}
         emptyMessage={t("userManagement.logs.noLogsFound")}
@@ -144,6 +149,8 @@ LogsViewMobile.propTypes = {
   getEventTypeColor: PropTypes.func.isRequired,
   getStatusColor: PropTypes.func.isRequired,
   cleanIpAddress: PropTypes.func.isRequired,
+  headerActions: PropTypes.node,
+  subHeader: PropTypes.node,
 };
 
 LogsViewMobile.defaultProps = {

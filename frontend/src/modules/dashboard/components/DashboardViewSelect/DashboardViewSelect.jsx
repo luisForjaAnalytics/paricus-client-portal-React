@@ -123,7 +123,7 @@ export const DashboardViewSelect = () => {
           },
         }}
       >
-        <DashboardStatisticsView stats={stats} />
+        <DashboardStatisticsView />
       </Box>
 
       {/* Announcements + Swiper grid — mobile: both on /swiper, desktop: always */}

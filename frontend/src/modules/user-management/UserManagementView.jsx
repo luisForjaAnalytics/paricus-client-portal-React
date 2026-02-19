@@ -1,6 +1,7 @@
 import Box from "@mui/material/Box";
 import { NavBarOptions } from "./components";
 import { Outlet, useOutletContext } from "react-router-dom";
+import { boxTypography } from "../../common/styles/styles";
 
 export const UserManagementView = () => {
   let setTitleState;
@@ -12,13 +13,9 @@ export const UserManagementView = () => {
   }
 
   return (
-    <Box sx={{ width: "100%" }}>
-      <Box sx={{ px: { xs: 2, md: 1,  }, py: { xs: 2, md: 3 } }}>
-        <NavBarOptions setTitleState={setTitleState} />
-      </Box>
-      <Box>
-        <Outlet />
-      </Box>
+    <Box sx={boxTypography.box}>
+      <NavBarOptions setTitleState={setTitleState} />
+      <Outlet />
     </Box>
   );
 };

@@ -2,6 +2,7 @@ import { useMemo, useCallback, useState } from "react";
 import { Box, Chip, Typography } from "@mui/material";
 import { ListAlt as ListAltIcon } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
+import { colors } from "../../../../common/styles/styles";
 import { ColumnHeaderFilter } from "../../../../common/components/ui/ColumnHeaderFilter";
 import { formatTimestamp as formatTimestampUtil } from "../../../../common/utils/formatters";
 
@@ -527,7 +528,7 @@ export const useLogsTableConfig = (logs = []) => {
   );
 
   // Mobile primary icon
-  const renderPrimaryIcon = <ListAltIcon fontSize="small" color="primary" />;
+  const renderPrimaryIcon = <ListAltIcon fontSize="small" sx={{ color: colors.primary }} />;
 
   return {
     filteredLogs,
@@ -540,6 +541,8 @@ export const useLogsTableConfig = (logs = []) => {
     totalRows,
     rows,
     setIsOpen,
+    handleFilterChange,
+    clearFilters,
     formatTimestamp,
     getEventTypeColor,
     getStatusColor,

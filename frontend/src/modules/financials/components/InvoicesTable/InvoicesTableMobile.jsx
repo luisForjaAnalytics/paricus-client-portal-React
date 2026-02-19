@@ -20,6 +20,7 @@ import { EditButton } from "../../../../common/components/ui/EditButton";
 import { DeleteButton } from "../../../../common/components/ui/DeleteButton";
 import { DownloadButton } from "../../../../common/components/ui/DownloadButton";
 import { UniversalMobilDataTable } from "../../../../common/components/ui/UniversalMobilDataTable";
+import { colors } from "../../../../common/styles/styles";
 
 export const InvoicesTableMobile = ({
   invoices,
@@ -210,7 +211,7 @@ export const InvoicesTableMobile = ({
         rows={invoices}
         columns={columns}
         primaryField="invoiceNumber"
-        primaryIcon={<PdfIcon color="error" fontSize="small" />}
+        primaryIcon={<PdfIcon fontSize="small" sx={{ color: colors.primary }} />}
         showTitle={true}
         titleField="invoiceNumber"
         headerTitle={t("invoices.table.invoiceNumber")}

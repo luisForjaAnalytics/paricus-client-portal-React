@@ -1,8 +1,14 @@
 import { useState, useMemo, useCallback } from "react";
+import {
+  FilterList as FilterListIcon,
+  Add as AddIcon,
+} from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import { useBreakpoint } from "../../../../common/hooks/useBreakpoint";
 import { useNotification } from "../../../../common/hooks";
+import { MobileFilterPanel } from "../../../../common/components/ui/MobileFilterPanel";
+import { MobileSpeedDial } from "../../../../common/components/ui/MobileSpeedDial";
 import { extractApiError } from "../../../../common/utils/apiHelpers";
 import { formatDate as formatDateUtil } from "../../../../common/utils/formatters";
 import { UsersTabDesktop } from "./UsersTabDesktop";
@@ -270,6 +276,34 @@ export const UsersTab = () => {
     }
   }, []);
 
+  // Mobile filter handler
+  const handleMobileFilterChange = useCallback((key, value) => {
+    if (key === "name") setSearchQuery(value);
+    else if (key === "client") setSelectedClient(value);
+  }, []);
+
+  // Mobile filter config
+  const mobileFilterConfig = useMemo(() => {
+    const cfg = [
+      {
+        key: "name",
+        label: t("users.table.name"),
+        type: "text",
+        value: searchQuery,
+      },
+    ];
+    if (isBPOAdmin) {
+      cfg.push({
+        key: "client",
+        label: t("users.table.client"),
+        type: "select",
+        value: selectedClient,
+        options: clientOptions.map((c) => ({ label: c.title, value: c.value })),
+      });
+    }
+    return cfg;
+  }, [t, searchQuery, selectedClient, isBPOAdmin, clientOptions]);
+
   // Use shared table configuration - called ONCE here and passed to children
   const {
     rows,
@@ -318,6 +352,31 @@ export const UsersTab = () => {
           {...sharedProps}
           columns={mobileColumns}
           renderPrimaryIcon={renderPrimaryIcon}
+          headerActions={
+            <MobileSpeedDial
+              actions={[
+                {
+                  icon: <FilterListIcon />,
+                  name: t("users.filters"),
+                  onClick: () => setIsOpen(!isOpen),
+                },
+                {
+                  icon: <AddIcon />,
+                  name: t("users.addNewUser"),
+                  onClick: openAddDialog,
+                },
+              ]}
+            />
+          }
+          subHeader={
+            <MobileFilterPanel
+              isOpen={isOpen}
+              filters={mobileFilterConfig}
+              onFilterChange={handleMobileFilterChange}
+              onClear={clearFilters}
+              loading={loading}
+            />
+          }
         />
       ) : (
         <UsersTabDesktop

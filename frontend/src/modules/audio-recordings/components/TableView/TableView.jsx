@@ -99,7 +99,7 @@ export const TableView = ({
       {
         field: "interactionId",
         headerName: t("audioRecordings.table.interactionId"),
-        width: 300,
+        width: 200,
         align: "center",
         headerAlign: "center",
         renderHeader: () => (

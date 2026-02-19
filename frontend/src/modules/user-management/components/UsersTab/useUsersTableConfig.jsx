@@ -8,6 +8,7 @@ import {
   Shield as ShieldIcon,
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
+import { colors } from "../../../../common/styles/styles";
 import { EditButton } from "../../../../common/components/ui/EditButton";
 import { ColumnHeaderFilter } from "../../../../common/components/ui/ColumnHeaderFilter";
 
@@ -289,7 +290,7 @@ export const useUsersTableConfig = ({
         labelWidth: 80,
         renderCell: ({ value }) => (
           <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-            <EmailIcon fontSize="small" color="action" />
+            <EmailIcon fontSize="small" sx={{ color: colors.primary }} />
             <span>{value}</span>
           </Box>
         ),
@@ -300,7 +301,7 @@ export const useUsersTableConfig = ({
         labelWidth: 80,
         renderCell: ({ value }) => (
           <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-            <BusinessIcon fontSize="small" color="primary" />
+            <BusinessIcon fontSize="small" sx={{ color: colors.primary }} />
             <Chip label={value} size="small" color="primary" variant="outlined" />
           </Box>
         ),
@@ -311,7 +312,7 @@ export const useUsersTableConfig = ({
         labelWidth: 80,
         renderCell: ({ value }) => (
           <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-            <ShieldIcon fontSize="small" color="secondary" />
+            <ShieldIcon fontSize="small" sx={{ color: colors.primary }} />
             {renderRole(value)}
           </Box>
         ),
@@ -339,7 +340,7 @@ export const useUsersTableConfig = ({
         sx={{
           width: 32,
           height: 32,
-          bgcolor: "primary.main",
+          bgcolor: colors.primary,
           fontSize: "0.875rem",
         }}
       >

@@ -143,28 +143,6 @@ export const UniversalDataGrid = ({
     );
   }
 
-  // Empty state
-  if (!loading && processedRows.length === 0) {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: autoHeight ? 200 : height,
-          border: `1px solid #e0e0e0`,
-          borderRadius: 1,
-          backgroundColor: "#fafafa",
-          ...sx,
-        }}
-      >
-        <Typography variant="body1" color="text.secondary">
-          {emptyMessage || defaultEmptyMessage}
-        </Typography>
-      </Box>
-    );
-  }
-
   return (
     <Box sx={{ height: autoHeight ? "auto" : height, width: "100%", ...sx }}>
       <DataGrid
@@ -180,6 +158,9 @@ export const UniversalDataGrid = ({
         onRowSelectionModelChange={handleSelectionModelChange}
         getRowId={getRowId}
         autoHeight={autoHeight}
+        localeText={{
+          noRowsLabel: emptyMessage || defaultEmptyMessage,
+        }}
         sx={{
           ...dataGridTable,
           ...sx,
@@ -239,86 +220,3 @@ export const useDataGridColumns = (columnDefinitions) => {
   }, [columnDefinitions, t]);
 };
 
-/**
- * Helper para crear columnas de acciones comunes
- */
-export const createActionColumn = ({ onEdit, onDelete, onView, customActions = [] }) => {
-  return {
-    field: "actions",
-    headerName: "Actions",
-    headerNameKey: "common.actions",
-    width: 120,
-    align: "center",
-    headerAlign: "center",
-    sortable: false,
-    renderCell: (params) => {
-      const { Box, IconButton, Tooltip } = require("@mui/material");
-      const {
-        Edit: EditIcon,
-        Delete: DeleteIcon,
-        Visibility: VisibilityIcon,
-      } = require("@mui/icons-material");
-
-      return (
-        <Box sx={{ display: "flex", gap: 0.5, justifyContent: "center" }}>
-          {onView && (
-            <Tooltip title="View">
-              <IconButton
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onView(params.row);
-                }}
-                size="small"
-                color="info"
-              >
-                <VisibilityIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          )}
-          {onEdit && (
-            <Tooltip title="Edit">
-              <IconButton
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onEdit(params.row);
-                }}
-                size="small"
-                color="primary"
-              >
-                <EditIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          )}
-          {onDelete && (
-            <Tooltip title="Delete">
-              <IconButton
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete(params.row);
-                }}
-                size="small"
-                color="error"
-              >
-                <DeleteIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          )}
-          {customActions.map((action, index) => (
-            <Tooltip key={index} title={action.tooltip}>
-              <IconButton
-                onClick={(e) => {
-                  e.stopPropagation();
-                  action.onClick(params.row);
-                }}
-                size="small"
-                color={action.color || "default"}
-              >
-                {action.icon}
-              </IconButton>
-            </Tooltip>
-          ))}
-        </Box>
-      );
-    },
-  };
-};

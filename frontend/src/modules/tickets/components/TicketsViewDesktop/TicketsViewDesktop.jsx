@@ -1,7 +1,8 @@
 import { useState, useMemo, useCallback } from "react";
-import { Box, Tooltip, IconButton, Chip } from "@mui/material";
+import { Box, Tooltip, IconButton, Chip, useMediaQuery, useTheme } from "@mui/material";
 import { Outlet, useNavigate } from "react-router-dom";
 import FilterListIcon from "@mui/icons-material/FilterList";
+import AddIcon from "@mui/icons-material/Add";
 import { colors } from "../../../../common/styles/styles";
 import { useTranslation } from "react-i18next";
 import { CreateTickeButton } from "../CreateTicketButton";
@@ -11,11 +12,16 @@ import { UniversalDataGrid } from "../../../../common/components/ui/DataGrid/Uni
 import { ColumnHeaderFilter } from "../../../../common/components/ui/ColumnHeaderFilter";
 import { getPriorityStyles, getStatusStyles } from "../../../../common/utils/getStatusProperty";
 import { TicketsViewMobil } from "../TicketsViewMobil/TicketsViewMobil";
+import { MobileFilterPanel } from "../../../../common/components/ui/MobileFilterPanel";
+import { MobileSpeedDial } from "../../../../common/components/ui/MobileSpeedDial";
 
 export const TicketsViewDesktop = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [isOpen, setIsOpen] = useState(false);
+  const [createTicketOpen, setCreateTicketOpen] = useState(false);
   const { data = [], isLoading, isError, refetch } = useGetTicketsQuery();
 
   // Filters state
@@ -65,6 +71,57 @@ export const TicketsViewDesktop = () => {
     { name: "Resolved", value: "resolved" },
     { name: "Closed", value: "closed" },
   ];
+
+  // Mobile filter config
+  const mobileFilterConfig = useMemo(
+    () => [
+      {
+        key: "ticketId",
+        label: t("tickets.table.ticketId"),
+        type: "text",
+        value: filters.ticketId,
+      },
+      {
+        key: "subject",
+        label: t("tickets.table.subject"),
+        type: "text",
+        value: filters.subject,
+      },
+      {
+        key: "from",
+        label: t("tickets.table.from"),
+        type: "text",
+        value: filters.from,
+      },
+      {
+        key: "assignedTo",
+        label: t("tickets.table.assignedTo"),
+        type: "text",
+        value: filters.assignedTo,
+      },
+      {
+        key: "priority",
+        label: t("tickets.table.priority"),
+        type: "select",
+        value: filters.priority,
+        options: priorities.map((p) => ({ label: p.name, value: p.value })),
+      },
+      {
+        key: "status",
+        label: t("tickets.table.status"),
+        type: "select",
+        value: filters.status,
+        options: statuses.map((s) => ({ label: s.name, value: s.value })),
+      },
+      {
+        key: "lastUpdate",
+        label: t("tickets.table.lastUpdate"),
+        type: "date",
+        value: filters.lastUpdate,
+      },
+    ],
+    [t, filters, priorities, statuses]
+  );
 
   // Filter tickets based on advanced filters
   const filteredTickets = useMemo(() => {
@@ -322,31 +379,41 @@ export const TicketsViewDesktop = () => {
 
   return (
     <Box sx={{ width: "100%" }}>
-      {/* Action Buttons - Create Ticket and Filter */}
+      {/* Action Buttons - Desktop only */}
+      {!isMobile && (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "flex-end",
+            marginBottom: 1,
+            marginRight: 2,
+            gap: 1,
+          }}
+        >
+          <CreateTickeButton />
 
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "flex-end",
-          marginBottom: 1,
-          marginRight: 2,
-          gap: 1,
-        }}
-      >
-        <CreateTickeButton />
+          <Tooltip title={t("tickets.filters")}>
+            <IconButton
+              onClick={() => setIsOpen(!isOpen)}
+              size="small"
+              sx={{
+                backgroundColor: colors?.backgroundOpenSubSection,
+              }}
+            >
+              <FilterListIcon fontSize="medium" />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      )}
 
-        <Tooltip title={t("tickets.filters")}>
-          <IconButton
-            onClick={() => setIsOpen(!isOpen)}
-            size="small"
-            sx={{
-              backgroundColor: colors?.backgroundOpenSubSection,
-            }}
-          >
-            <FilterListIcon fontSize="medium" />
-          </IconButton>
-        </Tooltip>
-      </Box>
+      {/* CreateTickeButton (solo dialog) para mobile SpeedDial */}
+      {isMobile && (
+        <CreateTickeButton
+          hideButton
+          externalOpen={createTicketOpen}
+          onExternalClose={() => setCreateTicketOpen(false)}
+        />
+      )}
 
       {/* DataGrid */}
       <Box
@@ -383,6 +450,32 @@ export const TicketsViewDesktop = () => {
         isLoading={isLoading}
         error={isError ? t("tickets.errorLoading") : null}
         onRowClick={(row) => navigate(`/app/tickets/ticketTable/${row.id}`)}
+        headerActions={
+          <MobileSpeedDial
+            actions={[
+              {
+                icon: <FilterListIcon />,
+                name: t("tickets.filters"),
+                onClick: () => setIsOpen(!isOpen),
+              },
+              {
+                icon: <AddIcon />,
+                name: t("tickets.createNewTicket.createNewTicket"),
+                onClick: () => setCreateTicketOpen(true),
+              },
+            ]}
+          />
+        }
+        subHeader={
+          <MobileFilterPanel
+            isOpen={isOpen}
+            filters={mobileFilterConfig}
+            onFilterChange={handleFilterChange}
+            onSearch={refetch}
+            onClear={clearFilters}
+            loading={isLoading}
+          />
+        }
       />
 
       {/* Nested routes outlet */}

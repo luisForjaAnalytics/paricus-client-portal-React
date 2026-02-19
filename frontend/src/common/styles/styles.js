@@ -37,13 +37,14 @@ export const colors = {
   borderTiptapEditor: "#2c2c2c59",
   borderVariant: "#D1D5DB", // border-gray-300
   borderSoft: "#E5E7EB", // Updated to match Tailwind
-  // ticket Sections
+  // Ticket Sections
   datailsTitleColor: "#16A34A",
   detailsBackgroundColor: "#4ee78611",
   detailsBorderColor: "#16A34A",
+  //Mobile Speed Dial
+  MobileSpeedDialColor: "rgba(14, 131, 71, 0.7)",
 
   //Dashboard Section
-
   masterRepoBackgroundColor: "#4ee78611",
   // Text colors (from Tailwind)
   textPrimary: "#111827", // text-gray-900
@@ -678,6 +679,7 @@ export const filterStyles = {
     //width:'15vh',
     flex: 1,
     mt: "0.5rem",
+    width: { xs: "18vh", md: "auto" },
     "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
       borderColor: colors.focusRing,
     },
@@ -705,6 +707,7 @@ export const filterStyles = {
     selectSection: {
       backgroundColor: colors.surface,
       borderRadius: "3rem",
+      width: { xs: "18vh", md: "auto" },
       "& .MuiSelect-select": {
         color: colors.textPrimary,
         display: "flex",

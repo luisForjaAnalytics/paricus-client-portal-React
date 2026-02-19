@@ -189,7 +189,7 @@ export const ClientBreakdownMobile = ({
             {clientBreakdowns.map((client) => (
               <MenuItem key={client.folder} value={client.folder}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <BusinessIcon fontSize="small" color="primary" />
+                  <BusinessIcon fontSize="small" sx={{ color: colors.primary }} />
                   <Typography variant="body2">
                     {client.folderDisplay}
                   </Typography>

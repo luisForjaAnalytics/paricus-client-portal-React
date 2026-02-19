@@ -4,6 +4,7 @@ import { Box, Chip } from "@mui/material";
 import { ConfirmationNumber as TicketIcon } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import { UniversalMobilDataTable } from "../../../../common/components/ui/UniversalMobilDataTable";
+import { colors } from "../../../../common/styles/styles";
 import {
   getPriorityStyles,
   getStatusStyles,
@@ -14,6 +15,8 @@ export const TicketsViewMobil = ({
   isLoading = false,
   error = null,
   onRowClick,
+  headerActions,
+  subHeader,
 }) => {
   const { t } = useTranslation();
 
@@ -83,7 +86,7 @@ export const TicketsViewMobil = ({
   );
 
   // Primary icon for each row
-  const renderPrimaryIcon = <TicketIcon fontSize="small" color="primary" />;
+  const renderPrimaryIcon = <TicketIcon fontSize="small" sx={{ color: colors.primary }} />;
 
   return (
     <Box sx={{ display: { xs: "block", md: "none" } }}>
@@ -96,6 +99,8 @@ export const TicketsViewMobil = ({
         showTitle={true}
         titleField="subject"
         headerTitle={t("tickets.sectionTitle")}
+        headerActions={headerActions}
+        subHeader={subHeader}
         loading={isLoading}
         error={error}
         emptyMessage={t("tickets.noTicketsFound")}
@@ -122,6 +127,8 @@ TicketsViewMobil.propTypes = {
   isLoading: PropTypes.bool,
   error: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
   onRowClick: PropTypes.func,
+  headerActions: PropTypes.node,
+  subHeader: PropTypes.node,
 };
 
 TicketsViewMobil.defaultProps = {

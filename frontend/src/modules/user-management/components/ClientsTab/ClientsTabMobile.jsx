@@ -1,8 +1,5 @@
 import { Box } from "@mui/material";
-import { Add as AddIcon } from "@mui/icons-material";
 import PropTypes from "prop-types";
-import { useTranslation } from "react-i18next";
-import { ActionButton } from "../../../../common/components/ui/ActionButton";
 import { UniversalMobilDataTable } from "../../../../common/components/ui/UniversalMobilDataTable";
 
 /**
@@ -19,22 +16,11 @@ export const ClientsTabMobile = ({
   actionsLabel,
   emptyMessage,
   headerTitle,
+  headerActions,
+  subHeader,
   // State
   isLoading,
-  // Actions
-  onAddClick,
 }) => {
-  const { t } = useTranslation();
-
-  // Header actions
-  const headerActions = (
-    <ActionButton
-      handleClick={onAddClick}
-      icon={<AddIcon />}
-      text={t("clients.addClient")}
-    />
-  );
-
   return (
     <Box sx={{ display: { xs: "block", md: "none" } }}>
       <UniversalMobilDataTable
@@ -46,6 +32,7 @@ export const ClientsTabMobile = ({
         titleField="name"
         headerTitle={headerTitle}
         headerActions={headerActions}
+        subHeader={subHeader}
         loading={isLoading}
         emptyMessage={emptyMessage}
         renderActions={renderActions}
@@ -65,6 +52,7 @@ ClientsTabMobile.propTypes = {
   actionsLabel: PropTypes.string,
   emptyMessage: PropTypes.string,
   headerTitle: PropTypes.string,
+  headerActions: PropTypes.node,
+  subHeader: PropTypes.node,
   isLoading: PropTypes.bool.isRequired,
-  onAddClick: PropTypes.func.isRequired,
 };

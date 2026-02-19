@@ -26,47 +26,44 @@ export const ClientsTabDesktop = ({
   const { t } = useTranslation();
 
   return (
-    <Box sx={{ px: 3 }}>
-      {/* Data Table - Desktop Only */}
+    <Box
+      sx={{
+        display: { xs: "none", md: "block" },
+        height: "auto",
+        width: "100%",
+      }}
+    >
+      {/* Action Buttons */}
       <Box
         sx={{
-          display: { xs: "none", md: "block" },
-          height: "auto",
-          width: "100%",
+          display: "flex",
+          justifyContent: "flex-end",
+          marginBottom: 1,
+          marginRight: 2,
+          gap: 1,
         }}
       >
-        {/* Action Buttons */}
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "flex-end",
-            marginBottom: 1,
-            marginRight: 2,
-            gap: 1,
-          }}
-        >
-          <ActionButton
-            handleClick={onAddClick}
-            icon={<AddIcon />}
-            text={t("clients.addClient")}
-          />
-          {/* filter Button */}
-          <FilterButton
-            folderName={"clients.filters"}
-            isOpen={isOpen}
-            setIsOpen={setIsOpen}
-          />
-        </Box>
-
-        <UniversalDataGrid
-          rows={rows}
-          columns={columns}
-          loading={isLoading}
-          emptyMessage={emptyMessage}
-          pageSizeOptions={[10, 25, 50, 100]}
-          columnHeaderHeight={isOpen ? 90 : 56}
+        <ActionButton
+          handleClick={onAddClick}
+          icon={<AddIcon />}
+          text={t("clients.addClient")}
+        />
+        {/* filter Button */}
+        <FilterButton
+          folderName={"clients.filters"}
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
         />
       </Box>
+
+      <UniversalDataGrid
+        rows={rows}
+        columns={columns}
+        loading={isLoading}
+        emptyMessage={emptyMessage}
+        pageSizeOptions={[10, 25, 50, 100]}
+        columnHeaderHeight={isOpen ? 90 : 56}
+      />
     </Box>
   );
 };

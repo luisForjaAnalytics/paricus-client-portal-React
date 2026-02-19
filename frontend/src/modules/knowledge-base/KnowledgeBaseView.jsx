@@ -1,10 +1,6 @@
-import { Box, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import {
-  boxTypography,
-  headerTitleBox,
-  typography,
-} from "../../common/styles/styles";
+import { boxTypography } from "../../common/styles/styles";
 import { Outlet } from "react-router-dom";
 import { HeaderBoxTypography } from "../../common/components/ui/HeaderBoxTypography/HeaderBoxTypography";
 

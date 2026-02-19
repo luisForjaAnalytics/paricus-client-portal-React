@@ -13,15 +13,13 @@ import { isTargetAchieved } from "../../../../store/kpi/kpiSlice";
 /**
  * StatCard - Desktop version with full details
  */
-const StatCard = ({
-  icon,
-  value,
-  label,
-  badge,
-  achieved,
-  viewReportsText,
-}) => {
-  const badgeColor = achieved ? "success" : "error";
+const StatCard = ({ icon, value, label, badge, achieved, viewReportsText }) => {
+  const badgeColor = achieved
+    ? { backgroundColor: colors.primaryLight, color: colors.primary }
+    : {
+        backgroundColor: colors.priorityStyles.high.backgroundColor,
+        color: colors.priorityStyles.high.color,
+      };
 
   return (
     <Card sx={dashboardStyles.dashboardStatsCard}>
@@ -78,12 +76,12 @@ const StatCard = ({
             <Box sx={{ mt: 1 }}>
               <Chip
                 label={badge}
-                color={badgeColor}
                 size="small"
                 sx={{
                   fontSize: { xs: "0.5rem", md: "0.8rem" },
                   fontWeight: "bold",
                   borderRadius: "1rem",
+                  ...badgeColor,
                 }}
               />
             </Box>
@@ -142,7 +140,7 @@ const StatCard = ({
   );
 };
 
-export const DashboardStatisticsView = ({ stats }) => {
+export const DashboardStatisticsView = () => {
   const { t } = useTranslation();
   const kpi = useSelector((state) => state.kpi);
 
@@ -152,14 +150,20 @@ export const DashboardStatisticsView = ({ stats }) => {
       value: Number(kpi.callsOffered.value).toLocaleString(),
       label: t("dashboard.statistics.callsOffered"),
       badge: kpi.callsOffered.change,
-      achieved: isTargetAchieved(kpi.callsOffered.value, kpi.callsOffered.target),
+      achieved: isTargetAchieved(
+        kpi.callsOffered.value,
+        kpi.callsOffered.target,
+      ),
     },
     {
       icon: <PhoneCallback />,
       value: Number(kpi.callsAnswered.value).toLocaleString(),
       label: t("dashboard.statistics.callsAnswered"),
       badge: kpi.callsAnswered.change,
-      achieved: isTargetAchieved(kpi.callsAnswered.value, kpi.callsAnswered.target),
+      achieved: isTargetAchieved(
+        kpi.callsAnswered.value,
+        kpi.callsAnswered.target,
+      ),
     },
     {
       icon: <TrendingUp />,
@@ -173,7 +177,10 @@ export const DashboardStatisticsView = ({ stats }) => {
       value: `${kpi.slaCompliance.value}%`,
       label: t("dashboard.statistics.slaCompliance"),
       badge: kpi.slaCompliance.change,
-      achieved: isTargetAchieved(kpi.slaCompliance.value, kpi.slaCompliance.target),
+      achieved: isTargetAchieved(
+        kpi.slaCompliance.value,
+        kpi.slaCompliance.target,
+      ),
     },
   ];
 

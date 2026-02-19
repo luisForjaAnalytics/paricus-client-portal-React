@@ -281,6 +281,7 @@ export default {
     retry: "Reintentar",
     details: "Detalles",
     tryAgain: "Intentar de nuevo",
+    rowsPerPage: "Filas por página",
   },
 
   // Login

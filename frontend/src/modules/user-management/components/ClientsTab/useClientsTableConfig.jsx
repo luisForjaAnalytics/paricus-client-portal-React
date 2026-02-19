@@ -5,6 +5,7 @@ import {
   Block as BlockIcon,
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
+import { colors } from "../../../../common/styles/styles";
 import { EditButton } from "../../../../common/components/ui/EditButton";
 import { ColumnHeaderFilter } from "../../../../common/components/ui/ColumnHeaderFilter";
 
@@ -379,7 +380,7 @@ export const useClientsTableConfig = ({
 
   // Mobile primary icon
   const renderPrimaryIcon = useCallback(
-    () => <BusinessIcon fontSize="small" color="primary" />,
+    () => <BusinessIcon fontSize="small" sx={{ color: colors.primary }} />,
     []
   );
 

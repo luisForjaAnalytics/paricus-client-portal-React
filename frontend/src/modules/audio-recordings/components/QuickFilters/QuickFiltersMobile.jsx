@@ -43,6 +43,8 @@ export const QuickFiltersMobile = ({
   onPageChange,
   onPageSizeChange,
   hideHeader = false,
+  headerActions,
+  subHeader,
 }) => {
   const { t } = useTranslation();
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -191,6 +193,7 @@ export const QuickFiltersMobile = ({
       <UniversalMobilDataTable
         rows={rows}
         columns={columns}
+        enablePagination={false}
         primaryField={(row) => (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 0.25 }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -209,11 +212,13 @@ export const QuickFiltersMobile = ({
             </Box>
           </Box>
         )}
-        primaryIcon={<HeadsetIcon fontSize="small" color="primary" />}
+        primaryIcon={<HeadsetIcon fontSize="small" sx={{ color: colors.primary }} />}
         secondaryField={null}
         showTitle={false}
         headerTitle={t("audioRecordings.table.callRecordings", "Call Recordings")}
         hideHeader={hideHeader}
+        headerActions={headerActions}
+        subHeader={subHeader}
         loading={loading}
         emptyMessage={t("audioRecordings.noRecordingsFound")}
         renderActions={renderActions}
@@ -272,4 +277,6 @@ QuickFiltersMobile.propTypes = {
   onPageChange: PropTypes.func.isRequired,
   onPageSizeChange: PropTypes.func.isRequired,
   hideHeader: PropTypes.bool,
+  headerActions: PropTypes.node,
+  subHeader: PropTypes.node,
 };

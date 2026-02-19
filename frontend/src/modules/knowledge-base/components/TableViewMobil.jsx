@@ -8,12 +8,15 @@ import {
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import { UniversalMobilDataTable } from "../../../common/components/ui/UniversalMobilDataTable";
+import { colors } from "../../../common/styles/styles";
 
 export const TableViewMobil = ({
   articles = [],
   isLoading = false,
   handleEditClick,
   handleViewClick,
+  headerActions,
+  subHeader,
 }) => {
   const { t } = useTranslation();
 
@@ -80,10 +83,12 @@ export const TableViewMobil = ({
         rows={rows}
         columns={columns}
         primaryField="article_name"
-        primaryIcon={<ArticleIcon fontSize="small" color="primary" />}
+        primaryIcon={<ArticleIcon fontSize="small" sx={{ color: colors.primary }} />}
         showTitle={true}
         titleField="article_name"
         headerTitle={t("knowledgeBase.articles")}
+        headerActions={headerActions}
+        subHeader={subHeader}
         loading={isLoading}
         emptyMessage={t("knowledgeBase.noArticlesFound")}
         renderActions={renderActions}
@@ -109,6 +114,8 @@ TableViewMobil.propTypes = {
   isLoading: PropTypes.bool,
   handleEditClick: PropTypes.func.isRequired,
   handleViewClick: PropTypes.func.isRequired,
+  headerActions: PropTypes.node,
+  subHeader: PropTypes.node,
 };
 
 TableViewMobil.defaultProps = {

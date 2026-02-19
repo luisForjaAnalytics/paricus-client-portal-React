@@ -1,43 +1,24 @@
 import { useState, useMemo, useEffect } from "react";
-import PropTypes from "prop-types";
-import { Box, Chip, Typography, Tooltip, IconButton } from "@mui/material";
+import { Box, Typography, Tooltip, IconButton } from "@mui/material";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import { colors } from "../../../../common/styles/styles";
-import {
-  UniversalDataGrid,
-  useDataGridColumns,
-} from "../../../../common/components/ui/DataGrid/UniversalDataGrid";
+import { UniversalDataGrid } from "../../../../common/components/ui/DataGrid/UniversalDataGrid";
 import { useTranslation } from "react-i18next";
 import { useGetLogsQuery } from "../../../../store/api/logsApi";
 import { LogsViewMobile } from "./LogsViewMobil";
-//import AdvancedFilters from "./AdvancedFilters";
 import { AlertInline } from "../../../../common/components/ui/AlertInline";
 import { useNotification } from "../../../../common/hooks";
-import { formatTimestamp as formatTimestampUtil } from "../../../../common/utils/formatters";
-
-import { LoadingProgress } from "../../../../common/components/ui/LoadingProgress";
+import { MobileFilterPanel } from "../../../../common/components/ui/MobileFilterPanel";
 import { useLogsTableConfig } from "./useLogsTableConfig";
 
 export const LogsView = () => {
   const { t } = useTranslation();
 
-  // Pagination and filter states
+  // Pagination
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
     pageSize: 10,
   });
-  const [filterss, setFilters] = useState({
-    eventId: "",
-    userId: "",
-    eventType: "",
-    entity: "",
-    description: "",
-    ipAddress: "",
-    status: "",
-    timestamp: "",
-  });
-
-  // State for advanced filters visibility
 
   // Notification hook
   const { notificationRef, showError } = useNotification();
@@ -47,7 +28,7 @@ export const LogsView = () => {
     {
       page: paginationModel.page + 1,
       limit: paginationModel.pageSize,
-      search: "", // We'll filter on frontend
+      search: "",
     },
     { refetchOnMountOrArgChange: true },
   );
@@ -63,101 +44,6 @@ export const LogsView = () => {
     }
   }, [error, t]);
 
-  // Clear all filters
-  const clearFilters = () => {
-    setFilters({
-      eventId: "",
-      userId: "",
-      eventType: "",
-      entity: "",
-      description: "",
-      ipAddress: "",
-      status: "",
-      timestamp: "",
-    });
-  };
-
-  // const logs = filteredLogs;
-  // const totalRows = filteredLogs.length;
-  // const locale = t("common.locale") || "en-US";
-
-  // DataGrid columns
-  // const columns = useDataGridColumns([
-  //   {
-  //     field: "id",
-  //     headerNameKey: "userManagement.logs.eventId",
-  //     width: 280,
-  //   },
-  //   {
-  //     field: "timestamp",
-  //     headerNameKey: "userManagement.logs.timestamp",
-  //     width: 200,
-  //     valueFormatter: (value) => formatTimestamp(value),
-  //   },
-  //   {
-  //     field: "userId",
-  //     headerNameKey: "userManagement.logs.userId",
-  //     width: 100,
-  //   },
-  //   {
-  //     field: "eventType",
-  //     headerNameKey: "userManagement.logs.eventType",
-  //     width: 140,
-  //     renderCell: (params) => (
-  //       <Chip
-  //         label={params.value}
-  //         color={getEventTypeColor(params.value)}
-  //         size="small"
-  //         variant="outlined"
-  //         sx={{ marginTop: 0.5 }}
-  //       />
-  //     ),
-  //   },
-  //   {
-  //     field: "entity",
-  //     headerNameKey: "userManagement.logs.entity",
-  //     width: 120,
-  //     renderCell: (params) => (
-  //       <Typography variant="body2" fontWeight={500} sx={{ marginTop: 2 }}>
-  //         {params.value}
-  //       </Typography>
-  //     ),
-  //   },
-  //   {
-  //     field: "description",
-  //     headerNameKey: "userManagement.logs.description",
-  //     flex: 1,
-  //     minWidth: 300,
-  //     align: "left",
-  //   },
-  //   {
-  //     field: "ipAddress",
-  //     headerNameKey: "userManagement.logs.ipAddress",
-  //     width: 150,
-  //     renderCell: (params) => (
-  //       <Typography
-  //         variant="body2"
-  //         sx={{ fontFamily: "monospace", marginTop: 2 }}
-  //       >
-  //         {cleanIpAddress(params.value)}
-  //       </Typography>
-  //     ),
-  //   },
-  //   {
-  //     field: "status",
-  //     headerNameKey: "userManagement.logs.status",
-  //     width: 200,
-  //     renderCell: (params) => (
-  //       <Chip
-  //         label={params.value}
-  //         variant="outlined"
-  //         color={getStatusColor(params.value)}
-  //         size="small"
-  //       />
-  //     ),
-  //   },
-  // ]);
-
   const logs = data ?? [];
   const {
     filteredLogs,
@@ -168,6 +54,8 @@ export const LogsView = () => {
     filters,
     isOpen,
     setIsOpen,
+    handleFilterChange,
+    clearFilters,
     rows,
     formatTimestamp,
     getEventTypeColor,
@@ -177,39 +65,76 @@ export const LogsView = () => {
     totalRows,
   } = useLogsTableConfig(logs);
 
-  return (
-    <Box sx={{ px: 3 }}>
-      {/* Mobile Header with Filter Button */}
-      <Box
-        sx={{
-          display: { xs: "flex", md: "none" },
-          position: "relative",
-          justifyContent: "center",
-          alignItems: "center",
-          mb: 2,
-        }}
-      >
-        <Typography
-          variant="h6"
-          sx={{ fontWeight: 600, fontSize: "1.1rem", color: colors.textPrimary }}
-        >
-          {t("userManagement.logs.label")}
-        </Typography>
-        <Box sx={{ position: "absolute", right: 0 }}>
-          <Tooltip title={t("userManagement.logs.filters")}>
-            <IconButton
-              onClick={() => setIsOpen(!isOpen)}
-              size="small"
-              sx={{
-                backgroundColor: colors?.backgroundOpenSubSection,
-              }}
-            >
-              <FilterListIcon fontSize="medium" />
-            </IconButton>
-          </Tooltip>
-        </Box>
-      </Box>
+  // Mobile filter config
+  const mobileFilterConfig = useMemo(
+    () => [
+      {
+        key: "eventId",
+        label: t("userManagement.logs.eventId"),
+        type: "text",
+        value: filters.eventId,
+      },
+      {
+        key: "timestamp",
+        label: t("userManagement.logs.timestamp"),
+        type: "date",
+        value: filters.timestamp,
+      },
+      {
+        key: "userId",
+        label: t("userManagement.logs.userId"),
+        type: "text",
+        value: filters.userId,
+      },
+      {
+        key: "eventType",
+        label: t("userManagement.logs.eventType"),
+        type: "select",
+        value: filters.eventType,
+        options: [
+          { label: "CREATE", value: "CREATE" },
+          { label: "UPDATE", value: "UPDATE" },
+          { label: "DELETE", value: "DELETE" },
+          { label: "LOGIN", value: "LOGIN" },
+          { label: "LOGOUT", value: "LOGOUT" },
+          { label: "AUDIO_PLAYBACK", value: "AUDIO_PLAYBACK" },
+        ],
+      },
+      {
+        key: "entity",
+        label: t("userManagement.logs.entity"),
+        type: "text",
+        value: filters.entity,
+      },
+      {
+        key: "description",
+        label: t("userManagement.logs.description"),
+        type: "text",
+        value: filters.description,
+      },
+      {
+        key: "ipAddress",
+        label: t("userManagement.logs.ipAddress"),
+        type: "text",
+        value: filters.ipAddress,
+      },
+      {
+        key: "status",
+        label: t("userManagement.logs.status"),
+        type: "select",
+        value: filters.status,
+        options: [
+          { label: "SUCCESS", value: "SUCCESS" },
+          { label: "FAILURE", value: "FAILURE" },
+          { label: "WARNING", value: "WARNING" },
+        ],
+      },
+    ],
+    [t, filters],
+  );
 
+  return (
+    <>
       {/* Desktop Filter Button */}
       <Box
         sx={{
@@ -265,10 +190,31 @@ export const LogsView = () => {
         getEventTypeColor={getEventTypeColor}
         getStatusColor={getStatusColor}
         cleanIpAddress={cleanIpAddress}
+        headerActions={
+          <Tooltip title={t("userManagement.logs.filters")}>
+            <IconButton
+              onClick={() => setIsOpen(!isOpen)}
+              size="small"
+              sx={{ backgroundColor: colors?.backgroundOpenSubSection }}
+            >
+              <FilterListIcon fontSize="medium" />
+            </IconButton>
+          </Tooltip>
+        }
+        subHeader={
+          <MobileFilterPanel
+            isOpen={isOpen}
+            filters={mobileFilterConfig}
+            onFilterChange={handleFilterChange}
+            onSearch={refetch}
+            onClear={clearFilters}
+            loading={isLoading}
+          />
+        }
       />
 
       {/* Error Snackbar */}
       <AlertInline ref={notificationRef} asSnackbar />
-    </Box>
+    </>
   );
 };

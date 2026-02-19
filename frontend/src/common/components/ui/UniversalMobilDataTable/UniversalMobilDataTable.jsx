@@ -1,11 +1,11 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import {
   Table,
   TableBody,
   TableCell,
   TableContainer,
-  TableHead,
   TableRow,
+  TablePagination,
   Typography,
   IconButton,
   Box,
@@ -454,6 +454,7 @@ export const UniversalMobilDataTable = ({
   headerTitle = null,
   headerActions = null,
   hideHeader = false,
+  subHeader = null,
 
   // Loading & Error states
   loading = false,
@@ -473,6 +474,10 @@ export const UniversalMobilDataTable = ({
 
   // Expanded footer (for nested content like tables)
   renderExpandedFooter = null,
+
+  // Pagination (client-side, enabled by default)
+  enablePagination = true,
+  rowsPerPageOptions = [10, 25, 50, 100],
 
   // Styling
   sx = {},
@@ -500,6 +505,33 @@ export const UniversalMobilDataTable = ({
     // Filter out invalid rows
     return rows.filter((row) => row && typeof row === "object");
   }, [rows]);
+
+  // Pagination state (client-side)
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(
+    rowsPerPageOptions[0] || 10
+  );
+
+  // Reset page when rows change (e.g. after filtering)
+  useEffect(() => {
+    setPage(0);
+  }, [processedRows.length]);
+
+  // Paginated rows for client-side pagination
+  const paginatedRows = useMemo(() => {
+    if (!enablePagination) return processedRows;
+    const start = page * rowsPerPage;
+    return processedRows.slice(start, start + rowsPerPage);
+  }, [processedRows, page, rowsPerPage, enablePagination]);
+
+  const handleChangePage = useCallback((_, newPage) => {
+    setPage(newPage);
+  }, []);
+
+  const handleChangeRowsPerPage = useCallback((event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  }, []);
 
   // Validate columns
   const validColumns = useMemo(() => {
@@ -537,90 +569,93 @@ export const UniversalMobilDataTable = ({
     return <ErrorContent error={error} sx={sx} />;
   }
 
-  // Empty state
-  if (processedRows.length === 0) {
-    return (
-      <EmptyContent message={emptyMessage || defaultEmptyMessage} sx={sx} />
-    );
-  }
-
   // Main table content
   return (
     <Box sx={{ width: "100%", ...sx }}>
-      {/* Header with actions (optional) */}
-      {headerActions && !hideHeader && (
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "flex-end",
-            alignItems: "center",
-            mb: 1,
-            px: 1,
-          }}
-        >
-          {headerActions}
-        </Box>
-      )}
-
+      {/* Header */}
       {!hideHeader && (
         <Box
-        sx={{
-          display:'flex',
-          justifyContent:'center',
-          my:2
-        }}
+          sx={{
+            display: "grid",
+            gridTemplateColumns: headerActions ? "1fr auto 1fr" : "1fr",
+            alignItems: "center",
+            my: 2,
+          }}
         >
-          <Typography sx={titlesTypography.mobilDataTableTableHeader}>
+          {headerActions && <Box />}
+          <Typography sx={{ ...titlesTypography.mobilDataTableTableHeader, textAlign: "center" }}>
             {headerTitle || t?.("common.details") || "Details"}
           </Typography>
+          {headerActions && (
+            <Box sx={{ display: "flex", justifyContent: "flex-end", pr: 1 }}>
+              {headerActions}
+            </Box>
+          )}
         </Box>
       )}
 
-      {/* Accordion Table */}
-      <TableContainer
-        component={Paper}
-        elevation={0}
-        sx={{
-          border: `1px solid ${colors.border || "#e0e0e0"}`,
-          borderRadius: "1.5rem",
-        }}
-      >
-        <Table aria-label="accordion table">
-          {/* {!hideHeader && (
-            <TableHead sx={{ backgroundColor: colors.background || "#f5f5f5" }}>
-              <TableRow>
-                <TableCell sx={{ width: 50 }} />
-                <TableCell>
-                  <Typography sx={titlesTypography.accordionTableHeader}>
-                    {headerTitle || t?.("common.details") || "Details"}
-                  </Typography>
-                </TableCell>
-              </TableRow>
-            </TableHead>
-          )} */}
+      {/* Sub-header content (e.g. filter panels) */}
+      {subHeader}
 
-          <TableBody>
-            {processedRows.map((row) => (
-              <AccordionRow
-                key={safeGetRowId(row)}
-                row={row}
-                columns={validColumns}
-                primaryField={primaryField}
-                primaryIcon={primaryIcon}
-                secondaryField={secondaryField}
-                showTitle={showTitle}
-                titleField={titleField}
-                renderActions={renderActions}
-                actionsLabel={actionsLabel}
-                onRowClick={onRowClick}
-                defaultExpanded={defaultExpanded}
-                labelWidth={labelWidth}
-                renderExpandedFooter={renderExpandedFooter}
+      {/* Empty state - rendered inside layout to preserve header */}
+      {processedRows.length === 0 ? (
+        <EmptyContent message={emptyMessage || defaultEmptyMessage} />
+      ) : (
+        <>
+          {/* Accordion Table */}
+          <TableContainer
+            component={Paper}
+            elevation={0}
+            sx={{
+              border: `1px solid ${colors.border || "#e0e0e0"}`,
+              borderRadius: "1.5rem",
+            }}
+          >
+            <Table aria-label="accordion table">
+              <TableBody>
+                {paginatedRows.map((row) => (
+                  <AccordionRow
+                    key={safeGetRowId(row)}
+                    row={row}
+                    columns={validColumns}
+                    primaryField={primaryField}
+                    primaryIcon={primaryIcon}
+                    secondaryField={secondaryField}
+                    showTitle={showTitle}
+                    titleField={titleField}
+                    renderActions={renderActions}
+                    actionsLabel={actionsLabel}
+                    onRowClick={onRowClick}
+                    defaultExpanded={defaultExpanded}
+                    labelWidth={labelWidth}
+                    renderExpandedFooter={renderExpandedFooter}
+                  />
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          {/* Pagination */}
+          {enablePagination && (
+            <Paper sx={{ mt: 2, borderRadius: 2 }}>
+              <TablePagination
+                component="div"
+                count={processedRows.length}
+                page={page}
+                onPageChange={handleChangePage}
+                rowsPerPage={rowsPerPage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                rowsPerPageOptions={rowsPerPageOptions}
+                labelRowsPerPage={t("common.rowsPerPage")}
+                sx={{
+                  backgroundColor: colors.background || "#f5f5f5",
+                  borderRadius: 2,
+                }}
               />
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </Paper>
+          )}
+        </>
+      )}
     </Box>
   );
 };
@@ -646,6 +681,7 @@ UniversalMobilDataTable.propTypes = {
   headerTitle: PropTypes.string,
   headerActions: PropTypes.node,
   hideHeader: PropTypes.bool,
+  subHeader: PropTypes.node,
   loading: PropTypes.bool,
   error: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
   emptyMessage: PropTypes.string,
@@ -656,39 +692,8 @@ UniversalMobilDataTable.propTypes = {
   defaultExpanded: PropTypes.bool,
   labelWidth: PropTypes.number,
   renderExpandedFooter: PropTypes.func,
+  enablePagination: PropTypes.bool,
+  rowsPerPageOptions: PropTypes.arrayOf(PropTypes.number),
   sx: PropTypes.object,
 };
 
-// ============================================================================
-// HELPER HOOK
-// ============================================================================
-
-/**
- * Helper hook to create accordion columns with consistent styling and translations
- * @param {Array} columnDefinitions - Array of column definitions
- * @returns {Array} Processed column definitions with translations
- */
-export const useAccordionColumns = (columnDefinitions) => {
-  const { t } = useTranslation();
-
-  return useMemo(() => {
-    if (!Array.isArray(columnDefinitions)) {
-      console.warn("useAccordionColumns: columnDefinitions must be an array");
-      return [];
-    }
-
-    return columnDefinitions.filter(isValidColumn).map((col) => ({
-      labelWidth: 120,
-      ...col,
-      headerName: col.headerNameKey
-        ? t?.(col.headerNameKey) || col.headerNameKey
-        : col.headerName || col.field,
-    }));
-  }, [columnDefinitions, t]);
-};
-
-// ============================================================================
-// EXPORTS
-// ============================================================================
-
-export { safeRender, safeGetValue, isValidColumn };

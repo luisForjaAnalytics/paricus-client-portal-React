@@ -280,6 +280,7 @@ export default {
     retry: "Retry",
     details: "Details",
     tryAgain: "Try again",
+    rowsPerPage: "Rows per page",
   },
 
   // Login

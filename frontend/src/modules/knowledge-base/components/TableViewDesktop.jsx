@@ -20,6 +20,7 @@ import { TableViewMobil } from "./TableViewMobil";
 import { formatDateTime } from "../../../common/utils/formatDateTime";
 import { ArticleSearch } from "./ArticleSearch";
 import { AlertInline } from "../../../common/components/ui/AlertInline";
+import { MobileFilterPanel } from "../../../common/components/ui/MobileFilterPanel";
 import { useNotification } from "../../../common/hooks";
 
 const dataStructure = (data) => {
@@ -51,7 +52,12 @@ export const TableView = () => {
   // Get kbPrefix from user's auth state (null for BPO Admin = access all)
   const kbPrefix = useSelector((state) => state.auth.user?.kbPrefix);
 
-  const { data = [], isLoading, isError, refetch } = useGetAllArticlesQuery(kbPrefix);
+  const {
+    data = [],
+    isLoading,
+    isError,
+    refetch,
+  } = useGetAllArticlesQuery(kbPrefix);
 
   const [getArticleById] = useLazyGetArticleByIdQuery();
   const [filters, setFilters] = useState({
@@ -70,7 +76,7 @@ export const TableView = () => {
     isError: isSearchError,
   } = useGetArticleSearchQuery(
     { kbPrefix, search: searchTerm },
-    { skip: !searchTerm.trim() } // Skip if empty
+    { skip: !searchTerm.trim() }, // Skip if empty
   );
 
   // State for advanced filters visibility
@@ -116,13 +122,39 @@ export const TableView = () => {
         [filterKey]: value,
       }));
     },
-    [setFilters]
+    [setFilters],
+  );
+
+  // Mobile filter config
+  const mobileFilterConfig = useMemo(
+    () => [
+      {
+        key: "articleName",
+        label: t("knowledgeBase.table.articleName"),
+        type: "text",
+        value: filters.articleName,
+      },
+      {
+        key: "synopsis",
+        label: t("knowledgeBase.table.synopsis"),
+        type: "text",
+        value: filters.synopsis,
+      },
+      {
+        key: "updatedAt",
+        label: t("knowledgeBase.table.updatedAt"),
+        type: "date",
+        value: filters.updatedAt,
+      },
+    ],
+    [t, filters],
   );
 
   // Filter articles by advanced filters or search results
   const filteredArticles = useMemo(() => {
     // If searching and have results, use them; otherwise use all data
-    const sourceData = searchTerm.trim() && searchResults ? searchResults : data;
+    const sourceData =
+      searchTerm.trim() && searchResults ? searchResults : data;
 
     if (!filters.articleName && !filters.synopsis && !filters.updatedAt) {
       return sourceData;
@@ -151,7 +183,7 @@ export const TableView = () => {
 
   const rows = useMemo(
     () => dataStructure(filteredArticles),
-    [filteredArticles]
+    [filteredArticles],
   );
 
   // Función para editar (navega a editorView)
@@ -205,7 +237,11 @@ export const TableView = () => {
           />
         ),
         renderCell: (params) => (
-          <Typography variant="body2" fontWeight="medium" sx={{ margin: "1rem" }}>
+          <Typography
+            variant="body2"
+            fontWeight="medium"
+            sx={{ margin: "1rem" }}
+          >
             {params.value || "N/A"}
           </Typography>
         ),
@@ -289,7 +325,16 @@ export const TableView = () => {
         ),
       },
     ],
-    [t, filters, handleFilterChange, isOpen, isLoading, refetch, clearFilters, kbPrefix]
+    [
+      t,
+      filters,
+      handleFilterChange,
+      isOpen,
+      isLoading,
+      refetch,
+      clearFilters,
+      kbPrefix,
+    ],
   );
 
   return (
@@ -333,9 +378,11 @@ export const TableView = () => {
           rows={rows}
           columns={columns}
           loading={isLoading}
-          emptyMessage={t("knowledgeBase.noArticlesFound") || "No articles found"}
+          emptyMessage={
+            t("knowledgeBase.noArticlesFound") || "No articles found"
+          }
           pageSizeOptions={[10, 25, 50, 100]}
-          height={'auto'}
+          height={"auto"}
           columnHeaderHeight={isOpen ? 90 : 56}
         />
       </Box>
@@ -346,6 +393,27 @@ export const TableView = () => {
         isLoading={isLoading}
         handleEditClick={handleEditClick}
         handleViewClick={handleViewClick}
+        headerActions={
+          <Tooltip title={t("knowledgeBase.filtersButton")}>
+            <IconButton
+              onClick={() => setIsOpen(!isOpen)}
+              size="small"
+              sx={{ backgroundColor: colors?.backgroundOpenSubSection }}
+            >
+              <FilterListIcon fontSize="medium" />
+            </IconButton>
+          </Tooltip>
+        }
+        subHeader={
+          <MobileFilterPanel
+            isOpen={isOpen}
+            filters={mobileFilterConfig}
+            onFilterChange={handleFilterChange}
+            onSearch={refetch}
+            onClear={clearFilters}
+            loading={isLoading}
+          />
+        }
       />
 
       {/* Error Snackbar */}

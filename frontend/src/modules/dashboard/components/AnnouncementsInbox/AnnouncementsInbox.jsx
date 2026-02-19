@@ -146,9 +146,14 @@ export const AnnouncementsInbox = () => {
             {announcements.length > 0 && (
               <Chip
                 label="New"
-                color="error"
                 size="small"
-                sx={{ fontSize: "0.625rem", height: 20 }}
+                sx={{
+                  fontSize: "0.625rem",
+                  fontWeight:'bold',
+                  height: 20,
+                  backgroundColor: colors.priorityStyles.high.backgroundColor,
+                  color: colors.priorityStyles.high.color,
+                }}
               />
             )}
           </Box>
@@ -201,8 +206,6 @@ export const AnnouncementsInbox = () => {
                   sx={{
                     mb: 2,
                     p: "0.5rem",
-                    //px:'0.5',
-                    //borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
                     cursor: "pointer",
                     borderRadius: "1rem",
                     transition: "background-color 0.2s ease",

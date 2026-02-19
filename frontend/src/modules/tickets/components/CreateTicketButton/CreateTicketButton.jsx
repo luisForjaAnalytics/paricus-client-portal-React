@@ -41,9 +41,14 @@ import { extractApiError } from "../../../../common/utils/apiHelpers";
 import { useNotification } from "../../../../common/hooks";
 import { LoadingProgress } from "../../../../common/components/ui/LoadingProgress";
 
-export const CreateTickeButton = ({}) => {
+export const CreateTickeButton = ({ externalOpen = false, onExternalClose, hideButton = false }) => {
   const { t } = useTranslation();
   const [showUploadModal, setShowUploadModal] = useState(false);
+
+  // Permite abrir el modal desde el padre (e.g., SpeedDial)
+  useEffect(() => {
+    if (externalOpen) setShowUploadModal(true);
+  }, [externalOpen]);
   const [createTicket, { isLoading, error }] = useCreateTicketMutation();
   const [uploadAttachment] = useUploadTicketAttachmentMutation();
   const { data: departments = [], isLoading: loadingDepartments } =
@@ -112,6 +117,7 @@ export const CreateTickeButton = ({}) => {
     reset();
     clearFiles();
     setShowUploadModal(false);
+    onExternalClose?.();
   };
 
   const handleUploadModal = () => {
@@ -204,11 +210,13 @@ export const CreateTickeButton = ({}) => {
 
   return (
     <>
-      <ActionButton
-        handleClick={handleUploadModal}
-        icon={<AddIcon />}
-        text={t("tickets.createNewTicket.createNewTicket")}
-      />
+      {!hideButton && (
+        <ActionButton
+          handleClick={handleUploadModal}
+          icon={<AddIcon />}
+          text={t("tickets.createNewTicket.createNewTicket")}
+        />
+      )}
 
       <Dialog
         open={showUploadModal}

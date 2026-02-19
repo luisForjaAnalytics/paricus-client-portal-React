@@ -1,4 +1,1 @@
-export {
-  UniversalMobilDataTable,
-  useAccordionColumns,
-} from "./UniversalMobilDataTable";
+export { UniversalMobilDataTable } from "./UniversalMobilDataTable";

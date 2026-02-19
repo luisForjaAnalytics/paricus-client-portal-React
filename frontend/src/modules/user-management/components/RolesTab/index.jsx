@@ -1,8 +1,14 @@
 import { useState, useMemo, useCallback } from "react";
+import {
+  FilterList as FilterListIcon,
+  Add as AddIcon,
+} from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import { useBreakpoint } from "../../../../common/hooks/useBreakpoint";
 import { useNotification } from "../../../../common/hooks";
+import { MobileFilterPanel } from "../../../../common/components/ui/MobileFilterPanel";
+import { MobileSpeedDial } from "../../../../common/components/ui/MobileSpeedDial";
 import { RolesTabDesktop } from "./RolesTabDesktop";
 import { RolesTabMobile } from "./RolesTabMobile";
 import { AddNewRoleModal } from "./AddNewRoleModal";
@@ -282,6 +288,34 @@ export const RolesTab = () => {
     }
   };
 
+  // Mobile filter handler
+  const handleMobileFilterChange = useCallback((key, value) => {
+    if (key === "roleName") setSearchQuery(value);
+    else if (key === "client") setSelectedClient(value);
+  }, []);
+
+  // Mobile filter config
+  const mobileFilterConfig = useMemo(() => {
+    const cfg = [
+      {
+        key: "roleName",
+        label: t("roles.table.roleName"),
+        type: "text",
+        value: searchQuery,
+      },
+    ];
+    if (isBPOAdmin) {
+      cfg.push({
+        key: "client",
+        label: t("roles.table.client"),
+        type: "select",
+        value: selectedClient,
+        options: clients.map((c) => ({ label: c.name, value: c.id })),
+      });
+    }
+    return cfg;
+  }, [t, searchQuery, selectedClient, isBPOAdmin, clients]);
+
   // Use shared table configuration - called ONCE here and passed to children
   const {
     rows,
@@ -341,6 +375,31 @@ export const RolesTab = () => {
           {...sharedProps}
           columns={mobileColumns}
           renderPrimaryIcon={renderPrimaryIcon}
+          headerActions={
+            <MobileSpeedDial
+              actions={[
+                {
+                  icon: <FilterListIcon />,
+                  name: t("roles.filters"),
+                  onClick: () => setIsOpen(!isOpen),
+                },
+                {
+                  icon: <AddIcon />,
+                  name: t("roles.addRole"),
+                  onClick: openAddDialog,
+                },
+              ]}
+            />
+          }
+          subHeader={
+            <MobileFilterPanel
+              isOpen={isOpen}
+              filters={mobileFilterConfig}
+              onFilterChange={handleMobileFilterChange}
+              onClear={clearFilters}
+              loading={isLoading}
+            />
+          }
         />
       ) : (
         <RolesTabDesktop

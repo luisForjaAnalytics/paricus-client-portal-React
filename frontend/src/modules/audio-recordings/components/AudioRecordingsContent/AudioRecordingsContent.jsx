@@ -1,11 +1,13 @@
-import { Box, Typography } from "@mui/material";
+import { useMemo } from "react";
+import { Box } from "@mui/material";
 import {
   Warning as WarningIcon,
   Error as ErrorIcon,
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
-import { titlesTypography } from "../../../../common/styles/styles";
+import { useSelector } from "react-redux";
 import { AlertInline } from "../../../../common/components/ui/AlertInline";
+import { MobileFilterPanel } from "../../../../common/components/ui/MobileFilterPanel";
 import { QuickFiltersMobile } from "../QuickFilters/QuickFiltersMobile";
 import { TableView } from "../TableView/TableView";
 import { FilterButton } from "../FilterButton/FilterButton";
@@ -13,6 +15,7 @@ import { AudioPlayerBar } from "../AudioPlayerBar";
 import { useAudioRecordings } from "../../hooks/useAudioRecordings";
 import { useAudioPlayer } from "../../hooks/useAudioPlayer";
 import { formatDateTime } from "../../../../common/utils/formatDateTime";
+import { companies } from "../AdvancedFilters/company.js";
 
 /**
  * AudioRecordingsContent - Main content component for audio recordings
@@ -20,6 +23,8 @@ import { formatDateTime } from "../../../../common/utils/formatDateTime";
  */
 export const AudioRecordingsContent = () => {
   const { t } = useTranslation();
+  const permissions = useSelector((state) => state.auth?.permissions);
+  const isBPOAdmin = permissions?.includes("admin_audio_recordings") ?? false;
 
   // Data and filters
   const {
@@ -77,6 +82,68 @@ export const AudioRecordingsContent = () => {
     formatTime,
   } = useAudioPlayer(recordings);
 
+  // Mobile filter config
+  const mobileFilterConfig = useMemo(() => {
+    const cfg = [];
+    if (isBPOAdmin) {
+      cfg.push({
+        key: "company",
+        label: t("audioRecordings.table.company"),
+        type: "select",
+        value: filters.company || "",
+        options: companies.map((c) => ({ label: c.name, value: c.name })),
+      });
+    }
+    cfg.push(
+      {
+        key: "interactionId",
+        label: t("audioRecordings.table.interactionId"),
+        type: "text",
+        value: filters.interactionId,
+      },
+      {
+        key: "callType",
+        label: t("audioRecordings.table.callType"),
+        type: "select",
+        value: filters.callType,
+        options: callTypes.map((ct) => ({ label: ct, value: ct })),
+      },
+      {
+        key: "startDate",
+        label: t("audioRecordings.table.startTime"),
+        type: "date",
+        value: filters.startDate,
+      },
+      {
+        key: "endDate",
+        label: t("audioRecordings.table.endTime"),
+        type: "date",
+        value: filters.endDate,
+      },
+      {
+        key: "customerPhone",
+        label: t("audioRecordings.table.customerPhone"),
+        type: "text",
+        value: filters.customerPhone,
+      },
+      {
+        key: "agentName",
+        label: t("audioRecordings.table.agentName"),
+        type: "text",
+        value: filters.agentName,
+      },
+    );
+    return cfg;
+  }, [t, filters, callTypes, isBPOAdmin]);
+
+  const handleMobileFilterChange = (key, value) => {
+    if (key === "company") {
+      setCompanyFilter(value || null);
+    } else {
+      setFilters((prev) => ({ ...prev, [key]: value }));
+    }
+  };
+
   // Wrap toggleAudio to handle errors
   const handleToggleAudio = async (item) => {
     try {
@@ -119,28 +186,6 @@ export const AudioRecordingsContent = () => {
           message={error}
         />
       )}
-
-      {/* Mobile Header - Company centered + Filter Button in corner */}
-      <Box
-        sx={{
-          display: { xs: "flex", md: "none" },
-          position: "relative",
-          justifyContent: "center",
-          alignItems: "center",
-          mb: 2,
-        }}
-      >
-        <Typography variant="subtitle2" sx={{ ...titlesTypography.mobilDataTableTableHeader }}>
-          {t("audioRecordings.table.company")}
-        </Typography>
-        <Box sx={{ position: "absolute", right: 16 }}>
-          <FilterButton
-            folderName="audioRecordings.filters"
-            isOpen={isOpen}
-            setIsOpen={setIsOpen}
-          />
-        </Box>
-      </Box>
 
       {/* Filter Button - Desktop only */}
       <Box
@@ -209,7 +254,24 @@ export const AudioRecordingsContent = () => {
         totalCount={totalCount}
         onPageChange={setPage}
         onPageSizeChange={setItemsPerPage}
-        hideHeader={true}
+        headerActions={
+          <FilterButton
+            folderName="audioRecordings.filters"
+            isOpen={isOpen}
+            setIsOpen={setIsOpen}
+          />
+        }
+        subHeader={
+          <MobileFilterPanel
+            isOpen={isOpen}
+            filters={mobileFilterConfig}
+            onFilterChange={handleMobileFilterChange}
+            onSearch={refetch}
+            onClear={clearFilters}
+            loading={loading}
+            isDebouncing={isDebouncing}
+          />
+        }
       />
 
       {/* Audio Player Control Bar (Fixed Bottom) */}

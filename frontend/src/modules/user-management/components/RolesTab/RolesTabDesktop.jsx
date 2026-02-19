@@ -35,7 +35,7 @@ export const RolesTabDesktop = ({
   const { t } = useTranslation();
 
   return (
-    <Box sx={{ px: 3 }}>
+    <>
       {/* Roles Table - Desktop Only */}
       <Box
         sx={{
@@ -89,6 +89,6 @@ export const RolesTabDesktop = ({
         isUpdatingPermissions={isUpdatingPermissions}
         onPermissionToggle={handlePermissionToggle}
       />
-    </Box>
+    </>
   );
 };

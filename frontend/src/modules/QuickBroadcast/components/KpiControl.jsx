@@ -16,7 +16,6 @@ import {
   Save,
   RestartAlt,
 } from "@mui/icons-material";
-import { useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -34,7 +33,8 @@ import {
   primaryIconButton,
   outlinedButton,
 } from "../../../common/styles/styles";
-import { AlertInline } from "../../../common/components/ui/AlertInline/AlertInline";
+import { useNotification } from "../../../common/hooks";
+import { AlertInline } from "../../../common/components/ui/AlertInline";
 
 const KPI_CONFIG = [
   {
@@ -104,7 +104,7 @@ export const KpiControl = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const kpi = useSelector((state) => state.kpi);
-  const alertRef = useRef();
+  const { notificationRef, showSuccess, showError } = useNotification();
 
   const {
     control,
@@ -126,30 +126,22 @@ export const KpiControl = () => {
   const watchedValues = watch();
 
   const onSubmit = (data) => {
-    try {
-      dispatch(setAllKpis(data));
-      alertRef.current?.showSuccess(t("kpiControl.saveSuccess"));
-    } catch {
-      alertRef.current?.showError(t("kpiControl.saveError"));
-    }
+    dispatch(setAllKpis(data));
+    showSuccess(t("kpiControl.saveSuccess"));
   };
 
   const onError = () => {
-    alertRef.current?.showError(t("kpiControl.saveError"));
+    showError(t("kpiControl.saveError"));
   };
 
   const handleReset = () => {
-    try {
-      dispatch(resetKpis());
-      reset({
-        callsOffered: { ...defaultKpis.callsOffered },
-        callsAnswered: { ...defaultKpis.callsAnswered },
-        answerRate: { ...defaultKpis.answerRate },
-        slaCompliance: { ...defaultKpis.slaCompliance },
-      });
-    } catch {
-      alertRef.current?.showError(t("kpiControl.saveError"));
-    }
+    dispatch(resetKpis());
+    reset({
+      callsOffered: { ...defaultKpis.callsOffered },
+      callsAnswered: { ...defaultKpis.callsAnswered },
+      answerRate: { ...defaultKpis.answerRate },
+      slaCompliance: { ...defaultKpis.slaCompliance },
+    });
   };
 
   return (
@@ -177,6 +169,12 @@ export const KpiControl = () => {
           const watched = watchedValues[key] ?? {};
           const achieved = isTargetAchieved(watched.value, watched.target);
           const fieldErrors = errors[key] ?? {};
+          const badgeColor = achieved
+            ? { backgroundColor: colors.primaryLight, color: colors.primary }
+            : {
+                backgroundColor: colors.priorityStyles.high.backgroundColor,
+                color: colors.priorityStyles.high.color,
+              };
 
           return (
             <Card
@@ -191,7 +189,9 @@ export const KpiControl = () => {
             >
               <CardContent sx={{ p: "1.25rem !important" }}>
                 {/* Card header */}
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+                <Box
+                  sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}
+                >
                   <Box
                     sx={{
                       width: 36,
@@ -220,15 +220,25 @@ export const KpiControl = () => {
                     {t(labelKey)}
                   </Typography>
                   <Chip
-                    label={achieved ? t("kpiControl.achieved") : t("kpiControl.notAchieved")}
+                    label={
+                      achieved
+                        ? t("kpiControl.achieved")
+                        : t("kpiControl.notAchieved")
+                    }
                     size="small"
-                    color={achieved ? "success" : "error"}
-                    sx={{ fontSize: "0.65rem", fontWeight: 700, borderRadius: "0.5rem" }}
+                    sx={{
+                      fontSize: "0.7rem",
+                      fontWeight: 700,
+                      borderRadius: "0.5rem",
+                      ...badgeColor,
+                    }}
                   />
                 </Box>
 
                 {/* Fields */}
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+                <Box
+                  sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}
+                >
                   {/* Value actual */}
                   <Controller
                     name={`${key}.value`}
@@ -242,10 +252,20 @@ export const KpiControl = () => {
                         type="number"
                         sx={inputSx}
                         error={!!fieldErrors.value}
-                        helperText={fieldErrors.value ? t(fieldErrors.value.message) : ""}
+                        helperText={
+                          fieldErrors.value ? t(fieldErrors.value.message) : ""
+                        }
                         slotProps={
                           isPercent
-                            ? { input: { endAdornment: <InputAdornment position="end">%</InputAdornment> } }
+                            ? {
+                                input: {
+                                  endAdornment: (
+                                    <InputAdornment position="end">
+                                      %
+                                    </InputAdornment>
+                                  ),
+                                },
+                              }
                             : undefined
                         }
                       />
@@ -265,10 +285,22 @@ export const KpiControl = () => {
                         type="number"
                         sx={inputSx}
                         error={!!fieldErrors.target}
-                        helperText={fieldErrors.target ? t(fieldErrors.target.message) : ""}
+                        helperText={
+                          fieldErrors.target
+                            ? t(fieldErrors.target.message)
+                            : ""
+                        }
                         slotProps={
                           isPercent
-                            ? { input: { endAdornment: <InputAdornment position="end">%</InputAdornment> } }
+                            ? {
+                                input: {
+                                  endAdornment: (
+                                    <InputAdornment position="end">
+                                      %
+                                    </InputAdornment>
+                                  ),
+                                },
+                              }
                             : undefined
                         }
                       />
@@ -287,7 +319,11 @@ export const KpiControl = () => {
                         fullWidth
                         sx={inputSx}
                         error={!!fieldErrors.change}
-                        helperText={fieldErrors.change ? t(fieldErrors.change.message) : ""}
+                        helperText={
+                          fieldErrors.change
+                            ? t(fieldErrors.change.message)
+                            : ""
+                        }
                       />
                     )}
                   />
@@ -304,11 +340,15 @@ export const KpiControl = () => {
                     justifyContent: "space-between",
                   }}
                 >
-                  <Typography sx={{ fontSize: "0.75rem", color: colors.textMuted }}>
+                  <Typography
+                    sx={{ fontSize: "0.75rem", color: colors.textMuted }}
+                  >
                     {t("kpiControl.preview")}
                   </Typography>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Typography sx={{ fontWeight: 700, color: colors.textPrimary }}>
+                    <Typography
+                      sx={{ fontWeight: 700, color: colors.textPrimary }}
+                    >
                       {isPercent
                         ? `${watched.value ?? 0}%`
                         : Number(watched.value ?? 0).toLocaleString()}
@@ -316,8 +356,12 @@ export const KpiControl = () => {
                     <Chip
                       label={watched.change || "—"}
                       size="small"
-                      color={achieved ? "success" : "error"}
-                      sx={{ fontSize: "0.65rem", fontWeight: 700, borderRadius: "0.5rem" }}
+                      sx={{
+                        fontSize: "0.7rem",
+                        fontWeight: 700,
+                        borderRadius: "0.5rem",
+                        ...badgeColor
+                      }}
                     />
                   </Box>
                 </Box>
@@ -327,7 +371,7 @@ export const KpiControl = () => {
         })}
       </Box>
 
-      <AlertInline ref={alertRef} asSnackbar position={{ vertical: "bottom", horizontal: "center" }} />
+      <AlertInline ref={notificationRef} asSnackbar />
 
       {/* Actions */}
       <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
