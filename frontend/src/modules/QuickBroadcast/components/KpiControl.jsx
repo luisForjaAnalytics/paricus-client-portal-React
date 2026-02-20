@@ -35,6 +35,7 @@ import {
 } from "../../../common/styles/styles";
 import { useNotification } from "../../../common/hooks";
 import { AlertInline } from "../../../common/components/ui/AlertInline";
+import { useCreateLogMutation } from "../../../store/api/logsApi";
 
 const KPI_CONFIG = [
   {
@@ -104,6 +105,8 @@ export const KpiControl = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const kpi = useSelector((state) => state.kpi);
+  const user = useSelector((state) => state.auth.user);
+  const [createLog] = useCreateLogMutation();
   const { notificationRef, showSuccess, showError } = useNotification();
 
   const {
@@ -128,6 +131,14 @@ export const KpiControl = () => {
   const onSubmit = (data) => {
     dispatch(setAllKpis(data));
     showSuccess(t("kpiControl.saveSuccess"));
+
+    createLog({
+      userId: user?.id?.toString() || "unknown",
+      eventType: "UPDATE",
+      entity: "KPI",
+      description: `Updated KPI values: Calls Offered=${data.callsOffered.value}, Calls Answered=${data.callsAnswered.value}, Answer Rate=${data.answerRate.value}%, SLA=${data.slaCompliance.value}%`,
+      status: "SUCCESS",
+    });
   };
 
   const onError = () => {

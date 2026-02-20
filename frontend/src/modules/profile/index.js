@@ -1,2 +1,2 @@
 // Export main view
-export { default as ProfileView } from "./ProfileView";
+export { ProfileView } from "./ProfileView";

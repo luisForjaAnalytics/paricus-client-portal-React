@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import jwt from 'jsonwebtoken';
 import { authenticateToken, requirePermission } from '../middleware/auth-prisma.js';
 import { prisma } from '../database/prisma.js';
+import { logAnnouncementCreate, logAnnouncementDelete } from '../services/logger.js';
 
 const router = express.Router();
 
@@ -496,6 +497,8 @@ router.post(
         }
       });
 
+      await logAnnouncementCreate(req.user.id, title, clientIds.length);
+
       res.status(201).json({
         success: true,
         message: 'Announcement created successfully',
@@ -700,6 +703,8 @@ router.delete(
       await prisma.announcement.delete({
         where: { id }
       });
+
+      await logAnnouncementDelete(req.user.id, announcement.title);
 
       res.json({
         success: true,

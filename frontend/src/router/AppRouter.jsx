@@ -19,7 +19,7 @@ import {
   TableView,
 } from "../modules/knowledge-base";
 import { ReportingView } from "../modules/reporting";
-import { ProfileView } from "../modules/profile";
+
 import { ReportsManagementView } from "../modules/reports-management";
 import {
   UserManagementView,
@@ -37,6 +37,8 @@ import {
   TicketViewDetails,
 } from "../modules/tickets";
 import { QuickBroadcast, QuickBroadcastView, SwiperControl, KpiControl } from "../modules/QuickBroadcast";
+import { ProfileView } from "../modules/profile";
+
 
 const router = createBrowserRouter(
   [

@@ -1455,3 +1455,51 @@ export const selectMenuProps = {
     },
   },
 };
+
+export const profilelStyles = {
+  display: "flex",
+  flexDirection: "column",
+  backgroundColor: colors.surface,
+  borderRadius: "1rem",
+  border: `1px solid ${colors.border}`,
+  boxShadow: "none",
+  overflow: "hidden",
+  width: { xs: "100%", md: "100%" },
+  height: { xs: "auto", md: "auto" },
+  mt: { xs: 5, md: 5 },
+  mx: { xs: 0, md: "auto" },
+  my: 3,
+  p: 3,
+  transition: "border-color 200ms ease-in-out",
+  "&:hover": {
+    borderColor: colors.primary,
+  },
+
+  inputField: {
+    //width:'15vh',
+    //flex: 1,
+    //mt: "0.5rem",
+    width: { xs: "auto", md: "auto" },
+    "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+      borderColor: colors.focusRing,
+    },
+    "& .MuiOutlinedInput-root": {
+      backgroundColor: colors.surface,
+      borderRadius: "2rem",
+      height: "3rem",
+
+      "&.Mui-focused fieldset": {
+        borderColor: colors.focusRing,
+      },
+    },
+    "& .MuiInputLabel-root": {
+      top: "-0.4rem",
+      "&.Mui-focused": {
+        color: colors.focusRing,
+      },
+      "&.MuiInputLabel-shrink": {
+        top: "0",
+      },
+    },
+  },
+};

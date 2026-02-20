@@ -212,3 +212,55 @@ export async function logRoleDelete(performedByUserId, roleName) {
     status: 'SUCCESS',
   });
 }
+
+/**
+ * Log announcement creation
+ */
+export async function logAnnouncementCreate(performedByUserId, title, recipientCount) {
+  await createLog({
+    userId: performedByUserId.toString(),
+    eventType: 'CREATE',
+    entity: 'Announcement',
+    description: `Created announcement "${title}" for ${recipientCount} client(s)`,
+    status: 'SUCCESS',
+  });
+}
+
+/**
+ * Log announcement deletion
+ */
+export async function logAnnouncementDelete(performedByUserId, title) {
+  await createLog({
+    userId: performedByUserId.toString(),
+    eventType: 'DELETE',
+    entity: 'Announcement',
+    description: `Deleted announcement "${title}"`,
+    status: 'SUCCESS',
+  });
+}
+
+/**
+ * Log carousel image save
+ */
+export async function logCarouselSave(performedByUserId, imageCount, clientId) {
+  await createLog({
+    userId: performedByUserId.toString(),
+    eventType: 'CREATE',
+    entity: 'Carousel',
+    description: `Saved ${imageCount} carousel image(s)${clientId ? ` for client ${clientId}` : ' (global)'}`,
+    status: 'SUCCESS',
+  });
+}
+
+/**
+ * Log carousel image deletion
+ */
+export async function logCarouselDelete(performedByUserId, imageId) {
+  await createLog({
+    userId: performedByUserId.toString(),
+    eventType: 'DELETE',
+    entity: 'Carousel',
+    description: `Deleted carousel image (ID: ${imageId})`,
+    status: 'SUCCESS',
+  });
+}

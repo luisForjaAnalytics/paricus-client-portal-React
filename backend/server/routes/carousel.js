@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import jwt from 'jsonwebtoken';
 import { authenticateToken, requirePermission } from '../middleware/auth-prisma.js';
 import { prisma } from '../database/prisma.js';
+import { logCarouselSave, logCarouselDelete } from '../services/logger.js';
 
 const router = express.Router();
 
@@ -214,6 +215,8 @@ router.post(
         results.push({ ...record, url: `/api/carousel/${record.id}/file` });
       }
 
+      await logCarouselSave(req.user.id, results.length, targetClientId);
+
       res.status(201).json({
         success: true,
         message: `${results.length} carousel image(s) saved`,
@@ -292,6 +295,8 @@ router.delete(
       }
 
       await prisma.carouselImage.delete({ where: { id: parseInt(id) } });
+
+      await logCarouselDelete(req.user.id, parseInt(id));
 
       res.json({ success: true, message: 'Carousel image deleted' });
     } catch (error) {
