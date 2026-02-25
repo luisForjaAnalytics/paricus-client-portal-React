@@ -92,6 +92,18 @@ async function main() {
       permissionName: "admin_broadcast",
       description: "Send announcements and broadcasts to clients (BPO Admin and Client Admin only)",
     },
+    {
+      permissionName: "broadcast_announcements",
+      description: "Manage quick broadcast announcements",
+    },
+    {
+      permissionName: "broadcast_swiper",
+      description: "Manage swiper/carousel content for clients",
+    },
+    {
+      permissionName: "broadcast_kpi",
+      description: "Manage KPI display content for clients",
+    },
   ];
 
   console.log("Creating permissions...");
@@ -359,6 +371,9 @@ async function main() {
     "admin_roles",
     "admin_reports",
     "admin_broadcast",
+    "broadcast_announcements",
+    "broadcast_swiper",
+    "broadcast_kpi",
   ];
 
   const clientUserPermissions = [

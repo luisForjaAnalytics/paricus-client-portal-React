@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { prisma } from '../database/prisma.js';
 import { authenticateToken } from '../middleware/auth-prisma.js';
-import { sendPasswordResetEmail } from '../utils/email.js';
+
 import { authValidation, sanitizeInput } from '../middleware/validation.js';
 import { logLogin, logLogout } from '../services/logger.js';
 import config from '../config/environment.js';
@@ -146,50 +146,74 @@ router.post('/forgot-password',
       return res.json({ message: 'If the email exists, a password reset link has been sent.' });
     }
 
-    // Generate secure reset token
-    const resetToken = crypto.randomBytes(32).toString('hex');
-    const resetTokenExpires = new Date(Date.now() + 3600000); // 1 hour from now
+    // Generate reset code (6 alphanumeric characters) — expires in 15 minutes
+    const resetCode = crypto.randomBytes(3).toString('hex').toUpperCase(); // e.g. "A3F1B2"
+    const resetCodeExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
 
-    // Save reset token to database
+    // Log code to console (temporary — until email service is deployed)
+    console.log(`🔑 Password reset code for ${user.email}: ${resetCode} (expires in 15 min)`);
+
+    // Save reset code to database
     await prisma.user.update({
       where: { id: user.id },
       data: {
-        passwordResetToken: resetToken,
-        passwordResetExpires: resetTokenExpires
+        passwordResetToken: resetCode,
+        passwordResetExpires: resetCodeExpires
       }
     });
 
-    // Send password reset email
-    await sendPasswordResetEmail(user.email, user.firstName, resetToken);
-
-    res.json({ message: 'If the email exists, a password reset link has been sent.' });
+    res.json({ message: 'If the email exists, a password reset code has been sent.' });
   } catch (error) {
     console.error('Forgot password error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// Reset password endpoint
-router.post('/reset-password', 
-  authValidation.resetPassword, 
+// Verify reset code endpoint
+router.post('/verify-code',
+  authValidation.verifyCode,
   async (req, res) => {
   try {
+    const { code } = req.body;
 
-    const { token, password } = req.body;
-
-    // Find user with valid reset token
     const user = await prisma.user.findFirst({
       where: {
-        passwordResetToken: token,
-        passwordResetExpires: {
-          gt: new Date()
-        },
+        passwordResetToken: code.toUpperCase(),
+        passwordResetExpires: { gt: new Date() },
+        isActive: true
+      },
+      select: { id: true }
+    });
+
+    if (!user) {
+      return res.status(400).json({ error: 'Invalid or expired reset code' });
+    }
+
+    res.json({ valid: true });
+  } catch (error) {
+    console.error('Verify code error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Reset password endpoint
+router.post('/reset-password',
+  authValidation.resetPassword,
+  async (req, res) => {
+  try {
+    const { token, password } = req.body;
+
+    // Find user with valid reset token (token = 6-char code)
+    const user = await prisma.user.findFirst({
+      where: {
+        passwordResetToken: token.toUpperCase(),
+        passwordResetExpires: { gt: new Date() },
         isActive: true
       }
     });
 
     if (!user) {
-      return res.status(400).json({ error: 'Invalid or expired reset token' });
+      return res.status(400).json({ error: 'Invalid or expired reset code' });
     }
 
     // Hash new password with configurable rounds

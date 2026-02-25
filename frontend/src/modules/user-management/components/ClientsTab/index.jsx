@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   FilterList as FilterListIcon,
   Add as AddIcon,
@@ -18,6 +18,7 @@ import {
   useDeleteClientMutation,
 } from "../../../../store/api/adminApi";
 import { AddNewClientModal } from "./AddNewClientModal";
+import { AlertInline } from "../../../../common/components/ui/AlertInline";
 import { extractApiError } from "../../../../common/utils/apiHelpers";
 import { formatDate as formatDateUtil } from "../../../../common/utils/formatters";
 
@@ -36,6 +37,13 @@ export const ClientsTab = () => {
   const [updateClient, { isLoading: isUpdating }] = useUpdateClientMutation();
   const [deleteClient] = useDeleteClientMutation();
 
+  // Show error notification when query fails
+  useEffect(() => {
+    if (error) {
+      showNotification(t("common.errorLoadingData"), "error");
+    }
+  }, [error, t]);
+
   // Filter out BPO Administration (super admin client)
   const clients = allClients.filter(
     (client) => client.id !== 1 && client.name !== "BPO Administration"
@@ -47,37 +55,17 @@ export const ClientsTab = () => {
   const [editingClient, setEditingClient] = useState(null);
   const [clientToDeactivate, setClientToDeactivate] = useState(null);
 
-  // Form state
-  const [clientForm, setClientForm] = useState({
-    name: "",
-    isProspect: false,
-    isActive: true,
-  });
-
   // Computed values
   const isSaving = isCreating || isUpdating;
 
   const handleEdit = (client) => {
-    try {
-      setEditingClient(client);
-      setClientForm({
-        name: client.name,
-        isProspect: client.isProspect,
-        isActive: client.isActive,
-      });
-      setShowCreateDialog(true);
-    } catch (err) {
-      console.error(`ERROR handleEdit: ${err}`);
-    }
+    setEditingClient(client);
+    setShowCreateDialog(true);
   };
 
   const handleDeactivate = (client) => {
-    try {
-      setClientToDeactivate(client);
-      setShowConfirmDialog(true);
-    } catch (err) {
-      console.error(`ERROR handleDeactivate: ${err}`);
-    }
+    setClientToDeactivate(client);
+    setShowConfirmDialog(true);
   };
 
   const confirmDeactivation = async () => {
@@ -87,51 +75,29 @@ export const ClientsTab = () => {
       setShowConfirmDialog(false);
       setClientToDeactivate(null);
     } catch (error) {
-      console.error(`ERROR confirmDeactivation: ${error}`);
-      showNotification(t("clients.messages.clientDeactivateFailed"), "error");
+      showNotification(extractApiError(error, t("clients.messages.clientDeactivateFailed")), "error");
     }
   };
 
-  const handleSave = async () => {
-    if (!isFormValid()) return;
-
+  const saveClient = async (data) => {
     try {
       if (editingClient) {
-        await updateClient({ id: editingClient.id, ...clientForm }).unwrap();
+        await updateClient({ id: editingClient.id, ...data }).unwrap();
         showNotification(t("clients.messages.clientUpdated"), "success");
       } else {
-        await createClient(clientForm).unwrap();
+        await createClient(data).unwrap();
         showNotification(t("clients.messages.clientCreated"), "success");
       }
 
       handleCloseDialog();
     } catch (error) {
-      console.error(`ERROR handleSave: ${error}`);
       showNotification(extractApiError(error, t("clients.messages.clientSaveFailed")), "error");
     }
   };
 
   const handleCloseDialog = () => {
-    try {
-      setShowCreateDialog(false);
-      setEditingClient(null);
-      setClientForm({
-        name: "",
-        isProspect: false,
-        isActive: true,
-      });
-    } catch (err) {
-      console.error(`ERROR handleCloseDialog: ${err}`);
-    }
-  };
-
-  const isFormValid = () => {
-    try {
-      return clientForm.name && clientForm.name.length >= 2;
-    } catch (err) {
-      console.error(`ERROR isFormValid: ${err}`);
-      return false;
-    }
+    setShowCreateDialog(false);
+    setEditingClient(null);
   };
 
   const locale = t("common.locale") || "en-US";
@@ -199,18 +165,13 @@ export const ClientsTab = () => {
   // Props for modal
   const modalProps = {
     editingClient,
-    clients,
     showCreateDialog,
     showConfirmDialog,
-    clientForm,
     isSaving,
     clientToDeactivate,
-    notificationRef,
     confirmDeactivation,
-    isFormValid,
     handleCloseDialog,
-    handleSave,
-    setClientForm,
+    onSave: saveClient,
     setShowConfirmDialog,
   };
 
@@ -254,6 +215,9 @@ export const ClientsTab = () => {
         />
       )}
       <AddNewClientModal {...modalProps} />
+
+      {/* Snackbar para notificaciones */}
+      <AlertInline ref={notificationRef} asSnackbar />
     </>
   );
 };

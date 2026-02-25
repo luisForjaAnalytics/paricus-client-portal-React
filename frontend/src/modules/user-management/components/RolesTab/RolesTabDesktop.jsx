@@ -3,7 +3,7 @@ import { Add as AddIcon } from "@mui/icons-material";
 import { UniversalDataGrid } from "../../../../common/components/ui/DataGrid/UniversalDataGrid";
 import { useTranslation } from "react-i18next";
 import { PermissionsModal } from "./PermissionsModal";
-import { FilterButton } from "../FilterButton/FilterButton";
+import { FilterButton } from "../FilterButton";
 import { ActionButton } from "../../../../common/components/ui/ActionButton";
 
 /**
@@ -25,9 +25,11 @@ export const RolesTabDesktop = ({
   // Permissions dialog props
   permissions,
   selectedPermissions,
+  initialPermissions,
   savePermissions,
   isUpdatingPermissions,
   handlePermissionToggle,
+  handleBatchPermissionToggle,
   permissionsDialog,
   closePermissionsDialog,
   selectedRole,
@@ -85,9 +87,11 @@ export const RolesTabDesktop = ({
         selectedRole={selectedRole}
         permissions={permissions}
         selectedPermissions={selectedPermissions}
+        initialPermissions={initialPermissions}
         savePermissions={savePermissions}
         isUpdatingPermissions={isUpdatingPermissions}
         onPermissionToggle={handlePermissionToggle}
+        onBatchPermissionToggle={handleBatchPermissionToggle}
       />
     </>
   );

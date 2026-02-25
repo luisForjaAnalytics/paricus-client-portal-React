@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import {
   Dialog,
   DialogActions,
@@ -10,8 +11,10 @@ import {
   Checkbox,
   FormControlLabel,
 } from "@mui/material";
-import { Close as CloseIcon } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import {
   primaryButton,
   modalCard,
@@ -20,24 +23,60 @@ import {
 } from "../../../../common/styles/styles";
 import { ActionButton } from "../../../../common/components/ui/ActionButton";
 import { CancelButton } from "../../../../common/components/ui/CancelButton";
-import { AlertInline } from "../../../../common/components/ui/AlertInline";
+
+const buildSchema = (t) =>
+  z.object({
+    name: z
+      .string()
+      .min(1, t("clients.form.clientNameRequired"))
+      .min(2, t("clients.form.clientNameMinLength")),
+    isProspect: z.boolean().default(false),
+    isActive: z.boolean().default(true),
+  });
 
 export const AddNewClientModal = ({
   editingClient,
   showCreateDialog,
   showConfirmDialog,
-  handleSave,
   handleCloseDialog,
-  clientForm,
+  onSave,
   isSaving,
-  isFormValid,
   clientToDeactivate,
   confirmDeactivation,
-  notificationRef,
-  setClientForm,
-  setShowConfirmDialog
+  setShowConfirmDialog,
 }) => {
   const { t } = useTranslation();
+
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors, isValid },
+  } = useForm({
+    resolver: zodResolver(buildSchema(t)),
+    mode: "onChange",
+    defaultValues: {
+      name: "",
+      isProspect: false,
+      isActive: true,
+    },
+  });
+
+  // Reset form when dialog opens/closes or editingClient changes
+  useEffect(() => {
+    if (showCreateDialog) {
+      reset({
+        name: editingClient?.name || "",
+        isProspect: editingClient?.isProspect ?? false,
+        isActive: editingClient?.isActive ?? true,
+      });
+    }
+  }, [showCreateDialog, editingClient, reset]);
+
+  const onSubmit = (data) => {
+    onSave(data);
+  };
+
   return (
     <>
       {/* Create/Edit Dialog */}
@@ -70,53 +109,72 @@ export const AddNewClientModal = ({
         </DialogTitle>
 
         <DialogContent dividers>
-          
-          <TextField
-            label={t("clients.form.clientName")}
-            required
-            fullWidth
-            value={clientForm.name}
-            onChange={(e) =>
-              setClientForm({ ...clientForm, name: e.target.value })
-            }
-            sx={modalCard?.inputSection}
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={clientForm.isProspect}
-                onChange={(e) =>
-                  setClientForm({ ...clientForm, isProspect: e.target.checked })
-                }
-                sx={{
-                  "&.Mui-checked": {
-                    color: colors.primary,
-                  },
-                }}
-              />
-            }
-            label={t("clients.form.isProspect")}
-            sx={{ margin: "1rem 0 0 0rem", display: "block" }}
-          />
-          {editingClient && (
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={clientForm.isActive}
-                  onChange={(e) =>
-                    setClientForm({ ...clientForm, isActive: e.target.checked })
-                  }
-                  sx={{
-                    "&.Mui-checked": {
-                      color: colors.primary,
-                    },
-                  }}
+          <Box
+            component="form"
+            id="client-form"
+            onSubmit={handleSubmit(onSubmit)}
+            noValidate
+          >
+            <Controller
+              name="name"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label={t("clients.form.clientName")}
+                  required
+                  fullWidth
+                  sx={modalCard?.inputSection}
+                  error={!!errors.name}
+                  helperText={errors.name?.message}
                 />
-              }
-              label={t("clients.form.active")}
-              sx={{ margin: "1rem 0 0 0rem", display: "block" }}
+              )}
             />
-          )}
+            <Controller
+              name="isProspect"
+              control={control}
+              render={({ field }) => (
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={field.value}
+                      onChange={(e) => field.onChange(e.target.checked)}
+                      sx={{
+                        "&.Mui-checked": {
+                          color: colors.primary,
+                        },
+                      }}
+                    />
+                  }
+                  label={t("clients.form.isProspect")}
+                  sx={{ margin: "1rem 0 0 0rem", display: "block" }}
+                />
+              )}
+            />
+            {editingClient && (
+              <Controller
+                name="isActive"
+                control={control}
+                render={({ field }) => (
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={field.value}
+                        onChange={(e) => field.onChange(e.target.checked)}
+                        sx={{
+                          "&.Mui-checked": {
+                            color: colors.primary,
+                          },
+                        }}
+                      />
+                    }
+                    label={t("clients.form.active")}
+                    sx={{ margin: "1rem 0 0 0rem", display: "block" }}
+                  />
+                )}
+              />
+            )}
+          </Box>
         </DialogContent>
         <DialogActions
           sx={{
@@ -125,8 +183,8 @@ export const AddNewClientModal = ({
           }}
         >
           <ActionButton
-            handleClick={handleSave}
-            disabled={isSaving || !isFormValid()}
+            handleClick={handleSubmit(onSubmit)}
+            disabled={isSaving || !isValid}
             text={isSaving ? t("common.saving") : t("common.save")}
             sx={{ width: "20%" }}
           />
@@ -166,9 +224,6 @@ export const AddNewClientModal = ({
           </Button>
         </DialogActions>
       </Dialog>
-
-      {/* Snackbar Notifications */}
-      <AlertInline ref={notificationRef} asSnackbar />
     </>
   );
 };

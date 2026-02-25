@@ -35,9 +35,8 @@ export const FinancialsContent = () => {
 
     // Modal state
     showEditInvoiceModal,
-    setShowEditInvoiceModal,
-    editInvoiceForm,
-    setEditInvoiceForm,
+    editingInvoice,
+    closeEditInvoiceModal,
     savingInvoiceEdit,
 
     // Notification
@@ -50,7 +49,6 @@ export const FinancialsContent = () => {
     handleDeleteInvoice,
     openPaymentLink,
     openEditInvoiceModal,
-    markAsPaid,
     handleSaveInvoiceEdit,
     showNotification,
 
@@ -161,12 +159,10 @@ export const FinancialsContent = () => {
       {/* Edit Invoice Modal */}
       <EditInvoiceModal
         showEditInvoiceModal={showEditInvoiceModal}
-        editInvoiceForm={editInvoiceForm}
-        setEditInvoiceForm={setEditInvoiceForm}
-        handleSaveInvoiceEdit={handleSaveInvoiceEdit}
-        setShowEditInvoiceModal={setShowEditInvoiceModal}
+        invoiceData={editingInvoice}
+        onSave={handleSaveInvoiceEdit}
+        onClose={closeEditInvoiceModal}
         savingInvoiceEdit={savingInvoiceEdit}
-        markAsPaid={markAsPaid}
       />
 
       {/* Notifications */}

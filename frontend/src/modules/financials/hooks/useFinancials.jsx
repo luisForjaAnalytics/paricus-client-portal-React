@@ -154,19 +154,8 @@ export const useFinancials = () => {
   // Modal states
   const [showEditInvoiceModal, setShowEditInvoiceModal] = useState(false);
 
-  // Form states
-  const [editInvoiceForm, setEditInvoiceForm] = useState({
-    id: 0,
-    invoiceNumber: "",
-    title: "",
-    amount: 0,
-    currency: "USD",
-    status: "sent",
-    dueDate: "",
-    issuedDate: "",
-    paidDate: "",
-    paymentMethod: "",
-  });
+  // Editing state (raw invoice data)
+  const [editingInvoice, setEditingInvoice] = useState(null);
 
   // Refs
   const invoicesSection = useRef(null);
@@ -328,41 +317,13 @@ export const useFinancials = () => {
   };
 
   const openEditInvoiceModal = (invoice) => {
-    try {
-      setEditInvoiceForm({
-        id: invoice.id,
-        invoiceNumber: invoice.invoiceNumber,
-        title: invoice.title,
-        amount: invoice.amount,
-        currency: invoice.currency,
-        status: invoice.status,
-        dueDate: invoice.dueDate
-          ? new Date(invoice.dueDate).toISOString().split("T")[0]
-          : "",
-        issuedDate: invoice.issuedDate
-          ? new Date(invoice.issuedDate).toISOString().split("T")[0]
-          : "",
-        paidDate: invoice.paidDate
-          ? new Date(invoice.paidDate).toISOString().split("T")[0]
-          : "",
-        paymentMethod: invoice.paymentMethod || "",
-      });
-      setShowEditInvoiceModal(true);
-    } catch (err) {
-      console.error(`FinancialsView: ${err}`);
-    }
+    setEditingInvoice(invoice);
+    setShowEditInvoiceModal(true);
   };
 
-  const markAsPaid = () => {
-    try {
-      setEditInvoiceForm((prev) => ({
-        ...prev,
-        status: "paid",
-        paidDate: prev.paidDate || new Date().toISOString().split("T")[0],
-      }));
-    } catch (err) {
-      console.error(`FinancialsView: ${err}`);
-    }
+  const closeEditInvoiceModal = () => {
+    setShowEditInvoiceModal(false);
+    setEditingInvoice(null);
   };
 
   const dateToISOString = (dateString) => {
@@ -377,30 +338,29 @@ export const useFinancials = () => {
     }
   };
 
-  const handleSaveInvoiceEdit = async (e) => {
-    e.preventDefault();
-    if (!editInvoiceForm.id) return;
+  const handleSaveInvoiceEdit = async (data) => {
+    if (!data.id) return;
 
     try {
       const updateData = {
-        id: editInvoiceForm.id,
-        title: editInvoiceForm.title,
-        amount: editInvoiceForm.amount,
-        currency: editInvoiceForm.currency,
-        status: editInvoiceForm.status,
-        dueDate: dateToISOString(editInvoiceForm.dueDate),
-        issuedDate: dateToISOString(editInvoiceForm.issuedDate),
-        paymentMethod: editInvoiceForm.paymentMethod || null,
+        id: data.id,
+        title: data.title,
+        amount: data.amount,
+        currency: data.currency,
+        status: data.status,
+        dueDate: dateToISOString(data.dueDate),
+        issuedDate: dateToISOString(data.issuedDate),
+        paymentMethod: data.paymentMethod || null,
       };
 
-      if (editInvoiceForm.status === "paid" && editInvoiceForm.paidDate) {
-        updateData.paidDate = dateToISOString(editInvoiceForm.paidDate);
+      if (data.status === "paid" && data.paidDate) {
+        updateData.paidDate = dateToISOString(data.paidDate);
       }
 
       await updateInvoiceMutation(updateData).unwrap();
 
       showNotification("Invoice updated successfully", "success");
-      setShowEditInvoiceModal(false);
+      closeEditInvoiceModal();
     } catch (err) {
       console.error("Error updating invoice:", err);
       showNotification(extractApiError(err, "Failed to update invoice"), "error");
@@ -511,9 +471,8 @@ export const useFinancials = () => {
 
     // Modal state
     showEditInvoiceModal,
-    setShowEditInvoiceModal,
-    editInvoiceForm,
-    setEditInvoiceForm,
+    editingInvoice,
+    closeEditInvoiceModal,
     savingInvoiceEdit,
 
     // Notification
@@ -526,7 +485,6 @@ export const useFinancials = () => {
     handleDeleteInvoice,
     openPaymentLink,
     openEditInvoiceModal,
-    markAsPaid,
     handleSaveInvoiceEdit,
     showNotification,
 

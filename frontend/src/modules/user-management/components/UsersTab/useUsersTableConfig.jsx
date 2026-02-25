@@ -35,13 +35,9 @@ export const useUsersTableConfig = ({
 
   // Get user initials for avatar
   const getInitials = useCallback((user) => {
-    try {
-      const firstInitial = user.firstName ? user.firstName[0] : "";
-      const lastInitial = user.lastName ? user.lastName[0] : "";
-      return `${firstInitial}${lastInitial}`.toUpperCase();
-    } catch {
-      return "?";
-    }
+    const firstInitial = user.firstName ? user.firstName[0] : "";
+    const lastInitial = user.lastName ? user.lastName[0] : "";
+    return `${firstInitial}${lastInitial}`.toUpperCase();
   }, []);
 
   // Handler for filter changes (Desktop)
@@ -57,9 +53,9 @@ export const useUsersTableConfig = ({
   );
 
   // Shared rows transformation
-  const rows = useMemo(() => {
-    try {
-      return users.map((user) => ({
+  const rows = useMemo(
+    () =>
+      users.map((user) => ({
         id: user.id,
         name:
           `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
@@ -71,12 +67,9 @@ export const useUsersTableConfig = ({
         created_at: user.createdAt,
         original: user,
         initials: getInitials(user),
-      }));
-    } catch (err) {
-      console.error(`ERROR rows: ${err}`);
-      return [];
-    }
-  }, [users, t, getInitials]);
+      })),
+    [users, t, getInitials]
+  );
 
   // Shared render functions
   const renderStatus = useCallback(

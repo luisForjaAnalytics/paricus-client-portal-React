@@ -24,6 +24,9 @@ export const permissionList = [
   { id: 19, permissionName: "admin_audio_recordings", description: "View and manage audio call recordings (BPO Admin only)" },
   { id: 20, permissionName: "view_tickets", description: "View and manage support tickets" },
   { id: 21, permissionName: "admin_broadcast", description: "Send announcements and broadcasts (BPO Admin and Client Admin only)" },
+  { id: 22, permissionName: "broadcast_announcements", description: "Manage quick broadcast announcements" },
+  { id: 23, permissionName: "broadcast_swiper", description: "Manage swiper/carousel content for clients" },
+  { id: 24, permissionName: "broadcast_kpi", description: "Manage KPI display content for clients" },
 ];
 
 /**
@@ -38,7 +41,15 @@ export const permissionSections = {
   financial: ["view_financials", "admin_invoices", "download_invoices", "pay_invoices", "view_invoices"],
   reportsManagement: ["admin_reports", "download_reports"],
   userManagement: ["admin_clients", "admin_users", "admin_roles"],
-  broadcast: ["admin_broadcast"],
+  broadcast: ["admin_broadcast", "broadcast_announcements", "broadcast_swiper", "broadcast_kpi"],
+};
+
+/**
+ * Parent-child permission mapping
+ * Toggling a parent permission also toggles all its children
+ */
+export const parentChildPermissions = {
+  admin_broadcast: ["broadcast_announcements", "broadcast_swiper", "broadcast_kpi"],
 };
 
 /**

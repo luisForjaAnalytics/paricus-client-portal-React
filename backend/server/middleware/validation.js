@@ -157,6 +157,13 @@ export const authValidation = {
     validateRequest
   ],
   
+  verifyCode: [
+    body('code')
+      .notEmpty().withMessage('Reset code is required')
+      .isLength({ min: 6, max: 6 }).withMessage('Code must be 6 characters'),
+    validateRequest
+  ],
+
   resetPassword: [
     body('token').notEmpty().withMessage('Reset token is required'),
     commonValidations.password,

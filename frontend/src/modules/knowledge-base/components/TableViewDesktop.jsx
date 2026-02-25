@@ -1,10 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Box, IconButton, Typography, Tooltip } from "@mui/material";
-import {
-  Edit as EditIcon,
-  Visibility as VisibilityIcon,
-  FilterList as FilterListIcon,
-} from "@mui/icons-material";
+import { FilterList as FilterListIcon } from "@mui/icons-material";
 import { useSelector } from "react-redux";
 import {
   useGetAllArticlesQuery,
@@ -16,6 +12,8 @@ import { UniversalDataGrid } from "../../../common/components/ui/DataGrid/Univer
 import { ColumnHeaderFilter } from "../../../common/components/ui/ColumnHeaderFilter";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { EditButton } from "../../../common/components/ui/EditButton";
+import { ViewButton } from "../../../common/components/ui/ViewButton";
 import { TableViewMobil } from "./TableViewMobil";
 import { formatDateTime } from "../../../common/utils/formatDateTime";
 import { ArticleSearch } from "./ArticleSearch";
@@ -303,24 +301,16 @@ export const TableView = () => {
         ),
         renderCell: (params) => (
           <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
-            <Tooltip title={t("knowledgeBase.actions.edit")}>
-              <IconButton
-                onClick={() => handleEditClick(params.id, params.row.kbPrefix)}
-                size="small"
-                color="primary"
-              >
-                <EditIcon />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title={t("knowledgeBase.actions.view")}>
-              <IconButton
-                onClick={() => handleViewClick(params.id, params.row.kbPrefix)}
-                size="small"
-                sx={{ color: colors.primary }}
-              >
-                <VisibilityIcon />
-              </IconButton>
-            </Tooltip>
+            <EditButton
+              handleClick={() => handleEditClick(params.id, params.row.kbPrefix)}
+              title={t("knowledgeBase.actions.edit")}
+              size="small"
+            />
+            <ViewButton
+              handleClick={() => handleViewClick(params.id, params.row.kbPrefix)}
+              title={t("knowledgeBase.actions.view")}
+              size="small"
+            />
           </Box>
         ),
       },

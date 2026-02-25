@@ -4,13 +4,8 @@ import { Outlet, useOutletContext } from "react-router-dom";
 import { boxTypography } from "../../common/styles/styles";
 
 export const UserManagementView = () => {
-  let setTitleState;
-  try {
-    const context = useOutletContext();
-    setTitleState = context?.setTitleState;
-  } catch (err) {
-    console.error(`UserManagementView useOutletContext: ${err}`);
-  }
+  const context = useOutletContext();
+  const setTitleState = context?.setTitleState;
 
   return (
     <Box sx={boxTypography.box}>

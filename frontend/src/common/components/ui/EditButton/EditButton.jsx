@@ -1,5 +1,6 @@
 import PropTypes from "prop-types";
 import { IconButton, Tooltip } from "@mui/material";
+import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline';
 import { Edit as EditIcon } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import { colors } from "../../../styles/styles";
@@ -11,7 +12,7 @@ export const EditButton = ({
   icon,
   sx,
   color = "",
-  size = "small",
+  size = "medium",
   disabled = false,
 }) => {
   const { t } = useTranslation();
@@ -35,7 +36,7 @@ export const EditButton = ({
         disabled={disabled}
         sx={{ ...sx }}
       >
-        {icon || <EditIcon fontSize={size} sx={{ color: colors.info }} />}
+        {icon || <DriveFileRenameOutlineIcon fontSize={size} sx={{ color: colors.editButton }} />}
       </IconButton>
     </Tooltip>
   );

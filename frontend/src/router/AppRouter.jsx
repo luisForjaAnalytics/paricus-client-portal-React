@@ -38,6 +38,8 @@ import {
 } from "../modules/tickets";
 import { QuickBroadcast, QuickBroadcastView, SwiperControl, KpiControl } from "../modules/QuickBroadcast";
 import { ProfileView } from "../modules/profile";
+import { ForgotPasswordView } from "../common/components/layout/ForgotPassword/ForgotPassword";
+
 
 
 const router = createBrowserRouter(
@@ -47,6 +49,7 @@ const router = createBrowserRouter(
       element: <LoginView />,
       errorElement: <ErrorView />,
     },
+
     {
       path: "/app",
       element: <LayoutAccount />,
@@ -205,26 +208,42 @@ const router = createBrowserRouter(
         {
           path: "broadcast",
           element: (
-            <ProtectedRoute requiredPermission="admin_broadcast">
+            <ProtectedRoute anyPermissions={["admin_broadcast", "broadcast_announcements", "broadcast_swiper", "broadcast_kpi"]}>
               <QuickBroadcast />
             </ProtectedRoute>
           ),
           children: [
             {
               index: true,
-              element: <QuickBroadcastView />,
+              element: (
+                <ProtectedRoute requiredPermission="broadcast_announcements">
+                  <QuickBroadcastView />
+                </ProtectedRoute>
+              ),
             },
             {
               path: "quick-broadcast",
-              element: <QuickBroadcastView />,
+              element: (
+                <ProtectedRoute requiredPermission="broadcast_announcements">
+                  <QuickBroadcastView />
+                </ProtectedRoute>
+              ),
             },
             {
               path: "swiper-control",
-              element: <SwiperControl />,
+              element: (
+                <ProtectedRoute requiredPermission="broadcast_swiper">
+                  <SwiperControl />
+                </ProtectedRoute>
+              ),
             },
             {
               path: "kpi-control",
-              element: <KpiControl />,
+              element: (
+                <ProtectedRoute requiredPermission="broadcast_kpi">
+                  <KpiControl />
+                </ProtectedRoute>
+              ),
             },
           ],
         },

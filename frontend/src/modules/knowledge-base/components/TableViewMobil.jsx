@@ -1,13 +1,11 @@
 import { useMemo } from "react";
 import PropTypes from "prop-types";
-import { Box, IconButton, Tooltip } from "@mui/material";
-import {
-  Article as ArticleIcon,
-  Edit as EditIcon,
-  Visibility as VisibilityIcon,
-} from "@mui/icons-material";
+import { Box } from "@mui/material";
+import { Article as ArticleIcon } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import { UniversalMobilDataTable } from "../../../common/components/ui/UniversalMobilDataTable";
+import { EditButton } from "../../../common/components/ui/EditButton";
+import { ViewButton } from "../../../common/components/ui/ViewButton";
 import { colors } from "../../../common/styles/styles";
 
 export const TableViewMobil = ({
@@ -57,24 +55,16 @@ export const TableViewMobil = ({
   // Render actions for each row
   const renderActions = (row) => (
     <>
-      <Tooltip title={t("knowledgeBase.edit")}>
-        <IconButton
-          size="small"
-          color="primary"
-          onClick={() => handleEditClick(row.id, row.kbPrefix)}
-        >
-          <EditIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
-      <Tooltip title={t("knowledgeBase.view")}>
-        <IconButton
-          size="small"
-          color="primary"
-          onClick={() => handleViewClick(row.id, row.kbPrefix)}
-        >
-          <VisibilityIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
+      <EditButton
+        handleClick={() => handleEditClick(row.id, row.kbPrefix)}
+        title={t("knowledgeBase.edit")}
+        size="small"
+      />
+      <ViewButton
+        handleClick={() => handleViewClick(row.id, row.kbPrefix)}
+        title={t("knowledgeBase.view")}
+        size="small"
+      />
     </>
   );
 

@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import {
   FilterList as FilterListIcon,
   Add as AddIcon,
@@ -53,6 +53,13 @@ export const RolesTab = () => {
   const [updateRolePermissions, { isLoading: isUpdatingPermissions }] =
     useUpdateRolePermissionsMutation();
 
+  // Show error notification when query fails
+  useEffect(() => {
+    if (error) {
+      showNotification(t("common.errorLoadingData"), "error");
+    }
+  }, [error, t]);
+
   // Dialog states
   const [dialog, setDialog] = useState(false);
   const [permissionsDialog, setPermissionsDialog] = useState(false);
@@ -63,151 +70,96 @@ export const RolesTab = () => {
   const [selectedClient, setSelectedClient] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPermissions, setSelectedPermissions] = useState([]);
+  const [initialPermissions, setInitialPermissions] = useState([]);
 
   // State for advanced filters visibility
   const [isOpen, setIsOpen] = useState(false);
-
-  // Form state
-  const [roleForm, setRoleForm] = useState({
-    role_name: "",
-    description: "",
-    client_id: null,
-  });
 
   // Computed values
   const isSaving = isCreating || isUpdating;
 
   const filteredRoles = useMemo(() => {
-    try {
-      let filtered = roles;
+    let filtered = roles;
 
-      // Filter by client
-      if (selectedClient) {
-        filtered = filtered.filter(
-          (role) => (role.clientId || role.client_id) === selectedClient
-        );
-      }
-
-      // Filter by search query (role name or description)
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        filtered = filtered.filter(
-          (role) =>
-            (role.roleName || role.role_name)?.toLowerCase().includes(query) ||
-            role.description?.toLowerCase().includes(query)
-        );
-      }
-
-      return filtered;
-    } catch (err) {
-      console.error(`ERROR filteredRoles: ${err}`);
-      return roles;
+    // Filter by client
+    if (selectedClient) {
+      filtered = filtered.filter(
+        (role) => (role.clientId || role.client_id) === selectedClient
+      );
     }
+
+    // Filter by search query (role name or description)
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (role) =>
+          (role.roleName || role.role_name)?.toLowerCase().includes(query) ||
+          role.description?.toLowerCase().includes(query)
+      );
+    }
+
+    return filtered;
   }, [roles, selectedClient, searchQuery]);
 
   const openAddDialog = () => {
-    try {
-      setEditingRole(null);
-      setRoleForm({
-        role_name: "",
-        description: "",
-        // For Client Admins, pre-set their clientId
-        client_id: isClientAdmin ? authUser?.clientId : null,
-      });
-      setDialog(true);
-    } catch (err) {
-      console.error(`ERROR openAddDialog: ${err}`);
-    }
+    setEditingRole(null);
+    setDialog(true);
   };
 
   const openEditDialog = (role) => {
-    try {
-      setEditingRole(role);
-      setRoleForm({
-        role_name: role.roleName || role.role_name,
-        description: role.description || "",
-        client_id: role.clientId || role.client_id,
-      });
-      setDialog(true);
-    } catch (err) {
-      console.error(`ERROR openEditDialog: ${err}`);
-    }
+    setEditingRole(role);
+    setDialog(true);
   };
 
   const closeDialog = () => {
-    try {
-      setDialog(false);
-      setEditingRole(null);
-      setRoleForm({
-        role_name: "",
-        description: "",
-        client_id: null,
-      });
-    } catch (err) {
-      console.error(`ERROR closeDialog: ${err}`);
-    }
+    setDialog(false);
+    setEditingRole(null);
   };
 
   const openPermissionsDialog = async (role) => {
-    try {
-      setSelectedRole(role);
+    setSelectedRole(role);
 
-      if (!role.id) {
-        showNotification(t("roles.messages.invalidRole"), "error");
-        return;
-      }
-
-      try {
-        const result = await getRolePermissions(role.id).unwrap();
-        setSelectedPermissions(result);
-      } catch (error) {
-        console.error("Error fetching role permissions:", error);
-        setSelectedPermissions([]);
-      }
-
-      setPermissionsDialog(true);
-    } catch (err) {
-      console.error(`ERROR openPermissionsDialog: ${err}`);
+    if (!role.id) {
+      showNotification(t("roles.messages.invalidRole"), "error");
+      return;
     }
+
+    try {
+      const result = await getRolePermissions(role.id).unwrap();
+      setSelectedPermissions(result);
+      setInitialPermissions(result);
+    } catch (error) {
+      showNotification(extractApiError(error, t("roles.messages.permissionsFetchFailed")), "error");
+      setSelectedPermissions([]);
+      setInitialPermissions([]);
+    }
+
+    setPermissionsDialog(true);
   };
 
   const closePermissionsDialog = () => {
-    try {
-      setPermissionsDialog(false);
-      setSelectedRole(null);
-      setSelectedPermissions([]);
-    } catch (err) {
-      console.error(`ERROR closePermissionsDialog: ${err}`);
-    }
+    setPermissionsDialog(false);
+    setSelectedRole(null);
+    setSelectedPermissions([]);
   };
 
-  const saveRole = async () => {
-    if (!isFormValid()) return;
-
+  const saveRole = async (data) => {
     try {
       if (editingRole) {
-        const updateData = {
+        await updateRole({
           id: editingRole.id,
-          role_name: roleForm.role_name,
-          description: roleForm.description,
-          client_id: roleForm.client_id,
-        };
-        await updateRole(updateData).unwrap();
+          role_name: data.role_name,
+          description: data.description,
+          client_id: data.client_id,
+        }).unwrap();
         showNotification(t("roles.messages.roleUpdated"), "success");
       } else {
-        const roleData = {
-          clientId: roleForm.client_id,
-          roleName: roleForm.role_name,
-          description: roleForm.description,
+        await createRole({
+          clientId: data.client_id,
+          roleName: data.role_name,
+          description: data.description,
           permissionIds: [],
-        };
-
-        if (!roleData.clientId) {
-          showNotification(t("roles.messages.selectClient"), "error");
-          return;
-        }
-
-        await createRole(roleData).unwrap();
+        }).unwrap();
         showNotification(t("roles.messages.roleCreated"), "success");
       }
 
@@ -238,32 +190,30 @@ export const RolesTab = () => {
 
   // Función para eliminar rol directamente (la confirmación se maneja en DeleteButton)
   const handleDeleteRole = async (role) => {
-    await deleteRole(role.id).unwrap();
+    try {
+      await deleteRole(role.id).unwrap();
+      showNotification(t("roles.messages.roleDeleted"), "success");
+    } catch (error) {
+      showNotification(extractApiError(error, t("roles.messages.roleDeleteFailed")), "error");
+    }
   };
 
   const handlePermissionToggle = (permissionId) => {
-    try {
-      setSelectedPermissions((prev) =>
-        prev.includes(permissionId)
-          ? prev.filter((id) => id !== permissionId)
-          : [...prev, permissionId]
-      );
-    } catch (err) {
-      console.error(`ERROR handlePermissionToggle: ${err}`);
-    }
+    setSelectedPermissions((prev) =>
+      prev.includes(permissionId)
+        ? prev.filter((id) => id !== permissionId)
+        : [...prev, permissionId]
+    );
   };
 
-  const isFormValid = () => {
-    try {
-      return (
-        roleForm.role_name &&
-        roleForm.role_name.length >= 2 &&
-        roleForm.client_id
-      );
-    } catch (err) {
-      console.error(`ERROR isFormValid: ${err}`);
-      return false;
-    }
+  const handleBatchPermissionToggle = (ids, action) => {
+    setSelectedPermissions((prev) => {
+      if (action === "add") {
+        const newIds = ids.filter((id) => !prev.includes(id));
+        return [...prev, ...newIds];
+      }
+      return prev.filter((id) => !ids.includes(id));
+    });
   };
 
   const locale = t("common.locale") || "en-US";
@@ -271,22 +221,12 @@ export const RolesTab = () => {
 
   // Clear all filters
   const clearFilters = useCallback(() => {
-    try {
-      setSearchQuery("");
-      setSelectedClient("");
-    } catch (error) {
-      console.error("clearFilters error:", error);
-    }
+    setSearchQuery("");
+    setSelectedClient("");
   }, []);
 
-  const isProtectedRole = (roleName) => {
-    try {
-      return roleName === "BPO Admin" || roleName === "Client Admin";
-    } catch (err) {
-      console.error(`ERROR isProtectedRole: ${err}`);
-      return false;
-    }
-  };
+  const isProtectedRole = (roleName) =>
+    roleName === "BPO Admin" || roleName === "Client Admin";
 
   // Mobile filter handler
   const handleMobileFilterChange = useCallback((key, value) => {
@@ -360,9 +300,11 @@ export const RolesTab = () => {
     // Permissions dialog props (Desktop only)
     permissions,
     selectedPermissions,
+    initialPermissions,
     savePermissions,
     isUpdatingPermissions,
     handlePermissionToggle,
+    handleBatchPermissionToggle,
     permissionsDialog,
     closePermissionsDialog,
     selectedRole,
@@ -410,15 +352,13 @@ export const RolesTab = () => {
       <AddNewRoleModal
         dialog={dialog}
         editingRole={editingRole}
-        roleForm={roleForm}
-        setRoleForm={setRoleForm}
         closeDialog={closeDialog}
-        saveRole={saveRole}
+        onSave={saveRole}
         isSaving={isSaving}
-        isFormValid={isFormValid}
         clients={clients}
         isBPOAdmin={isBPOAdmin}
         isProtectedRole={isProtectedRole}
+        defaultClientId={isClientAdmin ? authUser?.clientId : null}
       />
 
       {/* Snackbar para notificaciones */}

@@ -2,7 +2,7 @@ import { Box } from "@mui/material";
 import { Add as AddIcon } from "@mui/icons-material";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
-import { FilterButton } from "../FilterButton/FilterButton";
+import { FilterButton } from "../FilterButton";
 import { ActionButton } from "../../../../common/components/ui/ActionButton";
 import { UniversalDataGrid } from "../../../../common/components/ui/DataGrid/UniversalDataGrid";
 

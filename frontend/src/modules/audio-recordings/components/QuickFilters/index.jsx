@@ -7,6 +7,8 @@ import { QuickFiltersMobile } from "./QuickFiltersMobile";
  * Componente unificado QuickFilters que renderiza la versión
  * móvil o desktop según el breakpoint actual.
  */
+export { QuickFiltersMobile } from "./QuickFiltersMobile";
+
 export const QuickFilters = (props) => {
   const { isMobile } = useBreakpoint();
 

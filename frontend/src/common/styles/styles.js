@@ -43,7 +43,10 @@ export const colors = {
   detailsBorderColor: "#16A34A",
   //Mobile Speed Dial
   MobileSpeedDialColor: "rgba(14, 131, 71, 0.7)",
-
+  //Edit Button
+  editButton: "#54ce7d",
+    //Desactivate Button
+  desactivateButton: "#fff0ee",
   //Dashboard Section
   masterRepoBackgroundColor: "#4ee78611",
   // Text colors (from Tailwind)
@@ -1373,7 +1376,7 @@ export const swiperControlStyles = {
   border: `1px solid ${colors.border}`,
   boxShadow: "none",
   overflow: "hidden",
-  width: { xs: "100%", md: "100%", lg: "66%" },
+  width: { xs: "100%", md: "100%", lg: "100%" },
   height: { xs: "auto", md: "auto" },
   mt: { xs: 5, md: 8 },
   mx: { xs: 0, md: "auto" },

@@ -3,6 +3,7 @@ import { IconButton, Tooltip } from "@mui/material";
 import { Visibility } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import { colors } from "../../../styles/styles";
+import ZoomInIcon from '@mui/icons-material/ZoomIn';
 
 export const ViewButton = ({
   handleClick,
@@ -11,7 +12,7 @@ export const ViewButton = ({
   icon,
   sx,
   color = "",
-  size = "small",
+  size = "medium",
   disabled = false,
 }) => {
   const { t } = useTranslation();
@@ -35,7 +36,7 @@ export const ViewButton = ({
         disabled={disabled}
         sx={{ ...sx }}
       >
-        {icon || <Visibility fontSize={size} sx={{ color: colors.focusRing }} />}
+        {icon || <ZoomInIcon fontSize={size} sx={{ color: colors.focusRing }} />}
       </IconButton>
     </Tooltip>
   );

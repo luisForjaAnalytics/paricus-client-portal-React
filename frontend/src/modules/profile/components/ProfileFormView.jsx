@@ -11,11 +11,13 @@ import {
   useUpdateProfileMutation,
   useUpdatePasswordMutation,
 } from "../../../store/api/profileApi";
+import { useCreateLogMutation } from "../../../store/api/logsApi";
 import {
   outlinedIconButton,
   primaryIconButton,
   profilelStyles,
 } from "../../../common/styles/styles";
+import { PasswordField } from "../../../common/components/ui/PasswordField";
 
 const noShadowSx = {
   ...profilelStyles.inputField,
@@ -24,6 +26,12 @@ const noShadowSx = {
     boxShadow: "none",
     backgroundColor: "transparent",
   },
+  "& input:-webkit-autofill, & input:-webkit-autofill:hover, & input:-webkit-autofill:focus":
+    {
+      WebkitBoxShadow: "0 0 0 1000px white inset !important",
+      WebkitTextFillColor: "inherit !important",
+      transition: "background-color 5000s ease-in-out 0s",
+    },
 };
 
 const profileGridSx = {
@@ -88,6 +96,7 @@ export const ProfileFormView = () => {
     useUpdateProfileMutation();
   const [updatePassword, { isLoading: isUpdatingPassword }] =
     useUpdatePasswordMutation();
+  const [createLog] = useCreateLogMutation();
 
   const { notificationRef, showNotification } = useNotification();
 
@@ -132,6 +141,21 @@ export const ProfileFormView = () => {
       } else {
         showNotification(t("profile.profileUpdated"), "success");
       }
+
+      // Log profile update (fire-and-forget)
+      const changes = [];
+      if (data.firstName !== (user?.firstName || "")) changes.push("firstName");
+      if (data.lastName !== (user?.lastName || "")) changes.push("lastName");
+      if (data.phone !== (user?.phone || "")) changes.push("phone");
+      if (data.currentPassword && data.newPassword) changes.push("password");
+
+      createLog({
+        userId: user?.id?.toString() || "unknown",
+        eventType: "UPDATE",
+        entity: "Profile",
+        description: `Updated profile: ${changes.join(", ")}`,
+        status: "SUCCESS",
+      });
 
       // Reset form with new profile values + clear password fields
       reset({
@@ -252,10 +276,10 @@ export const ProfileFormView = () => {
               name="currentPassword"
               control={control}
               render={({ field }) => (
-                <TextField
+                <PasswordField
                   {...field}
                   label={t("profile.currentPassword")}
-                  type="password"
+                  autoComplete="new-password"
                   fullWidth
                   sx={noShadowSx}
                   error={!!errors.currentPassword}
@@ -267,10 +291,10 @@ export const ProfileFormView = () => {
               name="newPassword"
               control={control}
               render={({ field }) => (
-                <TextField
+                <PasswordField
                   {...field}
                   label={t("profile.newPassword")}
-                  type="password"
+                  autoComplete="new-password"
                   fullWidth
                   sx={noShadowSx}
                   error={!!errors.newPassword}
@@ -282,10 +306,10 @@ export const ProfileFormView = () => {
               name="confirmPassword"
               control={control}
               render={({ field }) => (
-                <TextField
+                <PasswordField
                   {...field}
                   label={t("profile.confirmPassword")}
-                  type="password"
+                  autoComplete="new-password"
                   fullWidth
                   sx={noShadowSx}
                   error={!!errors.confirmPassword}

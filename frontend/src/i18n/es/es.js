@@ -282,6 +282,8 @@ export default {
     details: "Detalles",
     tryAgain: "Intentar de nuevo",
     rowsPerPage: "Filas por página",
+    showPassword: "Mostrar contraseña",
+    hidePassword: "Ocultar contraseña",
   },
 
   // Login
@@ -290,7 +292,6 @@ export default {
     welcome: "¡Bienvenido de nuevo! Por favor ingrese sus datos.",
     email: "Correo Electrónico",
     password: "Contraseña",
-    forgotPassword: "¿Olvidó su contraseña?",
     signIn: "Iniciar Sesión",
     signingIn: "Iniciando sesión...",
     fillAllFields: "Por favor complete todos los campos",
@@ -299,6 +300,31 @@ export default {
     emailInvalid: "Por favor ingrese un correo electrónico válido",
     passwordRequired: "La contraseña es requerida",
     passwordMinLength: "La contraseña debe tener al menos 6 caracteres",
+    forgotPassword: {
+      linkTitle: "¿Olvidó su contraseña?",
+      description:
+        "Ingresa tu dirección de correo electrónico y te enviaremos un código para restablecer tu contraseña.",
+      resetPassword: "Restablecer Contraseña",
+      backToLogin: "Volver al Inicio",
+      sending: "Enviando...",
+      enterCode: "Ingresa el código de 6 caracteres que enviamos a tu correo.",
+      submit: "Enviar",
+      verifying: "Verificando...",
+      invalidCode: "Código inválido o expirado. Inténtalo de nuevo.",
+      enterNewPassword: "Ingresa tu nueva contraseña.",
+      newPassword: "Nueva Contraseña",
+      confirmPassword: "Confirmar Contraseña",
+      savePassword: "Guardar Contraseña",
+      passwordMinLength: "La contraseña debe tener al menos 8 caracteres",
+      passwordRequirements:
+        "Debe incluir mayúscula, minúscula, número y carácter especial",
+      confirmRequired: "Por favor confirma tu contraseña",
+      passwordsNotMatch: "Las contraseñas no coinciden",
+      resetSuccess: "¡Contraseña restablecida exitosamente! Redirigiendo al inicio...",
+      resetError: "No se pudo restablecer la contraseña. Inténtalo de nuevo.",
+      success: "Si el correo existe, se ha enviado un código de restablecimiento.",
+      error: "Algo salió mal. Por favor inténtalo más tarde.",
+    },
   },
 
   // Perfil
@@ -323,7 +349,8 @@ export default {
     updatePassword: "Actualizar Contraseña",
     firstNameRequired: "El nombre es obligatorio",
     lastNameRequired: "El apellido es obligatorio",
-    allPasswordFieldsRequired: "Todos los campos de contraseña son obligatorios para cambiarla",
+    allPasswordFieldsRequired:
+      "Todos los campos de contraseña son obligatorios para cambiarla",
     profileUpdated: "Perfil actualizado exitosamente",
     profileUpdateFailed: "Error al actualizar el perfil",
     passwordUpdated: "Contraseña actualizada exitosamente",
@@ -367,6 +394,14 @@ export default {
       selectClientFirst: "Primero seleccione un cliente",
       noRolesAvailable: "No hay roles disponibles para este cliente",
       selectRole: "Seleccione un rol",
+      firstNameRequired: "El nombre es obligatorio",
+      lastNameRequired: "El apellido es obligatorio",
+      emailRequired: "El correo electrónico es obligatorio",
+      emailInvalid: "Dirección de correo inválida",
+      passwordRequired: "La contraseña es obligatoria",
+      passwordMinLength: "La contraseña debe tener al menos 8 caracteres",
+      clientRequired: "El cliente es obligatorio",
+      roleRequired: "El rol es obligatorio",
     },
     actions: {
       editUser: "Editar usuario",
@@ -415,7 +450,9 @@ export default {
       roleName: "Nombre del Rol",
       description: "Descripción",
       client: "Cliente",
+      roleNameRequired: "El nombre del rol es obligatorio",
       roleNameMinLength: "El nombre del rol debe tener al menos 2 caracteres",
+      clientRequired: "El cliente es obligatorio",
       permissionsTitle: "Seleccione los permisos que debe tener este rol:",
       maxCharactersError: "Se permiten máximo {{max}} caracteres",
     },
@@ -433,6 +470,7 @@ export default {
       roleDeleteFailed: "Error al eliminar el rol",
       permissionsUpdated: "Permisos actualizados exitosamente",
       permissionsUpdateFailed: "Error al actualizar los permisos",
+      permissionsFetchFailed: "Error al cargar los permisos del rol",
       invalidRole: "Rol inválido seleccionado",
       selectClient: "Por favor seleccione un cliente para este rol",
     },
@@ -460,7 +498,10 @@ export default {
     view_invoices: "Ver Facturas",
     pay_invoices: "Pagar Facturas",
     view_tickets: "Ver Tickets de Soporte",
-    admin_broadcast: "Difusión Rápida",
+    admin_broadcast: "Sección de Difusión",
+    broadcast_announcements: "Difusión Rápida",
+    broadcast_swiper: "Control de Slides",
+    broadcast_kpi: "Control de KPI",
   },
 
   // Gestión de Clientes
@@ -494,6 +535,8 @@ export default {
     },
     form: {
       clientName: "Nombre del Cliente",
+      clientNameRequired: "El nombre del cliente es requerido",
+      clientNameMinLength: "El nombre debe tener al menos 2 caracteres",
       isProspect: "Es Prospecto",
       active: "Activo",
     },
@@ -544,6 +587,7 @@ export default {
     noInvoicesClient: "Las facturas aparecerán aquí cuando estén disponibles",
     uploadSomeInvoices: "Suba algunas facturas en PDF para este cliente",
     form: {
+      title: "Título",
       amount: "Monto",
       currency: "Moneda",
       status: "Estado",
@@ -587,6 +631,15 @@ export default {
         other: "Otro",
       },
       maxCharactersError: "Se permiten máximo {{max}} caracteres",
+      titleRequired: "El nombre de la factura es obligatorio",
+      amountRequired: "El monto es obligatorio",
+      amountMin: "El monto debe ser mayor o igual a 0",
+      currencyRequired: "La moneda es obligatoria",
+      statusRequired: "El estado es obligatorio",
+      issuedDateRequired: "La fecha de emisión es obligatoria",
+      dueDateRequired: "La fecha de vencimiento es obligatoria",
+      paidDateRequired:
+        "La fecha de pago es obligatoria cuando el estado es pagado",
     },
     messages: {
       invoiceUpdated: "Factura actualizada exitosamente",
@@ -1017,7 +1070,8 @@ export default {
   },
   kpiControl: {
     title: "Control de KPIs del Dashboard",
-    subtitle: "Define los valores actuales y metas. El badge será verde si se alcanza la meta, rojo si no.",
+    subtitle:
+      "Define los valores actuales y metas. El badge será verde si se alcanza la meta, rojo si no.",
     achieved: "Alcanzado",
     notAchieved: "No alcanzado",
     currentValue: "Valor actual",

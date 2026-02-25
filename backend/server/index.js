@@ -186,7 +186,6 @@ app.use(express.urlencoded({ extended: true }));
 
 // CSRF Protection (apply to state-changing operations)
 app.use('/api/admin', validateCSRFToken);
-app.use('/api/auth/reset-password', validateCSRFToken);
 
 // CSRF token endpoint
 app.get('/api/csrf-token', getCSRFToken);

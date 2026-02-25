@@ -136,16 +136,26 @@ export const LayoutAccount = () => {
 
   const filteredAdminItems = useMemo(
     () =>
-      menuItemsAdmin.filter((item) => {
-        if (item.permission && !hasPermission(item.permission)) return false;
-        if (item.subItems) {
-          const filteredSubs = item.subItems.filter((subItem) =>
-            subItem.permission ? hasPermission(subItem.permission) : true
-          );
-          return filteredSubs.length > 0;
-        }
-        return true;
-      }),
+      menuItemsAdmin
+        .filter((item) => {
+          if (item.permission && !hasPermission(item.permission)) return false;
+          if (item.subItems) {
+            const filteredSubs = item.subItems.filter((subItem) =>
+              subItem.permission ? hasPermission(subItem.permission) : true
+            );
+            return filteredSubs.length > 0;
+          }
+          return true;
+        })
+        .map((item) => {
+          if (item.subItems) {
+            const filteredSubs = item.subItems.filter((subItem) =>
+              subItem.permission ? hasPermission(subItem.permission) : true
+            );
+            return { ...item, subItems: filteredSubs, route: filteredSubs[0]?.route || item.route };
+          }
+          return item;
+        }),
     [hasPermission]
   );
 

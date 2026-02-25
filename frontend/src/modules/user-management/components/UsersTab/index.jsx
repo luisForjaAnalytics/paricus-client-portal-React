@@ -10,6 +10,7 @@ import { useNotification } from "../../../../common/hooks";
 import { MobileFilterPanel } from "../../../../common/components/ui/MobileFilterPanel";
 import { MobileSpeedDial } from "../../../../common/components/ui/MobileSpeedDial";
 import { extractApiError } from "../../../../common/utils/apiHelpers";
+import { AlertInline } from "../../../../common/components/ui/AlertInline";
 import { formatDate as formatDateUtil } from "../../../../common/utils/formatters";
 import { UsersTabDesktop } from "./UsersTabDesktop";
 import { UsersTabMobile } from "./UsersTabMobile";
@@ -54,71 +55,41 @@ export const UsersTab = () => {
 
   const saving = creating || updating;
 
-  // Form data
-  const [userForm, setUserForm] = useState({
-    first_name: "",
-    last_name: "",
-    email: "",
-    client_id: null,
-    role_id: null,
-    password: "",
-  });
-
   // Computed values
-  const clientOptions = useMemo(() => {
-    try {
-      return clients.map((client) => ({
-        title: client.name,
-        value: client.id,
-      }));
-    } catch (err) {
-      console.error(`ERROR clientOptions: ${err}`);
-      return [];
-    }
-  }, [clients]);
-
-  const roleOptions = useMemo(() => {
-    try {
-      return roles
-        .filter((role) => role.client_id === userForm.client_id)
-        .map((role) => ({ title: role.role_name, value: role.id }));
-    } catch (err) {
-      console.error(`ERROR roleOptions: ${err}`);
-      return [];
-    }
-  }, [roles, userForm.client_id]);
+  const clientOptions = useMemo(
+    () => clients.map((client) => ({
+      title: client.name,
+      value: client.id,
+    })),
+    [clients],
+  );
 
   const filteredUsers = useMemo(() => {
-    try {
-      let filtered = users;
+    let filtered = users;
 
-      // For Client Admins, only show users from their company
-      if (isClientAdmin && authUser?.clientId) {
-        filtered = filtered.filter(
-          (user) => user.clientId === authUser.clientId
-        );
-      }
-
-      // For BPO Admins, use the selected client filter
-      if (isBPOAdmin && selectedClient) {
-        filtered = filtered.filter((user) => user.clientId === selectedClient);
-      }
-
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        filtered = filtered.filter(
-          (user) =>
-            user.firstName?.toLowerCase().includes(query) ||
-            user.lastName?.toLowerCase().includes(query) ||
-            user.email?.toLowerCase().includes(query)
-        );
-      }
-
-      return filtered;
-    } catch (err) {
-      console.error(`ERROR filteredUsers: ${err}`);
-      return users;
+    // For Client Admins, only show users from their company
+    if (isClientAdmin && authUser?.clientId) {
+      filtered = filtered.filter(
+        (user) => user.clientId === authUser.clientId
+      );
     }
+
+    // For BPO Admins, use the selected client filter
+    if (isBPOAdmin && selectedClient) {
+      filtered = filtered.filter((user) => user.clientId === selectedClient);
+    }
+
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (user) =>
+          user.firstName?.toLowerCase().includes(query) ||
+          user.lastName?.toLowerCase().includes(query) ||
+          user.email?.toLowerCase().includes(query)
+      );
+    }
+
+    return filtered;
   }, [
     users,
     selectedClient,
@@ -128,103 +99,40 @@ export const UsersTab = () => {
     authUser?.clientId,
   ]);
 
-  const isFormValid = useMemo(() => {
-    try {
-      const emailRegex = /.+@.+\..+/;
-      return (
-        userForm.first_name &&
-        userForm.last_name &&
-        userForm.email &&
-        emailRegex.test(userForm.email) &&
-        userForm.client_id &&
-        userForm.role_id &&
-        (editingUser || userForm.password)
-      );
-    } catch (err) {
-      console.error(`ERROR isFormValid: ${err}`);
-      return false;
-    }
-  }, [userForm, editingUser]);
-
   // Methods
   const openAddDialog = () => {
-    try {
-      setEditingUser(null);
-      setUserForm({
-        first_name: "",
-        last_name: "",
-        email: "",
-        // For Client Admins, pre-set their clientId
-        client_id: isClientAdmin ? authUser?.clientId : null,
-        role_id: null,
-        password: "",
-      });
-      setDialog(true);
-    } catch (err) {
-      console.error(`ERROR openAddDialog: ${err}`);
-    }
+    setEditingUser(null);
+    setDialog(true);
   };
 
   const openEditDialog = (user) => {
-    try {
-      setEditingUser(user);
-      setUserForm({
-        first_name: user.firstName,
-        last_name: user.lastName,
-        email: user.email,
-        client_id: user.clientId,
-        role_id: user.roleId,
-        password: "",
-      });
-      setDialog(true);
-    } catch (err) {
-      console.error(`ERROR openEditDialog: ${err}`);
-    }
+    setEditingUser(user);
+    setDialog(true);
   };
 
   const closeDialog = () => {
-    try {
-      setDialog(false);
-      setEditingUser(null);
-      setUserForm({
-        first_name: "",
-        last_name: "",
-        email: "",
-        client_id: null,
-        role_id: null,
-        password: "",
-      });
-    } catch (err) {
-      console.error(`ERROR closeDialog: ${err}`);
-    }
+    setDialog(false);
+    setEditingUser(null);
   };
 
-  const saveUser = async () => {
+  const saveUser = async (data) => {
     try {
-      const userData = { ...userForm };
-
-      // Convert empty string role_id to null for server validation
-      if (userData.role_id === "" || userData.role_id === undefined) {
-        userData.role_id = null;
-      }
+      const userData = { ...data };
 
       if (editingUser && !userData.password) {
         delete userData.password;
       }
 
       if (editingUser) {
-        // Update existing user
         await updateUserMutation({ id: editingUser.id, ...userData }).unwrap();
         showNotification(t("users.messages.userUpdated"), "success");
       } else {
-        // Create new user
         await createUserMutation(userData).unwrap();
         showNotification(t("users.messages.userCreated"), "success");
       }
 
       closeDialog();
     } catch (error) {
-      console.error("Error saving user:", error);
       showNotification(
         extractApiError(error, t("users.messages.saveFailed")),
         "error"
@@ -246,7 +154,6 @@ export const UsersTab = () => {
         "success"
       );
     } catch (error) {
-      console.error("Error toggling user status:", error);
       showNotification(
         extractApiError(error, t("users.messages.statusUpdateFailed")),
         "error"
@@ -258,22 +165,10 @@ export const UsersTab = () => {
   const locale = t("common.locale") || "en-US";
   const formatDate = useCallback((ds) => formatDateUtil(ds, locale), [locale]);
 
-  const handleClientChange = (clientId) => {
-    try {
-      setUserForm((prev) => ({ ...prev, client_id: clientId, role_id: null }));
-    } catch (err) {
-      console.error(`ERROR handleClientChange: ${err}`);
-    }
-  };
-
   // Clear all filters
   const clearFilters = useCallback(() => {
-    try {
-      setSearchQuery("");
-      setSelectedClient("");
-    } catch (error) {
-      console.error("clearFilters error:", error);
-    }
+    setSearchQuery("");
+    setSelectedClient("");
   }, []);
 
   // Mobile filter handler
@@ -387,18 +282,17 @@ export const UsersTab = () => {
       <AddNewUserModal
         dialog={dialog}
         editingUser={editingUser}
-        userForm={userForm}
-        setUserForm={setUserForm}
         closeDialog={closeDialog}
-        saveUser={saveUser}
+        onSave={saveUser}
         saving={saving}
-        isFormValid={isFormValid}
-        notificationRef={notificationRef}
         clientOptions={clientOptions}
-        roleOptions={roleOptions}
+        allRoles={roles}
         isBPOAdmin={isBPOAdmin}
-        handleClientChange={handleClientChange}
+        defaultClientId={isClientAdmin ? authUser?.clientId : null}
       />
+
+      {/* Snackbar para notificaciones */}
+      <AlertInline ref={notificationRef} asSnackbar />
     </>
   );
 };
