@@ -1,140 +1,190 @@
-# New Frontend Architecture
+# Frontend Architecture
 
-## 🎯 Implemented Structure: Screaming Architecture
+## Screaming Architecture
 
-The frontend structure has been reorganized following the **Screaming Architecture** pattern, where the organization screams the business domain of the application.
+The frontend follows the **Screaming Architecture** pattern, where the folder structure reflects the business domain of the application.
 
 ---
 
-## 📁 Folder Structure
+## Folder Structure
 
 ```
 frontend/src/
-├── common/                      # Shared code between modules
+├── common/                          # Shared code between modules
 │   ├── components/
-│   │   ├── ui/                 # Reusable UI components
-│   │   │   └── TableItems.jsx
-│   │   └── layout/             # Layout components
-│   │       ├── LayoutAccount.jsx
-│   │       ├── Login.jsx
+│   │   ├── ui/                     # Reusable UI components
+│   │   │   ├── ActionButton/
+│   │   │   ├── AlertInline/
+│   │   │   ├── AppText/
+│   │   │   ├── CancelButton/
+│   │   │   ├── ColumnHeaderFilter/
+│   │   │   ├── DataGrid/           # UniversalDataGrid
+│   │   │   ├── DeleteButton/
+│   │   │   ├── DownloadButton/
+│   │   │   ├── EditButton/
+│   │   │   ├── GetInitialsAvatar/
+│   │   │   ├── HeaderBoxTypography/
+│   │   │   ├── LoadingProgress/
+│   │   │   ├── MobileFilterPanel/
+│   │   │   ├── MobileSpeedDial/
+│   │   │   ├── PasswordField/      # Password input with show/hide toggle
+│   │   │   ├── SelectMenuItem/
+│   │   │   ├── Swiper/             # SwiperView carousel
+│   │   │   ├── TicketText/
+│   │   │   ├── TiptapEditor/       # Rich text editor
+│   │   │   ├── TiptapReadOnly/     # Read-only rich text
+│   │   │   ├── UniversalMobilDataTable/
+│   │   │   └── ViewButton/
+│   │   │
+│   │   └── layout/                 # Layout components
 │   │       ├── AppBar/
 │   │       │   ├── AppBarLayout.jsx
 │   │       │   ├── AvatarButton.jsx
 │   │       │   └── LanguageMenu.jsx
-│   │       └── Navigation/
-│   │           ├── ItemMenu.jsx
-│   │           ├── MenuSection.jsx
-│   │           ├── MobilMenu.jsx
-│   │           └── SingOutButton.jsx
+│   │       ├── ForgotPassword/     # 3-phase forgot password flow
+│   │       │   ├── ForgotPassword.jsx   # Orchestrator (email → code → password)
+│   │       │   ├── index.js
+│   │       │   └── components/
+│   │       │       ├── EmailPhase.jsx   # Email input + RHF/Zod
+│   │       │       ├── CodePhase.jsx    # 6-digit OTP input
+│   │       │       ├── PasswordPhase.jsx # New password + confirm
+│   │       │       └── shared.js        # Shared inputSx styles
+│   │       ├── Navigation/
+│   │       │   ├── AccordionMenuItem.jsx
+│   │       │   ├── ItemMenu.jsx
+│   │       │   ├── MenuSection.jsx
+│   │       │   ├── MobilMenu.jsx
+│   │       │   └── SingOutButton.jsx
+│   │       ├── LayoutAccount.jsx
+│   │       ├── Login.jsx
+│   │       └── index.js
 │   │
-│   ├── hooks/                  # Shared hooks
-│   │   ├── index.js            # Barrel export
-│   │   ├── useBreakpoint.js    # 🆕 Hook for responsive (eliminates *Movil.jsx)
-│   │   ├── usePermissions.js
-│   │   └── useTesseractOCR.js
+│   ├── hooks/                      # Shared hooks
+│   │   ├── index.js                # Barrel export
+│   │   ├── useBreakpoint.js        # Responsive breakpoints
+│   │   ├── useModal.js             # Modal open/close state
+│   │   ├── useNotification.js      # Snackbar notifications
+│   │   ├── usePermissions.js       # Permission checks
+│   │   ├── useTesseractOCR.js      # OCR processing
+│   │   ├── useTicketAttachments.js
+│   │   └── useTicketDetailAttachments.js
 │   │
-│   ├── styles/                 # Global styles
+│   ├── styles/                     # Global styles
 │   │   └── styles.js
 │   │
-│   └── utils/                  # Shared utilities
+│   └── utils/                      # Shared utilities
+│       ├── apiHelpers.js           # extractApiError
+│       ├── formatDateTime.js
+│       ├── formatters.js
+│       ├── getAttachmentUrl.js
+│       ├── getInitials.js
+│       ├── getStatusProperty.js
+│       ├── invoiceParser.js
+│       ├── logger.js
+│       └── permissionParser.js
 │
-├── modules/                    # Business modules (Feature-based)
-│   ├── financials/
+├── config/
+│   └── menu/
+│       └── MenusSection.jsx        # Menu configuration (items, icons, permissions)
+│
+├── modules/                        # Business modules (Feature-based)
+│   ├── dashboard/
+│   │   ├── DashboardView.jsx
 │   │   ├── components/
-│   │   │   ├── ClientSummary/
-│   │   │   │   ├── index.jsx               # 🆕 Unified wrapper
-│   │   │   │   ├── ClientSummaryDesktop.jsx
-│   │   │   │   ├── ClientSummaryMobile.jsx
-│   │   │   │   └── ClientSummaryCard.jsx
-│   │   │   ├── ClientBreakdown/
-│   │   │   │   ├── index.jsx               # 🆕 Unified wrapper
-│   │   │   │   ├── ClientBreakdownDesktop.jsx
-│   │   │   │   └── ClientBreakdownMobile.jsx
-│   │   │   ├── InvoicesTable/
-│   │   │   │   ├── index.jsx               # 🆕 Unified wrapper
-│   │   │   │   ├── InvoicesTableDesktop.jsx
-│   │   │   │   ├── InvoicesTableMobile.jsx
-│   │   │   │   └── PendingLinkModal.jsx
-│   │   │   ├── OcrButton/
-│   │   │   │   ├── index.jsx
-│   │   │   │   └── OcrButton.jsx
-│   │   │   └── index.js                    # Barrel export
+│   │   │   ├── ActiveTasks/
+│   │   │   ├── AnnouncementsInbox/
+│   │   │   ├── DashboardHeader/
+│   │   │   ├── DashboardStatisticsView/
+│   │   │   ├── DashboardViewSelect/
+│   │   │   └── MasterRepository/
+│   │   └── index.js
+│   │
+│   ├── financials/
 │   │   ├── FinancialsView.jsx
-│   │   └── index.js                        # Barrel export
+│   │   ├── hooks/
+│   │   │   └── useFinancials.jsx
+│   │   ├── components/
+│   │   │   ├── ClientSummary/      # Desktop + Mobile wrapper
+│   │   │   ├── ClientBreakdown/    # Desktop + Mobile wrapper
+│   │   │   ├── InvoicesTable/      # Desktop + Mobile wrapper
+│   │   │   ├── EditInvoiceModal/
+│   │   │   ├── FinancialsContent/
+│   │   │   ├── UploadInvoiceButton/
+│   │   │   └── index.js
+│   │   └── index.js
 │   │
 │   ├── audio-recordings/
-│   │   ├── components/
-│   │   │   ├── QuickFilters/
-│   │   │   │   ├── index.jsx               # 🆕 Unified wrapper
-│   │   │   │   ├── QuickFiltersDesktop.jsx
-│   │   │   │   └── QuickFiltersMobile.jsx
-│   │   │   ├── AdvancedFilters/
-│   │   │   │   ├── AdvancedFilters.jsx
-│   │   │   │   └── company.js
-│   │   │   ├── TableView/
-│   │   │   │   └── TableView.jsx
-│   │   │   └── index.js
 │   │   ├── AudioRecordingsView.jsx
+│   │   ├── hooks/
+│   │   │   ├── useAudioPlayer.js
+│   │   │   └── useAudioRecordings.js
+│   │   ├── components/
+│   │   │   ├── QuickFilters/       # Desktop + Mobile wrapper
+│   │   │   ├── AudioPlayerBar/
+│   │   │   ├── AudioRecordingsContent/
+│   │   │   ├── FilterButton/
+│   │   │   ├── TableView/
+│   │   │   ├── AdvancedFilters/
+│   │   │   └── index.js
 │   │   └── index.js
 │   │
 │   ├── user-management/
-│   │   ├── components/
-│   │   │   ├── UsersTab/
-│   │   │   │   ├── index.jsx               # 🆕 Unified wrapper
-│   │   │   │   ├── UsersTabDesktop.jsx
-│   │   │   │   └── UsersTabMobile.jsx
-│   │   │   ├── ClientsTab/
-│   │   │   │   ├── index.jsx               # 🆕 Unified wrapper
-│   │   │   │   ├── ClientsTabDesktop.jsx
-│   │   │   │   └── ClientsTabMobile.jsx
-│   │   │   ├── RolesTab/
-│   │   │   │   ├── index.jsx               # 🆕 Unified wrapper
-│   │   │   │   ├── RolesTabDesktop.jsx
-│   │   │   │   └── RolesTabMobile.jsx
-│   │   │   ├── Navigation/
-│   │   │   │   └── NavBarOptions.jsx
-│   │   │   └── index.js
 │   │   ├── UserManagementView.jsx
-│   │   └── index.js
-│   │
-│   ├── dashboard/
 │   │   ├── components/
-│   │   │   ├── DashboardCards.jsx
-│   │   │   ├── DashboardCards1.jsx
-│   │   │   └── SwierDashBoard.jsx
-│   │   ├── DashboardView.jsx
+│   │   │   ├── UsersTab/           # Desktop + Mobile + AddNewUserModal
+│   │   │   ├── ClientsTab/        # Desktop + Mobile + AddNewClientModal
+│   │   │   ├── RolesTab/          # Desktop + Mobile + AddNewRoleModal + PermissionsModal
+│   │   │   ├── LogsView/         # Desktop + Mobile + AdvancedFilters
+│   │   │   ├── FilterButton/
+│   │   │   ├── Navigation/        # NavBarOptions (tab navigation)
+│   │   │   └── index.js
 │   │   └── index.js
 │   │
 │   ├── knowledge-base/
-│   │   ├── components/
-│   │   │   ├── CKEditor.jsx
-│   │   │   ├── TableView.jsx
-│   │   │   └── ArticleExample.jsx
 │   │   ├── KnowledgeBaseView.jsx
+│   │   ├── components/
+│   │   │   ├── ArticleSearch.jsx
+│   │   │   ├── ArticleView.jsx
+│   │   │   ├── CKEditor.jsx
+│   │   │   ├── TableViewDesktop.jsx
+│   │   │   └── TableViewMobil.jsx
+│   │   └── index.js
+│   │
+│   ├── tickets/
+│   │   ├── ticketsView.jsx
+│   │   ├── components/
+│   │   │   ├── CreateTicketButton/
+│   │   │   ├── TicketViewDetails/  # Detail view + sub-components
+│   │   │   ├── TicketsViewDesktop/
+│   │   │   └── TicketsViewMobil/
+│   │   └── index.js
+│   │
+│   ├── profile/
+│   │   ├── ProfileView.jsx
+│   │   ├── components/
+│   │   │   └── ProfileFormView.jsx # RHF + Zod form
 │   │   └── index.js
 │   │
 │   ├── reporting/
 │   │   ├── ReportingView.jsx
 │   │   └── index.js
 │   │
-│   ├── profile/
-│   │   ├── ProfileView.jsx
-│   │   └── index.js
-│   │
 │   ├── reports-management/
-│   │   ├── components/
-│   │   │   ├── ClientFolders.jsx
-│   │   │   └── ClientReports.jsx
 │   │   ├── ReportsManagementView.jsx
+│   │   ├── components/
+│   │   │   ├── ClientFolders/     # Desktop + Mobile wrapper
+│   │   │   ├── ClientReports.jsx
+│   │   │   ├── ManageAccessModal/
+│   │   │   └── UploadReportModal/
 │   │   └── index.js
 │   │
-│   ├── tickets/                  # 🆕 Ticket management system
+│   ├── QuickBroadcast/
+│   │   ├── QuickBroadcast.jsx
 │   │   ├── components/
-│   │   │   ├── CreateTicketButton/
-│   │   │   │   ├── CreateTicketButton.jsx
-│   │   │   │   └── ticketStatus-js.js
-│   │   │   └── index.js
-│   │   ├── TicketsView.jsx
+│   │   │   ├── KpiControl.jsx
+│   │   │   ├── QuickBroadcastView.jsx
+│   │   │   ├── SwiperControl.jsx
+│   │   │   └── options.js
 │   │   └── index.js
 │   │
 │   └── error/
@@ -142,28 +192,33 @@ frontend/src/
 │       └── index.js
 │
 ├── router/
-│   ├── AppRouter.jsx           # 🔄 Updated with new imports
+│   ├── AppRouter.jsx
 │   └── components/
 │       └── ProtectedRoute.jsx
 │
 ├── store/
-│   ├── api/                    # RTK Query API slices
-│   │   ├── authApi.js
-│   │   ├── adminApi.js
-│   │   ├── profileApi.js
-│   │   ├── invoicesApi.js
-│   │   ├── reportsApi.js
-│   │   ├── audioRecordingsApi.js
-│   │   ├── articlesApi.js
-│   │   ├── articlesSearchApi.js
-│   │   ├── logsApi.js
-│   │   └── ticketsApi.js       # 🆕 Tickets API
+│   ├── api/                        # RTK Query API slices
+│   │   ├── authApi.js              # Login, logout, refresh, forgotPassword, verifyCode, resetPassword
+│   │   ├── adminApi.js             # Users, clients, roles CRUD
+│   │   ├── profileApi.js           # Profile & password update
+│   │   ├── invoicesApi.js          # Invoice management
+│   │   ├── audioRecordingsApi.js   # Audio recordings + call types
+│   │   ├── reportsApi.js           # Reports & folders
+│   │   ├── articlesApi.js          # Knowledge base articles
+│   │   ├── articlesSearchApi.js    # Article search
+│   │   ├── carouselApi.js          # Dashboard carousel/swiper
+│   │   ├── dashboardApi.js         # Dashboard data
+│   │   ├── logsApi.js              # Activity logs
+│   │   └── ticketsApi.js           # Ticket CRUD + descriptions
 │   ├── auth/
-│   │   └── authSlice.js
+│   │   └── authSlice.js            # Auth state (token, user, permissions)
 │   ├── helper/
-│   └── store.js                # 🔄 Updated with ticketsApi
+│   └── store.js                    # Redux store configuration
 │
 ├── i18n/
+│   ├── i18n.js                     # i18next configuration
+│   ├── en/                         # English translations
+│   └── es/                         # Spanish translations
 │
 ├── App.jsx
 └── main.jsx
@@ -171,171 +226,13 @@ frontend/src/
 
 ---
 
-## 🚀 Implemented Improvements
+## Key Patterns
 
-### 1. **Elimination of Mobile Duplication**
-**Before:**
-```jsx
-// ❌ Two separate files
-ClientSummary.jsx
-ClientSummaryMovil.jsx
-```
+### 1. Responsive Components (Desktop/Mobile Wrapper)
 
-**After:**
-```jsx
-// ✅ Single wrapper + specific components
-ClientSummary/
-├── index.jsx                 // Wrapper using useBreakpoint
-├── ClientSummaryDesktop.jsx
-└── ClientSummaryMobile.jsx
-```
-
-**Implementation:**
-```jsx
-// ClientSummary/index.jsx
-import { useBreakpoint } from "../../../../common/hooks/useBreakpoint";
-
-export const ClientSummary = (props) => {
-  const { isMobile } = useBreakpoint();
-
-  return isMobile ?
-    <ClientSummaryMobile {...props} /> :
-    <ClientSummaryDesktop {...props} />;
-};
-```
-
-### 2. **Reusable useBreakpoint Hook**
-```jsx
-// common/hooks/useBreakpoint.js
-export const useBreakpoint = () => {
-  const theme = useTheme();
-
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const isTablet = useMediaQuery(theme.breakpoints.between('md', 'lg'));
-  const isDesktop = useMediaQuery(theme.breakpoints.up('lg'));
-
-  // Also includes: isXs, isSm, isMd, isLg, isXl, current
-
-  return { isMobile, isTablet, isDesktop, ... };
-};
-```
-
-### 3. **Barrel Exports (Clean Imports)**
-**Before:**
-```jsx
-import { FinancialsView } from "../views/financials/FinancialsView";
-import { ClientSummary } from "../views/financials/components/ClientSummary";
-```
-
-**After:**
-```jsx
-import { FinancialsView, ClientSummary } from "../modules/financials";
-```
-
-### 4. **Business Domain Organization**
-- Each module contains EVERYTHING related to that functionality
-- Easy to find related code
-- Facilitates team collaboration (each dev can work on a module)
-
----
-
-## 📖 Usage Guide
-
-### Importing Common Hooks
-```jsx
-// ✅ From barrel export
-import { useBreakpoint, usePermissions } from "@/common/hooks";
-
-// ✅ Specific
-import { useBreakpoint } from "@/common/hooks/useBreakpoint";
-```
-
-### Importing Layout Components
-```jsx
-import { LayoutAccount, Login } from "@/common/components/layout";
-import { AppBarLayout } from "@/common/components/layout/AppBar";
-```
-
-### Importing Modules
-```jsx
-// Full view
-import { FinancialsView } from "@/modules/financials";
-
-// Specific components
-import { ClientSummary, InvoicesTable } from "@/modules/financials";
-```
-
-### Creating a Responsive Component
-```jsx
-import { useBreakpoint } from "@/common/hooks";
-
-export const MyComponent = () => {
-  const { isMobile, isTablet, isDesktop } = useBreakpoint();
-
-  if (isMobile) return <MobileLayout />;
-  if (isTablet) return <TabletLayout />;
-  return <DesktopLayout />;
-};
-```
-
----
-
-## 🎯 Advantages of the New Structure
-
-### ✅ **DRY (Don't Repeat Yourself)**
-- No duplicate `*Movil.jsx` files
-- Centralized `useBreakpoint` hook
-- Barrel exports avoid long imports
-
-### ✅ **Screaming Architecture**
-- Structure screams the domain: "financials", "user-management", "audio-recordings"
-- Easy to know what the app does just by looking at folders
-- New devs understand the project quickly
-
-### ✅ **Modularity**
-- Each module is independent
-- Easy to move or extract modules
-- Ready for future microfrontends
-
-### ✅ **Maintainability**
-- Related code stays together
-- Changes in one module don't affect others
-- Easy to refactor
-
-### ✅ **Scalability**
-- Add new module: copy existing structure
-- No growth limit
-- Clear and consistent patterns
-
----
-
-## 🔄 How to Add a New Module
-
-```bash
-# 1. Create structure
-mkdir -p src/modules/new-module/components
-
-# 2. Create main view
-touch src/modules/new-module/NewModuleView.jsx
-
-# 3. Create barrel export
-cat > src/modules/new-module/index.js << EOF
-export { default as NewModuleView } from "./NewModuleView";
-EOF
-
-# 4. Add route in router
-# src/router/AppRouter.jsx
-import { NewModuleView } from "../modules/new-module";
-```
-
----
-
-## 📚 Code Patterns
-
-### Responsive Component
 ```jsx
 // modules/my-module/components/MyComponent/index.jsx
-import { useBreakpoint } from "@/common/hooks";
+import { useBreakpoint } from "../../../../common/hooks";
 import { MyComponentDesktop } from "./MyComponentDesktop";
 import { MyComponentMobile } from "./MyComponentMobile";
 
@@ -347,506 +244,139 @@ export const MyComponent = (props) => {
 };
 ```
 
-### Module Barrel Export
+### 2. Barrel Exports
+
 ```jsx
-// modules/my-module/index.js
-export { default as MyModuleView } from "./MyModuleView";
-export { MyComponent } from "./components/MyComponent";
-export { OtherComponent } from "./components/OtherComponent";
+// modules/financials/index.js
+export { FinancialsView } from "./FinancialsView";
+
+// Usage
+import { FinancialsView } from "../modules/financials";
 ```
 
----
+### 3. Forms with React Hook Form + Zod
 
-## 🛠️ Migration Completed
-
-### ✅ Deleted Files
-- `src/views/` (complete)
-- `src/layouts/` (complete)
-- `src/hooks/` (complete)
-- All `*Movil.jsx` files (replaced by wrappers)
-
-### ✅ Migrated Files
-- ✅ Common components → `common/components/`
-- ✅ Hooks → `common/hooks/`
-- ✅ Styles → `common/styles/`
-- ✅ Views → `modules/{module-name}/`
-- ✅ Module components → `modules/{name}/components/`
-
-### ✅ Updated Imports
-- ✅ Router (`AppRouter.jsx`)
-- ✅ All migrated components
-- ✅ Style paths
-- ✅ Hook paths
-
----
-
-## 📝 Final Notes
-
-- **No additional libraries**: Everything with existing React + MUI
-- **Compatible with RTK Query**: Doesn't affect state management
-- **Backward compatible**: Internal components still work the same
-- **Ready for aliases**: You can configure `@/` in vite.config.js
-
-### Configure Aliases (Optional)
-```js
-// vite.config.js
-export default defineConfig({
-  resolve: {
-    alias: {
-      '@': '/src',
-      '@common': '/src/common',
-      '@modules': '/src/modules',
-    },
-  },
-});
-```
-
-Then:
 ```jsx
-import { useBreakpoint } from '@common/hooks';
-import { FinancialsView } from '@modules/financials';
-```
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 
----
+const schema = z.object({
+  email: z.string().min(1, "Required").email("Invalid"),
+});
 
-## 🎫 Tickets System Implementation (Added 2025-12-22)
-
-### Overview
-Complete ticket management system integrated following the project's architecture patterns (Prisma ORM + RTK Query + React).
-
----
-
-### 📊 Database Schema (Prisma)
-
-**Two new tables created in SQLite:**
-
-#### `tickets` table
-```prisma
-model Ticket {
-  id          String             @id @default(uuid())
-  clientId    Int                @map("client_id")
-  userId      Int                @map("user_id")
-  subject     String
-  priority    String             // "High", "Medium", "Low"
-  status      String             @default("Open")
-  assignedTo  String?            @map("assigned_to")
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
-  client      Client             @relation(...)
-  user        User               @relation(...)
-  descriptions TicketDescription[]
-}
-```
-
-#### `ticket_descriptions` table
-```prisma
-model TicketDescription {
-  id              Int      @id @default(autoincrement())
-  ticketId        String   @map("ticket_id")
-  descriptionData String   @map("description_data")
-  timestamp       DateTime @default(now())
-  ticket          Ticket   @relation(...)
-}
-```
-
-**Key Features:**
-- UUID primary key for tickets
-- Multi-tenant support (clientId)
-- User tracking (userId)
-- Conversation history (multiple descriptions)
-- Automatic timestamps
-- Cascade delete protection
-
----
-
-### 🔌 Backend API (`backend/server/routes/tickets.js`)
-
-**REST Endpoints:**
-
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| `GET` | `/api/tickets` | List all tickets for client | ✅ JWT |
-| `GET` | `/api/tickets/:id` | Get single ticket | ✅ JWT |
-| `POST` | `/api/tickets` | Create new ticket | ✅ JWT |
-| `PUT` | `/api/tickets/:id` | Update ticket | ✅ JWT |
-| `POST` | `/api/tickets/:id/descriptions` | Add comment | ✅ JWT |
-| `DELETE` | `/api/tickets/:id` | Delete ticket | ✅ JWT |
-
-**Security Features:**
-- JWT authentication required on all endpoints
-- Client isolation (users only see their client's tickets)
-- Input validation
-- Proper error handling
-
-**Example Request/Response:**
-```javascript
-// POST /api/tickets
-// Request
-{
-  "subject": "Payment issue",
-  "priority": "High",
-  "assignedTo": "Support Team",
-  "description": "Cannot process payment"
-}
-
-// Response
-{
-  "data": {
-    "id": "uuid-here",
-    "clientId": 1,
-    "userId": 5,
-    "subject": "Payment issue",
-    "priority": "High",
-    "status": "Open",
-    "assignedTo": "Support Team",
-    "createdAt": "2025-12-22T...",
-    "descriptions": [
-      {
-        "id": 1,
-        "descriptionData": "Cannot process payment",
-        "timestamp": "2025-12-22T..."
-      }
-    ]
-  }
-}
-```
-
----
-
-### ⚛️ Frontend RTK Query API (`frontend/src/store/api/ticketsApi.js`)
-
-**API Slice Configuration:**
-```javascript
-export const ticketsApi = createApi({
-  reducerPath: "ticketsApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: `${import.meta.env.VITE_API_URL}/tickets`,
-    prepareHeaders: (headers, { getState }) => {
-      const token = getState().auth?.token;
-      if (token) headers.set("Authorization", `Bearer ${token}`);
-      return headers;
-    },
-  }),
-  tagTypes: ["Tickets"],
-  endpoints: (builder) => ({ ... })
+const { control, handleSubmit, formState: { errors } } = useForm({
+  resolver: zodResolver(schema),
+  mode: "onChange",
+  defaultValues: { email: "" },
 });
 ```
 
-**Available Hooks:**
-```javascript
-// Queries (GET)
-const { data, isLoading, error } = useGetTicketsQuery();
-const { data, isLoading, error } = useGetTicketQuery(ticketId);
+### 4. RTK Query API Slices
 
-// Mutations (POST/PUT/DELETE)
-const [createTicket, { isLoading }] = useCreateTicketMutation();
-const [updateTicket, { isLoading }] = useUpdateTicketMutation();
-const [addDescription, { isLoading }] = useAddTicketDescriptionMutation();
-const [deleteTicket, { isLoading }] = useDeleteTicketMutation();
+```jsx
+// All API calls use RTK Query (no axios)
+const { data = [], isLoading, error } = useGetItemsQuery(params);
+const [createItem, { isLoading: creating }] = useCreateItemMutation();
+
+// Mutations auto-refetch via tag invalidation
+await createItem(payload).unwrap();
 ```
 
-**RTK Query Features:**
-- ✅ Automatic caching
-- ✅ Auto-refetch after mutations (`invalidatesTags`)
-- ✅ Loading states included
-- ✅ Error handling built-in
-- ✅ Optimistic updates ready
+### 5. Error Handling in Mutations
 
-**Redux Store Integration:**
-```javascript
-// store/store.js
-export const store = configureStore({
-  reducer: {
-    // ... other reducers
-    [ticketsApi.reducerPath]: ticketsApi.reducer,
+```jsx
+import { extractApiError } from "../../../common/utils/apiHelpers";
+import { useNotification } from "../../../common/hooks";
+
+const { showNotification } = useNotification();
+
+try {
+  await createItem(data).unwrap();
+  showNotification(t("success.message"), "success");
+} catch (error) {
+  showNotification(extractApiError(error, t("error.fallback")), "error");
+}
+```
+
+### 6. Multi-Phase Flow (ForgotPassword Pattern)
+
+```jsx
+// Orchestrator manages phase state, delegates to phase components
+const [phase, setPhase] = useState("email"); // "email" → "code" → "password"
+
+{phase === "email" && <EmailPhase onSubmit={...} />}
+{phase === "code" && <CodePhase onSubmit={...} />}
+{phase === "password" && <PasswordPhase onSubmit={...} />}
+```
+
+### 7. Custom UI Components
+
+All reusable UI components live in `common/components/ui/` with barrel exports:
+
+| Component | Purpose |
+|-----------|---------|
+| ActionButton | Primary action button (submit, save) |
+| CancelButton | Cancel/back button |
+| AlertInline | Notification snackbar |
+| PasswordField | Password input with show/hide toggle |
+| LoadingProgress | Circular loading indicator |
+| UniversalDataGrid | Desktop data table |
+| UniversalMobilDataTable | Mobile data table |
+| ColumnHeaderFilter | Table header with filter |
+| MobileFilterPanel | Slide-out filter panel for mobile |
+| MobileSpeedDial | FAB speed dial for mobile actions |
+| EditButton / ViewButton / DeleteButton / DownloadButton | Icon action buttons |
+| TiptapEditor / TiptapReadOnly | Rich text editor |
+| SwiperView | Image carousel |
+| SelectMenuItem | Dropdown menu item |
+
+### 8. Browser Autofill Override
+
+To prevent Chrome's gray autofill background on inputs:
+
+```jsx
+const autofillOverride = {
+  "& input:-webkit-autofill, & input:-webkit-autofill:hover, & input:-webkit-autofill:focus": {
+    WebkitBoxShadow: "0 0 0 1000px white inset !important",
+    WebkitTextFillColor: "inherit !important",
+    transition: "background-color 5000s ease-in-out 0s",
   },
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(
-      // ... other middleware
-      ticketsApi.middleware
-    ),
-});
-```
-
----
-
-### 🎨 Frontend Component (`modules/tickets/components/CreateTicketButton/`)
-
-**Component Structure:**
-```
-CreateTicketButton/
-├── CreateTicketButton.jsx    # Main component
-└── ticketStatus-js.js         # Status constants
-```
-
-**Implementation Highlights:**
-
-```javascript
-import { useCreateTicketMutation } from "../../../../store/api/ticketsApi";
-
-export const CreateTicketButton = () => {
-  const [createTicket, { isLoading, error }] = useCreateTicketMutation();
-
-  const onSubmit = async (data) => {
-    try {
-      const payload = {
-        subject: data.subject,
-        priority: data.priority,
-        assignedTo: data.assignedTo,
-        description: data.description.descriptionData,
-      };
-
-      await createTicket(payload).unwrap();
-      // Auto closes modal and resets form
-    } catch (err) {
-      // Error shown via Alert component
-    }
-  };
-
-  // ... form JSX
 };
 ```
 
-**Features:**
-- ✅ React Hook Form validation
-- ✅ Loading state (disabled button during submission)
-- ✅ Error alerts (MUI Alert component)
-- ✅ Auto-close on success
-- ✅ Form reset after submission
-- ✅ i18n support (react-i18next)
+---
 
-**Form Fields:**
-- Subject (text, required)
-- Priority (dropdown: High/Medium/Low, required)
-- Assigned To (dropdown, required)
-- Description (textarea, required)
+## Module Summary
+
+| Module | Description | Permission |
+|--------|-------------|------------|
+| dashboard | KPIs, announcements, active tasks | `view_dashboard` |
+| financials | Invoices, client summaries, breakdowns | `view_financials` / `admin_invoices` |
+| audio-recordings | Call recordings from WFM database | `admin_audio_recordings` |
+| user-management | Users, clients, roles, permissions, logs | `admin_users` / `admin_clients` / `admin_roles` |
+| knowledge-base | Articles with rich text editor | `view_knowledge_base` |
+| tickets | Support ticket CRUD with attachments | JWT auth |
+| profile | User profile & password change | JWT auth |
+| reporting | Report viewing | `view_reporting` |
+| reports-management | Upload/manage client reports & folders | `admin_reports` |
+| QuickBroadcast | Dashboard carousel & KPI management | Admin |
 
 ---
 
-### 🔄 Data Flow Diagram
+## Adding a New Module
 
-```
-User Interaction
-      ↓
-CreateTicketButton.jsx
-      ↓ (handleSubmit)
-useCreateTicketMutation()
-      ↓ (POST request)
-ticketsApi → /api/tickets
-      ↓ (JWT validation)
-Backend routes/tickets.js
-      ↓ (authenticateToken middleware)
-Prisma ORM
-      ↓ (SQL INSERT)
-SQLite Database
-      ↓ (response)
-Backend sends ticket data
-      ↓
-RTK Query updates cache
-      ↓ (invalidatesTags: ['Tickets'])
-All useGetTicketsQuery() refetch automatically
-      ↓
-UI updates with new ticket
-      ↓
-Modal closes, form resets
-```
+1. Create folder: `src/modules/new-module/`
+2. Create view: `NewModuleView.jsx`
+3. Create barrel: `index.js`
+4. Add components: `components/` subfolder
+5. Add route in `router/AppRouter.jsx`
+6. Add menu item in `config/menu/MenusSection.jsx`
+7. Add i18n keys in `i18n/en/en.js` and `i18n/es/es.js`
+8. If needed: create RTK Query slice in `store/api/`
 
 ---
 
-### 🚀 Usage Examples
-
-#### Creating a Ticket
-```javascript
-// In any component
-import { useCreateTicketMutation } from "@/store/api/ticketsApi";
-
-function MyComponent() {
-  const [createTicket, { isLoading, error }] = useCreateTicketMutation();
-
-  const handleCreate = async () => {
-    try {
-      const result = await createTicket({
-        subject: "Bug report",
-        priority: "Medium",
-        assignedTo: "Tech Support",
-        description: "Login button not working"
-      }).unwrap();
-
-      console.log("Ticket created:", result);
-    } catch (err) {
-      console.error("Failed:", err);
-    }
-  };
-
-  return (
-    <button onClick={handleCreate} disabled={isLoading}>
-      {isLoading ? "Creating..." : "Create Ticket"}
-    </button>
-  );
-}
-```
-
-#### Listing Tickets
-```javascript
-import { useGetTicketsQuery } from "@/store/api/ticketsApi";
-
-function TicketsList() {
-  const { data: tickets = [], isLoading, error } = useGetTicketsQuery();
-
-  if (isLoading) return <CircularProgress />;
-  if (error) return <Alert severity="error">{error.message}</Alert>;
-
-  return (
-    <List>
-      {tickets.map(ticket => (
-        <ListItem key={ticket.id}>
-          <ListItemText
-            primary={ticket.subject}
-            secondary={`Priority: ${ticket.priority} | Status: ${ticket.status}`}
-          />
-        </ListItem>
-      ))}
-    </List>
-  );
-}
-```
-
-#### Adding Comments
-```javascript
-import { useAddTicketDescriptionMutation } from "@/store/api/ticketsApi";
-
-function AddComment({ ticketId }) {
-  const [addDescription] = useAddTicketDescriptionMutation();
-
-  const handleAddComment = async (comment) => {
-    await addDescription({
-      id: ticketId,
-      description: comment
-    }).unwrap();
-    // Automatically refetches ticket details
-  };
-
-  return <CommentForm onSubmit={handleAddComment} />;
-}
-```
-
----
-
-### 📁 Files Modified/Created
-
-**Backend:**
-- ✅ `backend/server/prisma/schema.prisma` - Added Ticket & TicketDescription models
-- ✅ `backend/server/routes/tickets.js` - New API routes (created)
-- ✅ `backend/server/index.js` - Registered ticket routes
-- ✅ `backend/server/prisma/migrations/` - Migration SQL files
-
-**Frontend:**
-- ✅ `frontend/src/store/api/ticketsApi.js` - RTK Query slice (created)
-- ✅ `frontend/src/store/store.js` - Registered ticketsApi reducer & middleware
-- ✅ `frontend/src/modules/tickets/components/CreateTicketButton/CreateTicketButton.jsx` - Updated with mutation
-
-**Database:**
-- ✅ Migration: `20251222235419_add_tickets_table`
-- ✅ Tables created: `tickets`, `ticket_descriptions`
-
----
-
-### 🎯 Next Steps (Recommended)
-
-1. **Ticket List View**
-   ```javascript
-   // Create TicketsView.jsx using useGetTicketsQuery()
-   ```
-
-2. **Ticket Detail View**
-   ```javascript
-   // Create TicketDetailView.jsx using useGetTicketQuery(id)
-   ```
-
-3. **Status Updates**
-   ```javascript
-   // Use useUpdateTicketMutation() to change status
-   ```
-
-4. **Filters & Search**
-   ```javascript
-   // Add filters by priority, status, date
-   ```
-
-5. **Permissions**
-   ```javascript
-   // Add permissions: 'view_tickets', 'create_tickets', 'manage_tickets'
-   // in prisma/seed.js
-   ```
-
-6. **Real-time Updates** (Optional)
-   ```javascript
-   // Add WebSocket support for live ticket updates
-   ```
-
----
-
-### 🧪 Testing
-
-**Manual Testing Steps:**
-1. Start backend: `cd backend/server && npm run dev`
-2. Start frontend: `cd frontend && npm run dev`
-3. Login with test credentials
-4. Navigate to Tickets section
-5. Click "Create New Ticket"
-6. Fill form and submit
-7. Verify ticket appears in database: `npx prisma studio`
-
-**Test Credentials:**
-```
-BPO Admin: admin@paricus.com / admin123!
-Client Admin: admin@flexmobile.com / flex123!
-Client User: user@flexmobile.com / flexuser123!
-```
-
----
-
-### 🔍 Troubleshooting
-
-**Issue: "Cannot read properties of undefined"**
-- Solution: Use default values in hooks
-  ```javascript
-  const { data: tickets = [] } = useGetTicketsQuery();
-  ```
-
-**Issue: Tickets not refetching after creation**
-- Solution: Ensure mutation has `invalidatesTags: ['Tickets']`
-- Check query has `providesTags: ['Tickets']`
-
-**Issue: 401 Unauthorized**
-- Solution: Verify JWT token in localStorage
-- Check `Authorization` header is set in `prepareHeaders`
-
-**Issue: 500 Internal Server Error**
-- Solution: Check backend logs
-- Verify database migration completed
-- Ensure Prisma client is generated
-
----
-
-### 📝 Implementation Summary
-
-**Date:** 2025-12-22
-**Pattern:** RTK Query + Prisma ORM
-**Database:** SQLite
-**Status:** ✅ Fully functional
-**Migration:** `20251222235419_add_tickets_table`
-
-**Key Metrics:**
-- 2 database tables created
-- 6 REST API endpoints
-- 6 React hooks generated
-- 1 component integrated
-- Full CRUD operations supported
-
----
-
-**Structure implemented on:** 2025-11-17
-**Tickets system added on:** 2025-12-22
+**Last updated:** 2026-02-25
 **Pattern:** Screaming Architecture
-**Status:** ✅ Completed and functional
+**Status:** Active development
