@@ -243,6 +243,7 @@ export default {
     active: "Activo",
     inactive: "Inactivo",
     all: "Todos",
+    na: "N/A",
     none: "Ninguno",
     yes: "Sí",
     no: "No",
@@ -261,6 +262,22 @@ export default {
       "¿Está seguro que desea eliminar {{item}}? Esta acción no se puede deshacer.",
     deleteSuccess: "{{item}} eliminado exitosamente",
     deleteError: "Error al eliminar {{item}}",
+    // Diálogo de confirmación de desactivación
+    deactivate: "Desactivar",
+    deactivating: "Desactivando...",
+    confirmDeactivateTitle: "Desactivar {{item}}",
+    confirmDeactivateMessage:
+      "¿Está seguro de que desea desactivar {{item}}? Esta acción no se puede deshacer.",
+    deactivateSuccess: "{{item}} desactivado exitosamente",
+    deactivateError: "Error al desactivar {{item}}",
+    // Diálogo de confirmación de activación
+    activate: "Activar",
+    activating: "Activando...",
+    confirmActivateTitle: "Activar {{item}}",
+    confirmActivateMessage:
+      "¿Está seguro de que desea activar {{item}}?",
+    activateSuccess: "{{item}} activado exitosamente",
+    activateError: "Error al activar {{item}}",
     // Mensajes de Snackbar
     operationSuccess: "Operación completada exitosamente",
     operationError: "Ocurrió un error",
@@ -436,6 +453,10 @@ export default {
     searchLabel: "Buscar Roles",
     searchPlaceholder: "Buscar por nombre o descripción...",
     noRolesFound: "No se encontraron roles",
+    viewPermissionsTitle: "Permisos del Rol",
+    permissionsAssigned: "permisos asignados",
+    noPermissions: "No hay permisos asignados a este rol",
+    errorLoadingPermissions: "Error al cargar los permisos del rol",
     unknownClient: "Desconocido",
     table: {
       id: "ID",
@@ -459,6 +480,7 @@ export default {
     actions: {
       edit: "Editar rol",
       configurePermissions: "Configurar permisos",
+      viewPermissions: "Ver permisos",
       delete: "Eliminar rol",
       savePermissions: "Guardar Permisos",
     },
@@ -502,6 +524,10 @@ export default {
     broadcast_announcements: "Difusión Rápida",
     broadcast_swiper: "Control de Slides",
     broadcast_kpi: "Control de KPI",
+    dashboard_announcements_inbox: "Buzón de Anuncios",
+    dashboard_master_repository: "Repositorio Principal",
+    dashboard_swiper: "Swiper",
+    dashboard_active_tasks: "Tareas Activas",
   },
 
   // Gestión de Clientes
@@ -974,7 +1000,7 @@ export default {
     selectUser: "Ver Usuario",
     allUsers: "Todos los Usuarios",
     viewAs: "Ver Como",
-    viewAllDashboard: "Todos los Dashboards",
+    viewAllDashboard: "Vista Administrador",
     portfolioRevenue: "Ingresos del Portafolio",
     masterKbArticles: "Artículos KB Maestros",
     urgentAlerts: "Alertas Urgentes",
@@ -1089,6 +1115,9 @@ export default {
     },
     saveSuccess: "Valores KPI guardados exitosamente",
     saveError: "Corrige los errores de validación antes de guardar",
+    viewAll: "Vista Administrador",
+    viewAs: "Ver como",
+    readOnlyMode: "Viendo KPIs del usuario (solo lectura)",
   },
   selectMenuItem: {
     selected: "seleccionados",

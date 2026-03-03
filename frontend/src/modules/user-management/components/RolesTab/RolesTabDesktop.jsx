@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import { Box } from "@mui/material";
 import { Add as AddIcon } from "@mui/icons-material";
 import { UniversalDataGrid } from "../../../../common/components/ui/DataGrid/UniversalDataGrid";
@@ -95,4 +96,24 @@ export const RolesTabDesktop = ({
       />
     </>
   );
+};
+
+RolesTabDesktop.propTypes = {
+  rows: PropTypes.array.isRequired,
+  columns: PropTypes.array.isRequired,
+  emptyMessage: PropTypes.string,
+  isLoading: PropTypes.bool,
+  isOpen: PropTypes.bool.isRequired,
+  setIsOpen: PropTypes.func.isRequired,
+  openAddDialog: PropTypes.func.isRequired,
+  permissions: PropTypes.array,
+  selectedPermissions: PropTypes.array,
+  initialPermissions: PropTypes.array,
+  savePermissions: PropTypes.func.isRequired,
+  isUpdatingPermissions: PropTypes.bool,
+  handlePermissionToggle: PropTypes.func.isRequired,
+  handleBatchPermissionToggle: PropTypes.func.isRequired,
+  permissionsDialog: PropTypes.bool.isRequired,
+  closePermissionsDialog: PropTypes.func.isRequired,
+  selectedRole: PropTypes.object,
 };

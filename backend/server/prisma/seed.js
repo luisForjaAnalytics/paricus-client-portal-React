@@ -104,6 +104,22 @@ async function main() {
       permissionName: "broadcast_kpi",
       description: "Manage KPI display content for clients",
     },
+    {
+      permissionName: "dashboard_announcements_inbox",
+      description: "View announcements inbox on dashboard",
+    },
+    {
+      permissionName: "dashboard_master_repository",
+      description: "View master repository on dashboard",
+    },
+    {
+      permissionName: "dashboard_swiper",
+      description: "View swiper/carousel on dashboard",
+    },
+    {
+      permissionName: "dashboard_active_tasks",
+      description: "View active tasks on dashboard",
+    },
   ];
 
   console.log("Creating permissions...");

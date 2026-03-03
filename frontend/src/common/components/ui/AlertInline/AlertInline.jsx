@@ -30,7 +30,7 @@ export const AlertInline = forwardRef(
       // Props para modo snackbar
       asSnackbar = false,
       autoHideDuration = 4000,
-      position = { vertical: "bottom", horizontal: "center" },
+      position = { vertical: "top", horizontal: "center" },
     },
     ref
   ) => {

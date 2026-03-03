@@ -1,4 +1,5 @@
 import { Fragment, useState } from "react";
+import PropTypes from "prop-types";
 import {
   Box,
   Button,
@@ -387,4 +388,16 @@ export const PermissionsModal = ({
       )}
     </Dialog>
   );
+};
+
+PermissionsModal.propTypes = {
+  permissionsDialog: PropTypes.bool.isRequired,
+  closePermissionsDialog: PropTypes.func.isRequired,
+  selectedRole: PropTypes.object,
+  selectedPermissions: PropTypes.array.isRequired,
+  initialPermissions: PropTypes.array,
+  savePermissions: PropTypes.func.isRequired,
+  isUpdatingPermissions: PropTypes.bool,
+  onPermissionToggle: PropTypes.func.isRequired,
+  onBatchPermissionToggle: PropTypes.func.isRequired,
 };

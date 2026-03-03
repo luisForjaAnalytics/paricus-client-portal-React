@@ -170,7 +170,7 @@ export const LogsView = () => {
           rows={rows}
           columns={desktopColumns}
           loading={isLoading}
-          emptyMessage={t("userManagement.logs.noLogsFound") || "No logs found"}
+          emptyMessage={t("userManagement.logs.noLogsFound")}
           rowCount={totalRows}
           paginationMode="server"
           paginationModel={paginationModel}

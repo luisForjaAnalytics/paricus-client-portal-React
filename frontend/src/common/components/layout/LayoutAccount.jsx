@@ -266,6 +266,7 @@ export const LayoutAccount = () => {
         <Box
           sx={{
             margin: { xs: 0, md: "0 1rem 0 1rem" }, // Mobile: sin margin (controlado por boxTypography.box), Desktop: margin lateral
+            overflowX: "hidden", // Prevent horizontal shift when mobile filter panel opens
           }}
         >
           <Outlet context={{ setTitleState }} />

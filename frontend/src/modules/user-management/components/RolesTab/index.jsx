@@ -12,6 +12,7 @@ import { MobileSpeedDial } from "../../../../common/components/ui/MobileSpeedDia
 import { RolesTabDesktop } from "./RolesTabDesktop";
 import { RolesTabMobile } from "./RolesTabMobile";
 import { AddNewRoleModal } from "./AddNewRoleModal";
+import { ViewPermissionsModal } from "./ViewPermissionsModal";
 import { useRolesTableConfig } from "./useRolesTableConfig";
 import { AlertInline } from "../../../../common/components/ui/AlertInline";
 import { formatDate as formatDateUtil } from "../../../../common/utils/formatters";
@@ -63,6 +64,8 @@ export const RolesTab = () => {
   // Dialog states
   const [dialog, setDialog] = useState(false);
   const [permissionsDialog, setPermissionsDialog] = useState(false);
+  const [viewPermissionsDialog, setViewPermissionsDialog] = useState(false);
+  const [viewingRole, setViewingRole] = useState(null);
 
   // Selection states
   const [editingRole, setEditingRole] = useState(null);
@@ -228,6 +231,11 @@ export const RolesTab = () => {
   const isProtectedRole = (roleName) =>
     roleName === "BPO Admin" || roleName === "Client Admin";
 
+  const onViewPermissions = (role) => {
+    setViewingRole(role);
+    setViewPermissionsDialog(true);
+  };
+
   // Mobile filter handler
   const handleMobileFilterChange = useCallback((key, value) => {
     if (key === "roleName") setSearchQuery(value);
@@ -273,6 +281,7 @@ export const RolesTab = () => {
     openEditDialog,
     handleDeleteRole,
     openPermissionsDialog,
+    onViewPermissions,
     isProtectedRole,
     isBPOAdmin,
     selectedClient,
@@ -359,6 +368,15 @@ export const RolesTab = () => {
         isBPOAdmin={isBPOAdmin}
         isProtectedRole={isProtectedRole}
         defaultClientId={isClientAdmin ? authUser?.clientId : null}
+      />
+
+      <ViewPermissionsModal
+        open={viewPermissionsDialog}
+        onClose={() => {
+          setViewPermissionsDialog(false);
+          setViewingRole(null);
+        }}
+        role={viewingRole}
       />
 
       {/* Snackbar para notificaciones */}

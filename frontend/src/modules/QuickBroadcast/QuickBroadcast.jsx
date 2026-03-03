@@ -1,9 +1,19 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { Box, Tabs, Tab, Typography } from "@mui/material";
-import { Outlet, useNavigate, useLocation, useOutletContext } from "react-router-dom";
+import {
+  Outlet,
+  useNavigate,
+  useLocation,
+  useOutletContext,
+} from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
-import { boxTypography, colors, titlesTypography } from "../../common/styles/styles";
+import {
+  boxTypography,
+  colors,
+  titlesTypography,
+} from "../../common/styles/styles";
+import { KpiHeader } from "./components/KpiHeader";
 
 function a11yProps(index) {
   return {
@@ -13,8 +23,16 @@ function a11yProps(index) {
 }
 
 const allTabs = [
-  { route: "quick-broadcast", label: "quickBroadcast", permission: "broadcast_announcements" },
-  { route: "swiper-control", label: "swiperControl", permission: "broadcast_swiper" },
+  {
+    route: "quick-broadcast",
+    label: "quickBroadcast",
+    permission: "broadcast_announcements",
+  },
+  {
+    route: "swiper-control",
+    label: "swiperControl",
+    permission: "broadcast_swiper",
+  },
   { route: "kpi-control", label: "kpiControl", permission: "broadcast_kpi" },
 ];
 
@@ -22,7 +40,9 @@ export const QuickBroadcast = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
-  const userPermissions = useSelector((state) => state.auth.user?.permissions || []);
+  const userPermissions = useSelector(
+    (state) => state.auth.user?.permissions || [],
+  );
 
   let setTitleState;
   try {
@@ -63,12 +83,29 @@ export const QuickBroadcast = () => {
     setActiveTab(newValue);
   };
 
+  // KpiHeader state - lifted here so it renders at tab level
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const handleSelectionChange = useCallback(({ userId }) => {
+    setSelectedUserId(userId);
+  }, []);
+
+  // Check if active tab is kpi-control
+  const safeTab = activeTab >= tabs.length ? 0 : activeTab;
+  const isKpiTab = tabs[safeTab]?.route === "kpi-control";
+
   if (tabs.length === 0) return null;
 
   return (
     <Box sx={boxTypography.box}>
-      {/* Tabs - hidden on mobile (mobile uses drawer accordion) */}
-      <Box sx={{ borderBottom: 0, display: { xs: "none", md: "contents" } }}>
+      {/* Tabs + KpiHeader row - hidden on mobile (mobile uses drawer accordion) */}
+      <Box
+        sx={{
+          borderBottom: 0,
+          display: { xs: "none", md: "flex" },
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
         <Tabs
           value={activeTab >= tabs.length ? 0 : activeTab}
           onChange={handleChange}
@@ -96,11 +133,26 @@ export const QuickBroadcast = () => {
             />
           ))}
         </Tabs>
+        {/* KpiHeader - only visible on KPI Controller tab for admins */}
+        {isKpiTab && <KpiHeader onSelectionChange={handleSelectionChange} />}
       </Box>
+
+      {/* KpiHeader - mobile only, above cards */}
+      {isKpiTab && (
+        <Box
+          sx={{
+            display: { xs: "flex", md: "none" },
+            justifyContent: "center",
+            mb: -3,
+          }}
+        >
+          <KpiHeader onSelectionChange={handleSelectionChange} />
+        </Box>
+      )}
 
       {/* Content - rendered by nested routes */}
       <Box>
-        <Outlet />
+        <Outlet context={{ selectedUserId }} />
       </Box>
     </Box>
   );

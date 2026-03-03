@@ -27,13 +27,17 @@ export const permissionList = [
   { id: 22, permissionName: "broadcast_announcements", description: "Manage quick broadcast announcements" },
   { id: 23, permissionName: "broadcast_swiper", description: "Manage swiper/carousel content for clients" },
   { id: 24, permissionName: "broadcast_kpi", description: "Manage KPI display content for clients" },
+  { id: 25, permissionName: "dashboard_announcements_inbox", description: "View announcements inbox on dashboard" },
+  { id: 26, permissionName: "dashboard_master_repository", description: "View master repository on dashboard" },
+  { id: 27, permissionName: "dashboard_swiper", description: "View swiper/carousel on dashboard" },
+  { id: 28, permissionName: "dashboard_active_tasks", description: "View active tasks on dashboard" },
 ];
 
 /**
  * Permission sections mapping - used by PermissionsModal to group permissions by feature area
  */
 export const permissionSections = {
-  dashboard: ["view_dashboard", "admin_dashboard_config"],
+  dashboard: ["view_dashboard", "admin_dashboard_config", "dashboard_announcements_inbox", "dashboard_master_repository", "dashboard_swiper", "dashboard_active_tasks"],
   reporting: ["view_reporting"],
   audioRetrieval: ["view_interactions", "admin_audio_recordings", "download_audio_files"],
   knowledgeBase: ["view_knowledge_base", "create_kb_articles", "edit_kb_articles"],

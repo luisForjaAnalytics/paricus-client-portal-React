@@ -1,11 +1,11 @@
 import { useEffect } from "react";
+import PropTypes from "prop-types";
 import {
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   TextField,
-  Button,
   Box,
   Typography,
   Checkbox,
@@ -16,7 +16,6 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
-  primaryButton,
   modalCard,
   titlesTypography,
   colors,
@@ -37,13 +36,9 @@ const buildSchema = (t) =>
 export const AddNewClientModal = ({
   editingClient,
   showCreateDialog,
-  showConfirmDialog,
   handleCloseDialog,
   onSave,
   isSaving,
-  clientToDeactivate,
-  confirmDeactivation,
-  setShowConfirmDialog,
 }) => {
   const { t } = useTranslation();
 
@@ -195,35 +190,14 @@ export const AddNewClientModal = ({
         </DialogActions>
       </Dialog>
 
-      {/* Confirmation Dialog */}
-      <Dialog
-        open={showConfirmDialog}
-        onClose={() => setShowConfirmDialog(false)}
-        maxWidth="xs"
-        fullWidth
-      >
-        <DialogTitle>{t("clients.confirmDeactivation")}</DialogTitle>
-        <DialogContent>
-          <Typography>
-            {t("clients.deactivationWarning")} "{clientToDeactivate?.name}"?{" "}
-            {t("clients.deactivationWarningContinue")}
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <CancelButton
-            handleClick={() => setShowConfirmDialog(false)}
-            text={t("common.cancel")}
-          />
-          <Button
-            variant="contained"
-            color="error"
-            onClick={confirmDeactivation}
-            sx={primaryButton}
-          >
-            {t("clients.actions.deactivate")}
-          </Button>
-        </DialogActions>
-      </Dialog>
     </>
   );
+};
+
+AddNewClientModal.propTypes = {
+  editingClient: PropTypes.object,
+  showCreateDialog: PropTypes.bool.isRequired,
+  handleCloseDialog: PropTypes.func.isRequired,
+  onSave: PropTypes.func.isRequired,
+  isSaving: PropTypes.bool,
 };

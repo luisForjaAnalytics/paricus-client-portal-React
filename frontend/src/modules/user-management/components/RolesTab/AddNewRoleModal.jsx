@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import PropTypes from "prop-types";
 import {
   Dialog,
   DialogActions,
@@ -217,4 +218,16 @@ export const AddNewRoleModal = ({
         </DialogActions>
       </Dialog>
   );
+};
+
+AddNewRoleModal.propTypes = {
+  dialog: PropTypes.bool.isRequired,
+  editingRole: PropTypes.object,
+  closeDialog: PropTypes.func.isRequired,
+  onSave: PropTypes.func.isRequired,
+  isSaving: PropTypes.bool,
+  clients: PropTypes.array.isRequired,
+  isBPOAdmin: PropTypes.bool,
+  isProtectedRole: PropTypes.func,
+  defaultClientId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 };

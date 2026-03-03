@@ -51,9 +51,7 @@ export const ClientsTab = () => {
 
   // State management
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [editingClient, setEditingClient] = useState(null);
-  const [clientToDeactivate, setClientToDeactivate] = useState(null);
 
   // Computed values
   const isSaving = isCreating || isUpdating;
@@ -61,22 +59,6 @@ export const ClientsTab = () => {
   const handleEdit = (client) => {
     setEditingClient(client);
     setShowCreateDialog(true);
-  };
-
-  const handleDeactivate = (client) => {
-    setClientToDeactivate(client);
-    setShowConfirmDialog(true);
-  };
-
-  const confirmDeactivation = async () => {
-    try {
-      await deleteClient(clientToDeactivate.id).unwrap();
-      showNotification(t("clients.messages.clientDeactivated"), "success");
-      setShowConfirmDialog(false);
-      setClientToDeactivate(null);
-    } catch (error) {
-      showNotification(extractApiError(error, t("clients.messages.clientDeactivateFailed")), "error");
-    }
   };
 
   const saveClient = async (data) => {
@@ -123,7 +105,9 @@ export const ClientsTab = () => {
     clients,
     formatDate,
     handleEdit,
-    handleDeactivate,
+    deleteClient,
+    activateClient: updateClient,
+    showNotification,
   });
 
   // Mobile filter config
@@ -166,13 +150,9 @@ export const ClientsTab = () => {
   const modalProps = {
     editingClient,
     showCreateDialog,
-    showConfirmDialog,
     isSaving,
-    clientToDeactivate,
-    confirmDeactivation,
     handleCloseDialog,
     onSave: saveClient,
-    setShowConfirmDialog,
   };
 
   return (

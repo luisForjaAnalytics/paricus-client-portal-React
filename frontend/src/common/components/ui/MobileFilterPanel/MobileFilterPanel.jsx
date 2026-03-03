@@ -141,7 +141,7 @@ const datePickerSlotProps = {
         backgroundColor: colors.surface,
         borderRadius: "3rem",
         height: "2.2rem",
-        width: "18vh",
+        width: "100%",
         "&.Mui-focused .MuiPickersOutlinedInput-notchedOutline": {
           borderColor: `${colors.focusRing} !important`,
         },
@@ -158,7 +158,7 @@ const datePickerSlotProps = {
       },
     },
     sx: {
-      flex: 1,
+      width: "100%",
       mt: "0.5rem",
       "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
         borderColor: colors.focusRing,
@@ -222,7 +222,7 @@ export const MobileFilterPanel = ({
             placeholder={placeholder || label}
             value={value || ""}
             onChange={(e) => onFilterChange(key, e.target.value)}
-            sx={filterStyles.inputFilter}
+            sx={{ ...filterStyles.inputFilter, width: "100%" }}
           />
         );
 
@@ -237,7 +237,7 @@ export const MobileFilterPanel = ({
               onChange={(e) => onFilterChange(key, e.target.value)}
               label={label}
               MenuProps={selectMenuProps}
-              sx={filterStyles.multiOptionFilter?.selectSection}
+              sx={{ ...filterStyles.multiOptionFilter?.selectSection, width: "100%" }}
             >
               <MenuItem value="">
                 <em>{t("common.all")}</em>
@@ -276,18 +276,17 @@ export const MobileFilterPanel = ({
 
   return (
     <Collapse in={isOpen} timeout={300} unmountOnExit>
-      <Box
-        sx={{
-          px: 3,
-          py: 1.5,
-          mb: 2,
-          backgroundColor: colors.surface,
-          borderRadius: "1rem",
-          border: `1px solid ${colors.border}`,
-          justifyContent: "center",
-          //width:'20vh' //Table width
-        }}
-      >
+      <Box sx={{ pb: 2, overflowX: "hidden" }}>
+        <Box
+          sx={{
+            px: 2,
+            py: 1.5,
+            backgroundColor: colors.surface,
+            borderRadius: "1rem",
+            border: `1px solid ${colors.border}`,
+            justifyContent: "center",
+          }}
+        >
         <Box
           sx={{
             display: "grid",
@@ -297,7 +296,7 @@ export const MobileFilterPanel = ({
           }}
         >
           {filters.map((filterConfig) => (
-            <Box key={filterConfig.key} sx={{ width: "100%" }}>
+            <Box key={filterConfig.key} sx={{ width: "100%", minWidth: 0 }}>
               {renderFilter(filterConfig)}
             </Box>
           ))}
@@ -335,6 +334,7 @@ export const MobileFilterPanel = ({
             </IconButton>
           </Tooltip>
         </Box>
+      </Box>
       </Box>
     </Collapse>
   );

@@ -77,6 +77,11 @@ export const ColumnHeaderFilter = ({
 
   const renderFilterInput = () => {
     switch (filterType) {
+      case "none":
+        return (
+          <Box sx={{ height: "2.5rem" }} />
+        );
+
       case "actions":
         return (
           <Box
@@ -385,9 +390,10 @@ export const ColumnHeaderFilter = ({
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center",
+        justifyContent: isOpen ? "flex-end" : "center",
         gap: 0.75,
         width: "100%",
+        height: "100%",
         py: isOpen ? 0.5 : 0,
       }}
     >
@@ -412,7 +418,7 @@ export const ColumnHeaderFilter = ({
 
 ColumnHeaderFilter.propTypes = {
   headerName: PropTypes.string.isRequired,
-  filterType: PropTypes.oneOf(["text", "select", "date", "actions"]),
+  filterType: PropTypes.oneOf(["text", "select", "date", "actions", "none"]),
   filterKey: PropTypes.string,
   filterValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   onFilterChange: PropTypes.func,

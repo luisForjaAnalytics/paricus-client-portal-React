@@ -22,7 +22,7 @@ export const UsersTabMobile = ({
   loading,
 }) => {
   return (
-    <Box sx={{ display: { xs: "block", md: "none" } }}>
+    <Box sx={{ display: { xs: "block", md: "none" }, overflowX: "hidden" }}>
       <UniversalMobilDataTable
         rows={rows}
         columns={columns}

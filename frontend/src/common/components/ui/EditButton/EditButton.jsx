@@ -1,7 +1,6 @@
 import PropTypes from "prop-types";
 import { IconButton, Tooltip } from "@mui/material";
 import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline';
-import { Edit as EditIcon } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import { colors } from "../../../styles/styles";
 
