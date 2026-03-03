@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import {
   FilterList as FilterListIcon,
   Add as AddIcon,
@@ -40,9 +40,16 @@ export const UsersTab = () => {
     authUser?.permissions?.includes("view_invoices") && !isBPOAdmin;
 
   // RTK Query hooks
-  const { data: users = [], isLoading: loading } = useGetUsersQuery();
+  const { data: users = [], isLoading: loading, error } = useGetUsersQuery();
   const { data: clients = [] } = useGetClientsQuery();
   const { data: roles = [] } = useGetRolesQuery();
+
+  // Show error notification when query fails
+  useEffect(() => {
+    if (error) {
+      showNotification(t("common.errorLoadingData"), "error");
+    }
+  }, [error, t]);
   const [createUserMutation, { isLoading: creating }] = useCreateUserMutation();
   const [updateUserMutation, { isLoading: updating }] = useUpdateUserMutation();
 
@@ -140,28 +147,6 @@ export const UsersTab = () => {
     }
   };
 
-  const toggleUserStatus = async (user) => {
-    try {
-      await updateUserMutation({
-        id: user.id,
-        isActive: !user.isActive,
-      }).unwrap();
-
-      showNotification(
-        !user.isActive
-          ? t("users.messages.userActivated")
-          : t("users.messages.userDeactivated"),
-        "success"
-      );
-    } catch (error) {
-      showNotification(
-        extractApiError(error, t("users.messages.statusUpdateFailed")),
-        "error"
-      );
-    }
-  };
-
-
   const locale = t("common.locale") || "en-US";
   const formatDate = useCallback((ds) => formatDateUtil(ds, locale), [locale]);
 
@@ -213,7 +198,8 @@ export const UsersTab = () => {
     users: filteredUsers,
     formatDate,
     openEditDialog,
-    toggleUserStatus,
+    updateUserMutation,
+    showNotification,
     isBPOAdmin,
     selectedClient,
     setSelectedClient,

@@ -44,9 +44,12 @@ export const colors = {
   //Mobile Speed Dial
   MobileSpeedDialColor: "rgba(14, 131, 71, 0.7)",
   //Edit Button
-  editButton: "#54ce7d",
-    //Desactivate Button
-  desactivateButton: "#fff0ee",
+  editButton: "#d066f0be",
+  //Desactivate Button
+  desactivateButton: "#54ce7d",
+  //Permission Button
+  permissionButton: "#54ce7d",
+  permissionCirculeButton: "#51c979b2",
   //Dashboard Section
   masterRepoBackgroundColor: "#4ee78611",
   // Text colors (from Tailwind)
@@ -910,6 +913,7 @@ export const modalCard = {
       },
     },
     inputLabelSection: {
+      mt: -0.5,
       paddingTop: "0",
       "&.Mui-focused": {
         color: colors.focusRing,

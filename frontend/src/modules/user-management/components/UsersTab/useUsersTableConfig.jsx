@@ -1,8 +1,6 @@
 import { useMemo, useCallback } from "react";
-import { Box, Chip, IconButton, Tooltip, Avatar, Typography } from "@mui/material";
+import { Box, Chip, Avatar, Typography } from "@mui/material";
 import {
-  Block as BlockIcon,
-  CheckCircle as CheckCircleIcon,
   Email as EmailIcon,
   Business as BusinessIcon,
   Shield as ShieldIcon,
@@ -10,6 +8,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { colors } from "../../../../common/styles/styles";
 import { EditButton } from "../../../../common/components/ui/EditButton";
+import { DeactivateButton } from "../../../../common/components/ui/DeactivateButton";
 import { ColumnHeaderFilter } from "../../../../common/components/ui/ColumnHeaderFilter";
 
 /**
@@ -20,7 +19,8 @@ export const useUsersTableConfig = ({
   users = [],
   formatDate,
   openEditDialog,
-  toggleUserStatus,
+  updateUserMutation,
+  showNotification,
   // Desktop-specific props (optional)
   isBPOAdmin = false,
   selectedClient = "",
@@ -104,24 +104,36 @@ export const useUsersTableConfig = ({
           item={row.original}
           title={t("users.actions.editUser")}
         />
-        <Tooltip
-          title={
-            row.is_active
-              ? t("users.actions.deactivateUser")
-              : t("users.actions.activateUser")
+        <DeactivateButton
+          handleDeactivate={(user) =>
+            updateUserMutation({
+              id: user.id,
+              isActive: !row.is_active,
+            }).unwrap()
           }
-        >
-          <IconButton size="small" onClick={() => toggleUserStatus(row.original)}>
-            {row.is_active ? (
-              <BlockIcon fontSize="small" />
-            ) : (
-              <CheckCircleIcon fontSize="small" />
-            )}
-          </IconButton>
-        </Tooltip>
+          item={row.original}
+          itemName={row.name}
+          itemType="user"
+          isActive={row.is_active}
+          title={row.is_active ? t("users.actions.deactivateUser") : t("users.actions.activateUser")}
+          onSuccess={() =>
+            showNotification(
+              row.is_active
+                ? t("users.messages.userDeactivated")
+                : t("users.messages.userActivated"),
+              "success"
+            )
+          }
+          onError={(error) =>
+            showNotification(
+              error?.data?.message || t("users.messages.statusUpdateFailed"),
+              "error"
+            )
+          }
+        />
       </>
     ),
-    [openEditDialog, toggleUserStatus, t]
+    [openEditDialog, updateUserMutation, showNotification, t]
   );
 
   // Desktop columns (DataGrid format)

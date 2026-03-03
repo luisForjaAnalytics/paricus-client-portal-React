@@ -1,9 +1,17 @@
 import { useMemo, useCallback } from "react";
-import { Box, Chip, Badge, Tooltip, Typography, IconButton } from "@mui/material";
+import {
+  Box,
+  Chip,
+  Badge,
+  Tooltip,
+  Typography,
+  IconButton,
+} from "@mui/material";
 import {
   Security as SecurityIcon,
   Shield as ShieldIcon,
 } from "@mui/icons-material";
+import LockOpenIcon from "@mui/icons-material/LockOpen";
 import { useTranslation } from "react-i18next";
 import { colors } from "../../../../common/styles/styles";
 import { EditButton } from "../../../../common/components/ui/EditButton";
@@ -21,6 +29,7 @@ export const useRolesTableConfig = ({
   openEditDialog,
   handleDeleteRole,
   openPermissionsDialog,
+  onViewPermissions,
   isProtectedRole,
   // Desktop-specific props (optional)
   isBPOAdmin = false,
@@ -40,7 +49,7 @@ export const useRolesTableConfig = ({
       const client = clients.find((c) => c.id === clientId);
       return client?.name || t("roles.unknownClient");
     },
-    [clients, t]
+    [clients, t],
   );
 
   // Handler for filter changes (Desktop)
@@ -52,7 +61,7 @@ export const useRolesTableConfig = ({
         setSelectedClient(value);
       }
     },
-    [setSearchQuery, setSelectedClient]
+    [setSearchQuery, setSelectedClient],
   );
 
   // Client options for filter
@@ -85,24 +94,49 @@ export const useRolesTableConfig = ({
   }, [roles, getClientName, t]);
 
   // Shared render functions
-  const renderPermissionsBadge = useCallback((count) => {
-    return (
-      <Badge badgeContent={count || 0} color="info">
-        <ShieldIcon sx={{ color: colors.primary }} fontSize="small" />
-      </Badge>
-    );
-  }, []);
+  const renderPermissionsBadge = useCallback(
+    (count, row) => {
+      return (
+        <Tooltip title={t("roles.actions.viewPermissions")}>
+          <IconButton
+            size="small"
+            onClick={() =>
+              onViewPermissions && onViewPermissions(row?.original)
+            }
+          >
+            <Badge
+              badgeContent={count || 0}
+              sx={{
+                "& .MuiBadge-badge": {
+                  backgroundColor: colors.permissionCirculeButton,
+                  color: colors.textWhite,
+                },
+              }}
+            >
+              <LockOpenIcon
+                sx={{ color: colors.permissionButton, fontSize: "1.6rem" }}
+              />
+            </Badge>
+          </IconButton>
+        </Tooltip>
+      );
+    },
+    [onViewPermissions, t],
+  );
 
-  const renderClientChip = useCallback((clientName) => {
-    return (
-      <Chip
-        label={clientName || t("common.na")}
-        color="primary"
-        variant="outlined"
-        size="small"
-      />
-    );
-  }, [t]);
+  const renderClientChip = useCallback(
+    (clientName) => {
+      return (
+        <Chip
+          label={clientName || t("common.na")}
+          color="primary"
+          variant="outlined"
+          size="small"
+        />
+      );
+    },
+    [t],
+  );
 
   // Shared render actions
   const renderActions = useCallback(
@@ -117,8 +151,10 @@ export const useRolesTableConfig = ({
           <Tooltip title={t("roles.actions.configurePermissions")}>
             <IconButton
               size="small"
-              color="success"
               onClick={() => openPermissionsDialog(row.original)}
+              sx={{
+                color: colors.permissionButton,
+              }}
             >
               <SecurityIcon fontSize="small" />
             </IconButton>
@@ -133,7 +169,13 @@ export const useRolesTableConfig = ({
         </>
       );
     },
-    [openEditDialog, openPermissionsDialog, handleDeleteRole, isProtectedRole, t]
+    [
+      openEditDialog,
+      openPermissionsDialog,
+      handleDeleteRole,
+      isProtectedRole,
+      t,
+    ],
   );
 
   // Desktop columns (DataGrid format)
@@ -217,7 +259,8 @@ export const useRolesTableConfig = ({
             isOpen={isOpen}
           />
         ),
-        renderCell: (params) => renderPermissionsBadge(params.value),
+        renderCell: (params) =>
+          renderPermissionsBadge(params.value, params.row),
       },
       {
         field: "created_at",
@@ -256,7 +299,14 @@ export const useRolesTableConfig = ({
           />
         ),
         renderCell: (params) => (
-          <Box sx={{ display: "flex", gap: 0.5, justifyContent: "center", mt: "0.5rem" }}>
+          <Box
+            sx={{
+              display: "flex",
+              gap: 0.5,
+              justifyContent: "center",
+              mt: "0.5rem",
+            }}
+          >
             {renderActions(params.row)}
           </Box>
         ),
@@ -296,7 +346,7 @@ export const useRolesTableConfig = ({
         field: "permissions_count",
         headerName: t("roles.table.permissions"),
         labelWidth: 110,
-        renderCell: ({ value }) => renderPermissionsBadge(value),
+        renderCell: ({ value, row }) => renderPermissionsBadge(value, row),
       },
       {
         field: "created_at",
@@ -316,7 +366,7 @@ export const useRolesTableConfig = ({
   // Mobile primary icon
   const renderPrimaryIcon = useCallback(
     () => <ShieldIcon fontSize="small" sx={{ color: colors.primary }} />,
-    []
+    [],
   );
 
   return {

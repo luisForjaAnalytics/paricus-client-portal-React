@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import {
   Box,
   Button,
@@ -16,6 +17,7 @@ import {
   Save,
   RestartAlt,
 } from "@mui/icons-material";
+import { useOutletContext } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -26,6 +28,7 @@ import {
   resetKpis,
   isTargetAchieved,
   defaultKpis,
+  userKpis,
 } from "../../../store/kpi/kpiSlice";
 import {
   colors,
@@ -109,6 +112,17 @@ export const KpiControl = () => {
   const [createLog] = useCreateLogMutation();
   const { notificationRef, showSuccess, showError } = useNotification();
 
+  // Selected user from KpiHeader (passed via Outlet context from QuickBroadcast)
+  const { selectedUserId } = useOutletContext() || {};
+
+
+  // Determine which KPIs to display based on selection
+  const activeKpis = selectedUserId
+    ? userKpis[selectedUserId] || defaultKpis
+    : kpi;
+
+  const isViewingUser = selectedUserId !== null;
+
   const {
     control,
     handleSubmit,
@@ -119,16 +133,27 @@ export const KpiControl = () => {
     resolver: zodResolver(kpiSchema),
     mode: "onChange",
     defaultValues: {
-      callsOffered: { ...kpi.callsOffered },
-      callsAnswered: { ...kpi.callsAnswered },
-      answerRate: { ...kpi.answerRate },
-      slaCompliance: { ...kpi.slaCompliance },
+      callsOffered: { ...activeKpis.callsOffered },
+      callsAnswered: { ...activeKpis.callsAnswered },
+      answerRate: { ...activeKpis.answerRate },
+      slaCompliance: { ...activeKpis.slaCompliance },
     },
   });
+
+  // Reset form when user selection changes
+  useEffect(() => {
+    reset({
+      callsOffered: { ...activeKpis.callsOffered },
+      callsAnswered: { ...activeKpis.callsAnswered },
+      answerRate: { ...activeKpis.answerRate },
+      slaCompliance: { ...activeKpis.slaCompliance },
+    });
+  }, [selectedUserId, reset, activeKpis]);
 
   const watchedValues = watch();
 
   const onSubmit = (data) => {
+    if (isViewingUser) return; // Read-only when viewing a user's KPIs
     dispatch(setAllKpis(data));
     showSuccess(t("kpiControl.saveSuccess"));
 
@@ -146,6 +171,7 @@ export const KpiControl = () => {
   };
 
   const handleReset = () => {
+    if (isViewingUser) return;
     dispatch(resetKpis());
     reset({
       callsOffered: { ...defaultKpis.callsOffered },
@@ -156,253 +182,284 @@ export const KpiControl = () => {
   };
 
   return (
-    <Box
-      sx={{
-        backgroundColor: colors.surface,
-        borderRadius: "1rem",
-        border: `1px solid ${colors.border}`,
-        width: { xs: "100%", md: "100%", lg: "66%" },
-        mx: { xs: 0, md: "auto" },
-        my: 3,
-        p: 3,
-      }}
-    >
-      {/* KPI Cards Grid */}
+    <>
       <Box
         sx={{
-          display: "grid",
-          gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-          gap: 2,
-          mb: 3,
+          backgroundColor: colors.surface,
+          borderRadius: "1rem",
+          border: `1px solid ${colors.border}`,
+          width: { xs: "100%", md: "100%", lg: "66%" },
+          mx: { xs: 0, md: "auto" },
+          my: 3,
+          p: 3,
         }}
       >
-        {KPI_CONFIG.map(({ key, icon, labelKey, isPercent }) => {
-          const watched = watchedValues[key] ?? {};
-          const achieved = isTargetAchieved(watched.value, watched.target);
-          const fieldErrors = errors[key] ?? {};
-          const badgeColor = achieved
-            ? { backgroundColor: colors.primaryLight, color: colors.primary }
-            : {
-                backgroundColor: colors.priorityStyles.high.backgroundColor,
-                color: colors.priorityStyles.high.color,
-              };
-
-          return (
-            <Card
-              key={key}
+        {/* Read-only indicator when viewing a user */}
+        {isViewingUser && (
+          <Box
+            sx={{
+              mb: 2,
+              p: 1.5,
+              borderRadius: "0.75rem",
+              backgroundColor: colors.primaryLight,
+              textAlign: "center",
+            }}
+          >
+            <Typography
               sx={{
-                border: `1px solid ${Object.keys(fieldErrors).length ? colors.errorBorder : colors.border}`,
-                borderRadius: "1rem",
-                boxShadow: "none",
-                transition: "border-color 200ms",
-                "&:hover": { borderColor: colors.primary },
+                fontSize: "0.8rem",
+                fontWeight: 600,
+                color: colors.primary,
               }}
             >
-              <CardContent sx={{ p: "1.25rem !important" }}>
-                {/* Card header */}
-                <Box
-                  sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}
-                >
+              {t("kpiControl.readOnlyMode")}
+            </Typography>
+          </Box>
+        )}
+
+        {/* KPI Cards Grid */}
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+            gap: 2,
+            mb: 3,
+          }}
+        >
+          {KPI_CONFIG.map(({ key, icon, labelKey, isPercent }) => {
+            const watched = watchedValues[key] ?? {};
+            const achieved = isTargetAchieved(watched.value, watched.target);
+            const fieldErrors = errors[key] ?? {};
+            const badgeColor = achieved
+              ? { backgroundColor: colors.primaryLight, color: colors.primary }
+              : {
+                  backgroundColor: colors.priorityStyles.high.backgroundColor,
+                  color: colors.priorityStyles.high.color,
+                };
+
+            return (
+              <Card
+                key={key}
+                sx={{
+                  border: `1px solid ${Object.keys(fieldErrors).length ? colors.errorBorder : colors.border}`,
+                  borderRadius: "1rem",
+                  boxShadow: "none",
+                  transition: "border-color 200ms",
+                  "&:hover": { borderColor: colors.primary },
+                  opacity: isViewingUser ? 0.95 : 1,
+                }}
+              >
+                <CardContent sx={{ p: "1.25rem !important" }}>
+                  {/* Card header */}
                   <Box
-                    sx={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: "0.5rem",
-                      backgroundColor: colors.primaryLight,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      color: colors.primary,
-                      "& svg": { fontSize: "1.1rem" },
-                    }}
+                    sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}
                   >
-                    {icon}
-                  </Box>
-                  <Typography
-                    sx={{
-                      fontSize: "0.75rem",
-                      fontWeight: 700,
-                      textTransform: "uppercase",
-                      letterSpacing: "0.05em",
-                      color: colors.textMuted,
-                      flex: 1,
-                    }}
-                  >
-                    {t(labelKey)}
-                  </Typography>
-                  <Chip
-                    label={
-                      achieved
-                        ? t("kpiControl.achieved")
-                        : t("kpiControl.notAchieved")
-                    }
-                    size="small"
-                    sx={{
-                      fontSize: "0.7rem",
-                      fontWeight: 700,
-                      borderRadius: "0.5rem",
-                      ...badgeColor,
-                    }}
-                  />
-                </Box>
-
-                {/* Fields */}
-                <Box
-                  sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}
-                >
-                  {/* Value actual */}
-                  <Controller
-                    name={`${key}.value`}
-                    control={control}
-                    render={({ field }) => (
-                      <TextField
-                        {...field}
-                        label={t("kpiControl.currentValue")}
-                        size="small"
-                        fullWidth
-                        type="number"
-                        sx={inputSx}
-                        error={!!fieldErrors.value}
-                        helperText={
-                          fieldErrors.value ? t(fieldErrors.value.message) : ""
-                        }
-                        slotProps={
-                          isPercent
-                            ? {
-                                input: {
-                                  endAdornment: (
-                                    <InputAdornment position="end">
-                                      %
-                                    </InputAdornment>
-                                  ),
-                                },
-                              }
-                            : undefined
-                        }
-                      />
-                    )}
-                  />
-
-                  {/* Target / Meta */}
-                  <Controller
-                    name={`${key}.target`}
-                    control={control}
-                    render={({ field }) => (
-                      <TextField
-                        {...field}
-                        label={t("kpiControl.target")}
-                        size="small"
-                        fullWidth
-                        type="number"
-                        sx={inputSx}
-                        error={!!fieldErrors.target}
-                        helperText={
-                          fieldErrors.target
-                            ? t(fieldErrors.target.message)
-                            : ""
-                        }
-                        slotProps={
-                          isPercent
-                            ? {
-                                input: {
-                                  endAdornment: (
-                                    <InputAdornment position="end">
-                                      %
-                                    </InputAdornment>
-                                  ),
-                                },
-                              }
-                            : undefined
-                        }
-                      />
-                    )}
-                  />
-
-                  {/* Badge / Change label */}
-                  <Controller
-                    name={`${key}.change`}
-                    control={control}
-                    render={({ field }) => (
-                      <TextField
-                        {...field}
-                        label={t("kpiControl.badge")}
-                        size="small"
-                        fullWidth
-                        sx={inputSx}
-                        error={!!fieldErrors.change}
-                        helperText={
-                          fieldErrors.change
-                            ? t(fieldErrors.change.message)
-                            : ""
-                        }
-                      />
-                    )}
-                  />
-                </Box>
-
-                {/* Preview */}
-                <Box
-                  sx={{
-                    mt: 2,
-                    pt: 1.5,
-                    borderTop: `1px solid ${colors.border}`,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <Typography
-                    sx={{ fontSize: "0.75rem", color: colors.textMuted }}
-                  >
-                    {t("kpiControl.preview")}
-                  </Typography>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Typography
-                      sx={{ fontWeight: 700, color: colors.textPrimary }}
+                    <Box
+                      sx={{
+                        width: 36,
+                        height: 36,
+                        borderRadius: "0.5rem",
+                        backgroundColor: colors.primaryLight,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: colors.primary,
+                        "& svg": { fontSize: "1.1rem" },
+                      }}
                     >
-                      {isPercent
-                        ? `${watched.value ?? 0}%`
-                        : Number(watched.value ?? 0).toLocaleString()}
+                      {icon}
+                    </Box>
+                    <Typography
+                      sx={{
+                        fontSize: "0.75rem",
+                        fontWeight: 700,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.05em",
+                        color: colors.textMuted,
+                        flex: 1,
+                      }}
+                    >
+                      {t(labelKey)}
                     </Typography>
                     <Chip
-                      label={watched.change || "—"}
+                      label={
+                        achieved
+                          ? t("kpiControl.achieved")
+                          : t("kpiControl.notAchieved")
+                      }
                       size="small"
                       sx={{
                         fontSize: "0.7rem",
                         fontWeight: 700,
                         borderRadius: "0.5rem",
-                        ...badgeColor
+                        ...badgeColor,
                       }}
                     />
                   </Box>
-                </Box>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </Box>
 
-      <AlertInline ref={notificationRef} asSnackbar />
+                  {/* Fields */}
+                  <Box
+                    sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}
+                  >
+                    {/* Value actual */}
+                    <Controller
+                      name={`${key}.value`}
+                      control={control}
+                      render={({ field }) => (
+                        <TextField
+                          {...field}
+                          label={t("kpiControl.currentValue")}
+                          size="small"
+                          fullWidth
+                          type="number"
+                          disabled={isViewingUser}
+                          sx={inputSx}
+                          error={!!fieldErrors.value}
+                          helperText={
+                            fieldErrors.value ? t(fieldErrors.value.message) : ""
+                          }
+                          slotProps={
+                            isPercent
+                              ? {
+                                  input: {
+                                    endAdornment: (
+                                      <InputAdornment position="end">
+                                        %
+                                      </InputAdornment>
+                                    ),
+                                  },
+                                }
+                              : undefined
+                          }
+                        />
+                      )}
+                    />
 
-      {/* Actions */}
-      <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
-        <Button
-          type="button"
-          onClick={handleReset}
-          startIcon={<RestartAlt />}
-          sx={{ ...outlinedButton, px: 3 }}
-        >
-          {t("kpiControl.reset")}
-        </Button>
-        <Button
-          type="button"
-          onClick={handleSubmit(onSubmit, onError)}
-          startIcon={<Save />}
-          sx={{ ...primaryIconButton, px: 3 }}
-        >
-          {t("kpiControl.save")}
-        </Button>
+                    {/* Target / Meta */}
+                    <Controller
+                      name={`${key}.target`}
+                      control={control}
+                      render={({ field }) => (
+                        <TextField
+                          {...field}
+                          label={t("kpiControl.target")}
+                          size="small"
+                          fullWidth
+                          type="number"
+                          disabled={isViewingUser}
+                          sx={inputSx}
+                          error={!!fieldErrors.target}
+                          helperText={
+                            fieldErrors.target
+                              ? t(fieldErrors.target.message)
+                              : ""
+                          }
+                          slotProps={
+                            isPercent
+                              ? {
+                                  input: {
+                                    endAdornment: (
+                                      <InputAdornment position="end">
+                                        %
+                                      </InputAdornment>
+                                    ),
+                                  },
+                                }
+                              : undefined
+                          }
+                        />
+                      )}
+                    />
+
+                    {/* Badge / Change label */}
+                    <Controller
+                      name={`${key}.change`}
+                      control={control}
+                      render={({ field }) => (
+                        <TextField
+                          {...field}
+                          label={t("kpiControl.badge")}
+                          size="small"
+                          fullWidth
+                          disabled={isViewingUser}
+                          sx={inputSx}
+                          error={!!fieldErrors.change}
+                          helperText={
+                            fieldErrors.change
+                              ? t(fieldErrors.change.message)
+                              : ""
+                          }
+                        />
+                      )}
+                    />
+                  </Box>
+
+                  {/* Preview */}
+                  <Box
+                    sx={{
+                      mt: 2,
+                      pt: 1.5,
+                      borderTop: `1px solid ${colors.border}`,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <Typography
+                      sx={{ fontSize: "0.75rem", color: colors.textMuted }}
+                    >
+                      {t("kpiControl.preview")}
+                    </Typography>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <Typography
+                        sx={{ fontWeight: 700, color: colors.textPrimary }}
+                      >
+                        {isPercent
+                          ? `${watched.value ?? 0}%`
+                          : Number(watched.value ?? 0).toLocaleString()}
+                      </Typography>
+                      <Chip
+                        label={watched.change || "\u2014"}
+                        size="small"
+                        sx={{
+                          fontSize: "0.7rem",
+                          fontWeight: 700,
+                          borderRadius: "0.5rem",
+                          ...badgeColor
+                        }}
+                      />
+                    </Box>
+                  </Box>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </Box>
+
+        <AlertInline ref={notificationRef} asSnackbar />
+
+        {/* Actions - hidden when viewing a specific user */}
+        {!isViewingUser && (
+          <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
+            <Button
+              type="button"
+              onClick={handleReset}
+              startIcon={<RestartAlt />}
+              sx={{ ...outlinedButton, px: 3 }}
+            >
+              {t("kpiControl.reset")}
+            </Button>
+            <Button
+              type="button"
+              onClick={handleSubmit(onSubmit, onError)}
+              startIcon={<Save />}
+              sx={{ ...primaryIconButton, px: 3 }}
+            >
+              {t("kpiControl.save")}
+            </Button>
+          </Box>
+        )}
       </Box>
-    </Box>
+    </>
   );
 };

@@ -242,6 +242,7 @@ export default {
     active: "Active",
     inactive: "Inactive",
     all: "All",
+    na: "N/A",
     none: "None",
     yes: "Yes",
     no: "No",
@@ -260,6 +261,22 @@ export default {
       "Are you sure you want to delete {{item}}? This action cannot be undone.",
     deleteSuccess: "{{item}} deleted successfully",
     deleteError: "Error deleting {{item}}",
+    // Deactivate confirmation dialog
+    deactivate: "Deactivate",
+    deactivating: "Deactivating...",
+    confirmDeactivateTitle: "Deactivate {{item}}",
+    confirmDeactivateMessage:
+      "Are you sure you want to deactivate {{item}}? This action cannot be undone.",
+    deactivateSuccess: "{{item}} deactivated successfully",
+    deactivateError: "Error deactivating {{item}}",
+    // Activate confirmation dialog
+    activate: "Activate",
+    activating: "Activating...",
+    confirmActivateTitle: "Activate {{item}}",
+    confirmActivateMessage:
+      "Are you sure you want to activate {{item}}?",
+    activateSuccess: "{{item}} activated successfully",
+    activateError: "Error activating {{item}}",
     // Snackbar messages
     operationSuccess: "Operation completed successfully",
     operationError: "An error occurred",
@@ -435,6 +452,10 @@ export default {
     searchLabel: "Search Roles",
     searchPlaceholder: "Search by name or description...",
     noRolesFound: "No roles found",
+    viewPermissionsTitle: "Role Permissions",
+    permissionsAssigned: "permissions assigned",
+    noPermissions: "No permissions assigned to this role",
+    errorLoadingPermissions: "Failed to load role permissions",
     unknownClient: "Unknown",
     table: {
       id: "ID",
@@ -458,6 +479,7 @@ export default {
     actions: {
       edit: "Edit role",
       configurePermissions: "Configure permissions",
+      viewPermissions: "View permissions",
       delete: "Delete role",
       savePermissions: "Save Permissions",
     },
@@ -501,6 +523,10 @@ export default {
     broadcast_announcements: "Quick Broadcast",
     broadcast_swiper: "Swiper Control",
     broadcast_kpi: "KPI Control",
+    dashboard_announcements_inbox: "Announcements Inbox",
+    dashboard_master_repository: "Master Repository",
+    dashboard_swiper: "Swiper",
+    dashboard_active_tasks: "Active Tasks",
   },
 
   // Clients Management
@@ -970,7 +996,7 @@ export default {
     selectUser: "View User",
     allUsers: "All Users",
     viewAs: "View As",
-    viewAllDashboard: "All Dashboards",
+    viewAllDashboard: "Admin View",
     portfolioRevenue: "Portfolio Revenue",
     masterKbArticles: "Master KB Articles",
     urgentAlerts: "Urgent Alerts",
@@ -1084,6 +1110,9 @@ export default {
     },
     saveSuccess: "KPI values saved successfully",
     saveError: "Please fix validation errors before saving",
+    viewAll: "Admin View",
+    viewAs: "View as",
+    readOnlyMode: "Viewing user KPIs (read-only)",
   },
   selectMenuItem: {
     selected: "selected",

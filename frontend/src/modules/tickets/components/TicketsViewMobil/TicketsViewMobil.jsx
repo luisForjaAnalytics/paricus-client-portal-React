@@ -89,7 +89,7 @@ export const TicketsViewMobil = ({
   const renderPrimaryIcon = <TicketIcon fontSize="small" sx={{ color: colors.primary }} />;
 
   return (
-    <Box sx={{ display: { xs: "block", md: "none" } }}>
+    <Box sx={{ display: { xs: "block", md: "none" }, overflowX: "hidden" }}>
       <UniversalMobilDataTable
         rows={tickets}
         columns={columns}

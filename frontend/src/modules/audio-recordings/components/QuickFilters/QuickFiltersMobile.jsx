@@ -188,7 +188,7 @@ export const QuickFiltersMobile = ({
   };
 
   return (
-    <Box sx={{ display: { xs: "block", md: "none" } }}>
+    <Box sx={{ display: { xs: "block", md: "none" }, overflowX: "hidden" }}>
       {/* Accordion Table */}
       <UniversalMobilDataTable
         rows={rows}

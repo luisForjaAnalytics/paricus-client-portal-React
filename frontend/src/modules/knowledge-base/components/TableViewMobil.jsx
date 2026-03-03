@@ -69,7 +69,7 @@ export const TableViewMobil = ({
   );
 
   return (
-    <Box sx={{ display: { xs: "block", md: "none" }, width: "100%" }}>
+    <Box sx={{ display: { xs: "block", md: "none" }, width: "100%", overflowX: "hidden" }}>
       {topContent && (
         <Box sx={{ display: "flex", justifyContent: "center", px: 6, mb: 1 }}>
           {topContent}

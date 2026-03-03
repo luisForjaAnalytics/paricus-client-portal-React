@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from "react";
+import PropTypes from "prop-types";
 import {
   Dialog,
   DialogActions,
@@ -305,4 +306,21 @@ export const AddNewUserModal = ({
       </DialogActions>
     </Dialog>
   );
+};
+
+AddNewUserModal.propTypes = {
+  dialog: PropTypes.bool.isRequired,
+  editingUser: PropTypes.object,
+  closeDialog: PropTypes.func.isRequired,
+  onSave: PropTypes.func.isRequired,
+  saving: PropTypes.bool,
+  clientOptions: PropTypes.arrayOf(
+    PropTypes.shape({
+      title: PropTypes.string,
+      value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    })
+  ).isRequired,
+  allRoles: PropTypes.array.isRequired,
+  isBPOAdmin: PropTypes.bool,
+  defaultClientId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 };

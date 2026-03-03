@@ -109,7 +109,7 @@ export const LogsViewMobile = ({
   const renderPrimaryIcon = <ListAltIcon fontSize="small" sx={{ color: colors.primary }} />;
 
   return (
-    <Box sx={{ display: { xs: "block", md: "none" } }}>
+    <Box sx={{ display: { xs: "block", md: "none" }, overflowX: "hidden" }}>
       <UniversalMobilDataTable
         rows={rows}
         columns={columns}

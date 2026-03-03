@@ -73,7 +73,8 @@
       "Bash(set \"PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=yes\")",
       "Bash(ren:*)",
       "Bash(npm ls:*)",
-      "Bash(npx vite build:*)"
+      "Bash(npx vite build:*)",
+      "Bash(xargs grep -l \"view.all\\\\|View All\\\\|view all\")"
     ],
     "deny": [],
     "ask": []

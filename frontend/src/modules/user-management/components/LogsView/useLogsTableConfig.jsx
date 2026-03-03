@@ -87,13 +87,13 @@ export const useLogsTableConfig = (logs = []) => {
   // Clean IPv6-mapped IPv4 addresses
   const cleanIpAddress = useCallback((ip) => {
     try {
-      if (!ip) return "N/A";
+      if (!ip) return t("common.na");
       return ip.startsWith("::ffff:") ? ip.replace("::ffff:", "") : ip;
     } catch (err) {
       console.error(`useLogsTableConfig cleanIpAddress: ${err}`);
-      return "N/A";
+      return t("common.na");
     }
-  }, []);
+  }, [t]);
 
   // Status chip color
   const getStatusColor = useCallback((status) => {
@@ -547,6 +547,6 @@ export const useLogsTableConfig = (logs = []) => {
     getEventTypeColor,
     getStatusColor,
     cleanIpAddress,
-    emptyMessage: t("userManagement.logs.noLogsFound") || "No logs found",
+    emptyMessage: t("userManagement.logs.noLogsFound"),
   };
 };

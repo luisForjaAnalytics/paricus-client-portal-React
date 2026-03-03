@@ -1,12 +1,10 @@
 import { useMemo, useCallback, useState } from "react";
-import { Box, Chip, IconButton, Tooltip, Typography } from "@mui/material";
-import {
-  Business as BusinessIcon,
-  Block as BlockIcon,
-} from "@mui/icons-material";
+import { Box, Chip, Typography } from "@mui/material";
+import { Business as BusinessIcon } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import { colors } from "../../../../common/styles/styles";
 import { EditButton } from "../../../../common/components/ui/EditButton";
+import { DeactivateButton } from "../../../../common/components/ui/DeactivateButton";
 import { ColumnHeaderFilter } from "../../../../common/components/ui/ColumnHeaderFilter";
 
 /**
@@ -17,7 +15,9 @@ export const useClientsTableConfig = ({
   clients = [],
   formatDate,
   handleEdit,
-  handleDeactivate,
+  deleteClient,
+  activateClient,
+  showNotification,
   // Desktop-specific filter state (managed internally if not provided)
   externalFilters,
   setExternalFilters,
@@ -149,21 +149,49 @@ export const useClientsTableConfig = ({
             item={row.original}
             title={t("clients.actions.edit")}
           />
-          {row.isActive && (
-            <Tooltip title={t("clients.actions.deactivate")}>
-              <IconButton
-                size="small"
-                color="error"
-                onClick={() => handleDeactivate(row.original)}
-              >
-                <BlockIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          )}
+          <DeactivateButton
+            handleDeactivate={(client) =>
+              row.isActive
+                ? deleteClient(client.id).unwrap()
+                : activateClient({ id: client.id, name: client.name, isActive: true, isProspect: client.isProspect ?? false }).unwrap()
+            }
+            item={row.original}
+            itemName={row.name}
+            itemType="client"
+            isActive={row.isActive}
+            title={row.isActive ? t("common.deactivate") : t("common.activate")}
+            confirmTitle={
+              row.isActive
+                ? undefined
+                : t("common.confirmActivateTitle", { item: t("common.client") })
+            }
+            confirmMessage={
+              row.isActive
+                ? `${t("clients.deactivationWarning")} "${row.name}"? ${t("clients.deactivationWarningContinue")}`
+                : t("common.confirmActivateMessage", { item: row.name })
+            }
+            onSuccess={() =>
+              showNotification(
+                row.isActive
+                  ? t("clients.messages.clientDeactivated")
+                  : t("common.activateSuccess", { item: row.name }),
+                "success"
+              )
+            }
+            onError={(error) =>
+              showNotification(
+                error?.data?.message ||
+                  (row.isActive
+                    ? t("clients.messages.clientDeactivateFailed")
+                    : t("common.activateError", { item: row.name })),
+                "error"
+              )
+            }
+          />
         </>
       );
     },
-    [handleEdit, handleDeactivate, t]
+    [handleEdit, deleteClient, activateClient, showNotification, t]
   );
 
   // Desktop columns (DataGrid format)
@@ -198,6 +226,13 @@ export const useClientsTableConfig = ({
         flex: 1,
         align: "center",
         headerAlign: "center",
+        renderHeader: () => (
+          <ColumnHeaderFilter
+            headerName={t("clients.table.type")}
+            filterType="none"
+            isOpen={isOpen}
+          />
+        ),
         renderCell: (params) => renderTypeChip(params.row.isProspect),
       },
       {
@@ -227,6 +262,13 @@ export const useClientsTableConfig = ({
         flex: 1,
         align: "center",
         headerAlign: "center",
+        renderHeader: () => (
+          <ColumnHeaderFilter
+            headerName={t("clients.table.users")}
+            filterType="none"
+            isOpen={isOpen}
+          />
+        ),
       },
       {
         field: "roleCount",
@@ -234,6 +276,13 @@ export const useClientsTableConfig = ({
         flex: 1,
         align: "center",
         headerAlign: "center",
+        renderHeader: () => (
+          <ColumnHeaderFilter
+            headerName={t("clients.table.roles")}
+            filterType="none"
+            isOpen={isOpen}
+          />
+        ),
       },
       {
         field: "createdAt",
@@ -241,6 +290,13 @@ export const useClientsTableConfig = ({
         flex: 1,
         align: "center",
         headerAlign: "center",
+        renderHeader: () => (
+          <ColumnHeaderFilter
+            headerName={t("clients.table.created")}
+            filterType="none"
+            isOpen={isOpen}
+          />
+        ),
         valueFormatter: (value) => {
           try {
             return formatDate ? formatDate(value) : value;
