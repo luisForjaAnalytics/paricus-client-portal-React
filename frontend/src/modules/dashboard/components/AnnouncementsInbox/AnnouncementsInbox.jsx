@@ -109,6 +109,7 @@ export const AnnouncementsInbox = () => {
         ...dashboardStyles.dashboardStatsCard,
         height: { xs: "auto", md: "100%" },
         maxHeight: { xs: "25rem", md: "none" },
+        width: "100%",
         display: "flex",
         flexDirection: "column",
       }}
