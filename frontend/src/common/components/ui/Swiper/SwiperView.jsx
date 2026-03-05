@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
@@ -90,4 +91,13 @@ export const SwiperView = ({ images = [] }) => {
       </CardContent>
     </Card>
   );
+};
+
+SwiperView.propTypes = {
+  images: PropTypes.arrayOf(
+    PropTypes.shape({
+      previewUrl: PropTypes.string,
+      name: PropTypes.string,
+    })
+  ),
 };

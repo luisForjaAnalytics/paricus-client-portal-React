@@ -1,6 +1,7 @@
 import PropTypes from "prop-types";
 import { Button } from "@mui/material";
 import { primaryIconButton } from "../../../styles/styles";
+import { logger } from "../../../utils/logger";
 
 export const ActionButton = ({
   handleClick,
@@ -17,7 +18,7 @@ export const ActionButton = ({
         handleClick(event);
       }
     } catch (error) {
-      console.error("ActionButton click error:", error);
+      logger.error("ActionButton click error:", error);
     }
   };
 

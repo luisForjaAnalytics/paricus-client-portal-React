@@ -2,6 +2,7 @@ import { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Box, Typography, Button, Paper } from '@mui/material';
 import { ErrorOutline as ErrorIcon } from '@mui/icons-material';
+import { withTranslation } from "react-i18next";
 import { logger } from '../../utils/logger';
 
 /**
@@ -77,7 +78,7 @@ class ErrorBoundary extends Component {
             />
 
             <Typography variant="h5" gutterBottom fontWeight="bold">
-              {this.props.title || 'Something went wrong'}
+              {this.props.title || this.props.t("errorBoundary.title")}
             </Typography>
 
             <Typography
@@ -85,7 +86,7 @@ class ErrorBoundary extends Component {
               color="text.secondary"
               sx={{ mb: 3 }}
             >
-              {this.props.message || 'An unexpected error occurred. Please try again.'}
+              {this.props.message || this.props.t("errorBoundary.message")}
             </Typography>
 
             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
@@ -94,7 +95,7 @@ class ErrorBoundary extends Component {
                 color="primary"
                 onClick={this.handleReload}
               >
-                Reload Page
+                {this.props.t("errorBoundary.reloadPage")}
               </Button>
 
               <Button
@@ -102,7 +103,7 @@ class ErrorBoundary extends Component {
                 color="primary"
                 onClick={this.handleGoHome}
               >
-                Go to Dashboard
+                {this.props.t("errorBoundary.goToDashboard")}
               </Button>
             </Box>
 
@@ -139,6 +140,7 @@ ErrorBoundary.propTypes = {
   fallback: PropTypes.node,
   title: PropTypes.string,
   message: PropTypes.string,
+  t: PropTypes.func,
 };
 
-export default ErrorBoundary;
+export default withTranslation()(ErrorBoundary);

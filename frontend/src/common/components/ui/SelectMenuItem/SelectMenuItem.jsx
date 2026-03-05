@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 import { CheckBox, CheckBoxOutlineBlank } from "@mui/icons-material";
 import { selectMenuProps, modalCard, colors } from "../../../styles/styles";
 import { getPriorityStyles } from "../../../utils/getStatusProperty";
+import { logger } from "../../../utils/logger";
 
 const CHECK_ICON_SX = { fontSize: "1rem", color: colors.primary };
 const UNCHECK_ICON_SX = { fontSize: "1rem" };
@@ -74,7 +75,7 @@ export const SelectMenuItem = forwardRef(
 
     // Early return after hooks
     if (normalizedOptions.length === 0 && !Array.isArray(options)) {
-      console.warn("SelectMenuItem: options must be an array");
+      logger.warn("SelectMenuItem: options must be an array");
       return null;
     }
 
@@ -102,7 +103,7 @@ export const SelectMenuItem = forwardRef(
             onChange(newValue);
           }
         } catch (err) {
-          console.error("SelectMenuItem: dispatch error", err);
+          logger.error("SelectMenuItem: dispatch error", err);
         }
       },
       [field, onChange]
@@ -121,7 +122,7 @@ export const SelectMenuItem = forwardRef(
 
           dispatch(newValue);
         } catch (err) {
-          console.error("SelectMenuItem: onChange error", err);
+          logger.error("SelectMenuItem: onChange error", err);
         }
       },
       [multiple, selectAllLabel, allSelected, allValues, dispatch]

@@ -90,7 +90,7 @@ export const ActiveTasks = ({
 
   return (
     <Card sx={dashboardStyles.dashboardStatsCard}>
-      <CardContent sx={{ padding: "1rem" }}>
+      <CardContent sx={{ padding: "1rem", display: "flex", flexDirection: "column", height: "100%" }}>
         {/* Header */}
         <Box
           sx={{
@@ -154,7 +154,7 @@ export const ActiveTasks = ({
 
         {/* Tasks List */}
         {!isLoading && !error && (
-          <Box>
+          <Box sx={{ flexGrow: 1 }}>
             {tickets.length === 0 ? (
               <Box
                 sx={{
@@ -208,15 +208,6 @@ export const ActiveTasks = ({
                           minWidth: 0,
                         }}
                       >
-                        {/* <Box
-                          sx={{
-                            width: 6,
-                            height: 6,
-                            borderRadius: "50%",
-                            backgroundColor: priorityStyles.color,
-                            flexShrink: 0,
-                          }}
-                        /> */}
                         <Chip
                           label={ticket?.priority || "Medium"}
                           size="small"
@@ -255,32 +246,32 @@ export const ActiveTasks = ({
                 );
               })
             )}
+          </Box>
+        )}
 
-            {/* View All Button */}
-            {tickets.length > 0 && (
-              <Box sx={{ mt: 2, textAlign: "center" }}>
-                <Link
-                  component="button"
-                  variant="caption"
-                  onClick={handleLink}
-                  underline="none"
-                  sx={{
-                    color: colors.textSecondary,
-                    textTransform: "uppercase",
-                    fontWeight: "600",
-                    letterSpacing: "0.05em",
-                    cursor: "pointer",
-                    border: "none",
-                    background: "none",
-                    "&:hover": {
-                      color: colors.primary,
-                    },
-                  }}
-                >
-                  {t("dashboard.activeTasks.browseTaskManager")}
-                </Link>
-              </Box>
-            )}
+        {/* Browse Button - always visible at bottom */}
+        {!isLoading && !error && (
+          <Box sx={{ mt: 2, textAlign: "center" }}>
+            <Link
+              component="button"
+              variant="caption"
+              onClick={handleLink}
+              underline="none"
+              sx={{
+                color: colors.textSecondary,
+                textTransform: "uppercase",
+                fontWeight: "600",
+                letterSpacing: "0.05em",
+                cursor: "pointer",
+                border: "none",
+                background: "none",
+                "&:hover": {
+                  color: colors.primary,
+                },
+              }}
+            >
+              {t("dashboard.activeTasks.browseTaskManager")}
+            </Link>
           </Box>
         )}
       </CardContent>

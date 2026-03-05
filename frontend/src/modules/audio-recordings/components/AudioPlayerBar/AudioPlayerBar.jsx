@@ -20,7 +20,9 @@ import {
   VolumeOff as VolumeOffIcon,
   Mic as MicIcon,
 } from "@mui/icons-material";
+import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 import { useTranslation } from "react-i18next";
+import { colors } from "../../../../common/styles/styles";
 
 /**
  * AudioPlayerBar - Fixed bottom audio player component
@@ -161,7 +163,11 @@ export const AudioPlayerBar = ({
                   },
                 }}
               >
-                {isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
+                {isPlaying ? (
+                  <PauseIcon />
+                ) : (
+                  <PlayCircleOutlineIcon sx={{ color: colors.focusRing }} />
+                )}
               </IconButton>
 
               <Tooltip title={t("audioRecordings.tooltips.forward10s")}>

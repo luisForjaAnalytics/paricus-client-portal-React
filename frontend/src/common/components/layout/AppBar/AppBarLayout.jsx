@@ -214,7 +214,8 @@ export const AppBarLayout = ({ titleState, setTitleState }) => {
                 },
               }}
             >
-              <Badge badgeContent={17} color="error">
+              {/* TODO: connect to real notification count */}
+              <Badge badgeContent={0} color="error">
                 <NotificationsIcon />
               </Badge>
             </IconButton>

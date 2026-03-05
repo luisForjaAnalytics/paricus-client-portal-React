@@ -44,13 +44,13 @@ export const MasterRepository = () => {
 
   const formatTimeLabel = (date) => {
     try {
-      if (!date) return "N/A";
+      if (!date) return t("common.na");
       const parsedDate = new Date(date);
-      if (isNaN(parsedDate.getTime())) return "N/A";
+      if (isNaN(parsedDate.getTime())) return t("common.na");
       return formatDistanceToNow(parsedDate, { locale });
     } catch (error) {
       console.error("Error formatting date:", error);
-      return "N/A";
+      return t("common.na");
     }
   };
 
@@ -63,7 +63,7 @@ export const MasterRepository = () => {
           colors.masterRepoBackgroundColor || "rgba(46, 125, 50, 0.08)",
       }}
     >
-      <CardContent sx={{ padding: "1rem" }}>
+      <CardContent sx={{ padding: "1rem", display: "flex", flexDirection: "column", height: "100%" }}>
         {/* Header */}
         <Box
           sx={{
@@ -112,7 +112,7 @@ export const MasterRepository = () => {
 
         {/* Articles List */}
         {!isLoading && !error && (
-          <Box>
+          <Box sx={{ flexGrow: 1 }}>
             {articles.length === 0 ? (
               <Box
                 sx={{
@@ -140,7 +140,7 @@ export const MasterRepository = () => {
                     borderRadius: 1,
                     transition: "background-color 0.2s ease",
                     "&:hover": {
-                      backgroundColor: "rgba(46, 125, 50, 0.12)",
+                      backgroundColor: colors.masterRepoItemHover,
                     },
                   }}
                 >
@@ -180,7 +180,7 @@ export const MasterRepository = () => {
                           whiteSpace: "nowrap",
                         }}
                       >
-                        {article.article_name || "N/A"}
+                        {article.article_name || t("common.na")}
                       </Typography>
                     </Box>
                     {/* Metadata */}
@@ -188,43 +188,43 @@ export const MasterRepository = () => {
                       <Typography variant="caption" color="text.secondary">
                         {article.updated_at
                           ? formatTimeLabel(article.updated_at)
-                          : "N/A"}
+                          : t("common.na")}
                       </Typography>
                     </Box>
                   </Box>
                 </Box>
               ))
             )}
+          </Box>
+        )}
 
-            {/* Action Buttons */}
-            {articles.length > 0 && (
-              <Box
-                sx={{
-                  mt: 2,
-                  display: "flex",
-                  justifyContent: "center",
-                  gap: 2,
-                }}
-              >
-                <Typography
-                  variant="caption"
-                  onClick={handleLink}
-                  underline="none"
-                  sx={{
-                    color: colors.textSecondary,
-                    textTransform: "uppercase",
-                    fontWeight: "600",
-                    letterSpacing: "0.05em",
-                    cursor: "pointer",
-                    "&:hover": {
-                      color: colors.primary,
-                    },
-                  }}
-                >
-                  {t("dashboard.masterRepository.browseKnowledgeBase")}
-                </Typography>
-              </Box>
-            )}
+        {/* Browse Button - always visible at bottom */}
+        {!isLoading && !error && (
+          <Box
+            sx={{
+              mt: 2,
+              display: "flex",
+              justifyContent: "center",
+              gap: 2,
+            }}
+          >
+            <Typography
+              variant="caption"
+              onClick={handleLink}
+              underline="none"
+              sx={{
+                color: colors.textSecondary,
+                textTransform: "uppercase",
+                fontWeight: "600",
+                letterSpacing: "0.05em",
+                cursor: "pointer",
+                "&:hover": {
+                  color: colors.primary,
+                },
+              }}
+            >
+              {t("dashboard.masterRepository.browseKnowledgeBase")}
+            </Typography>
           </Box>
         )}
       </CardContent>

@@ -12,6 +12,7 @@ import { TableHeader } from "@tiptap/extension-table-header";
 import { Box } from "@mui/material";
 import { AlertInline } from "../AlertInline";
 import PropTypes from "prop-types";
+import { useTranslation } from "react-i18next";
 import "./TiptapReadOnly.css";
 
 /**
@@ -31,6 +32,7 @@ export const TiptapReadOnly = ({
   sx = {},
   showErrorAlert = false
 }) => {
+  const { t } = useTranslation();
   // Validate content - provide empty string fallback to allow hook to run
   const safeContent = content && typeof content === 'string' ? content : '';
 
@@ -85,7 +87,7 @@ export const TiptapReadOnly = ({
     if (showErrorAlert) {
       return (
         <AlertInline
-          message="Error rendering content. Please try refreshing the page."
+          message={t("common.errorRenderingContent")}
           severity="error"
           sx={sx}
         />

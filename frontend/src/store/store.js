@@ -1,6 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { authApi } from "./api/authApi";
 import { authReducer, clearCredentials } from "./auth/authSlice";
+import { logger } from "../common/utils/logger";
 import { kpiReducer } from "./kpi/kpiSlice";
 import { invoicesApi } from "./api/invoicesApi";
 import { reportsApi } from "./api/reportsApi";
@@ -22,18 +23,22 @@ const resetCacheMiddleware = (storeAPI) => (next) => (action) => {
     authApi.endpoints.logout.matchFulfilled(action)
   ) {
     // Clear all API caches
-    storeAPI.dispatch(invoicesApi.util.resetApiState());
-    storeAPI.dispatch(reportsApi.util.resetApiState());
-    storeAPI.dispatch(adminApi.util.resetApiState());
-    storeAPI.dispatch(audioRecordingsApi.util.resetApiState());
-    storeAPI.dispatch(profileApi.util.resetApiState());
-    storeAPI.dispatch(articlesApi.util.resetApiState());
-    storeAPI.dispatch(logsApi.util.resetApiState());
-    storeAPI.dispatch(authApi.util.resetApiState());
-    storeAPI.dispatch(articlesSearchApi.util.resetApiState());
-    storeAPI.dispatch(ticketsApi.util.resetApiState());
-    storeAPI.dispatch(dashboardApi.util.resetApiState());
-    storeAPI.dispatch(carouselApi.util.resetApiState());
+    try {
+      storeAPI.dispatch(invoicesApi.util.resetApiState());
+      storeAPI.dispatch(reportsApi.util.resetApiState());
+      storeAPI.dispatch(adminApi.util.resetApiState());
+      storeAPI.dispatch(audioRecordingsApi.util.resetApiState());
+      storeAPI.dispatch(profileApi.util.resetApiState());
+      storeAPI.dispatch(articlesApi.util.resetApiState());
+      storeAPI.dispatch(logsApi.util.resetApiState());
+      storeAPI.dispatch(authApi.util.resetApiState());
+      storeAPI.dispatch(articlesSearchApi.util.resetApiState());
+      storeAPI.dispatch(ticketsApi.util.resetApiState());
+      storeAPI.dispatch(dashboardApi.util.resetApiState());
+      storeAPI.dispatch(carouselApi.util.resetApiState());
+    } catch (err) {
+      logger.error("Error resetting API cache on logout:", err);
+    }
   }
 
   return next(action);

@@ -8,6 +8,7 @@ import IconButton from "@mui/material/IconButton";
 import { Tooltip, Typography } from "@mui/material";
 import LanguageIcon from "@mui/icons-material/Language";
 import { colors } from "../../../styles/styles";
+import { logger } from "../../../utils/logger";
 
 export default function LanguageMenu() {
   const { i18n, t } = useTranslation();
@@ -35,7 +36,7 @@ export default function LanguageMenu() {
       localStorage.setItem("lang", selectedLang);
       setAnchorEl(null);
     } catch (err) {
-      console.error(`ERROR handleMenuItemClick: ${err}`);
+      logger.error(`ERROR handleMenuItemClick: ${err}`);
     }
   };
 

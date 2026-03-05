@@ -21,6 +21,7 @@ import { useNotification } from "../../../hooks";
 import { ActionButton } from "../ActionButton";
 import { CancelButton } from "../CancelButton";
 import { LoadingProgress } from "../LoadingProgress";
+import { logger } from "../../../utils/logger";
 
 /**
  * DeleteButton - Botón de eliminación con diálogo de confirmación y snackbar integrado
@@ -71,7 +72,7 @@ export const DeleteButton = ({
 
   const handleConfirmDelete = async () => {
     if (!handleDelete) {
-      console.error("DeleteButton: handleDelete prop is required");
+      logger.error("DeleteButton: handleDelete prop is required");
       return;
     }
 
@@ -95,7 +96,7 @@ export const DeleteButton = ({
         onSuccess(item);
       }
     } catch (error) {
-      console.error("DeleteButton delete error:", error);
+      logger.error("DeleteButton delete error:", error);
 
       // Mostrar snackbar de error
       const errorMsg =

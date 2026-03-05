@@ -145,7 +145,7 @@ export const AnnouncementsInbox = () => {
             </AppText>
             {announcements.length > 0 && (
               <Chip
-                label="New"
+                label={t("dashboard.announcementsInbox.new")}
                 size="small"
                 sx={{
                   fontSize: "0.625rem",
@@ -210,7 +210,7 @@ export const AnnouncementsInbox = () => {
                     borderRadius: "1rem",
                     transition: "background-color 0.2s ease",
                     "&:hover": {
-                      backgroundColor: "#4ee78611",
+                      backgroundColor: colors.detailsBackgroundColor,
                     },
                     "&:last-child": {
                       borderBottom: "none",

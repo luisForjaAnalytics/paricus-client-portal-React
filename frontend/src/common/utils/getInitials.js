@@ -1,3 +1,5 @@
+import { logger } from "./logger";
+
 export const getInitials = (name = "") => {
   try {
     const companyName = name.trim().split(" ");
@@ -5,7 +7,7 @@ export const getInitials = (name = "") => {
     const lastInitial = companyName[companyName.length - 1]?.[0] || "";
     return `${firstInitial}${lastInitial}`.toUpperCase();
   } catch (err) {
-    console.error(`ERROR: ${err}`);
+    logger.error(`ERROR: ${err}`);
     return "";
   }
 };

@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { colors } from "../../../../common/styles/styles";
 import { ColumnHeaderFilter } from "../../../../common/components/ui/ColumnHeaderFilter";
 import { formatTimestamp as formatTimestampUtil } from "../../../../common/utils/formatters";
+import { logger } from "../../../../common/utils/logger";
 
 /**
  * useLogsTableConfig - Shared hook for Logs table configuration
@@ -40,7 +41,7 @@ export const useLogsTableConfig = (logs = []) => {
         [filterKey]: value,
       }));
     } catch (error) {
-      console.error("useLogsTableConfig handleFilterChange error:", error);
+      logger.error("useLogsTableConfig handleFilterChange error:", error);
     }
   }, []);
 
@@ -58,7 +59,7 @@ export const useLogsTableConfig = (logs = []) => {
         status: "",
       });
     } catch (error) {
-      console.error("useLogsTableConfig clearFilters error:", error);
+      logger.error("useLogsTableConfig clearFilters error:", error);
     }
   }, []);
 
@@ -90,7 +91,7 @@ export const useLogsTableConfig = (logs = []) => {
       if (!ip) return t("common.na");
       return ip.startsWith("::ffff:") ? ip.replace("::ffff:", "") : ip;
     } catch (err) {
-      console.error(`useLogsTableConfig cleanIpAddress: ${err}`);
+      logger.error(`useLogsTableConfig cleanIpAddress: ${err}`);
       return t("common.na");
     }
   }, [t]);
@@ -109,7 +110,7 @@ export const useLogsTableConfig = (logs = []) => {
           return "default";
       }
     } catch (err) {
-      console.error(`useLogsTableConfig getStatusColor: ${err}`);
+      logger.error(`useLogsTableConfig getStatusColor: ${err}`);
       return "default";
     }
   }, []);
@@ -134,7 +135,7 @@ export const useLogsTableConfig = (logs = []) => {
           return "default";
       }
     } catch (err) {
-      console.error(`useLogsTableConfig getEventTypeColor: ${err}`);
+      logger.error(`useLogsTableConfig getEventTypeColor: ${err}`);
       return "default";
     }
   }, []);
@@ -205,7 +206,7 @@ export const useLogsTableConfig = (logs = []) => {
     });
   }, [logs?.logs, filters]);
   const rows = filteredLogs;
-  const totalRows = filteredLogs.length;
+  const totalRows = logs?.pagination?.totalCount ?? filteredLogs.length;
   // Desktop columns with ColumnHeaderFilter
   const desktopColumns = useMemo(() => {
     try {
@@ -231,7 +232,6 @@ export const useLogsTableConfig = (logs = []) => {
         {
           field: "timestamp",
           headerName: t("userManagement.logs.timestamp"),
-          //width: 200,
           flex: 1,
           align: "center",
           headerAlign: "center",
@@ -251,7 +251,6 @@ export const useLogsTableConfig = (logs = []) => {
           field: "userId",
           headerName: t("userManagement.logs.userId"),
           width: 140,
-          //flex: 1,
           align: "center",
           headerAlign: "center",
           renderHeader: () => (
@@ -270,7 +269,6 @@ export const useLogsTableConfig = (logs = []) => {
           field: "eventType",
           headerName: t("userManagement.logs.eventType"),
           width: 180,
-          //flex: 1,
           align: "center",
           headerAlign: "center",
           renderHeader: () => (
@@ -299,7 +297,6 @@ export const useLogsTableConfig = (logs = []) => {
         {
           field: "entity",
           headerName: t("userManagement.logs.entity"),
-          //width: 120,
           flex: 1,
           align: "center",
           headerAlign: "center",
@@ -324,7 +321,6 @@ export const useLogsTableConfig = (logs = []) => {
           field: "description",
           headerName: t("userManagement.logs.description"),
           flex: 1,
-          //minWidth: 300,
           align: "center",
           headerAlign: "center",
           renderHeader: () => (
@@ -342,7 +338,6 @@ export const useLogsTableConfig = (logs = []) => {
         {
           field: "ipAddress",
           headerName: t("userManagement.logs.ipAddress"),
-          //width: 150,
           flex: 1,
           align: "center",
           headerAlign: "center",
@@ -369,7 +364,6 @@ export const useLogsTableConfig = (logs = []) => {
         {
           field: "status",
           headerName: t("userManagement.logs.status"),
-          //width: 160,
           flex: 1,
           align: "center",
           headerAlign: "center",
@@ -395,26 +389,9 @@ export const useLogsTableConfig = (logs = []) => {
             />
           ),
         },
-        // {
-        //   field: "actions",
-        //   headerName: t("common.actions"),
-        //   width: 100,
-        //   align: "center",
-        //   headerAlign: "center",
-        //   sortable: false,
-        //   renderHeader: () => (
-        //     <ColumnHeaderFilter
-        //       headerName={t("common.actions")}
-        //       filterType="actions"
-        //       isOpen={isOpen}
-        //       onClearFilters={clearFilters}
-        //     />
-        //   ),
-        //   renderCell: () => null,
-        // },
       ];
     } catch (error) {
-      console.error("useLogsTableConfig desktopColumns error:", error);
+      logger.error("useLogsTableConfig desktopColumns error:", error);
       return [];
     }
   }, [

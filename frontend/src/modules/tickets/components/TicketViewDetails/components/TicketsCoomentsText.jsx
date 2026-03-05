@@ -52,7 +52,7 @@ export const TicketsCoomentsText = ({ ticket }) => {
         borderRadius: "12px",
         border: "1px solid #E5E7EB",
         overflow: "hidden",
-        margin: "1rem 0 1rem 1rem", // Same margin as descriptionSection
+        margin: { xs: "1rem 0.5rem 1rem 0.5rem", md: "1rem 0 1rem 1rem" }, // Same margin as descriptionSection
       }}
     >
       {/* Tabs Header */}
@@ -79,12 +79,20 @@ export const TicketsCoomentsText = ({ ticket }) => {
           }}
         >
           <Tab
-            icon={<HistoryIcon sx={{ fontSize: "1rem", color: colors.datailsTitleColor }} />}
+            icon={
+              <HistoryIcon
+                sx={{ fontSize: "1rem", color: colors.datailsTitleColor }}
+              />
+            }
             iconPosition="start"
             label={t("tickets.ticketView.historical")}
           />
           <Tab
-            icon={<CommentIcon sx={{ fontSize: "1rem", color: colors.datailsTitleColor }} />}
+            icon={
+              <CommentIcon
+                sx={{ fontSize: "1rem", color: colors.datailsTitleColor }}
+              />
+            }
             iconPosition="start"
             label={t("tickets.ticketView.comments")}
           />

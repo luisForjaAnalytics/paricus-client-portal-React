@@ -1,4 +1,5 @@
 import { colors } from "../styles/styles";
+import { logger } from "./logger";
 // Priority
 
 export const PRIORITY_STATUS = {
@@ -35,7 +36,7 @@ export const getPriorityStyles = (priority) => {
         };
     }
   } catch (err) {
-    console.error(`ERROR: ${err}`);
+    logger.error(`ERROR: ${err}`);
   }
 };
 
@@ -82,6 +83,6 @@ export const getStatusStyles = (status) => {
         };
     }
   } catch (err) {
-    console.error(`ERROR: ${err}`);
+    logger.error(`ERROR: ${err}`);
   }
 };

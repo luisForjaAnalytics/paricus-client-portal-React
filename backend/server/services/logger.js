@@ -72,12 +72,14 @@ export async function logUserCreate(performedByUserId, newUserEmail) {
 /**
  * Log user update
  */
-export async function logUserUpdate(performedByUserId, updatedUserEmail) {
+export async function logUserUpdate(performedByUserId, updatedUserEmail, changes = null) {
   await createLog({
     userId: performedByUserId.toString(),
     eventType: 'UPDATE',
     entity: 'User',
-    description: `Updated user: ${updatedUserEmail}`,
+    description: changes
+      ? `User ${updatedUserEmail}: ${changes}`
+      : `Updated user: ${updatedUserEmail}`,
     status: 'SUCCESS',
   });
 }
@@ -151,12 +153,14 @@ export async function logClientCreate(performedByUserId, clientName) {
 /**
  * Log client update
  */
-export async function logClientUpdate(performedByUserId, clientName) {
+export async function logClientUpdate(performedByUserId, clientName, changes = null) {
   await createLog({
     userId: performedByUserId.toString(),
     eventType: 'UPDATE',
     entity: 'Client',
-    description: `Updated client: ${clientName}`,
+    description: changes
+      ? `Client ${clientName}: ${changes}`
+      : `Updated client: ${clientName}`,
     status: 'SUCCESS',
   });
 }

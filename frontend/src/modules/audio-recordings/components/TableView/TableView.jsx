@@ -1,16 +1,12 @@
 import PropTypes from "prop-types";
 import Tooltip from "@mui/material/Tooltip";
-import {
-  Box,
-  IconButton,
-  Chip,
-  Typography,
-} from "@mui/material";
+import { Box, IconButton, Chip, Typography } from "@mui/material";
 import {
   PlayArrow as PlayArrowIcon,
   Stop as StopIcon,
   Download as DownloadIcon,
 } from "@mui/icons-material";
+import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 import PhoneIcon from "@mui/icons-material/Phone";
 import SupportAgentIcon from "@mui/icons-material/SupportAgent";
 import { useTranslation } from "react-i18next";
@@ -21,6 +17,7 @@ import { ColumnHeaderFilter } from "../../../../common/components/ui/ColumnHeade
 import { colors } from "../../../../common/styles/styles";
 import { useCallback, useMemo } from "react";
 import { LoadingProgress } from "../../../../common/components/ui/LoadingProgress";
+import { logger } from "../../../../common/utils/logger";
 
 const transformRecordings = (rowsTable, formatDate) => {
   try {
@@ -39,7 +36,7 @@ const transformRecordings = (rowsTable, formatDate) => {
       audiofilename: data.audiofilename,
     }));
   } catch (err) {
-    console.error(`ERROR: transformRecordings - ${err.message}`, err);
+    logger.error(`ERROR: transformRecordings - ${err.message}`, err);
     return [];
   }
 };
@@ -84,13 +81,13 @@ export const TableView = ({
         }));
       }
     },
-    [setFilters, setCompanyFilter]
+    [setFilters, setCompanyFilter],
   );
 
   // Transform recordings data for DataGrid
   const rows = useMemo(
     () => transformRecordings(dataViewInfo, formatDateTime),
-    [dataViewInfo, formatDateTime]
+    [dataViewInfo, formatDateTime],
   );
 
   // DataGrid columns with proper dependencies for re-render
@@ -110,7 +107,7 @@ export const TableView = ({
             filterValue={filters.interactionId}
             onFilterChange={handleFilterChange}
             placeholder={t(
-              "audioRecordings.advancedFilters.interactionIdPlaceholder"
+              "audioRecordings.advancedFilters.interactionIdPlaceholder",
             )}
             isOpen={isOpen}
           />
@@ -228,7 +225,7 @@ export const TableView = ({
             filterValue={filters.customerPhone}
             onFilterChange={handleFilterChange}
             placeholder={t(
-              "audioRecordings.advancedFilters.customerPhonePlaceholder"
+              "audioRecordings.advancedFilters.customerPhonePlaceholder",
             )}
             isOpen={isOpen}
           />
@@ -243,7 +240,7 @@ export const TableView = ({
             }}
           >
             <PhoneIcon fontSize="small" sx={{ color: "action.active" }} />
-            {params.value || "N/A"}
+            {params.value || t("common.na")}
           </Box>
         ),
       },
@@ -261,7 +258,7 @@ export const TableView = ({
             filterValue={filters.agentName}
             onFilterChange={handleFilterChange}
             placeholder={t(
-              "audioRecordings.advancedFilters.agentNamePlaceholder"
+              "audioRecordings.advancedFilters.agentNamePlaceholder",
             )}
             isOpen={isOpen}
           />
@@ -279,7 +276,7 @@ export const TableView = ({
               fontSize="small"
               sx={{ color: "action.active" }}
             />
-            {params.value || "N/A"}
+            {params.value || t("common.na")}
           </Box>
         ),
       },
@@ -340,11 +337,17 @@ export const TableView = ({
                     }
                   >
                     {isLoadingUrl ? (
-                     <LoadingProgress size={20} />
+                      <LoadingProgress size={20} />
                     ) : isPlaying ? (
                       <StopIcon />
                     ) : (
-                      <PlayArrowIcon />
+                      <PlayCircleOutlineIcon
+                        sx={{
+                          color: colors.focusRing,
+                          fontSize: "1.85rem",
+                          mt: "-0.2rem",
+                        }}
+                      />
                     )}
                   </IconButton>
                 </span>
@@ -385,7 +388,7 @@ export const TableView = ({
       toggleAudio,
       handlePrefetchAudio,
       downloadAudio,
-    ]
+    ],
   );
 
   // Handle pagination model change (DataGrid uses 0-based page index)
@@ -399,7 +402,7 @@ export const TableView = ({
         onPageChange(model.page + 1); // Convert to 1-based
       }
     },
-    [page, itemsPerPage, onPageChange, onPageSizeChange]
+    [page, itemsPerPage, onPageChange, onPageSizeChange],
   );
 
   return (
@@ -447,7 +450,7 @@ TableView.propTypes = {
       customer_phone_number: PropTypes.string,
       agent_name: PropTypes.string,
       audiofilename: PropTypes.string,
-    })
+    }),
   ),
   loading: PropTypes.bool,
   formatDateTime: PropTypes.func.isRequired,
@@ -491,4 +494,3 @@ TableView.defaultProps = {
   totalCount: 0,
   isDebouncing: false,
 };
-

@@ -4,6 +4,7 @@ import { Visibility } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import { colors } from "../../../styles/styles";
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
+import { logger } from "../../../utils/logger";
 
 export const ViewButton = ({
   handleClick,
@@ -23,7 +24,7 @@ export const ViewButton = ({
         handleClick(item);
       }
     } catch (error) {
-      console.error("ViewButton click error:", error);
+      logger.error("ViewButton click error:", error);
     }
   };
 

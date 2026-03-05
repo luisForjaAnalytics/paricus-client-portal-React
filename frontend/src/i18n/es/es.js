@@ -1,4 +1,3 @@
-import { Details } from "@mui/icons-material";
 
 export default {
   // Navegación - Sidebar
@@ -301,6 +300,7 @@ export default {
     rowsPerPage: "Filas por página",
     showPassword: "Mostrar contraseña",
     hidePassword: "Ocultar contraseña",
+    errorRenderingContent: "Error al mostrar el contenido. Por favor recarga la página.",
   },
 
   // Login
@@ -866,6 +866,8 @@ export default {
     sectionTitle: "Tickets",
     filters: "Filtros",
     noTicketsFound: "No se encontraron tickets",
+    errorLoading: "Error al cargar el ticket",
+    noSubject: "SIN ASUNTO",
     table: {
       ticketId: "ID de Ticket",
       updatedAt: "Última Actualización",
@@ -1017,6 +1019,7 @@ export default {
       noAnnouncements: "No hay anuncios aún",
       attachmentNotAvailable:
         "Archivos adjuntos: {{files}}. Los archivos aún no han sido subidos al almacenamiento. Esta funcionalidad estará disponible pronto.",
+      new: "Nuevo",
     },
     ticketsBySegment: "Tickets por Segmento",
     ticketLifeCycle: "Ciclo de Vida del Ticket",
@@ -1126,5 +1129,11 @@ export default {
     low: "Baja",
     medium: "Media",
     high: "Alta",
+  },
+  errorBoundary: {
+    title: "Algo salió mal",
+    message: "Ocurrió un error inesperado. Por favor intenta de nuevo.",
+    reloadPage: "Recargar Página",
+    goToDashboard: "Ir al Dashboard",
   },
 };

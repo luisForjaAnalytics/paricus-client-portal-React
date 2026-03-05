@@ -127,79 +127,84 @@ export const TicketViewDetails = () => {
         <TicketAssignedToContext.Provider value={assignedToContextValue}>
           <TicketDescriptionContext.Provider value={descriptionContextValue}>
             <TicketFilesContext.Provider value={filesContextValue}>
-        <Box
-          sx={{
-            width: "100%",
-            height: "80vh", // Altura completa de la ventana
-            display: "flex",
-            flexDirection: "column",
-            gap: 2,
-            paddingBottom: 1,
-            pt: { xs: 2, md: 1 },
-            pl: { xs: 2, md: 3 },
-            pr: { xs: 2, md: 3 },
-          }}
-        >
-          {/* Show subtle loading indicator when refetching (e.g., after uploading image) */}
-          {isFetching && ticket && (
-            <LinearProgress
-              sx={{ position: "absolute", top: 0, left: 0, right: 0 }}
-            />
-          )}
-
-          {/* SUBJECT */}
-          <Box>
-            <Typography sx={ticketStyle.typographySubject}>
-              {ticket?.subject?.toUpperCase() || "NO SUBJECT"}
-            </Typography>
-          </Box>
-
-          {/* DESCRIPTION AND DETAILS */}
-          <Box
-            sx={{
-              ...ticketStyle.descriptioDetailBox,
-              flex: 1,
-              minHeight: 0,
-            }}
-          >
-            {/* LEFT COLUMN - Description and Tabs (Historical/Comments) */}
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                //gap: 1,
-                width: "70%",
-                minWidth: 0,
-                height: "100%",
-              }}
-            >
-              {/* DESCRIPTION */}
               <Box
                 sx={{
-                  ...ticketStyle.descriptionSection,
-                  height: "30%",
+                  width: "100%",
+                  height: { xs: "auto", md: "80vh" }, // Altura completa de la ventana
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 2,
+                  paddingBottom: 1,
+                  pt: { xs: 2, md: 1 },
+                  pl: { xs: 0, md: 3 },
+                  pr: { xs: 2, md: 3 },
                 }}
               >
-                <TicketDescriptionInfo ticket={ticket} />
+                {/* Show subtle loading indicator when refetching (e.g., after uploading image) */}
+                {isFetching && ticket && (
+                  <LinearProgress
+                    sx={{ position: "absolute", top: 0, left: 0, right: 0 }}
+                  />
+                )}
+
+                {/* SUBJECT */}
+                <Box>
+                  <Typography
+                    sx={{
+                      ...ticketStyle.typographySubject,
+                      textAlign: { xs: "center", md: "left" },
+                    }}
+                  >
+                    {ticket?.subject?.toUpperCase() || "NO SUBJECT"}
+                  </Typography>
+                </Box>
+
+                {/* DESCRIPTION AND DETAILS */}
+                <Box
+                  sx={{
+                    ...ticketStyle.descriptioDetailBox,
+                    flex: 1,
+                    minHeight: 0,
+                  }}
+                >
+                  {/* LEFT COLUMN - Description and Tabs (Historical/Comments) */}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      //gap: 1,
+                      width: { xs: "auto", md: "70%" },
+                      minWidth: 0,
+                      height: "100%",
+                    }}
+                  >
+                    {/* DESCRIPTION */}
+                    <Box
+                      sx={{
+                        ...ticketStyle.descriptionSection,
+                        height: "30%",
+                      }}
+                    >
+                      <TicketDescriptionInfo ticket={ticket} />
+                    </Box>
+
+                    {/* TABS - Historical and Comments */}
+                    <TicketsCoomentsText ticket={ticket} />
+                  </Box>
+
+                  {/* RIGHT COLUMN - INFO DETAILS */}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      width: { xs: "auto", md: "35%" },
+                      minWidth: "300px",
+                    }}
+                  >
+                    <TicketInfoDetails ticket={ticket} />
+                  </Box>
+                </Box>
               </Box>
-
-              {/* TABS - Historical and Comments */}
-              <TicketsCoomentsText ticket={ticket} />
-            </Box>
-
-            {/* RIGHT COLUMN - INFO DETAILS */}
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                width: "35%",
-                minWidth: "300px",
-              }}
-            >
-              <TicketInfoDetails ticket={ticket} />
-            </Box>
-          </Box>
-        </Box>
             </TicketFilesContext.Provider>
           </TicketDescriptionContext.Provider>
         </TicketAssignedToContext.Provider>

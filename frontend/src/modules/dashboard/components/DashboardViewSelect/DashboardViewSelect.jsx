@@ -12,6 +12,7 @@ import { SwiperView } from "../../../../common/components/ui/Swiper";
 import { useGetCarouselImagesQuery } from "../../../../store/api/carouselApi";
 import { getAttachmentUrl } from "../../../../common/utils/getAttachmentUrl";
 import { LoadingProgress } from "../../../../common/components/ui/LoadingProgress";
+import { logger } from "../../../../common/utils/logger";
 
 /**
  * DashboardViewSelect - Displays dashboard content based on selected client/user
@@ -58,7 +59,7 @@ export const DashboardViewSelect = () => {
     try {
       refetch();
     } catch (err) {
-      console.error("Error refetching dashboard data:", err);
+      logger.error("Error refetching dashboard data:", err);
     }
   };
 

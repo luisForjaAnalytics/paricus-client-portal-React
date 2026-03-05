@@ -29,6 +29,7 @@ export const profileApi = createApi({
         method: 'PUT',
         body: passwordData,
       }),
+      invalidatesTags: ['Profile'],
     }),
   }),
 });

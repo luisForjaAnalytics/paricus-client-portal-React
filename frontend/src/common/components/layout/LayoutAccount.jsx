@@ -172,7 +172,7 @@ export const LayoutAccount = () => {
         <DrawerHeader sx={{ justifyContent: "center", py: 0 }}>
           <Box
             component="img"
-            src="/paricus_logo.jpeg"
+            src={open ? "/paricus_logo.jpeg" : "/log.png"}
             alt="Paricus Logo"
             sx={{
               width: open ? 120 : 40,

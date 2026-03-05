@@ -3,6 +3,7 @@ import { IconButton, Tooltip } from "@mui/material";
 import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline';
 import { useTranslation } from "react-i18next";
 import { colors } from "../../../styles/styles";
+import { logger } from "../../../utils/logger";
 
 export const EditButton = ({
   handleClick,
@@ -22,7 +23,7 @@ export const EditButton = ({
         handleClick(item);
       }
     } catch (error) {
-      console.error("EditButton click error:", error);
+      logger.error("EditButton click error:", error);
     }
   };
 

@@ -3,6 +3,7 @@ import { IconButton, Tooltip } from "@mui/material";
 import { Download as DownloadIcon } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import { colors } from "../../../styles/styles";
+import { logger } from "../../../utils/logger";
 
 export const DownloadButton = ({
   handleClick,
@@ -22,7 +23,7 @@ export const DownloadButton = ({
         handleClick(item);
       }
     } catch (error) {
-      console.error("DownloadButton click error:", error);
+      logger.error("DownloadButton click error:", error);
     }
   };
 

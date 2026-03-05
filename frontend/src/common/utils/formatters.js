@@ -1,13 +1,14 @@
 /**
  * Centralized formatting utilities.
  */
+import { logger } from "./logger";
 
 export const formatDate = (dateString, locale, options) => {
   if (!dateString) return "N/A";
   try {
     return new Date(dateString).toLocaleDateString(locale, options);
   } catch (err) {
-    console.error(`ERROR formatDate: ${err}`);
+    logger.error(`ERROR formatDate: ${err}`);
     return "N/A";
   }
 };
@@ -23,7 +24,7 @@ export const formatDateTime = (dateString, locale = "en-US") => {
       minute: "2-digit",
     }).format(new Date(dateString));
   } catch (err) {
-    console.error(`ERROR formatDateTime: ${err}`);
+    logger.error(`ERROR formatDateTime: ${err}`);
     return "N/A";
   }
 };
@@ -40,7 +41,7 @@ export const formatTimestamp = (dateString, locale = "en-US") => {
       second: "2-digit",
     });
   } catch (err) {
-    console.error(`ERROR formatTimestamp: ${err}`);
+    logger.error(`ERROR formatTimestamp: ${err}`);
     return dateString || "N/A";
   }
 };
@@ -53,7 +54,7 @@ export const formatFileSize = (bytes, labels) => {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   } catch (err) {
-    console.error(`ERROR formatFileSize: ${err}`);
+    logger.error(`ERROR formatFileSize: ${err}`);
     return `0 ${(labels || ["Bytes"])[0]}`;
   }
 };
@@ -65,7 +66,7 @@ export const formatCurrency = (amount, currency = "USD") => {
       currency,
     }).format(amount);
   } catch (err) {
-    console.error(`ERROR formatCurrency: ${err}`);
+    logger.error(`ERROR formatCurrency: ${err}`);
     return `$${amount}`;
   }
 };

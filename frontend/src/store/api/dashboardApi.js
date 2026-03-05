@@ -38,18 +38,6 @@ export const dashboardApi = createApi({
       keepUnusedDataFor: 300,
     }),
 
-    // DEPRECATED: Articles now come from external API (articlesApi)
-    // Get recent articles (last 3)
-    /*
-    getRecentArticles: builder.query({
-      query: () => "/recent-articles",
-      transformResponse: (response) => response.data || [],
-      providesTags: ["RecentArticles"],
-      // Cache for 5 minutes
-      keepUnusedDataFor: 300,
-    }),
-    */
-
     // Refresh dashboard stats manually
     refreshDashboardStats: builder.mutation({
       query: () => "/stats",

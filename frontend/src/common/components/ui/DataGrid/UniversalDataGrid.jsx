@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import PropTypes from "prop-types";
 import { dataGridTable } from "../../../styles/styles";
 import { LoadingProgress } from "../LoadingProgress";
+import { logger } from "../../../utils/logger";
 
 /**
  * UniversalDataGrid - Componente reutilizable para tablas con DataGrid de MUI
@@ -86,7 +87,7 @@ export const UniversalDataGrid = ({
   // Memoize processed rows to prevent unnecessary re-renders
   const processedRows = useMemo(() => {
     if (!Array.isArray(rows)) {
-      console.warn("UniversalDataGrid: rows prop must be an array");
+      logger.warn("UniversalDataGrid: rows prop must be an array");
       return [];
     }
     return rows;
@@ -95,7 +96,7 @@ export const UniversalDataGrid = ({
   // Memoize columns to prevent re-creation
   const processedColumns = useMemo(() => {
     if (!Array.isArray(columns)) {
-      console.warn("UniversalDataGrid: columns prop must be an array");
+      logger.warn("UniversalDataGrid: columns prop must be an array");
       return [];
     }
     return columns;

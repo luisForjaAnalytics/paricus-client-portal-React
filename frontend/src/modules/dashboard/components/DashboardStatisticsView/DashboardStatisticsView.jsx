@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import { Box, Chip, Card, CardContent, Typography } from "@mui/material";
 import {
   Phone,
@@ -138,6 +139,15 @@ const StatCard = ({ icon, value, label, badge, achieved, viewReportsText }) => {
       </CardContent>
     </Card>
   );
+};
+
+StatCard.propTypes = {
+  icon: PropTypes.node.isRequired,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  label: PropTypes.string.isRequired,
+  badge: PropTypes.string,
+  achieved: PropTypes.bool,
+  viewReportsText: PropTypes.string,
 };
 
 export const DashboardStatisticsView = () => {

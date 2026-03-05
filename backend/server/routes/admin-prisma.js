@@ -154,9 +154,12 @@ router.post('/clients',
     // Invalidate clients cache
     invalidatePatternCache('clients');
 
-    res.status(201).json({ 
+    // Log client creation
+    await logClientCreate(req.user.userId, name);
+
+    res.status(201).json({
       message: 'Client created successfully',
-      client 
+      client
     });
   } catch (error) {
     console.error('Create client error:', error);
@@ -175,6 +178,15 @@ router.put('/clients/:id',
     const { id } = req.params;
     const { name, isActive, isProspect } = req.body;
 
+    // Get current client state to detect changes
+    const currentClient = await prisma.client.findUnique({
+      where: { id: parseInt(id) }
+    });
+
+    if (!currentClient) {
+      return res.status(404).json({ error: 'Client not found' });
+    }
+
     const client = await prisma.client.update({
       where: { id: parseInt(id) },
       data: {
@@ -184,9 +196,20 @@ router.put('/clients/:id',
       }
     });
 
-    res.json({ 
+    // Log client changes
+    if (isActive !== undefined && isActive !== currentClient.isActive) {
+      await logClientUpdate(
+        req.user.userId,
+        client.name,
+        isActive ? 'activated' : 'deactivated'
+      );
+    } else {
+      await logClientUpdate(req.user.userId, client.name);
+    }
+
+    res.json({
       message: 'Client updated successfully',
-      client 
+      client
     });
   } catch (error) {
     if (error.code === 'P2025') {
@@ -207,9 +230,12 @@ router.delete('/clients/:id', requireAdminClients, validateId, async (req, res) 
       data: { isActive: false }
     });
 
-    res.json({ 
+    // Log client deactivation
+    await logClientUpdate(req.user.userId, client.name, 'deactivated');
+
+    res.json({
       message: 'Client deactivated successfully',
-      client 
+      client
     });
   } catch (error) {
     if (error.code === 'P2025') {
@@ -362,7 +388,7 @@ router.post('/users',
     const { passwordHash: _, ...userResponse } = user;
 
     // Log user creation
-    await logUserCreate(req.user.id, email);
+    await logUserCreate(req.user.userId, email);
 
     res.status(201).json({ 
       message: 'User created successfully',
@@ -397,6 +423,12 @@ router.put('/users/:id',
     if (clientId !== undefined || client_id !== undefined) updateData.clientId = clientId ? parseInt(clientId) : parseInt(client_id);
     if (email !== undefined) updateData.email = email;
 
+    // Get current user state to detect activate/deactivate
+    const currentUser = await prisma.user.findUnique({
+      where: { id: parseInt(id) },
+      select: { isActive: true }
+    });
+
     const user = await prisma.user.update({
       where: { id: parseInt(id) },
       data: updateData,
@@ -417,8 +449,13 @@ router.put('/users/:id',
     // Remove password hash from response
     const { passwordHash: _, ...userResponse } = user;
 
-    // Log user update
-    await logUserUpdate(req.user.id, user.email);
+    // Log user update with specific message for activate/deactivate
+    const isActiveChanged = updateData.isActive !== undefined && currentUser && updateData.isActive !== currentUser.isActive;
+    if (isActiveChanged) {
+      await logUserUpdate(req.user.userId, user.email, updateData.isActive ? 'activated' : 'deactivated');
+    } else {
+      await logUserUpdate(req.user.userId, user.email);
+    }
 
     res.json({
       message: 'User updated successfully',
@@ -443,8 +480,8 @@ router.delete('/users/:id', requireAdminUsers, validateId, async (req, res) => {
       data: { isActive: false }
     });
 
-    // Log user deletion/deactivation
-    await logUserDelete(req.user.id, user.email);
+    // Log user deactivation
+    await logUserUpdate(req.user.userId, user.email, 'deactivated');
 
     res.json({
       message: 'User deactivated successfully'

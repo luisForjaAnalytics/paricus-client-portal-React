@@ -15,6 +15,7 @@ import {
   Download as DownloadIcon,
   Headset as HeadsetIcon,
 } from "@mui/icons-material";
+import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 import PhoneIcon from "@mui/icons-material/Phone";
 import SupportAgentIcon from "@mui/icons-material/SupportAgent";
 import { useTranslation } from "react-i18next";
@@ -152,7 +153,9 @@ export const QuickFiltersMobile = ({
               ) : isPlaying ? (
                 <StopIcon />
               ) : (
-                <PlayArrowIcon />
+                <PlayCircleOutlineIcon
+                  sx={{ color: colors.focusRing, fontSize: "2rem", mt:'-0.3rem' }}
+                />
               )}
             </IconButton>
           </span>
@@ -212,10 +215,15 @@ export const QuickFiltersMobile = ({
             </Box>
           </Box>
         )}
-        primaryIcon={<HeadsetIcon fontSize="small" sx={{ color: colors.primary }} />}
+        primaryIcon={
+          <HeadsetIcon fontSize="small" sx={{ color: colors.primary }} />
+        }
         secondaryField={null}
         showTitle={false}
-        headerTitle={t("audioRecordings.table.callRecordings", "Call Recordings")}
+        headerTitle={t(
+          "audioRecordings.table.callRecordings",
+          "Call Recordings",
+        )}
         hideHeader={hideHeader}
         headerActions={headerActions}
         subHeader={subHeader}

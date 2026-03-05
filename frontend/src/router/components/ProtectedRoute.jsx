@@ -32,22 +32,22 @@ export const ProtectedRoute = ({
 
   // Verificar si requiere ser super admin (BPO Administration)
   if (requireSuperAdmin && user?.clientName !== "BPO Administration") {
-    return null;
+    return <Navigate to="/unauthorized" replace />;
   }
 
   // Verificar permiso único
   if (requiredPermission && !hasPermission(requiredPermission)) {
-    return null;
+    return <Navigate to="/unauthorized" replace />;
   }
 
   // Verificar múltiples permisos (todos requeridos)
   if (requiredPermissions.length > 0 && !hasAllPermissions(requiredPermissions)) {
-    return null;
+    return <Navigate to="/unauthorized" replace />;
   }
 
   // Verificar al menos un permiso
   if (anyPermissions.length > 0 && !hasAnyPermission(anyPermissions)) {
-    return null;
+    return <Navigate to="/unauthorized" replace />;
   }
 
   // Usuario tiene acceso

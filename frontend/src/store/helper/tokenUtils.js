@@ -1,4 +1,4 @@
-
+import { logger } from "../../common/utils/logger";
 
 /**
  *
@@ -12,7 +12,7 @@ export const decodeToken = (token) => {
     const decodedPayload = atob(payloadBase64)
     return JSON.parse(decodedPayload)
   } catch (error) {
-    console.error(`tokenUtils decodeToken: ${error}`)
+    logger.error(`tokenUtils decodeToken: ${error}`)
     return null
   }
 }

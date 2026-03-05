@@ -52,6 +52,16 @@ export const colors = {
   permissionCirculeButton: "#51c979b2",
   //Dashboard Section
   masterRepoBackgroundColor: "#4ee78611",
+  masterRepoItemHover: "rgba(46, 125, 50, 0.12)",
+
+  // Loading Progress Gradient
+  gradientStart: "#1fb467ec",
+  gradientEnd: "#0a6a38c7",
+
+  // Tiptap Editor
+  tiptapToolbarBg: "#fafafa",
+  tiptapActiveButton: "#29b85e80",
+  tiptapActiveButtonHover: "#29b85e59",
   // Text colors (from Tailwind)
   textPrimary: "#111827", // text-gray-900
   textSecondary: "#374151", // text-gray-700
@@ -953,7 +963,7 @@ export const ticketStyle = {
   /* DESCRIPTION AND DETAILS */
   descriptioDetailBox: {
     display: "flex",
-    flexDirection: "row",
+    flexDirection: { xs: "column", md: "row" },
     backgroundColor: colors.drawer,
     borderRadius: "1rem",
     gap: 2,
@@ -967,10 +977,10 @@ export const ticketStyle = {
 
   descriptionSection: {
     backgroundColor: colors.detailsBackgroundColor,
-    padding: "1.5rem 1.5rem 1.5rem 1rem",
+    padding: { xs: "0.3rem 0.5rem 0rem 0.5rem", md: "1.5rem 1.5rem 1.5rem 1rem" },
     borderRadius: "12px",
     border: `0.1rem solid rgba(20, 177, 77, 0.2)`,
-    margin: "1rem 0 0rem 1rem",
+    margin: { xs: "1rem 0.5rem 0rem 0.5rem", md: "1rem 0 0rem 1rem" },
     overflowY: "auto",
   },
 

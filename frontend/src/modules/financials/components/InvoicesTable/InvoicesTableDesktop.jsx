@@ -67,7 +67,6 @@ export const InvoicesTableDesktop = ({
       sx={{
         backgroundColor: "transparent",
         borderRadius: "1rem",
-        // border: `1px solid ${colors.border}`,
         boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
         overflow: "hidden",
         width: "100%",
@@ -96,12 +95,6 @@ export const InvoicesTableDesktop = ({
             <TableCell sx={table.headerCell}>
               {t("invoices.table.paymentDate")}
             </TableCell>
-            {/* {isAdmin && (
-              <TableCell sx={table.headerCellInvoice}>
-                {t("invoices.table.paymentLink")}
-              </TableCell>
-            )} */}
-
             <TableCell sx={table.headerCellInvoice}>
               {t("invoices.table.paymentLink")}
             </TableCell>
@@ -218,16 +211,6 @@ export const InvoicesTableDesktop = ({
                   </Typography>
                 )}
               </TableCell>
-              {/* {isAdmin && (
-                <TableCell sx={table.cell}>
-                  <PendingLinkModal
-                    invoice={invoice}
-                    onSuccess={onPaymentLinkSuccess}
-                    onError={onPaymentLinkError}
-                  />
-                </TableCell>
-              )}               */}
-
               <TableCell sx={table.cell}>
                 <PendingLinkModal
                   invoice={invoice}

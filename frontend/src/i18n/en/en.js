@@ -300,6 +300,7 @@ export default {
     rowsPerPage: "Rows per page",
     showPassword: "Show password",
     hidePassword: "Hide password",
+    errorRenderingContent: "Error rendering content. Please try refreshing the page.",
   },
 
   // Login
@@ -862,6 +863,8 @@ export default {
     sectionTitle: "Tickets",
     filters: "Filters",
     noTicketsFound: "No tickets found",
+    errorLoading: "Error loading ticket",
+    noSubject: "NO SUBJECT",
     table: {
       ticketId: "Ticket ID",
       updatedAt: "Last Update",
@@ -1013,6 +1016,7 @@ export default {
       noAnnouncements: "No announcements yet",
       attachmentNotAvailable:
         "Attached files: {{files}}. Files have not been uploaded to storage yet. This feature will be available soon.",
+      new: "New",
     },
     ticketsBySegment: "Tickets by Segment",
     ticketLifeCycle: "Ticket Life-Cycle",
@@ -1121,5 +1125,11 @@ export default {
     low: "Low",
     medium: "Medium",
     high: "High",
+  },
+  errorBoundary: {
+    title: "Something went wrong",
+    message: "An unexpected error occurred. Please try again.",
+    reloadPage: "Reload Page",
+    goToDashboard: "Go to Dashboard",
   },
 };

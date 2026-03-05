@@ -2,6 +2,7 @@ import { memo } from "react";
 import PropTypes from "prop-types";
 import { Box, Typography } from "@mui/material";
 import { boxTypography, headerTitleBox } from "../../../styles/styles";
+import { logger } from "../../../utils/logger";
 
 /**
  * HeaderBoxTypography - Componente reutilizable para títulos de sección
@@ -24,7 +25,7 @@ const HeaderBoxTypographyComponent = ({
   // Validación: si no hay texto, no renderizar nada
   if (!text || typeof text !== "string") {
     if (process.env.NODE_ENV === "development") {
-      console.warn(
+      logger.warn(
         "HeaderBoxTypography: 'text' prop is required and must be a string"
       );
     }

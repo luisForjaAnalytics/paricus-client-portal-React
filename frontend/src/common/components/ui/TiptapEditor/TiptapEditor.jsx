@@ -24,7 +24,8 @@ import {
   Highlight as HighlightIcon,
 } from "@mui/icons-material";
 import PropTypes from "prop-types";
-import { tiptapEditorStyle } from "../../../styles/styles";
+import { tiptapEditorStyle, colors } from "../../../styles/styles";
+import { logger } from "../../../utils/logger";
 
 const MenuBar = ({ editor, customLeftButtons = [] }) => {
   if (!editor) {
@@ -161,7 +162,7 @@ const MenuBar = ({ editor, customLeftButtons = [] }) => {
           gap: 0.3,
           padding: "8px",
           borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
-          backgroundColor: "#fafafa",
+          backgroundColor: colors.tiptapToolbarBg,
         }}
       >
         {/* Custom left buttons */}
@@ -196,12 +197,12 @@ const MenuBar = ({ editor, customLeftButtons = [] }) => {
                   sx={{
                     padding: "4px",
                     backgroundColor: button.isActive
-                      ? "#29b85e80"
+                      ? colors.tiptapActiveButton
                       : "transparent",
                     color: button.isActive ? "white" : "rgba(0, 0, 0, 0.54)",
                     "&:hover": {
                       backgroundColor: button.isActive
-                        ? "#29b85e59"
+                        ? colors.tiptapActiveButtonHover
                         : "rgba(0, 0, 0, 0.04)",
                     },
                     "&:disabled": {
@@ -220,7 +221,7 @@ const MenuBar = ({ editor, customLeftButtons = [] }) => {
       </Box>
     );
   } catch (err) {
-    console.error("Error rendering MenuBar:", err);
+    logger.error("Error rendering MenuBar:", err);
     return null;
   }
 };
@@ -270,7 +271,7 @@ export const TiptapEditor = ({
           onChange(html, text.length);
         }
       } catch (err) {
-        console.error("Error updating editor content:", err);
+        logger.error("Error updating editor content:", err);
       }
     },
     onFocus: () => {
@@ -292,7 +293,7 @@ export const TiptapEditor = ({
         editor.commands.setContent(value || "");
       }
     } catch (err) {
-      console.error("Error setting editor content:", err);
+      logger.error("Error setting editor content:", err);
     }
   }, [value, editor]);
 

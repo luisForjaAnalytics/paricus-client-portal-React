@@ -19,6 +19,7 @@ import { setCredentials } from "../../../store/auth/authSlice";
 import { colors, primaryIconButton } from "../../styles/styles";
 import LanguageMenu from "./AppBar/LanguageMenu";
 import { extractApiError } from "../../utils/apiHelpers";
+import { logger } from "../../utils/logger";
 import { useNotification } from "../../hooks";
 import { AlertInline } from "../ui/AlertInline";
 import { LoadingProgress } from "../ui/LoadingProgress";
@@ -67,7 +68,7 @@ const LoginView = () => {
       dispatch(setCredentials(result));
       navigate("/app/dashboard", { replace: true });
     } catch (error) {
-      console.error("Login error:", error);
+      logger.error("Login error:", error);
       showError(extractApiError(error, t("login.invalidCredentials")));
     }
   };

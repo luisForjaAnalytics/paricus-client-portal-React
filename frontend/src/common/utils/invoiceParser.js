@@ -1,3 +1,5 @@
+import { logger } from "./logger";
+
 /**
  * Extrae información de una factura desde texto OCR
  * @param {string} text - Texto extraído del PDF
@@ -222,7 +224,7 @@ const parseDate = (dateStr) => {
     const result = `${year}-${month}-${day}`;
     return result;
   } catch (error) {
-    console.error(`❌ Error parsing date "${dateStr}":`, error);
+    logger.error(`Error parsing date "${dateStr}":`, error);
     return "";
   }
 };

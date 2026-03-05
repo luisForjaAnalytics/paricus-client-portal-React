@@ -1,4 +1,5 @@
 import { useState } from "react";
+import PropTypes from "prop-types";
 import { TextField, IconButton, InputAdornment, Tooltip } from "@mui/material";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
@@ -39,4 +40,8 @@ export const PasswordField = ({ slotProps, ...rest }) => {
       }}
     />
   );
+};
+
+PasswordField.propTypes = {
+  slotProps: PropTypes.object,
 };

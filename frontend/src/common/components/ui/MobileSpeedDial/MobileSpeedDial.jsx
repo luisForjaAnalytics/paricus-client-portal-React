@@ -4,6 +4,7 @@ import { Box, SpeedDial, SpeedDialAction, SpeedDialIcon } from "@mui/material";
 import { Close as CloseIcon } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import { colors } from "../../../styles/styles";
+import { logger } from "../../../utils/logger";
 
 const FAB_SIZE = 40;
 
@@ -30,7 +31,7 @@ export const MobileSpeedDial = ({ actions = [], sx }) => {
     try {
       onClick();
     } catch (error) {
-      console.error("MobileSpeedDial action error:", error);
+      logger.error("MobileSpeedDial action error:", error);
     }
     setOpen(false);
   }, []);

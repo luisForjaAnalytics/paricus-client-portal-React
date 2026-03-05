@@ -1,6 +1,7 @@
 import PropTypes from "prop-types";
 import { Button } from "@mui/material";
 import { outlinedButton } from "../../../styles/styles";
+import { logger } from "../../../utils/logger";
 
 export const CancelButton = ({
   handleClick,
@@ -18,7 +19,7 @@ export const CancelButton = ({
         handleClick(item);
       }
     } catch (error) {
-      console.error("CancelButton click error:", error);
+      logger.error("CancelButton click error:", error);
     }
   };
 

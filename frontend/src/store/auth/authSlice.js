@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { isTokenExpired } from "../helper/tokenUtils";
 import { authApi } from "../api/authApi";
+import { logger } from "../../common/utils/logger";
 
 /**
  * Safely parse JSON string with fallback value
@@ -13,7 +14,7 @@ const safeJsonParse = (jsonString, fallback = null) => {
   try {
     return JSON.parse(jsonString);
   } catch (error) {
-    console.error("Failed to parse stored data:", error);
+    logger.error("Failed to parse stored data:", error);
     return fallback;
   }
 };
@@ -40,7 +41,7 @@ const getInitialState = () => {
       }
     }
   } catch (error) {
-    console.error("Error initializing auth state:", error);
+    logger.error("Error initializing auth state:", error);
   }
 
   return {

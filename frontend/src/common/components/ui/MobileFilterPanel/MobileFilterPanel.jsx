@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import {
   Box,
   TextField,
@@ -338,4 +339,28 @@ export const MobileFilterPanel = ({
       </Box>
     </Collapse>
   );
+};
+
+MobileFilterPanel.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  filters: PropTypes.arrayOf(
+    PropTypes.shape({
+      key: PropTypes.string.isRequired,
+      label: PropTypes.string.isRequired,
+      type: PropTypes.oneOf(["text", "select", "date"]).isRequired,
+      value: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
+      placeholder: PropTypes.string,
+      options: PropTypes.arrayOf(
+        PropTypes.shape({
+          value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+          label: PropTypes.string.isRequired,
+        })
+      ),
+    })
+  ).isRequired,
+  onFilterChange: PropTypes.func.isRequired,
+  onSearch: PropTypes.func.isRequired,
+  onClear: PropTypes.func.isRequired,
+  loading: PropTypes.bool,
+  isDebouncing: PropTypes.bool,
 };

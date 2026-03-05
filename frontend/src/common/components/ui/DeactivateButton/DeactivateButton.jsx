@@ -20,6 +20,7 @@ import { colors, modalCard } from "../../../styles/styles";
 import { ActionButton } from "../ActionButton";
 import { CancelButton } from "../CancelButton";
 import { LoadingProgress } from "../LoadingProgress";
+import { logger } from "../../../utils/logger";
 
 /**
  * DeactivateButton - Botón de activación/desactivación con diálogo de confirmación
@@ -66,7 +67,7 @@ export const DeactivateButton = ({
 
   const handleConfirmDeactivate = async () => {
     if (!handleDeactivate) {
-      console.error("DeactivateButton: handleDeactivate prop is required");
+      logger.error("DeactivateButton: handleDeactivate prop is required");
       return;
     }
 
@@ -81,7 +82,7 @@ export const DeactivateButton = ({
         onSuccess(item);
       }
     } catch (error) {
-      console.error("DeactivateButton error:", error);
+      logger.error("DeactivateButton error:", error);
 
       if (onError) {
         onError(error, item);
