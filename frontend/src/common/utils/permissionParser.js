@@ -53,6 +53,7 @@ export const permissionSections = {
  * Toggling a parent permission also toggles all its children
  */
 export const parentChildPermissions = {
+  view_dashboard: ["dashboard_announcements_inbox", "dashboard_master_repository", "dashboard_swiper", "dashboard_active_tasks"],
   admin_broadcast: ["broadcast_announcements", "broadcast_swiper", "broadcast_kpi"],
 };
 

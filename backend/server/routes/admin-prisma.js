@@ -155,7 +155,7 @@ router.post('/clients',
     invalidatePatternCache('clients');
 
     // Log client creation
-    await logClientCreate(req.user.userId, name);
+    await logClientCreate(req.user.id, name);
 
     res.status(201).json({
       message: 'Client created successfully',
@@ -199,12 +199,12 @@ router.put('/clients/:id',
     // Log client changes
     if (isActive !== undefined && isActive !== currentClient.isActive) {
       await logClientUpdate(
-        req.user.userId,
+        req.user.id,
         client.name,
         isActive ? 'activated' : 'deactivated'
       );
     } else {
-      await logClientUpdate(req.user.userId, client.name);
+      await logClientUpdate(req.user.id, client.name);
     }
 
     res.json({
@@ -231,7 +231,7 @@ router.delete('/clients/:id', requireAdminClients, validateId, async (req, res) 
     });
 
     // Log client deactivation
-    await logClientUpdate(req.user.userId, client.name, 'deactivated');
+    await logClientUpdate(req.user.id, client.name, 'deactivated');
 
     res.json({
       message: 'Client deactivated successfully',
@@ -388,7 +388,7 @@ router.post('/users',
     const { passwordHash: _, ...userResponse } = user;
 
     // Log user creation
-    await logUserCreate(req.user.userId, email);
+    await logUserCreate(req.user.id, email);
 
     res.status(201).json({ 
       message: 'User created successfully',
@@ -452,9 +452,9 @@ router.put('/users/:id',
     // Log user update with specific message for activate/deactivate
     const isActiveChanged = updateData.isActive !== undefined && currentUser && updateData.isActive !== currentUser.isActive;
     if (isActiveChanged) {
-      await logUserUpdate(req.user.userId, user.email, updateData.isActive ? 'activated' : 'deactivated');
+      await logUserUpdate(req.user.id, user.email, updateData.isActive ? 'activated' : 'deactivated');
     } else {
-      await logUserUpdate(req.user.userId, user.email);
+      await logUserUpdate(req.user.id, user.email);
     }
 
     res.json({
@@ -481,7 +481,7 @@ router.delete('/users/:id', requireAdminUsers, validateId, async (req, res) => {
     });
 
     // Log user deactivation
-    await logUserUpdate(req.user.userId, user.email, 'deactivated');
+    await logUserUpdate(req.user.id, user.email, 'deactivated');
 
     res.json({
       message: 'User deactivated successfully'

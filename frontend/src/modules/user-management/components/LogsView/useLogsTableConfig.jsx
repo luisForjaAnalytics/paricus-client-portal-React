@@ -321,7 +321,7 @@ export const useLogsTableConfig = (logs = []) => {
           field: "description",
           headerName: t("userManagement.logs.description"),
           flex: 1,
-          align: "center",
+          align: "left",
           headerAlign: "center",
           renderHeader: () => (
             <ColumnHeaderFilter

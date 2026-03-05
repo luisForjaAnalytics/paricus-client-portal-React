@@ -19,6 +19,7 @@ frontend/src/
 │   │   │   ├── CancelButton/
 │   │   │   ├── ColumnHeaderFilter/
 │   │   │   ├── DataGrid/           # UniversalDataGrid
+│   │   │   ├── DeactivateButton/   # Activate/deactivate with confirm dialog
 │   │   │   ├── DeleteButton/
 │   │   │   ├── DownloadButton/
 │   │   │   ├── EditButton/
@@ -36,13 +37,15 @@ frontend/src/
 │   │   │   ├── UniversalMobilDataTable/
 │   │   │   └── ViewButton/
 │   │   │
+│   │   ├── ErrorBoundary/          # Error boundary with i18n (withTranslation HOC)
+│   │   │
 │   │   └── layout/                 # Layout components
 │   │       ├── AppBar/
 │   │       │   ├── AppBarLayout.jsx
 │   │       │   ├── AvatarButton.jsx
 │   │       │   └── LanguageMenu.jsx
 │   │       ├── ForgotPassword/     # 3-phase forgot password flow
-│   │       │   ├── ForgotPassword.jsx   # Orchestrator (email → code → password)
+│   │       │   ├── ForgotPassword.jsx   # Orchestrator (email -> code -> password)
 │   │       │   ├── index.js
 │   │       │   └── components/
 │   │       │       ├── EmailPhase.jsx   # Email input + RHF/Zod
@@ -70,7 +73,7 @@ frontend/src/
 │   │   └── useTicketDetailAttachments.js
 │   │
 │   ├── styles/                     # Global styles
-│   │   └── styles.js
+│   │   └── styles.js               # Centralized colors, typography, layout constants
 │   │
 │   └── utils/                      # Shared utilities
 │       ├── apiHelpers.js           # extractApiError
@@ -80,8 +83,8 @@ frontend/src/
 │       ├── getInitials.js
 │       ├── getStatusProperty.js
 │       ├── invoiceParser.js
-│       ├── logger.js
-│       └── permissionParser.js
+│       ├── logger.js               # Logger utility (replaces console.* in production)
+│       └── permissionParser.js     # Permission sections, parent-child mappings
 │
 ├── config/
 │   └── menu/
@@ -91,12 +94,12 @@ frontend/src/
 │   ├── dashboard/
 │   │   ├── DashboardView.jsx
 │   │   ├── components/
-│   │   │   ├── ActiveTasks/
-│   │   │   ├── AnnouncementsInbox/
+│   │   │   ├── ActiveTasks/         # Requires dashboard_active_tasks permission
+│   │   │   ├── AnnouncementsInbox/  # Requires dashboard_announcements_inbox permission
 │   │   │   ├── DashboardHeader/
 │   │   │   ├── DashboardStatisticsView/
-│   │   │   ├── DashboardViewSelect/
-│   │   │   └── MasterRepository/
+│   │   │   ├── DashboardViewSelect/ # Orchestrates sections with granular permissions
+│   │   │   └── MasterRepository/    # Requires dashboard_master_repository permission
 │   │   └── index.js
 │   │
 │   ├── financials/
@@ -133,8 +136,8 @@ frontend/src/
 │   │   ├── components/
 │   │   │   ├── UsersTab/           # Desktop + Mobile + AddNewUserModal
 │   │   │   ├── ClientsTab/        # Desktop + Mobile + AddNewClientModal
-│   │   │   ├── RolesTab/          # Desktop + Mobile + AddNewRoleModal + PermissionsModal
-│   │   │   ├── LogsView/         # Desktop + Mobile + AdvancedFilters
+│   │   │   ├── RolesTab/          # Desktop + Mobile + AddNewRoleModal + PermissionsModal + ViewPermissionsModal
+│   │   │   ├── LogsView/         # Desktop + Mobile + AdvancedFilters (server-side pagination)
 │   │   │   ├── FilterButton/
 │   │   │   ├── Navigation/        # NavBarOptions (tab navigation)
 │   │   │   └── index.js
@@ -194,7 +197,7 @@ frontend/src/
 ├── router/
 │   ├── AppRouter.jsx
 │   └── components/
-│       └── ProtectedRoute.jsx
+│       └── ProtectedRoute.jsx      # Redirects to /unauthorized (not blank page)
 │
 ├── store/
 │   ├── api/                        # RTK Query API slices
@@ -303,7 +306,7 @@ try {
 
 ```jsx
 // Orchestrator manages phase state, delegates to phase components
-const [phase, setPhase] = useState("email"); // "email" → "code" → "password"
+const [phase, setPhase] = useState("email"); // "email" -> "code" -> "password"
 
 {phase === "email" && <EmailPhase onSubmit={...} />}
 {phase === "code" && <CodePhase onSubmit={...} />}
@@ -319,6 +322,7 @@ All reusable UI components live in `common/components/ui/` with barrel exports:
 | ActionButton | Primary action button (submit, save) |
 | CancelButton | Cancel/back button |
 | AlertInline | Notification snackbar |
+| DeactivateButton | Activate/deactivate toggle with confirm dialog |
 | PasswordField | Password input with show/hide toggle |
 | LoadingProgress | Circular loading indicator |
 | UniversalDataGrid | Desktop data table |
@@ -345,22 +349,90 @@ const autofillOverride = {
 };
 ```
 
+### 9. Logger Utility
+
+All frontend code uses `logger` instead of `console.*`. In production, log calls are suppressed.
+
+```jsx
+import { logger } from "../../../common/utils/logger";
+
+logger.error("Something failed:", error);
+logger.warn("Unexpected state:", data);
+```
+
+### 10. Permission-Based Rendering
+
+#### Granular Dashboard Permissions
+
+Dashboard sections are controlled by individual permissions. The parent permission `view_dashboard` toggles all children:
+
+| Permission | Controls |
+|-----------|----------|
+| `view_dashboard` | Parent: access to dashboard route |
+| `dashboard_announcements_inbox` | AnnouncementsInbox component |
+| `dashboard_master_repository` | MasterRepository component |
+| `dashboard_swiper` | SwiperView carousel |
+| `dashboard_active_tasks` | ActiveTasks component |
+
+#### Broadcast Permissions (same parent-child pattern)
+
+| Permission | Controls |
+|-----------|----------|
+| `admin_broadcast` | Parent: access to broadcast management |
+| `broadcast_announcements` | Manage announcements |
+| `broadcast_swiper` | Manage swiper/carousel |
+| `broadcast_kpi` | Manage KPI display |
+
+#### Parent-Child Permission Toggle (PermissionsModal)
+
+When configuring role permissions, clicking a parent permission toggles all its children. Deselecting a child only removes that specific permission (and the parent if no siblings remain). Defined in `permissionParser.js`:
+
+```js
+export const parentChildPermissions = {
+  view_dashboard: ["dashboard_announcements_inbox", "dashboard_master_repository", "dashboard_swiper", "dashboard_active_tasks"],
+  admin_broadcast: ["broadcast_announcements", "broadcast_swiper", "broadcast_kpi"],
+};
+```
+
+---
+
+## Audit Logging
+
+Backend audit logs are created for key admin operations via `backend/server/services/logger.js`:
+
+| Operation | Entity | Event Type | Details |
+|-----------|--------|-----------|---------|
+| Create client | Client | CREATE | Client name |
+| Edit client | Client | UPDATE | Client name |
+| Activate/deactivate client | Client | UPDATE | "activated" / "deactivated" |
+| Create user | User | CREATE | User email |
+| Edit user | User | UPDATE | User email |
+| Activate/deactivate user | User | UPDATE | "activated" / "deactivated" |
+| Create/update/delete role | Role | CREATE/UPDATE/DELETE | Role name + changes |
+| Permission changes | Role | UPDATE | Added/removed permission names |
+| Login/logout | Auth | LOGIN/LOGOUT | User email |
+| Invoice CRUD | Invoice | CREATE/UPDATE/DELETE | Invoice number |
+| Announcement CRUD | Announcement | CREATE/DELETE | Title |
+| Carousel changes | Carousel | CREATE/DELETE | Image details |
+
+Logs are viewable in User Management > Logs with server-side pagination and inline column filters.
+
 ---
 
 ## Module Summary
 
 | Module | Description | Permission |
 |--------|-------------|------------|
-| dashboard | KPIs, announcements, active tasks | `view_dashboard` |
+| dashboard | KPIs, announcements, active tasks, swiper | `view_dashboard` + granular sub-permissions |
 | financials | Invoices, client summaries, breakdowns | `view_financials` / `admin_invoices` |
 | audio-recordings | Call recordings from WFM database | `admin_audio_recordings` |
 | user-management | Users, clients, roles, permissions, logs | `admin_users` / `admin_clients` / `admin_roles` |
 | knowledge-base | Articles with rich text editor | `view_knowledge_base` |
-| tickets | Support ticket CRUD with attachments | JWT auth |
+| tickets | Support ticket CRUD with attachments | `view_tickets` |
 | profile | User profile & password change | JWT auth |
 | reporting | Report viewing | `view_reporting` |
 | reports-management | Upload/manage client reports & folders | `admin_reports` |
-| QuickBroadcast | Dashboard carousel & KPI management | Admin |
+| QuickBroadcast | Dashboard carousel & KPI management | `admin_broadcast` + granular sub-permissions |
 
 ---
 
@@ -377,6 +449,6 @@ const autofillOverride = {
 
 ---
 
-**Last updated:** 2026-02-25
+**Last updated:** 2026-03-05
 **Pattern:** Screaming Architecture
 **Status:** Active development

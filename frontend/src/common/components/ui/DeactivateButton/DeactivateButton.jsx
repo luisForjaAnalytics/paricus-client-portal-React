@@ -74,9 +74,9 @@ export const DeactivateButton = ({
     setIsDeactivating(true);
 
     try {
-      await handleDeactivate(item);
-
+      // Close dialog before mutation to prevent flash of opposite state
       setOpen(false);
+      await handleDeactivate(item);
 
       if (onSuccess) {
         onSuccess(item);

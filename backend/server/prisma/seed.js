@@ -372,6 +372,10 @@ async function main() {
   // Define permission sets
   const clientAdminPermissions = [
     "view_dashboard",
+    "dashboard_announcements_inbox",
+    "dashboard_master_repository",
+    "dashboard_swiper",
+    "dashboard_active_tasks",
     "view_financials",
     "download_invoices",
     "view_reporting",
@@ -394,6 +398,10 @@ async function main() {
 
   const clientUserPermissions = [
     "view_dashboard",
+    "dashboard_announcements_inbox",
+    "dashboard_master_repository",
+    "dashboard_swiper",
+    "dashboard_active_tasks",
     "view_interactions",
     "view_knowledge_base",
     "view_reporting",

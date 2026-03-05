@@ -37,6 +37,12 @@ export const DashboardViewSelect = () => {
   const user = useSelector((state) => state.auth?.user);
   const isBPOAdmin = permissions?.includes("admin_clients") ?? false;
 
+  // Granular dashboard permissions
+  const canViewAnnouncements = permissions?.includes("dashboard_announcements_inbox") ?? true;
+  const canViewSwiper = permissions?.includes("dashboard_swiper") ?? true;
+  const canViewActiveTasks = permissions?.includes("dashboard_active_tasks") ?? true;
+  const canViewMasterRepo = permissions?.includes("dashboard_master_repository") ?? true;
+
   // Fetch carousel images
   const carouselClientId = isBPOAdmin
     ? selectedClientId || undefined
@@ -128,77 +134,88 @@ export const DashboardViewSelect = () => {
       </Box>
 
       {/* Announcements + Swiper grid — mobile: both on /swiper, desktop: always */}
-      <Box
-        sx={{
-          display: {
-            xs: section === "swiper" ? "grid" : "none",
-            md: "grid",
-          },
-          gridTemplateColumns: {
-            xs: "1fr",
-            lg: hasCarouselImages ? "1fr 1fr" : "1fr",
-          },
-          mb: 3,
-          gap: 3,
-          height: { xs: "auto", md: "32vh" },
-        }}
-      >
+      {(canViewAnnouncements || (canViewSwiper && hasCarouselImages)) && (
         <Box
           sx={{
-            display: { xs: "none", md: "flex" },
-            minHeight: 0,
-            overflow: "hidden",
+            display: {
+              xs: section === "swiper" ? "grid" : "none",
+              md: "grid",
+            },
+            gridTemplateColumns: {
+              xs: "1fr",
+              lg: canViewAnnouncements && canViewSwiper && hasCarouselImages ? "1fr 1fr" : "1fr",
+            },
+            mb: 3,
+            gap: 3,
+            height: { xs: "auto", md: "32vh" },
           }}
         >
-          <AnnouncementsInbox />
-        </Box>
+          {canViewAnnouncements && (
+            <Box
+              sx={{
+                display: { xs: "none", md: "flex" },
+                minHeight: 0,
+                overflow: "hidden",
+                width: "100%",
+              }}
+            >
+              <AnnouncementsInbox />
+            </Box>
+          )}
 
-        {hasCarouselImages && (
-          <Box sx={{ minHeight: 0, overflow: "hidden" }}>
-            <SwiperView
-              images={Array.from({ length: 4 }, (_, i) => {
-                const img = carouselImages.find((c) => c.slotIndex === i);
-                if (!img) return null;
-                return {
-                  previewUrl: getAttachmentUrl(img, token),
-                  name: img.fileName,
-                };
-              }).filter(Boolean)}
-            />
-          </Box>
-        )}
+          {canViewSwiper && hasCarouselImages && (
+            <Box sx={{ minHeight: 0, overflow: "hidden" }}>
+              <SwiperView
+                images={Array.from({ length: 4 }, (_, i) => {
+                  const img = carouselImages.find((c) => c.slotIndex === i);
+                  if (!img) return null;
+                  return {
+                    previewUrl: getAttachmentUrl(img, token),
+                    name: img.fileName,
+                  };
+                }).filter(Boolean)}
+              />
+            </Box>
+          )}
 
-        <Box
-          sx={{
-            display: { xs: "flex", md: "none" },
-            minHeight: 0,
-            overflow: "hidden",
-          }}
-        >
-          <AnnouncementsInbox />
+          {canViewAnnouncements && (
+            <Box
+              sx={{
+                display: { xs: "flex", md: "none" },
+                minHeight: 0,
+                overflow: "hidden",
+              }}
+            >
+              <AnnouncementsInbox />
+            </Box>
+          )}
         </Box>
-      </Box>
+      )}
 
       {/* Section General Info: Active Tasks + Master Repository */}
-      <Box
-        sx={{
-          display: {
-            xs: section === "general-info" ? "grid" : "none",
-            md: "grid",
-          },
-          gridTemplateColumns: {
-            xs: "1fr",
-            lg: "1fr 1fr",
-          },
-          gap: 3,
-        }}
-      >
-        <ActiveTasks
-          selectedClientId={selectedClientId}
-          selectedUserId={selectedUserId}
-        />
-        <MasterRepository />
-      </Box>
+      {(canViewActiveTasks || canViewMasterRepo) && (
+        <Box
+          sx={{
+            display: {
+              xs: section === "general-info" ? "grid" : "none",
+              md: "grid",
+            },
+            gridTemplateColumns: {
+              xs: "1fr",
+              lg: canViewActiveTasks && canViewMasterRepo ? "1fr 1fr" : "1fr",
+            },
+            gap: 3,
+          }}
+        >
+          {canViewActiveTasks && (
+            <ActiveTasks
+              selectedClientId={selectedClientId}
+              selectedUserId={selectedUserId}
+            />
+          )}
+          {canViewMasterRepo && <MasterRepository />}
+        </Box>
+      )}
     </Box>
   );
 };
