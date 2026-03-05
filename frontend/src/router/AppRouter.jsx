@@ -58,7 +58,7 @@ const router = createBrowserRouter(
         {
           path: "dashboard",
           element: (
-            <ProtectedRoute requiredPermission="view_dashboard">
+            <ProtectedRoute>
               <DashboardView />
             </ProtectedRoute>
           ),

@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { styled, alpha } from "@mui/material/styles";
+import { styled } from "@mui/material/styles";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
 import InputBase from "@mui/material/InputBase";
 import Badge from "@mui/material/Badge";
-import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
 import Typography from "@mui/material/Typography";
 import SearchIcon from "@mui/icons-material/Search";
@@ -139,9 +138,10 @@ export const AppBarLayout = ({ titleState, setTitleState }) => {
           sx={{
             display: "flex",
             alignItems: "center",
-            justifyContent: "space-between",
+            justifyContent: "flex-end",
             gap: 1,
             padding: { xs: "0 0 0 0.5rem", md: 0 },
+            mx: { xs: "1vh", md: "3vh" },
           }}
         >
           <MobilMenu />
@@ -166,7 +166,7 @@ export const AppBarLayout = ({ titleState, setTitleState }) => {
           </Typography>
 
           {/* Barra de búsqueda - Hidden on mobile */}
-          <Box
+          {/* <Box
             sx={{
               flexGrow: 1,
               display: { xs: "none", md: "flex" },
@@ -186,7 +186,7 @@ export const AppBarLayout = ({ titleState, setTitleState }) => {
                 inputProps={{ "aria-label": "search" }}
               />
             </Search>
-          </Box>
+          </Box> */}
 
           {/* ICONOS Y AVATAR */}
           <Box
@@ -194,7 +194,7 @@ export const AppBarLayout = ({ titleState, setTitleState }) => {
               display: { xs: "none", md: "flex" },
               marginRight: "2.5rem",
               alignItems: "center",
-              gap: 1,
+              gap: 3,
             }}
           >
             {/* /// LanguageMenu /// */}
@@ -205,7 +205,7 @@ export const AppBarLayout = ({ titleState, setTitleState }) => {
             >
               <LanguageMenu />
             </Box>
-            <IconButton
+            {/* <IconButton
               size="large"
               sx={{
                 color: colors.textSecondary,
@@ -214,11 +214,11 @@ export const AppBarLayout = ({ titleState, setTitleState }) => {
                 },
               }}
             >
-              {/* TODO: connect to real notification count */}
+              {/* TODO: connect to real notification count 
               <Badge badgeContent={0} color="error">
                 <NotificationsIcon />
               </Badge>
-            </IconButton>
+            </IconButton> */}
             <AvatarButton setTitleState={setTitleState} />
           </Box>
 

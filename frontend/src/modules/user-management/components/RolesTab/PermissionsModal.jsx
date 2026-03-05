@@ -231,12 +231,12 @@ export const PermissionsModal = ({
     selectedPermissions.length !== initialPermissions.length ||
     selectedPermissions.some((id) => !initialPermissions.includes(id));
 
-  // Helper to get permissions for a section
+  // Helper to get permissions for a section (preserves defined order)
   const getPermissionsForSection = (sectionKey) => {
     const permissionNames = permissionSections[sectionKey] || [];
-    return allPermissions.filter((p) =>
-      permissionNames.includes(p.permissionName),
-    );
+    return permissionNames
+      .map((name) => allPermissions.find((p) => p.permissionName === name))
+      .filter(Boolean);
   };
 
   // Smart toggle: handles parent-child logic

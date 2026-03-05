@@ -22,7 +22,7 @@ export const AvatarButton = ({ setTitleState }) => {
   };
 
   return (
-    <Box sx={{ flexGrow: 0, marginLeft: 2, marginBottom: 1 }}>
+    <Box sx={{ flexGrow: 0, marginBottom: 1 }}>
       <Tooltip title="Open settings">
         <IconButton
           size="large"

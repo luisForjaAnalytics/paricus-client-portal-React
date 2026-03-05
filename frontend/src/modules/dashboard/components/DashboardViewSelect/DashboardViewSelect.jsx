@@ -38,6 +38,7 @@ export const DashboardViewSelect = () => {
   const isBPOAdmin = permissions?.includes("admin_clients") ?? false;
 
   // Granular dashboard permissions
+  const canViewDashboard = permissions?.includes("view_dashboard") ?? true;
   const canViewAnnouncements = permissions?.includes("dashboard_announcements_inbox") ?? true;
   const canViewSwiper = permissions?.includes("dashboard_swiper") ?? true;
   const canViewActiveTasks = permissions?.includes("dashboard_active_tasks") ?? true;
@@ -68,6 +69,11 @@ export const DashboardViewSelect = () => {
       logger.error("Error refetching dashboard data:", err);
     }
   };
+
+  // If user has no view_dashboard permission, show empty dashboard
+  if (!canViewDashboard) {
+    return <Box sx={{ p: { xs: 3, md: 0 }, paddingTop: { xs: 3, md: 3 } }} />;
+  }
 
   // Loading state
   if (isLoading) {
