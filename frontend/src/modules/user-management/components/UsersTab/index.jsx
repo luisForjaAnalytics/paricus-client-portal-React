@@ -15,7 +15,7 @@ import { formatDate as formatDateUtil } from "../../../../common/utils/formatter
 import { UsersTabDesktop } from "./UsersTabDesktop";
 import { UsersTabMobile } from "./UsersTabMobile";
 import { AddNewUserModal } from "./AddNewUserModal";
-import { useUsersTableConfig } from "./useUsersTableConfig";
+import { useUsersTableConfig } from "../../hooks/useUsersTableConfig";
 import {
   useGetUsersQuery,
   useCreateUserMutation,

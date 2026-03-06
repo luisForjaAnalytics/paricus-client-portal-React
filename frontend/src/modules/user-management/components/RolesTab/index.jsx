@@ -13,7 +13,7 @@ import { RolesTabDesktop } from "./RolesTabDesktop";
 import { RolesTabMobile } from "./RolesTabMobile";
 import { AddNewRoleModal } from "./AddNewRoleModal";
 import { ViewPermissionsModal } from "./ViewPermissionsModal";
-import { useRolesTableConfig } from "./useRolesTableConfig";
+import { useRolesTableConfig } from "../../hooks/useRolesTableConfig";
 import { AlertInline } from "../../../../common/components/ui/AlertInline";
 import { formatDate as formatDateUtil } from "../../../../common/utils/formatters";
 import {

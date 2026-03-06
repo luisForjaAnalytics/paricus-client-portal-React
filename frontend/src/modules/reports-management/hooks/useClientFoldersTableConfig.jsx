@@ -2,7 +2,7 @@ import { useMemo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { Box, Typography, Chip } from "@mui/material";
 import { Folder as FolderIcon, FolderOpen as FolderOpenIcon } from "@mui/icons-material";
-import { colors, typography } from "../../../../common/styles/styles";
+import { colors, typography } from "../../../common/styles/styles";
 
 /**
  * useClientFoldersTableConfig - Shared hook for ClientFolders table configuration

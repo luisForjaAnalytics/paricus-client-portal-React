@@ -10,7 +10,7 @@ import { MobileFilterPanel } from "../../../../common/components/ui/MobileFilter
 import { MobileSpeedDial } from "../../../../common/components/ui/MobileSpeedDial";
 import { ClientsTabDesktop } from "./ClientsTabDesktop";
 import { ClientsTabMobile } from "./ClientsTabMobile";
-import { useClientsTableConfig } from "./useClientsTableConfig";
+import { useClientsTableConfig } from "../../hooks/useClientsTableConfig";
 import {
   useGetClientsQuery,
   useCreateClientMutation,

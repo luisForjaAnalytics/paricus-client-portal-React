@@ -9,7 +9,7 @@ import { LogsViewMobile } from "./LogsViewMobil";
 import { AlertInline } from "../../../../common/components/ui/AlertInline";
 import { useNotification } from "../../../../common/hooks";
 import { MobileFilterPanel } from "../../../../common/components/ui/MobileFilterPanel";
-import { useLogsTableConfig } from "./useLogsTableConfig";
+import { useLogsTableConfig } from "../../hooks/useLogsTableConfig";
 
 export const LogsView = () => {
   const { t } = useTranslation();

@@ -2,10 +2,10 @@ import { useMemo, useCallback, useState } from "react";
 import { Box, Chip, Typography } from "@mui/material";
 import { Business as BusinessIcon } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
-import { colors } from "../../../../common/styles/styles";
-import { EditButton } from "../../../../common/components/ui/EditButton";
-import { DeactivateButton } from "../../../../common/components/ui/DeactivateButton";
-import { ColumnHeaderFilter } from "../../../../common/components/ui/ColumnHeaderFilter";
+import { colors } from "../../../common/styles/styles";
+import { EditButton } from "../../../common/components/ui/EditButton";
+import { DeactivateButton } from "../../../common/components/ui/DeactivateButton";
+import { ColumnHeaderFilter } from "../../../common/components/ui/ColumnHeaderFilter";
 
 /**
  * Shared hook for Clients table configuration

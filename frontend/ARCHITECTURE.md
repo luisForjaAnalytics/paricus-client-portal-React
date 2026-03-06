@@ -133,6 +133,11 @@ frontend/src/
 │   │
 │   ├── user-management/
 │   │   ├── UserManagementView.jsx
+│   │   ├── hooks/
+│   │   │   ├── useUsersTableConfig.jsx    # Users table columns, rows, actions
+│   │   │   ├── useClientsTableConfig.jsx  # Clients table columns, rows, filters
+│   │   │   ├── useRolesTableConfig.jsx    # Roles table columns, rows, actions
+│   │   │   └── useLogsTableConfig.jsx     # Logs table columns, filters, pagination
 │   │   ├── components/
 │   │   │   ├── UsersTab/           # Desktop + Mobile + AddNewUserModal
 │   │   │   ├── ClientsTab/        # Desktop + Mobile + AddNewClientModal
@@ -174,6 +179,8 @@ frontend/src/
 │   │
 │   ├── reports-management/
 │   │   ├── ReportsManagementView.jsx
+│   │   ├── hooks/
+│   │   │   └── useClientFoldersTableConfig.jsx  # Client folders table config
 │   │   ├── components/
 │   │   │   ├── ClientFolders/     # Desktop + Mobile wrapper
 │   │   │   ├── ClientReports.jsx
@@ -360,7 +367,25 @@ logger.error("Something failed:", error);
 logger.warn("Unexpected state:", data);
 ```
 
-### 10. Permission-Based Rendering
+### 10. Module Hooks Convention
+
+Custom hooks are organized in `hooks/` folders at the module level, not alongside components:
+
+```
+modules/my-module/
+├── hooks/
+│   └── useMyTableConfig.jsx   # Table columns, rows, filters, actions
+├── components/
+│   └── MyTab/
+│       ├── index.jsx           # Imports from ../../hooks/useMyTableConfig
+│       ├── MyTabDesktop.jsx
+│       └── MyTabMobile.jsx
+└── index.js
+```
+
+Shared hooks across all modules live in `common/hooks/` (useBreakpoint, useModal, useNotification, usePermissions, etc.).
+
+### 11. Permission-Based Rendering
 
 #### Granular Dashboard Permissions
 
@@ -368,7 +393,7 @@ Dashboard sections are controlled by individual permissions. The parent permissi
 
 | Permission | Controls |
 |-----------|----------|
-| `view_dashboard` | Parent: access to dashboard route |
+| `view_dashboard` | Parent: enables dashboard content (route always accessible) |
 | `dashboard_announcements_inbox` | AnnouncementsInbox component |
 | `dashboard_master_repository` | MasterRepository component |
 | `dashboard_swiper` | SwiperView carousel |
@@ -382,6 +407,20 @@ Dashboard sections are controlled by individual permissions. The parent permissi
 | `broadcast_announcements` | Manage announcements |
 | `broadcast_swiper` | Manage swiper/carousel |
 | `broadcast_kpi` | Manage KPI display |
+
+#### Dashboard Empty State
+
+The dashboard route (`/app/dashboard`) does not require any permission — any authenticated user can access it. This ensures users are always redirected to the dashboard after login. If `view_dashboard` is removed, `DashboardViewSelect` renders an empty container (only the page header from `DashboardView` is visible). Individual sub-permissions control each section independently.
+
+#### Upload Invoice Form Validation
+
+The upload invoice button uses explicit required field checks instead of `react-hook-form`'s `isValid`, ensuring optional fields (`paymentMethod`, `paymentLink`, `description`) never block submission:
+
+```jsx
+const hasRequiredFields = watchedInvoiceName && watchedAmount > 0 && watchedIssuedDate && watchedDueDate;
+
+<ActionButton disabled={uploading || ocrLoading || !hasRequiredFields || isOverLimit} />
+```
 
 #### Parent-Child Permission Toggle (PermissionsModal)
 
@@ -442,13 +481,14 @@ Logs are viewable in User Management > Logs with server-side pagination and inli
 2. Create view: `NewModuleView.jsx`
 3. Create barrel: `index.js`
 4. Add components: `components/` subfolder
-5. Add route in `router/AppRouter.jsx`
-6. Add menu item in `config/menu/MenusSection.jsx`
-7. Add i18n keys in `i18n/en/en.js` and `i18n/es/es.js`
-8. If needed: create RTK Query slice in `store/api/`
+5. Add hooks: `hooks/` subfolder (custom hooks for table configs, data logic, etc.)
+6. Add route in `router/AppRouter.jsx`
+7. Add menu item in `config/menu/MenusSection.jsx`
+8. Add i18n keys in `i18n/en/en.js` and `i18n/es/es.js`
+9. If needed: create RTK Query slice in `store/api/`
 
 ---
 
-**Last updated:** 2026-03-05
+**Last updated:** 2026-03-06
 **Pattern:** Screaming Architecture
 **Status:** Active development

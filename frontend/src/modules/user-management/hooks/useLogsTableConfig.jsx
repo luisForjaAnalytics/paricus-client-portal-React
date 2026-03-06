@@ -2,10 +2,10 @@ import { useMemo, useCallback, useState } from "react";
 import { Box, Chip, Typography } from "@mui/material";
 import { ListAlt as ListAltIcon } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
-import { colors } from "../../../../common/styles/styles";
-import { ColumnHeaderFilter } from "../../../../common/components/ui/ColumnHeaderFilter";
-import { formatTimestamp as formatTimestampUtil } from "../../../../common/utils/formatters";
-import { logger } from "../../../../common/utils/logger";
+import { colors } from "../../../common/styles/styles";
+import { ColumnHeaderFilter } from "../../../common/components/ui/ColumnHeaderFilter";
+import { formatTimestamp as formatTimestampUtil } from "../../../common/utils/formatters";
+import { logger } from "../../../common/utils/logger";
 
 /**
  * useLogsTableConfig - Shared hook for Logs table configuration

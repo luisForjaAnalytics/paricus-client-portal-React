@@ -6,10 +6,10 @@ import {
   Shield as ShieldIcon,
 } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
-import { colors } from "../../../../common/styles/styles";
-import { EditButton } from "../../../../common/components/ui/EditButton";
-import { DeactivateButton } from "../../../../common/components/ui/DeactivateButton";
-import { ColumnHeaderFilter } from "../../../../common/components/ui/ColumnHeaderFilter";
+import { colors } from "../../../common/styles/styles";
+import { EditButton } from "../../../common/components/ui/EditButton";
+import { DeactivateButton } from "../../../common/components/ui/DeactivateButton";
+import { ColumnHeaderFilter } from "../../../common/components/ui/ColumnHeaderFilter";
 
 /**
  * Shared hook for Users table configuration

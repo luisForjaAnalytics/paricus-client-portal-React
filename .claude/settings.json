@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "additionalDirectories": [
+      "c:\\desarrollo\\FORJA\\paricus-client-portal-React\\frontend\\src\\modules\\user-management"
+    ]
+  }
+}

@@ -75,7 +75,12 @@ export const UploadInvoiceButton = ({ selectedFolder, onSuccess, onError }) => {
 
   const watchedFile = watch("file");
   const watchedDescription = watch("description");
+  const watchedInvoiceName = watch("invoiceName");
+  const watchedAmount = watch("amount");
+  const watchedIssuedDate = watch("issuedDate");
+  const watchedDueDate = watch("dueDate");
   const isOverLimit = watchedDescription?.length > MAX_CHARACTERS;
+  const hasRequiredFields = watchedInvoiceName && watchedAmount > 0 && watchedIssuedDate && watchedDueDate;
 
   // Procesar el texto OCR cuando esté disponible
   useEffect(() => {

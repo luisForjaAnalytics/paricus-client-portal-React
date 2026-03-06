@@ -9,7 +9,7 @@ import { useTranslation } from "react-i18next";
 import { useBreakpoint } from "../../../../common/hooks/useBreakpoint";
 import { ClientFoldersDesktop } from "./ClientFoldersDesktop";
 import { ClientFoldersMobile } from "./ClientFoldersMobile";
-import { useClientFoldersTableConfig } from "./useClientFoldersTableConfig.jsx";
+import { useClientFoldersTableConfig } from "../../hooks/useClientFoldersTableConfig";
 import { UploadReportModal } from "../UploadReportModal";
 import {
   titlesTypography,

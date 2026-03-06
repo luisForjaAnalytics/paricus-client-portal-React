@@ -13,10 +13,10 @@ import {
 } from "@mui/icons-material";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
 import { useTranslation } from "react-i18next";
-import { colors } from "../../../../common/styles/styles";
-import { EditButton } from "../../../../common/components/ui/EditButton";
-import { DeleteButton } from "../../../../common/components/ui/DeleteButton";
-import { ColumnHeaderFilter } from "../../../../common/components/ui/ColumnHeaderFilter";
+import { colors } from "../../../common/styles/styles";
+import { EditButton } from "../../../common/components/ui/EditButton";
+import { DeleteButton } from "../../../common/components/ui/DeleteButton";
+import { ColumnHeaderFilter } from "../../../common/components/ui/ColumnHeaderFilter";
 
 /**
  * Shared hook for Roles table configuration
