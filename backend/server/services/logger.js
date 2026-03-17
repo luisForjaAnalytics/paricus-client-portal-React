@@ -268,3 +268,72 @@ export async function logCarouselDelete(performedByUserId, imageId) {
     status: 'SUCCESS',
   });
 }
+
+/**
+ * Log profile update
+ */
+export async function logProfileUpdate(userId, email, changes = null) {
+  await createLog({
+    userId: userId.toString(),
+    eventType: 'UPDATE',
+    entity: 'Profile',
+    description: changes
+      ? `User ${email} updated profile: ${changes}`
+      : `User ${email} updated profile`,
+    status: 'SUCCESS',
+  });
+}
+
+/**
+ * Log password change (from profile)
+ */
+export async function logPasswordChange(userId, email, success = true) {
+  await createLog({
+    userId: userId.toString(),
+    eventType: 'UPDATE',
+    entity: 'Profile',
+    description: success
+      ? `User ${email} changed password`
+      : `User ${email} failed password change attempt`,
+    status: success ? 'SUCCESS' : 'FAILURE',
+  });
+}
+
+/**
+ * Log password reset (via forgot-password flow)
+ */
+export async function logPasswordReset(userId, email) {
+  await createLog({
+    userId: userId.toString(),
+    eventType: 'UPDATE',
+    entity: 'Auth',
+    description: `User ${email} reset password via recovery code`,
+    status: 'SUCCESS',
+  });
+}
+
+/**
+ * Log avatar upload
+ */
+export async function logAvatarUpload(userId, email) {
+  await createLog({
+    userId: userId.toString(),
+    eventType: 'UPDATE',
+    entity: 'Profile',
+    description: `User ${email} uploaded profile photo`,
+    status: 'SUCCESS',
+  });
+}
+
+/**
+ * Log avatar deletion
+ */
+export async function logAvatarDelete(userId, email) {
+  await createLog({
+    userId: userId.toString(),
+    eventType: 'UPDATE',
+    entity: 'Profile',
+    description: `User ${email} removed profile photo`,
+    status: 'SUCCESS',
+  });
+}

@@ -10,7 +10,7 @@ import { prisma } from '../database/prisma.js';
 import { authenticateToken } from '../middleware/auth-prisma.js';
 
 import { authValidation, sanitizeInput } from '../middleware/validation.js';
-import { logLogin, logLogout } from '../services/logger.js';
+import { logLogin, logLogout, logProfileUpdate, logPasswordChange, logPasswordReset, logAvatarUpload, logAvatarDelete } from '../services/logger.js';
 import config from '../config/environment.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -265,6 +265,8 @@ router.post('/reset-password',
       }
     });
 
+    await logPasswordReset(user.id, user.email);
+
     res.json({ message: 'Password reset successfully' });
   } catch (error) {
     console.error('Reset password error:', error);
@@ -315,6 +317,8 @@ router.post('/avatar', authenticateToken, avatarUpload.single('avatar'), async (
       data: { avatarUrl },
     });
 
+    await logAvatarUpload(req.user.id, req.user.email);
+
     res.json({ success: true, avatarUrl });
   } catch (error) {
     if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
@@ -324,8 +328,9 @@ router.post('/avatar', authenticateToken, avatarUpload.single('avatar'), async (
 
 // Serve avatar file
 router.get('/avatar/:filename', (req, res) => {
-  const filePath = path.join(AVATAR_DIR, req.params.filename);
-  if (!fs.existsSync(filePath)) {
+  const filename = path.basename(req.params.filename);
+  const filePath = path.join(AVATAR_DIR, filename);
+  if (!filePath.startsWith(AVATAR_DIR) || !fs.existsSync(filePath)) {
     return res.status(404).json({ error: 'Avatar not found' });
   }
   res.sendFile(filePath);
@@ -344,9 +349,81 @@ router.delete('/avatar', authenticateToken, async (req, res) => {
       where: { id: req.user.id },
       data: { avatarUrl: null },
     });
+
+    await logAvatarDelete(req.user.id, req.user.email);
+
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: 'Error deleting avatar' });
+  }
+});
+
+// Update profile (name)
+router.put('/profile', authenticateToken, async (req, res) => {
+  try {
+    const { first_name, last_name } = req.body;
+
+    const updateData = {};
+    if (first_name !== undefined) updateData.firstName = first_name;
+    if (last_name !== undefined) updateData.lastName = last_name;
+
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({ error: 'No fields to update' });
+    }
+
+    const user = await prisma.user.update({
+      where: { id: req.user.id },
+      data: updateData,
+      select: { id: true, email: true, firstName: true, lastName: true, avatarUrl: true },
+    });
+
+    const changes = Object.keys(updateData).join(', ');
+    await logProfileUpdate(req.user.id, req.user.email, changes);
+
+    res.json({ message: 'Profile updated successfully', user });
+  } catch (error) {
+    console.error('Profile update error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Change password (authenticated user)
+router.put('/profile/password', authenticateToken, async (req, res) => {
+  try {
+    const { current_password, new_password } = req.body;
+
+    if (!current_password || !new_password) {
+      return res.status(400).json({ error: 'Current and new password are required' });
+    }
+
+    if (new_password.length < 8) {
+      return res.status(400).json({ error: 'New password must be at least 8 characters' });
+    }
+
+    // Verify current password
+    const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+    const isValid = await bcrypt.compare(current_password, user.passwordHash);
+
+    if (!isValid) {
+      await logPasswordChange(req.user.id, req.user.email, false);
+      return res.status(401).json({ error: 'Current password is incorrect' });
+    }
+
+    // Hash and save new password
+    const saltRounds = parseInt(process.env.BCRYPT_ROUNDS) || 12;
+    const passwordHash = await bcrypt.hash(new_password, saltRounds);
+
+    await prisma.user.update({
+      where: { id: req.user.id },
+      data: { passwordHash, updatedAt: new Date() },
+    });
+
+    await logPasswordChange(req.user.id, req.user.email, true);
+
+    res.json({ message: 'Password changed successfully' });
+  } catch (error) {
+    console.error('Password change error:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

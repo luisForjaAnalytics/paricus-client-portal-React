@@ -9,7 +9,7 @@ import {
   Badge,
 } from "@mui/material";
 import { CameraAlt } from "@mui/icons-material";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,7 +21,7 @@ import {
   useUpdateProfileMutation,
   useUpdatePasswordMutation,
 } from "../../../store/api/profileApi";
-import { useCreateLogMutation } from "../../../store/api/logsApi";
+import { setCredentials } from "../../../store/auth/authSlice";
 import {
   outlinedIconButton,
   primaryIconButton,
@@ -48,7 +48,7 @@ const noShadowSx = {
 
 const profileGridSx = {
   display: "grid",
-  gridTemplateColumns: { xs: "repeat(2, 1fr)", md: "repeat(4, 1fr)" },
+  gridTemplateColumns: { xs: "repeat(2, 1fr)", md: "repeat(3, 1fr)" },
   gap: 3,
 };
 
@@ -63,7 +63,6 @@ const buildSchema = (t) =>
     .object({
       firstName: z.string().min(1, t("profile.firstNameRequired")),
       lastName: z.string().min(1, t("profile.lastNameRequired")),
-      phone: z.string().optional().default(""),
       currentPassword: z.string().optional().default(""),
       newPassword: z.string().optional().default(""),
       confirmPassword: z.string().optional().default(""),
@@ -102,14 +101,13 @@ const buildSchema = (t) =>
 
 export const ProfileFormView = () => {
   const { t } = useTranslation();
+  const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
 
   const [updateProfile, { isLoading: isUpdatingProfile }] =
     useUpdateProfileMutation();
   const [updatePassword, { isLoading: isUpdatingPassword }] =
     useUpdatePasswordMutation();
-  const [createLog] = useCreateLogMutation();
-
   const { notificationRef, showNotification } = useNotification();
 
   const [avatarDialogOpen, setAvatarDialogOpen] = useState(false);
@@ -127,7 +125,6 @@ export const ProfileFormView = () => {
     defaultValues: {
       firstName: user?.firstName || "",
       lastName: user?.lastName || "",
-      phone: user?.phone || "",
       currentPassword: "",
       newPassword: "",
       confirmPassword: "",
@@ -136,11 +133,23 @@ export const ProfileFormView = () => {
 
   const onSubmit = async (data) => {
     try {
-      await updateProfile({
+      const result = await updateProfile({
         first_name: data.firstName,
         last_name: data.lastName,
-        phone: data.phone,
       }).unwrap();
+
+      // Sync Redux state so AppBar name updates immediately
+      dispatch(
+        setCredentials({
+          token: localStorage.getItem("token"),
+          user: {
+            ...user,
+            firstName: result.user?.firstName ?? data.firstName,
+            lastName: result.user?.lastName ?? data.lastName,
+          },
+          tokenExpiry: localStorage.getItem("tokenExpiry"),
+        }),
+      );
 
       if (data.currentPassword && data.newPassword) {
         await updatePassword({
@@ -156,24 +165,9 @@ export const ProfileFormView = () => {
         showNotification(t("profile.profileUpdated"), "success");
       }
 
-      const changes = [];
-      if (data.firstName !== (user?.firstName || "")) changes.push("firstName");
-      if (data.lastName !== (user?.lastName || "")) changes.push("lastName");
-      if (data.phone !== (user?.phone || "")) changes.push("phone");
-      if (data.currentPassword && data.newPassword) changes.push("password");
-
-      createLog({
-        userId: user?.id?.toString() || "unknown",
-        eventType: "UPDATE",
-        entity: "Profile",
-        description: `Updated profile: ${changes.join(", ")}`,
-        status: "SUCCESS",
-      });
-
       reset({
         firstName: data.firstName,
         lastName: data.lastName,
-        phone: data.phone,
         currentPassword: "",
         newPassword: "",
         confirmPassword: "",
@@ -190,7 +184,6 @@ export const ProfileFormView = () => {
     reset({
       firstName: user?.firstName || "",
       lastName: user?.lastName || "",
-      phone: user?.phone || "",
       currentPassword: "",
       newPassword: "",
       confirmPassword: "",
@@ -296,18 +289,6 @@ export const ProfileFormView = () => {
             value={user?.email || ""}
             disabled
             helperText={t("profile.emailCannotChange")}
-          />
-          <Controller
-            name="phone"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                label={t("profile.phoneOptional")}
-                fullWidth
-                sx={noShadowSx}
-              />
-            )}
           />
         </Box>
 
