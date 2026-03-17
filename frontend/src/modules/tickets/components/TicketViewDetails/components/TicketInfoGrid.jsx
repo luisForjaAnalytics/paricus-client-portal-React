@@ -10,6 +10,7 @@ import { useTranslation } from "react-i18next";
 import { formatDateTime, capitalizeFirst } from "../../../../../common/utils/formatters";
 import { TicketText } from "../../../../../common/components/ui/TicketText";
 import { ticketStyle } from "../../../../../common/styles/styles";
+import { logger } from "../../../../../common/utils/logger";
 
 // Icon mapping for each field
 const fieldIcons = {
@@ -180,7 +181,7 @@ const TicketInfoGrid = ({ ticket }) => {
       // Otherwise use the default formatter
       return fieldFormatters.default(value);
     } catch (error) {
-      console.error("Error formatting value:", error);
+      logger.error("Error formatting value:", error);
       return "N/A";
     }
   };

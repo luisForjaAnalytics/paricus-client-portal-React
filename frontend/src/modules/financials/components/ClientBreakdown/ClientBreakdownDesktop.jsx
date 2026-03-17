@@ -30,6 +30,7 @@ import { InvoicesTableDesktop } from "../InvoicesTable/InvoicesTableDesktop";
 import { UploadInvoiceButton } from "../UploadInvoiceButton/UploadInvoiceButton";
 import { useTranslation } from "react-i18next";
 import { GetInitialsAvatar } from "../../../../common/components/ui/GetInitialsAvatar";
+import { logger } from "../../../../common/utils/logger";
 
 export const ClientBreakdownDesktop = ({
   clientBreakdowns,
@@ -85,7 +86,7 @@ export const ClientBreakdownDesktop = ({
       const lastInitial = companyName[companyName.length - 1]?.[0] || "";
       return `${firstInitial}${lastInitial}`.toUpperCase();
     } catch (err) {
-      console.error(`ERROR: ${err}`);
+      logger.error(`ERROR: ${err}`);
       return "";
     }
   };

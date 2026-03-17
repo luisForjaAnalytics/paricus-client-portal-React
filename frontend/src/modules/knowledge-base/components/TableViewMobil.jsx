@@ -7,6 +7,7 @@ import { UniversalMobilDataTable } from "../../../common/components/ui/Universal
 import { EditButton } from "../../../common/components/ui/EditButton";
 import { ViewButton } from "../../../common/components/ui/ViewButton";
 import { colors } from "../../../common/styles/styles";
+import { logger } from "../../../common/utils/logger";
 
 export const TableViewMobil = ({
   articles = [],
@@ -30,7 +31,7 @@ export const TableViewMobil = ({
         kbPrefix: article.kbPrefix,
       }));
     } catch (err) {
-      console.error(`ERROR rows: ${err}`);
+      logger.error(`ERROR rows: ${err}`);
       return [];
     }
   }, [articles]);

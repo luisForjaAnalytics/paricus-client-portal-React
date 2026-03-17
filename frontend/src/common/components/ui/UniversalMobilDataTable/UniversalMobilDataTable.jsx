@@ -22,6 +22,7 @@ import PropTypes from "prop-types";
 import { colors, titlesTypography } from "../../../styles/styles";
 import { AlertInline } from "../AlertInline";
 import { LoadingProgress } from "../LoadingProgress";
+import { logger } from "../../../utils/logger";
 
 // ============================================================================
 // SAFE RENDER UTILITIES
@@ -41,7 +42,7 @@ const safeRender = (renderFn, params, fallback = null) => {
     const result = renderFn(params);
     return result ?? fallback;
   } catch (error) {
-    console.error("SafeRender error:", error);
+    logger.error("SafeRender error:", error);
     return fallback;
   }
 };
@@ -62,7 +63,7 @@ const safeGetValue = (obj, field, defaultValue = null) => {
     }
     return obj[field] ?? defaultValue;
   } catch (error) {
-    console.error("SafeGetValue error:", error);
+    logger.error("SafeGetValue error:", error);
     return defaultValue;
   }
 };
@@ -117,7 +118,7 @@ const AccordionRow = ({
       try {
         onRowClick(row);
       } catch (error) {
-        console.error("onRowClick error:", error);
+        logger.error("onRowClick error:", error);
       }
     }
   }, [onRowClick, row]);
@@ -160,7 +161,7 @@ const AccordionRow = ({
 
   // Validate row
   if (!row || typeof row !== "object") {
-    console.warn("AccordionRow: Invalid row prop");
+    logger.warn("AccordionRow: Invalid row prop");
     return null;
   }
 
@@ -496,7 +497,7 @@ export const UniversalMobilDataTable = ({
   // Validate and process rows with memoization
   const processedRows = useMemo(() => {
     if (!Array.isArray(rows)) {
-      console.warn(
+      logger.warn(
         "UniversalMobilDataTable: rows prop must be an array, received:",
         typeof rows,
       );
@@ -536,7 +537,7 @@ export const UniversalMobilDataTable = ({
   // Validate columns
   const validColumns = useMemo(() => {
     if (!Array.isArray(columns)) {
-      console.warn("UniversalMobilDataTable: columns prop must be an array");
+      logger.warn("UniversalMobilDataTable: columns prop must be an array");
       return [];
     }
     return columns.filter(isValidColumn);
@@ -552,7 +553,7 @@ export const UniversalMobilDataTable = ({
         const id = getRowId(row);
         return id ?? Math.random().toString(36).substring(2, 11);
       } catch (error) {
-        console.error("getRowId error:", error);
+        logger.error("getRowId error:", error);
         return Math.random().toString(36).substring(2, 11);
       }
     },

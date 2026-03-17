@@ -1,15 +1,9 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { createBaseQuery } from "./baseQuery";
 
 export const profileApi = createApi({
   reducerPath: "profileApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: `${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/profile`,
-    prepareHeaders: (headers, { getState }) => {
-      const token = getState().auth?.token;
-      if (token) headers.set("Authorization", `Bearer ${token}`);
-      return headers;
-    },
-  }),
+  baseQuery: createBaseQuery("/profile"),
   tagTypes: ['Profile'],
   endpoints: (builder) => ({
     // Update profile information
@@ -31,10 +25,31 @@ export const profileApi = createApi({
       }),
       invalidatesTags: ['Profile'],
     }),
+
+    // Upload avatar image (uses /auth/avatar, not /profile)
+    uploadAvatar: builder.mutation({
+      query: (formData) => ({
+        url: `${import.meta.env.VITE_API_URL || "http://localhost:3001/api"}/auth/avatar`,
+        method: "POST",
+        body: formData,
+      }),
+      invalidatesTags: ['Profile'],
+    }),
+
+    // Delete avatar image
+    deleteAvatar: builder.mutation({
+      query: () => ({
+        url: `${import.meta.env.VITE_API_URL || "http://localhost:3001/api"}/auth/avatar`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ['Profile'],
+    }),
   }),
 });
 
 export const {
   useUpdateProfileMutation,
   useUpdatePasswordMutation,
+  useUploadAvatarMutation,
+  useDeleteAvatarMutation,
 } = profileApi;

@@ -7,11 +7,23 @@ import Tooltip from "@mui/material/Tooltip";
 import PropTypes from "prop-types";
 import { MenuSectionsAvatar } from "../Navigation/MenuSection";
 import { useSelector } from "react-redux";
-import { navBar } from "../../../styles/styles";
+import { navBar, colors } from "../../../styles/styles";
+import { getAvatarSrc } from "../../../../modules/profile";
 
 export const AvatarButton = ({ setTitleState }) => {
   const [anchorElUser, setAnchorElUser] = React.useState(null);
   const userAuth = useSelector((item) => (item?.auth || {}).user);
+
+  const initials = React.useMemo(() => {
+    const first = userAuth?.firstName?.[0] || "";
+    const last = userAuth?.lastName?.[0] || "";
+    return `${first}${last}`.toUpperCase();
+  }, [userAuth?.firstName, userAuth?.lastName]);
+
+  const avatarSrc = React.useMemo(
+    () => getAvatarSrc(userAuth?.avatarUrl),
+    [userAuth?.avatarUrl],
+  );
 
   const handleOpenUserMenu = (event) => {
     setAnchorElUser(event.currentTarget);
@@ -33,11 +45,21 @@ export const AvatarButton = ({ setTitleState }) => {
           onClick={handleOpenUserMenu}
           sx={{ p: 0 }}
         >
-          <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+          <Avatar
+            src={avatarSrc}
+            sx={{
+              color: colors.primary,
+              bgcolor: colors.financialClientAvatar,
+              fontSize: "1rem",
+              fontWeight: 600,
+            }}
+          >
+            {!avatarSrc && initials}
+          </Avatar>
         </IconButton>
       </Tooltip>
       <Menu
-       sx={navBar.menuAvatar}
+        sx={navBar.menuAvatar}
         id="menu-appbar"
         anchorEl={anchorElUser}
         anchorOrigin={{

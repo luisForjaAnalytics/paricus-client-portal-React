@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useLogoutMutation } from "../../../../store/api/authApi";
 import { ListItemIcon, MenuItem, Typography } from "@mui/material";
 import Logout from "@mui/icons-material/Logout";
+import { logger } from "../../../../common/utils/logger";
 
 export const SingOutButton = () => {
   const [logout] = useLogoutMutation();
@@ -14,7 +15,7 @@ export const SingOutButton = () => {
       await logout();
       navigate(`/login`,{ replace: true });
     } catch (err) {
-      console.error(`ERROR handleMenuOption: ${err}`);
+      logger.error(`ERROR handleMenuOption: ${err}`);
     }
   };
   const { t } = useTranslation();

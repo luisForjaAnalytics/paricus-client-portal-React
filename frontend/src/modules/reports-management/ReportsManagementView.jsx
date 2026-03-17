@@ -24,6 +24,7 @@ import {
   formatDateTime as formatDateTimeUtil,
   formatFileSize as formatFileSizeUtil,
 } from "../../common/utils/formatters";
+import { logger } from "../../common/utils/logger";
 
 export const ReportsManagementView = () => {
   const { t } = useTranslation();
@@ -60,7 +61,7 @@ export const ReportsManagementView = () => {
             const result = await getReports(folder).unwrap();
             return { folder, reports: result };
           } catch (error) {
-            console.error(`Failed to fetch reports for ${folder}:`, error);
+            logger.error(`Failed to fetch reports for ${folder}:`, error);
             return { folder, reports: [] };
           }
         });
@@ -88,7 +89,7 @@ export const ReportsManagementView = () => {
       const result = await getReports(folder).unwrap();
       setAllReports((prev) => ({ ...prev, [folder]: result }));
     } catch (error) {
-      console.error(`Failed to fetch reports for ${folder}:`, error);
+      logger.error(`Failed to fetch reports for ${folder}:`, error);
       setAllReports((prev) => ({ ...prev, [folder]: [] }));
     }
   };
@@ -136,7 +137,7 @@ export const ReportsManagementView = () => {
         setUploadForm({ ...uploadForm, file: event.target.files[0] });
       }
     } catch (err) {
-      console.error(`ERROR handleFileSelect: ${err}`);
+      logger.error(`ERROR handleFileSelect: ${err}`);
     }
   };
 
@@ -187,7 +188,7 @@ export const ReportsManagementView = () => {
             status: "SUCCESS",
           }).unwrap();
         } catch (logErr) {
-          console.error("Error logging report download:", logErr);
+          logger.error("Error logging report download:", logErr);
         }
       }
     } catch (error) {
@@ -203,7 +204,7 @@ export const ReportsManagementView = () => {
           status: "FAILURE",
         }).unwrap();
       } catch (logErr) {
-        console.error("Error logging report download failure:", logErr);
+        logger.error("Error logging report download failure:", logErr);
       }
     }
   };
@@ -226,7 +227,7 @@ export const ReportsManagementView = () => {
         status: "SUCCESS",
       }).unwrap();
     } catch (logErr) {
-      console.error("Error logging report deletion:", logErr);
+      logger.error("Error logging report deletion:", logErr);
     }
 
     // Refetch reports for this folder
@@ -244,7 +245,7 @@ export const ReportsManagementView = () => {
         fileInputRef.current.value = "";
       }
     } catch (err) {
-      console.error(`ERROR resetUploadForm: ${err}`);
+      logger.error(`ERROR resetUploadForm: ${err}`);
     }
   };
 
@@ -308,7 +309,7 @@ export const ReportsManagementView = () => {
     try {
       setShowFolderAccessModal(true);
     } catch (err) {
-      console.error(`ERROR openFolderAccessModal: ${err}`);
+      logger.error(`ERROR openFolderAccessModal: ${err}`);
     }
   };
 

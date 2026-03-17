@@ -1,5 +1,28 @@
 {
   "permissions": {
+    "allow": [
+      "Bash(grep -r console. c:desarrolloFORJAparicus-client-portal-Reactfrontendsrcmodules --include=*.jsx --include=*.js)",
+      "Bash(grep -r \"useLazyDownloadReportQuery\\\\|useGetAccessibleFoldersQuery\\\\|useGetRecentRecordingsQuery\" /c/desarrollo/FORJA/paricus-client-portal-React/frontend/src --include=*.jsx --include=*.js)",
+      "Bash(grep -r \"getAgentNames\\\\|getTags\" /c/desarrollo/FORJA/paricus-client-portal-React/frontend/src --include=*.jsx --include=*.js)",
+      "Bash(grep -r \"dashboardApi\\\\|carouselApi\" /c/desarrollo/FORJA/paricus-client-portal-React/frontend/src/store/api/*.js)",
+      "Bash(grep -r \"transformResponse.*response\\\\.data\" /c/desarrollo/FORJA/paricus-client-portal-React/frontend/src/store/api/*.js)",
+      "Read(//c/desarrollo/FORJA/paricus-client-portal-React/**)",
+      "Bash(grep -B2 -A5 \"asyncThunkAPI\" /c/desarrollo/FORJA/paricus-client-portal-React/frontend/src/store/api/*.js)",
+      "Bash(grep -r \"getAttachmentUrl\\\\|getDetailAttachmentUrl\" /c/desarrollo/FORJA/paricus-client-portal-React/frontend/src --include=*.jsx --include=*.js)",
+      "Bash(grep -l \"useState\\\\|useEffect\" modules/**/*.jsx)",
+      "Bash(while read:*)",
+      "Bash(do echo:*)",
+      "Read(//c/desarrollo/FORJA/paricus-client-portal-React/frontend/**)",
+      "Bash(grep -rh \"useGet\\\\|useLazy\\\\|useCreate\\\\|useUpdate\\\\|useDelete\\\\|useRefresh\\\\|useGrant\\\\|useRevoke\\\\|useApprove\\\\|useReject\\\\|useAdd\\\\|useUpload\\\\|useSave\\\\|useCleanup\" store/api/*.js)",
+      "Read(//tmp/**)",
+      "Bash(for file:*)",
+      "Bash(grep -l \"baseQuery: fetchBaseQuery\\\\|baseQuery:fetchBaseQuery\" *.js)",
+      "Bash(PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=\"procede\" npx prisma migrate reset --force)",
+      "Bash(rm -f prisma/dev.db)",
+      "Bash(PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=\"procede\" npx prisma migrate dev --name add_avatar_url_to_user)",
+      "Bash(PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=\"procede\" npx prisma db push --force-reset)",
+      "Bash(npx prisma:*)"
+    ],
     "additionalDirectories": [
       "c:\\desarrollo\\FORJA\\paricus-client-portal-React\\frontend\\src\\modules\\user-management"
     ]

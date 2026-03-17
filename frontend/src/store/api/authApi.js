@@ -1,16 +1,10 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { createBaseQuery } from "./baseQuery";
 import { getTokenExpiry } from "../helper/tokenUtils";
 
 export const authApi = createApi({
   reducerPath: "authApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_API_URL || 'http://localhost:3001/api',
-    prepareHeaders: (headers, { getState }) => {
-      const token = getState().auth?.token;
-      if (token) headers.set("Authorization", `Bearer ${token}`);
-      return headers;
-    },
-  }),
+  baseQuery: createBaseQuery(),
   endpoints: (builder) => ({
     login: builder.mutation({
       query: (credentials) => ({
@@ -21,12 +15,6 @@ export const authApi = createApi({
       transformResponse: (response) => {
         const { token, user } = response;
         const tokenExpiry = getTokenExpiry(token);
-
-        // Guardar en localStorage
-        localStorage.setItem("token", token);
-        localStorage.setItem("user", JSON.stringify(user));
-        localStorage.setItem("tokenExpiry", tokenExpiry);
-
         return { token, user, tokenExpiry };
       },
     }),
@@ -36,12 +24,6 @@ export const authApi = createApi({
         url: "/auth/logout",
         method: "POST",
       }),
-      transformResponse: () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        localStorage.removeItem("tokenExpiry");
-        return { success: true };
-      },
     }),
 
     forgotPassword: builder.mutation({

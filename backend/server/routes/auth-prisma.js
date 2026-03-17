@@ -2,6 +2,10 @@ import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 import { prisma } from '../database/prisma.js';
 import { authenticateToken } from '../middleware/auth-prisma.js';
 
@@ -9,7 +13,36 @@ import { authValidation, sanitizeInput } from '../middleware/validation.js';
 import { logLogin, logLogout } from '../services/logger.js';
 import config from '../config/environment.js';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const router = express.Router();
+
+// Avatar upload config
+const AVATAR_DIR = path.join(__dirname, '../uploads/avatars');
+if (!fs.existsSync(AVATAR_DIR)) {
+  fs.mkdirSync(AVATAR_DIR, { recursive: true });
+}
+
+const avatarStorage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, AVATAR_DIR),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `avatar-${req.user.id}-${Date.now()}${ext}`);
+  },
+});
+
+const avatarUpload = multer({
+  storage: avatarStorage,
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
+  fileFilter: (req, file, cb) => {
+    if (/^image\/(jpeg|png|gif|webp)$/.test(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed (JPG, PNG, GIF, WEBP).'));
+    }
+  },
+});
 
 // Login endpoint
 router.post('/login', 
@@ -107,10 +140,11 @@ router.post('/login',
         lastName: user.lastName,
         clientId: user.clientId,
         clientName: user.client?.name || null,
-        kbPrefix: user.client?.kbPrefix || null, // Knowledge Base API prefix (null = BPO Admin, access all)
+        kbPrefix: user.client?.kbPrefix || null,
         roleId: user.roleId,
         roleName: user.role?.roleName,
-        permissions: permissions
+        permissions: permissions,
+        avatarUrl: user.avatarUrl || null,
       }
     });
   } catch (error) {
@@ -257,6 +291,62 @@ router.get('/profile', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('Profile error:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Upload avatar image
+router.post('/avatar', authenticateToken, avatarUpload.single('avatar'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No image file provided' });
+    }
+
+    // Delete old avatar file if exists
+    const currentUser = await prisma.user.findUnique({ where: { id: req.user.id } });
+    if (currentUser?.avatarUrl) {
+      const oldFile = currentUser.avatarUrl.replace('/api/auth/avatar/', '');
+      const oldPath = path.join(AVATAR_DIR, oldFile);
+      if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+    }
+
+    const avatarUrl = `/api/auth/avatar/${req.file.filename}`;
+    await prisma.user.update({
+      where: { id: req.user.id },
+      data: { avatarUrl },
+    });
+
+    res.json({ success: true, avatarUrl });
+  } catch (error) {
+    if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+    res.status(500).json({ error: 'Error uploading avatar' });
+  }
+});
+
+// Serve avatar file
+router.get('/avatar/:filename', (req, res) => {
+  const filePath = path.join(AVATAR_DIR, req.params.filename);
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ error: 'Avatar not found' });
+  }
+  res.sendFile(filePath);
+});
+
+// Delete avatar
+router.delete('/avatar', authenticateToken, async (req, res) => {
+  try {
+    const currentUser = await prisma.user.findUnique({ where: { id: req.user.id } });
+    if (currentUser?.avatarUrl) {
+      const oldFile = currentUser.avatarUrl.replace('/api/auth/avatar/', '');
+      const oldPath = path.join(AVATAR_DIR, oldFile);
+      if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+    }
+    await prisma.user.update({
+      where: { id: req.user.id },
+      data: { avatarUrl: null },
+    });
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: 'Error deleting avatar' });
   }
 });
 

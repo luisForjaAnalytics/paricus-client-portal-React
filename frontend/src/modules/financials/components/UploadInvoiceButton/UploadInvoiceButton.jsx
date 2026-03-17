@@ -32,6 +32,7 @@ import {
 import { SelectMenuItem } from "../../../../common/components/ui/SelectMenuItem/SelectMenuItem";
 import { extractApiError } from "../../../../common/utils/apiHelpers";
 import { LoadingProgress } from "../../../../common/components/ui/LoadingProgress";
+import { logger } from "../../../../common/utils/logger";
 
 export const UploadInvoiceButton = ({ selectedFolder, onSuccess, onError }) => {
   const { t } = useTranslation();
@@ -56,7 +57,7 @@ export const UploadInvoiceButton = ({ selectedFolder, onSuccess, onError }) => {
     setValue,
     watch,
     reset,
-    formState: { errors, isValid },
+    formState: { errors },
   } = useForm({
     mode: "onChange",
     defaultValues: {
@@ -115,7 +116,7 @@ export const UploadInvoiceButton = ({ selectedFolder, onSuccess, onError }) => {
         await runOcr(file);
       }
     } catch (err) {
-      console.error(`UploadInvoiceButton handleFileSelect: ${err}`);
+      logger.error(`UploadInvoiceButton handleFileSelect: ${err}`);
       onError("Error processing PDF file");
     }
   };
@@ -163,7 +164,7 @@ export const UploadInvoiceButton = ({ selectedFolder, onSuccess, onError }) => {
       onSuccess(t("financials.messages.invoiceUploaded"));
       handleCancelModal();
     } catch (err) {
-      console.error("Error uploading invoice:", err);
+      logger.error("Error uploading invoice:", err);
       onError(extractApiError(err, t("financials.messages.invoiceUploadFailed")));
     }
   };
@@ -427,7 +428,7 @@ export const UploadInvoiceButton = ({ selectedFolder, onSuccess, onError }) => {
           >
             <ActionButton
               type="submit"
-              disabled={uploading || ocrLoading || !isValid || isOverLimit}
+              disabled={uploading || ocrLoading || !hasRequiredFields || isOverLimit}
               text={uploading ? t("common.uploading") : t("financials.uploadInvoice")}
             />
             <CancelButton

@@ -38,6 +38,7 @@ import { AlertInline } from "../../../common/components/ui/AlertInline";
 import { extractApiError } from "../../../common/utils/apiHelpers";
 import { useNotification } from "../../../common/hooks";
 import { LoadingProgress } from "../../../common/components/ui/LoadingProgress";
+import { logger } from "../../../common/utils/logger";
 
 export const QuickBroadcastView = () => {
   const { t } = useTranslation();
@@ -144,7 +145,7 @@ export const QuickBroadcastView = () => {
               },
             );
           } catch (uploadErr) {
-            console.error("Error uploading attachment:", uploadErr);
+            logger.error("Error uploading attachment:", uploadErr);
             // Continue with other files even if one fails
           }
         }
@@ -157,7 +158,7 @@ export const QuickBroadcastView = () => {
       setPriority("medium");
       setAttachments([]);
     } catch (err) {
-      console.error("Error creating announcement:", err);
+      logger.error("Error creating announcement:", err);
       showError(extractApiError(err, t("quickBroadcast.error")));
     } finally {
       setSending(false);

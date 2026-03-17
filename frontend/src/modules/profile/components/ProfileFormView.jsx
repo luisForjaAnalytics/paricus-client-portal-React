@@ -1,4 +1,14 @@
-import { Box, Button, TextField, Avatar, Typography } from "@mui/material";
+import { useState } from "react";
+import {
+  Box,
+  Button,
+  TextField,
+  Avatar,
+  Typography,
+  IconButton,
+  Badge,
+} from "@mui/material";
+import { CameraAlt } from "@mui/icons-material";
 import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { useForm, Controller } from "react-hook-form";
@@ -16,8 +26,10 @@ import {
   outlinedIconButton,
   primaryIconButton,
   profilelStyles,
+  colors,
 } from "../../../common/styles/styles";
 import { PasswordField } from "../../../common/components/ui/PasswordField";
+import { UploadProfilePhoto, getAvatarSrc } from "./UploadProfilePhoto";
 
 const noShadowSx = {
   ...profilelStyles.inputField,
@@ -100,6 +112,10 @@ export const ProfileFormView = () => {
 
   const { notificationRef, showNotification } = useNotification();
 
+  const [avatarDialogOpen, setAvatarDialogOpen] = useState(false);
+
+  const currentAvatarSrc = getAvatarSrc(user?.avatarUrl);
+
   const {
     control,
     handleSubmit,
@@ -120,14 +136,12 @@ export const ProfileFormView = () => {
 
   const onSubmit = async (data) => {
     try {
-      // Update profile
       await updateProfile({
         first_name: data.firstName,
         last_name: data.lastName,
         phone: data.phone,
       }).unwrap();
 
-      // Update password if fields are filled
       if (data.currentPassword && data.newPassword) {
         await updatePassword({
           current_password: data.currentPassword,
@@ -142,7 +156,6 @@ export const ProfileFormView = () => {
         showNotification(t("profile.profileUpdated"), "success");
       }
 
-      // Log profile update (fire-and-forget)
       const changes = [];
       if (data.firstName !== (user?.firstName || "")) changes.push("firstName");
       if (data.lastName !== (user?.lastName || "")) changes.push("lastName");
@@ -157,7 +170,6 @@ export const ProfileFormView = () => {
         status: "SUCCESS",
       });
 
-      // Reset form with new profile values + clear password fields
       reset({
         firstName: data.firstName,
         lastName: data.lastName,
@@ -191,11 +203,43 @@ export const ProfileFormView = () => {
     <Box sx={profilelStyles}>
       {/* Profile Header */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 3, mb: 4 }}>
-        <Avatar
-          src="https://i.pravatar.cc/150?u=a042581f4e29026704d"
-          alt={t("profile.photoLabel")}
-          sx={{ width: 80, height: 80 }}
-        />
+        <Badge
+          overlap="circular"
+          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+          badgeContent={
+            <IconButton
+              size="small"
+              onClick={() => setAvatarDialogOpen(true)}
+              sx={{
+                bgcolor: colors.primary,
+                color: "white",
+                width: 28,
+                height: 28,
+                "&:hover": { bgcolor: colors.primaryDark || colors.primary },
+              }}
+            >
+              <CameraAlt sx={{ fontSize: 16 }} />
+            </IconButton>
+          }
+        >
+          <Avatar
+            src={currentAvatarSrc}
+            alt={t("profile.photoLabel")}
+            sx={{
+              width: 80,
+              height: 80,
+              bgcolor: colors.financialClientAvatar,
+              fontSize: "2rem",
+              fontWeight: 600,
+              cursor: "pointer",
+              color: colors.primary,
+            }}
+            onClick={() => setAvatarDialogOpen(true)}
+          >
+            {!currentAvatarSrc &&
+              `${user?.firstName?.[0] || ""}${user?.lastName?.[0] || ""}`.toUpperCase()}
+          </Avatar>
+        </Badge>
         <Box>
           <Typography variant="h5" fontWeight={600} gutterBottom>
             {user?.firstName} {user?.lastName}
@@ -205,6 +249,13 @@ export const ProfileFormView = () => {
           </Typography>
         </Box>
       </Box>
+
+      {/* Avatar Upload Dialog */}
+      <UploadProfilePhoto
+        open={avatarDialogOpen}
+        onClose={() => setAvatarDialogOpen(false)}
+        onNotification={showNotification}
+      />
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         {/* Profile Form */}
@@ -262,12 +313,7 @@ export const ProfileFormView = () => {
 
         {/* Change Password Section */}
         <Box sx={{ mt: 4, pt: 3, borderTop: 1, borderColor: "divider" }}>
-          <Typography
-            variant="h6"
-            fontWeight={600}
-            gutterBottom
-            sx={{ mb: 3 }}
-          >
+          <Typography variant="h6" fontWeight={600} gutterBottom sx={{ mb: 3 }}>
             {t("profile.changePassword")}
           </Typography>
 

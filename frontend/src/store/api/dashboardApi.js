@@ -1,18 +1,10 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { createBaseQuery } from "./baseQuery";
 
 export const dashboardApi = createApi({
   reducerPath: "dashboardApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: `${import.meta.env.VITE_API_URL}/dashboard`,
-    prepareHeaders: (headers, { getState }) => {
-      const token = getState().auth?.token;
-      if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
-      }
-      return headers;
-    },
-  }),
-  tagTypes: ["DashboardStats", "RecentRecordings", "Announcements"],
+  baseQuery: createBaseQuery("/dashboard"),
+  tagTypes: ["DashboardStats", "Announcements"],
   endpoints: (builder) => ({
     // Get dashboard stats
     // Optional clientId param for BPO Admin to view specific client's data
@@ -25,15 +17,6 @@ export const dashboardApi = createApi({
       providesTags: (result, error, clientId) => [
         { type: "DashboardStats", id: clientId || "ALL" },
       ],
-      // Cache for 5 minutes
-      keepUnusedDataFor: 300,
-    }),
-
-    // Get recent recordings (last 3)
-    getRecentRecordings: builder.query({
-      query: () => "/recent-recordings",
-      transformResponse: (response) => response.data || [],
-      providesTags: ["RecentRecordings"],
       // Cache for 5 minutes
       keepUnusedDataFor: 300,
     }),
@@ -100,7 +83,6 @@ export const dashboardApi = createApi({
 
 export const {
   useGetDashboardStatsQuery,
-  useGetRecentRecordingsQuery,
   useRefreshDashboardStatsMutation,
   useGetAnnouncementsQuery,
   useGetAnnouncementQuery,

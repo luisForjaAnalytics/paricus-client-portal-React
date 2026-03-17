@@ -3,6 +3,7 @@ import * as pdfjsLib from "pdfjs-dist";
 import { GlobalWorkerOptions } from "pdfjs-dist/build/pdf";
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker?url";
 import Tesseract from "tesseract.js";
+import { logger } from "../utils/logger";
 
 // Configurar PDF.js worker
 GlobalWorkerOptions.workerSrc = pdfjsWorker;
@@ -40,7 +41,7 @@ export const useTesseractOCR =()=> {
 
       return images;
     } catch (err) {
-      console.error(`ERROR extractImagesFromPDF: ${err}`);
+      logger.error(`ERROR extractImagesFromPDF: ${err}`);
       throw err;
     }
   }, []);

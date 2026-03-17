@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import PropTypes from "prop-types";
 import {
   Dialog,
@@ -17,6 +17,7 @@ import { modalCard } from "../../../../../common/styles/styles";
 import { CancelButton } from "../../../../../common/components/ui/CancelButton";
 import { useGetDepartmentsQuery } from "../../../../../store/api/ticketsApi";
 import { LoadingProgress } from "../../../../../common/components/ui/LoadingProgress";
+import { logger } from "../../../../../common/utils/logger";
 
 /**
  * Configuration for different change types
@@ -130,7 +131,7 @@ export const TicketChangesRequest = ({
       : config?.options || [];
 
   if (!config && changeType !== "assignedTo") {
-    console.error(`Invalid changeType: ${changeType}`);
+    logger.error(`Invalid changeType: ${changeType}`);
     return null;
   }
 

@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import {
   useGetAudioRecordingsQuery,
   useGetCallTypesQuery,
-  usePrefetch,
 } from "../../../store/api/audioRecordingsApi";
 
 /**
@@ -106,8 +105,6 @@ export const useAudioRecordings = () => {
     refetchOnMountOrArgChange: false,
     skip: !loadCallTypes,
   });
-
-  const prefetchAudioRecordings = usePrefetch("getAudioRecordings");
 
   // Extract data from query
   const recordings = recordingsData?.data || [];

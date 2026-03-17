@@ -23,6 +23,7 @@ import {
 import { AlertInline } from "../../../../common/components/ui/AlertInline";
 import { useNotification } from "../../../../common/hooks";
 import { LoadingProgress } from "../../../../common/components/ui/LoadingProgress";
+import { logger } from "../../../../common/utils/logger";
 
 /**
  * DashboardHeader - Header component with user/client selector for BPO Admin
@@ -81,7 +82,7 @@ export const DashboardHeader = ({ onSelectionChange }) => {
 
       return { dashboardClientId: null, dashboardUserId: null };
     } catch (error) {
-      console.error("Error parsing selected value:", error);
+      logger.error("Error parsing selected value:", error);
       return { dashboardClientId: null, dashboardUserId: null };
     }
   }, [selectedValue, allUsers]);
@@ -120,7 +121,7 @@ export const DashboardHeader = ({ onSelectionChange }) => {
         }))
         .filter((client) => client.users.length > 0); // Only show clients with users
     } catch (error) {
-      console.error("Error grouping users by client:", error);
+      logger.error("Error grouping users by client:", error);
       return [];
     }
   }, [clients, allUsers]);
@@ -203,7 +204,7 @@ export const DashboardHeader = ({ onSelectionChange }) => {
 
       return "";
     } catch (error) {
-      console.error("Error getting display value:", error);
+      logger.error("Error getting display value:", error);
       return "";
     }
   }, [selectedValue, allUsers, t]);

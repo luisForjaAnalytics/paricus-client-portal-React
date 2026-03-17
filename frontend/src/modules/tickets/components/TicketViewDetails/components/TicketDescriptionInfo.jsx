@@ -18,6 +18,7 @@ import { useTicketAttachments } from "../../../../../common/hooks/useTicketAttac
 import { ticketStyle, imagePreview } from "../../../../../common/styles/styles";
 import { getAttachmentUrl } from "../../../../../common/utils/getAttachmentUrl";
 import { useModal } from "../../../../../common/hooks";
+import { logger } from "../../../../../common/utils/logger";
 
 export const TicketDescriptionInfo = ({ ticket }) => {
   const { t } = useTranslation();
@@ -43,7 +44,7 @@ export const TicketDescriptionInfo = ({ ticket }) => {
       descriptionData = ticket.description?.descriptionData;
     }
   } catch (error) {
-    console.error("Error parsing description:", error);
+    logger.error("Error parsing description:", error);
     descriptionData = null;
   }
 

@@ -36,6 +36,7 @@ import {
   formatDate,
 } from "../../common/utils/formatters";
 import { LoadingProgress } from "../../common/components/ui/LoadingProgress";
+import { logger } from "../../common/utils/logger";
 
 // Component to display a single folder's reports using RTK Query
 const FolderReportsSection = ({ folder, downloadReport }) => {
@@ -186,7 +187,7 @@ export const ReportingView = () => {
         throw new Error("No download URL received");
       }
     } catch (err) {
-      console.error("Error downloading report:", err);
+      logger.error("Error downloading report:", err);
       showNotification(
         err.data?.message || t("reporting.downloadFailed"),
         "error",

@@ -34,6 +34,7 @@ import { ActionButton } from "../../../../common/components/ui/ActionButton";
 import { DownloadButton } from "../../../../common/components/ui/DownloadButton";
 import { DeleteButton } from "../../../../common/components/ui/DeleteButton";
 import { LoadingProgress } from "../../../../common/components/ui/LoadingProgress";
+import { logger } from "../../../../common/utils/logger";
 
 /**
  * ClientFoldersDesktop - Desktop view for client folders table
@@ -70,7 +71,7 @@ export const ClientFoldersDesktop = ({
         [rowId]: !prev[rowId],
       }));
     } catch (err) {
-      console.error(`ERROR toggleRow: ${err}`);
+      logger.error(`ERROR toggleRow: ${err}`);
     }
   };
 
@@ -78,7 +79,7 @@ export const ClientFoldersDesktop = ({
     try {
       setPage(newPage);
     } catch (err) {
-      console.error(`ERROR handleChangePage: ${err}`);
+      logger.error(`ERROR handleChangePage: ${err}`);
     }
   };
 
@@ -87,7 +88,7 @@ export const ClientFoldersDesktop = ({
       setRowsPerPage(parseInt(event.target.value, 10));
       setPage(0);
     } catch (err) {
-      console.error(`ERROR handleChangeRowsPerPage: ${err}`);
+      logger.error(`ERROR handleChangeRowsPerPage: ${err}`);
     }
   };
 
@@ -97,7 +98,7 @@ export const ClientFoldersDesktop = ({
       setOrder(isAsc ? "desc" : "asc");
       setOrderBy(property);
     } catch (err) {
-      console.error(`ERROR handleRequestSort: ${err}`);
+      logger.error(`ERROR handleRequestSort: ${err}`);
     }
   };
 
@@ -122,7 +123,7 @@ export const ClientFoldersDesktop = ({
       });
       return sorted;
     } catch (err) {
-      console.error(`ERROR sortedData: ${err}`);
+      logger.error(`ERROR sortedData: ${err}`);
       return rows;
     }
   }, [rows, order, orderBy]);
@@ -134,7 +135,7 @@ export const ClientFoldersDesktop = ({
         page * rowsPerPage + rowsPerPage,
       );
     } catch (err) {
-      console.error(`ERROR paginatedData: ${err}`);
+      logger.error(`ERROR paginatedData: ${err}`);
       return sortedData;
     }
   }, [sortedData, page, rowsPerPage]);

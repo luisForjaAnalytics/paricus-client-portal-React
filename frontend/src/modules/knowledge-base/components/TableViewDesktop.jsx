@@ -20,6 +20,7 @@ import { ArticleSearch } from "./ArticleSearch";
 import { AlertInline } from "../../../common/components/ui/AlertInline";
 import { MobileFilterPanel } from "../../../common/components/ui/MobileFilterPanel";
 import { useNotification } from "../../../common/hooks";
+import { logger } from "../../../common/utils/logger";
 
 const dataStructure = (data) => {
   try {
@@ -35,11 +36,11 @@ const dataStructure = (data) => {
           kbPrefix: item?.kbPrefix || null, // Include kbPrefix for article operations
         };
       } catch (itemError) {
-        console.error(`Error processing article at index ${index}:`, itemError);
+        logger.error(`Error processing article at index ${index}:`, itemError);
       }
     });
   } catch (error) {
-    console.error("Error structuring article data:", error);
+    logger.error("Error structuring article data:", error);
     return [];
   }
 };
@@ -194,7 +195,7 @@ export const TableView = () => {
         state: { kbPrefix: prefix },
       });
     } catch (error) {
-      console.error("Error fetching article:", error);
+      logger.error("Error fetching article:", error);
       showError(t("knowledgeBase.errorFetchingArticle"));
     }
   };
@@ -209,7 +210,7 @@ export const TableView = () => {
         state: { kbPrefix: prefix },
       });
     } catch (error) {
-      console.error("Error fetching article:", error);
+      logger.error("Error fetching article:", error);
       showError(t("knowledgeBase.errorFetchingArticle"));
     }
   };

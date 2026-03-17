@@ -1,15 +1,9 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { createBaseQuery } from "./baseQuery";
 
 export const audioRecordingsApi = createApi({
   reducerPath: "audioRecordingsApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: `${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/audio-recordings`,
-    prepareHeaders: (headers, { getState }) => {
-      const token = getState().auth?.token;
-      if (token) headers.set("Authorization", `Bearer ${token}`);
-      return headers;
-    },
-  }),
+  baseQuery: createBaseQuery("/audio-recordings"),
   tagTypes: ['AudioRecordings'],
   // Keep cached data for 10 minutes after component unmounts
   keepUnusedDataFor: 600,
@@ -44,18 +38,6 @@ export const audioRecordingsApi = createApi({
       transformResponse: (response) => response.callTypes || [],
     }),
 
-    // Get agent names for filters
-    getAgentNames: builder.query({
-      query: () => "/filters/agents",
-      transformResponse: (response) => response.agents || [],
-    }),
-
-    // Get tags for filters
-    getTags: builder.query({
-      query: () => "/filters/tags",
-      transformResponse: (response) => response.tags || [],
-    }),
-
     // Get audio URL for a specific recording
     getAudioUrl: builder.query({
       query: (interactionId) => `/${interactionId}/audio-url`,
@@ -69,8 +51,5 @@ export const audioRecordingsApi = createApi({
 export const {
   useGetAudioRecordingsQuery,
   useGetCallTypesQuery,
-  useGetAgentNamesQuery,
-  useGetTagsQuery,
   useLazyGetAudioUrlQuery,
-  usePrefetch,
 } = audioRecordingsApi;

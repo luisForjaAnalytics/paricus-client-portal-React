@@ -2,6 +2,7 @@ import { useState, useRef, useMemo, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { useLazyGetAudioUrlQuery } from "../../../store/api/audioRecordingsApi";
 import { useCreateLogMutation } from "../../../store/api/logsApi";
+import { logger } from "../../../common/utils/logger";
 
 /**
  * Custom hook for audio player logic
@@ -56,7 +57,7 @@ export const useAudioPlayer = (recordings = []) => {
           } (Agent: ${recordingToLog.agent_name || "Unknown"})`,
           status: "SUCCESS",
         }).catch((logErr) => {
-          console.error(
+          logger.error(
             `ERROR: stopAudio (createLog) - ${logErr.message}`,
             logErr,
           );
@@ -100,14 +101,14 @@ export const useAudioPlayer = (recordings = []) => {
               } (Agent: ${item.agent_name || "Unknown"})`,
               status: "SUCCESS",
             }).catch((logErr) => {
-              console.error(
+              logger.error(
                 `ERROR: toggleAudio (createLog) - ${logErr.message}`,
                 logErr,
               );
             });
           }
         } catch (err) {
-          console.error(`ERROR: toggleAudio - ${err.message}`, err);
+          logger.error(`ERROR: toggleAudio - ${err.message}`, err);
 
           createLog({
             userId: authUser?.id?.toString() || "unknown",
@@ -116,7 +117,7 @@ export const useAudioPlayer = (recordings = []) => {
             description: `Failed to play audio recording ${item.interaction_id}`,
             status: "FAILURE",
           }).catch((logErr) => {
-            console.error(
+            logger.error(
               `ERROR: toggleAudio (createLog failure) - ${logErr.message}`,
               logErr,
             );
@@ -151,7 +152,7 @@ export const useAudioPlayer = (recordings = []) => {
         setIsPlaying(true);
       }
     } catch (err) {
-      console.error(`ERROR: togglePlayPause - ${err.message}`, err);
+      logger.error(`ERROR: togglePlayPause - ${err.message}`, err);
     }
   }, [isPlaying]);
 
@@ -161,7 +162,7 @@ export const useAudioPlayer = (recordings = []) => {
         setCurrentTime(audioPlayer.current.currentTime);
       }
     } catch (err) {
-      console.error(`ERROR: updateProgress - ${err.message}`, err);
+      logger.error(`ERROR: updateProgress - ${err.message}`, err);
     }
   }, []);
 
@@ -171,7 +172,7 @@ export const useAudioPlayer = (recordings = []) => {
         setDuration(audioPlayer.current.duration);
       }
     } catch (err) {
-      console.error(`ERROR: handleMetadataLoaded - ${err.message}`, err);
+      logger.error(`ERROR: handleMetadataLoaded - ${err.message}`, err);
     }
   }, []);
 
@@ -182,7 +183,7 @@ export const useAudioPlayer = (recordings = []) => {
       audioPlayer.current.currentTime = seekTime;
       setCurrentTime(seekTime);
     } catch (err) {
-      console.error(`ERROR: seekAudio - ${err.message}`, err);
+      logger.error(`ERROR: seekAudio - ${err.message}`, err);
     }
   }, [duration]);
 
@@ -194,7 +195,7 @@ export const useAudioPlayer = (recordings = []) => {
         audioPlayer.current.currentTime - 10,
       );
     } catch (err) {
-      console.error(`ERROR: rewind - ${err.message}`, err);
+      logger.error(`ERROR: rewind - ${err.message}`, err);
     }
   }, []);
 
@@ -206,7 +207,7 @@ export const useAudioPlayer = (recordings = []) => {
         audioPlayer.current.currentTime + 10,
       );
     } catch (err) {
-      console.error(`ERROR: forward - ${err.message}`, err);
+      logger.error(`ERROR: forward - ${err.message}`, err);
     }
   }, [duration]);
 
@@ -222,7 +223,7 @@ export const useAudioPlayer = (recordings = []) => {
         setIsMuted(true);
       }
     } catch (err) {
-      console.error(`ERROR: toggleMute - ${err.message}`, err);
+      logger.error(`ERROR: toggleMute - ${err.message}`, err);
     }
   }, [isMuted, volume]);
 
@@ -237,7 +238,7 @@ export const useAudioPlayer = (recordings = []) => {
         setIsMuted(false);
       }
     } catch (err) {
-      console.error(`ERROR: handleVolumeChange - ${err.message}`, err);
+      logger.error(`ERROR: handleVolumeChange - ${err.message}`, err);
     }
   }, []);
 
@@ -252,7 +253,7 @@ export const useAudioPlayer = (recordings = []) => {
         audioPlayer.current.playbackRate = speeds[nextIndex];
       }
     } catch (err) {
-      console.error(`ERROR: cyclePlaybackSpeed - ${err.message}`, err);
+      logger.error(`ERROR: cyclePlaybackSpeed - ${err.message}`, err);
     }
   }, [playbackSpeed]);
 
@@ -263,7 +264,7 @@ export const useAudioPlayer = (recordings = []) => {
       const secs = Math.floor(seconds % 60);
       return `${mins}:${secs.toString().padStart(2, "0")}`;
     } catch (err) {
-      console.error(`ERROR: formatTime - ${err.message}`, err);
+      logger.error(`ERROR: formatTime - ${err.message}`, err);
       return "0:00";
     }
   }, []);
@@ -274,17 +275,17 @@ export const useAudioPlayer = (recordings = []) => {
       setIsPlaying(false);
       setCurrentTime(0);
     } catch (err) {
-      console.error(`ERROR: handleAudioEnded - ${err.message}`, err);
+      logger.error(`ERROR: handleAudioEnded - ${err.message}`, err);
     }
   }, []);
 
   const handleAudioError = useCallback((err) => {
     try {
-      console.error(`ERROR: handleAudioError - Audio playback failed`, err);
+      logger.error(`ERROR: handleAudioError - Audio playback failed`, err);
       setCurrentlyPlaying(null);
       setIsPlaying(false);
     } catch (error) {
-      console.error(`ERROR: handleAudioError - ${error.message}`, error);
+      logger.error(`ERROR: handleAudioError - ${error.message}`, error);
     }
   }, []);
 
@@ -303,7 +304,7 @@ export const useAudioPlayer = (recordings = []) => {
 
         window.open(audioUrl, "_blank");
       } catch (err) {
-        console.error(`ERROR: downloadAudio - ${err.message}`, err);
+        logger.error(`ERROR: downloadAudio - ${err.message}`, err);
         throw err;
       } finally {
         setLoadingAudioUrl(null);

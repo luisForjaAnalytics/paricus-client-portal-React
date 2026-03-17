@@ -3,7 +3,6 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs/promises';
 import jwt from 'jsonwebtoken';
-import { PrismaClient } from '@prisma/client';
 import { authenticateToken } from '../middleware/auth-prisma.js';
 import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
@@ -13,8 +12,9 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+import { prisma } from '../database/prisma.js';
+
 const router = express.Router();
-const prisma = new PrismaClient();
 
 const STORAGE_MODE = config.storageMode || 'local';
 const BUCKET_NAME = config.aws.bucketName || 'paricus-reports';

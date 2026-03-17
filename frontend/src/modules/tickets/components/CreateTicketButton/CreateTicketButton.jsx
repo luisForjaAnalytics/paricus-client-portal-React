@@ -40,6 +40,7 @@ import { AlertInline } from "../../../../common/components/ui/AlertInline";
 import { extractApiError } from "../../../../common/utils/apiHelpers";
 import { useNotification } from "../../../../common/hooks";
 import { LoadingProgress } from "../../../../common/components/ui/LoadingProgress";
+import { logger } from "../../../../common/utils/logger";
 
 export const CreateTickeButton = ({ externalOpen = false, onExternalClose, hideButton = false }) => {
   const { t } = useTranslation();
@@ -188,7 +189,7 @@ export const CreateTickeButton = ({ externalOpen = false, onExternalClose, hideB
             }).unwrap();
           }
         } catch (uploadError) {
-          console.error("❌ Error uploading attachments:", uploadError);
+          logger.error("Error uploading attachments:", uploadError);
           // Don't fail the whole operation if attachments fail
           // The ticket was already created successfully
         } finally {
@@ -203,7 +204,7 @@ export const CreateTickeButton = ({ externalOpen = false, onExternalClose, hideB
       reset();
       handleCancelModal();
     } catch (err) {
-      console.error("Error creating ticket:", err);
+      logger.error("Error creating ticket:", err);
       // Error is handled by RTK Query and available in the `error` variable
     }
   };

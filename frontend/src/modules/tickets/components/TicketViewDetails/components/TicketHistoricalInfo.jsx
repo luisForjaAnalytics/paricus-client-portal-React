@@ -7,6 +7,7 @@ import { TicketText } from "../../../../../common/components/ui/TicketText";
 import { TiptapReadOnly } from "../../../../../common/components/ui/TiptapReadOnly/TiptapReadOnly";
 import { DetailAttachmentsView } from "./DetailAttachmentsView";
 import { GetInitialsAvatar } from "../../../../../common/components/ui/GetInitialsAvatar";
+import { logger } from "../../../../../common/utils/logger";
 
 export const TicketHistoricalInfo = ({ ticket }) => {
   const { t } = useTranslation();
@@ -129,7 +130,7 @@ export const TicketHistoricalInfo = ({ ticket }) => {
               </Box>
             );
           } catch (error) {
-            console.error("Error rendering detail item:", error, item);
+            logger.error("Error rendering detail item:", error, item);
             return (
               <Box key={item?.id || index} sx={ticketStyle.historicalContainer}>
                 <AlertInline

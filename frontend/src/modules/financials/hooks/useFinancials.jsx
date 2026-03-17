@@ -24,6 +24,7 @@ import {
   slugToTitle,
 } from "../../../common/utils/formatters";
 import { extractApiError } from "../../../common/utils/apiHelpers";
+import { logger } from "../../../common/utils/logger";
 
 /**
  * Custom hook for financials module logic
@@ -176,7 +177,7 @@ export const useFinancials = () => {
       setSelectedFolder(clientFolder);
       scrollToInvoices();
     } catch (err) {
-      console.error(`FinancialsView: ${err}`);
+      logger.error(`FinancialsView: ${err}`);
     }
   };
 
@@ -189,7 +190,7 @@ export const useFinancials = () => {
         });
       }, 100);
     } catch (err) {
-      console.error(`FinancialsView: ${err}`);
+      logger.error(`FinancialsView: ${err}`);
     }
   };
 
@@ -219,11 +220,11 @@ export const useFinancials = () => {
             status: 'SUCCESS',
           }).unwrap();
         } catch (logErr) {
-          console.error("Error logging view invoice action:", logErr);
+          logger.error("Error logging view invoice action:", logErr);
         }
       }
     } catch (err) {
-      console.error("Error viewing invoice:", err);
+      logger.error("Error viewing invoice:", err);
       showNotification(extractApiError(err, "Failed to view invoice"), "error");
 
       try {
@@ -235,7 +236,7 @@ export const useFinancials = () => {
           status: 'FAILURE',
         }).unwrap();
       } catch (logErr) {
-        console.error("Error logging view invoice failure:", logErr);
+        logger.error("Error logging view invoice failure:", logErr);
       }
     }
   };
@@ -269,7 +270,7 @@ export const useFinancials = () => {
           window.URL.revokeObjectURL(blobUrl);
           showNotification("Download completed", "success");
         } catch (err) {
-          console.error(`FinancialsView downloadInvoice: ${err}`);
+          logger.error(`FinancialsView downloadInvoice: ${err}`);
           throw err;
         }
 
@@ -282,11 +283,11 @@ export const useFinancials = () => {
             status: 'SUCCESS',
           }).unwrap();
         } catch (logErr) {
-          console.error("Error logging download invoice action:", logErr);
+          logger.error("Error logging download invoice action:", logErr);
         }
       }
     } catch (err) {
-      console.error("Error downloading invoice:", err);
+      logger.error("Error downloading invoice:", err);
       showNotification(extractApiError(err, "Failed to download invoice"), "error");
 
       try {
@@ -298,7 +299,7 @@ export const useFinancials = () => {
           status: 'FAILURE',
         }).unwrap();
       } catch (logErr) {
-        console.error("Error logging download invoice failure:", logErr);
+        logger.error("Error logging download invoice failure:", logErr);
       }
     }
   };
@@ -312,7 +313,7 @@ export const useFinancials = () => {
       window.open(paymentLink, "_blank");
       showNotification("Opening payment page...", "success");
     } catch (err) {
-      console.error(`FinancialsView: ${err}`);
+      logger.error(`FinancialsView: ${err}`);
     }
   };
 
@@ -333,7 +334,7 @@ export const useFinancials = () => {
       const adjustedDate = new Date(date.getTime() - offset * 60 * 1000);
       return adjustedDate.toISOString();
     } catch (err) {
-      console.error(`FinancialsView: ${err}`);
+      logger.error(`FinancialsView: ${err}`);
       return new Date().toISOString();
     }
   };
@@ -362,7 +363,7 @@ export const useFinancials = () => {
       showNotification("Invoice updated successfully", "success");
       closeEditInvoiceModal();
     } catch (err) {
-      console.error("Error updating invoice:", err);
+      logger.error("Error updating invoice:", err);
       showNotification(extractApiError(err, "Failed to update invoice"), "error");
     }
   };
@@ -380,7 +381,7 @@ export const useFinancials = () => {
       };
       return statusColors[status] || "default";
     } catch (err) {
-      console.error(`FinancialsView: ${err}`);
+      logger.error(`FinancialsView: ${err}`);
       return "default";
     }
   };

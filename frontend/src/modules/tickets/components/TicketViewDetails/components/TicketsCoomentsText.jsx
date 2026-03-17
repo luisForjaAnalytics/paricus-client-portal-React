@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { TicketUpdateStatus } from "./TicketUpdateStatus";
 import { TicketHistoricalInfo } from "./TicketHistoricalInfo";
 import { colors } from "../../../../../common/styles/styles";
+import { logger } from "../../../../../common/utils/logger";
 
 export const TicketsCoomentsText = ({ ticket }) => {
   const { t } = useTranslation();
@@ -16,7 +17,7 @@ export const TicketsCoomentsText = ({ ticket }) => {
     try {
       setActiveTab(newValue);
     } catch (error) {
-      console.error("Error changing tab:", error);
+      logger.error("Error changing tab:", error);
     }
   };
 

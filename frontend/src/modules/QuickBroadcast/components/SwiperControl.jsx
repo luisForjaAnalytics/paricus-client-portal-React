@@ -1,5 +1,10 @@
-import { Box, Button } from "@mui/material";
-import { AddPhotoAlternate, Image, Save } from "@mui/icons-material";
+import { Box, Button, Typography } from "@mui/material";
+import {
+  AddPhotoAlternate,
+  Image,
+  Save,
+  InfoOutlined,
+} from "@mui/icons-material";
 import { SwiperView } from "../../../common/components/ui/Swiper";
 import { useTranslation } from "react-i18next";
 import { useState, useCallback, useRef, useMemo, useEffect } from "react";
@@ -129,7 +134,7 @@ export const SwiperControl = () => {
 
         // If this slot was cleared, remove it from clearedSlots (new upload replaces it)
         setClearedSlots((prev) => prev.filter((s) => s !== slotIndex));
-      } catch (err) {
+      } catch {
         showError(t("swiperControl.saveError"));
       } finally {
         if (fileInputRefs.current[slotIndex]) {
@@ -304,17 +309,32 @@ export const SwiperControl = () => {
         </Box>
       </Box>
 
-      {/* Column 2, Row 1: Swiper */}
+      {/* Column 2: Hint + Swiper */}
       <Box
         sx={{
-          height: "32vh",
-          minWidth: 0,
-          overflow: "hidden",
           gridRow: { xs: 1, md: 1 },
           gridColumn: { md: 2 },
+          minWidth: 0,
         }}
       >
-        <SwiperView images={displayImages} />
+        {/* Recommended dimensions hint */}
+        <Box
+          sx={{ display: "flex", justifyContent: "center", gap: 0.5, mb: 0.5, px: 1 }}
+        >
+          <InfoOutlined
+            sx={{ fontSize: "0.85rem", color: colors.warning }}
+          />
+          <Typography
+            variant="caption"
+            color="warning"
+            sx={{ lineHeight: 1.3 }}
+          >
+            {t("swiperControl.recommendedSize")}
+          </Typography>
+        </Box>
+        <Box sx={{ height: "32vh", overflow: "hidden" }}>
+          <SwiperView images={displayImages} />
+        </Box>
       </Box>
       {/* Column 2, Row 2: Select Client + Save */}
       <Box

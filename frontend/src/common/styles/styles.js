@@ -424,7 +424,7 @@ export const reportsCardSelected = {
   border: `1px solid ${colors.borderSoft}`,
   boxShadow: "0px 0.5px 0.5px 0px rgba(0, 0, 0, 0.32)",
   padding: "1rem 1rem 0.2rem 1rem",
-  borderRadius: "1rem",
+  //borderRadius: "1rem",
 };
 
 // ========================================

@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Box, Typography, Chip } from "@mui/material";
 import { Folder as FolderIcon, FolderOpen as FolderOpenIcon } from "@mui/icons-material";
 import { colors, typography } from "../../../common/styles/styles";
+import { logger } from "../../../common/utils/logger";
 
 /**
  * useClientFoldersTableConfig - Shared hook for ClientFolders table configuration
@@ -24,7 +25,7 @@ export const useClientFoldersTableConfig = ({
         reports: reports[folder] || [],
       }));
     } catch (err) {
-      console.error(`ERROR useClientFoldersTableConfig rows: ${err}`);
+      logger.error(`ERROR useClientFoldersTableConfig rows: ${err}`);
       return [];
     }
   }, [clientFolders, reports]);
@@ -72,7 +73,7 @@ export const useClientFoldersTableConfig = ({
         },
       ];
     } catch (err) {
-      console.error(`ERROR useClientFoldersTableConfig desktopColumns: ${err}`);
+      logger.error(`ERROR useClientFoldersTableConfig desktopColumns: ${err}`);
       return [];
     }
   }, [t]);
@@ -95,7 +96,7 @@ export const useClientFoldersTableConfig = ({
         },
       ];
     } catch (err) {
-      console.error(`ERROR useClientFoldersTableConfig mobileColumns: ${err}`);
+      logger.error(`ERROR useClientFoldersTableConfig mobileColumns: ${err}`);
       return [];
     }
   }, [t]);
@@ -105,7 +106,7 @@ export const useClientFoldersTableConfig = ({
     try {
       return <FolderOpenIcon sx={{ fontSize: 28, color: colors.primary }} />;
     } catch (err) {
-      console.error(`ERROR renderPrimaryIcon: ${err}`);
+      logger.error(`ERROR renderPrimaryIcon: ${err}`);
       return null;
     }
   }, []);
@@ -115,7 +116,7 @@ export const useClientFoldersTableConfig = ({
     try {
       return t("reportsManagement.clientFolders.noFoldersFound");
     } catch (err) {
-      console.error(`ERROR emptyMessage: ${err}`);
+      logger.error(`ERROR emptyMessage: ${err}`);
       return "No folders found";
     }
   }, [t]);
@@ -124,7 +125,7 @@ export const useClientFoldersTableConfig = ({
     try {
       return t("reportsManagement.clientFolders.title");
     } catch (err) {
-      console.error(`ERROR headerTitle: ${err}`);
+      logger.error(`ERROR headerTitle: ${err}`);
       return "Client Folders";
     }
   }, [t]);

@@ -32,6 +32,7 @@ import {
 } from "../../../../../store/api/ticketsApi";
 import { useTicketDetailAttachments } from "../../../../../common/hooks/useTicketDetailAttachments";
 import { CancelButton } from "../../../../../common/components/ui/CancelButton";
+import { logger } from "../../../../../common/utils/logger";
 
 // Icon mapping for each field
 const fieldIcons = {
@@ -427,7 +428,7 @@ const TicketInfoDetails = ({ ticket }) => {
       }
       return fieldFormatters.default(displayValue);
     } catch (error) {
-      console.error("Error formatting value:", error);
+      logger.error("Error formatting value:", error);
       return "N/A";
     }
   };
@@ -505,7 +506,7 @@ const TicketInfoDetails = ({ ticket }) => {
           try {
             await uploadAllFiles(newDetail.id);
           } catch (uploadError) {
-            console.error(
+            logger.error(
               `TicketViewDetailsInfo uploadAllFiles: ${uploadError}`,
             );
           }
@@ -572,7 +573,7 @@ const TicketInfoDetails = ({ ticket }) => {
         try {
           await uploadAllFiles(newDetail.id);
         } catch (uploadError) {
-          console.error(`TicketViewDetailsInfo uploadAllFiles: ${uploadError}`);
+          logger.error(`TicketViewDetailsInfo uploadAllFiles: ${uploadError}`);
           setError("Update created but failed to upload some attachments");
           return;
         }
@@ -592,7 +593,7 @@ const TicketInfoDetails = ({ ticket }) => {
         navigate("/app/tickets/ticketTable");
       }, 1000);
     } catch (err) {
-      console.error(`TicketViewDetailsInfo handleUpdate: ${err}`);
+      logger.error(`TicketViewDetailsInfo handleUpdate: ${err}`);
 
       let errorMessage = "Failed to update ticket. Please try again.";
 

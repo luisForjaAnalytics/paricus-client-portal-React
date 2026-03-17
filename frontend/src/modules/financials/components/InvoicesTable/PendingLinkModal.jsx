@@ -25,6 +25,7 @@ import {
 import { ActionButton } from "../../../../common/components/ui/ActionButton";
 import { CancelButton } from "../../../../common/components/ui/CancelButton";
 import { extractApiError } from "../../../../common/utils/apiHelpers";
+import { logger } from "../../../../common/utils/logger";
 
 export const PendingLinkModal = ({ invoice, onSuccess, onError }) => {
   const { t } = useTranslation();
@@ -65,7 +66,7 @@ export const PendingLinkModal = ({ invoice, onSuccess, onError }) => {
           status: "SUCCESS",
         }).unwrap();
       } catch (logErr) {
-        console.error("Error logging payment link save:", logErr);
+        logger.error("Error logging payment link save:", logErr);
       }
 
       if (onSuccess) {
@@ -73,7 +74,7 @@ export const PendingLinkModal = ({ invoice, onSuccess, onError }) => {
       }
       handleClose();
     } catch (err) {
-      console.error("Error saving payment link:", err);
+      logger.error("Error saving payment link:", err);
       // Log the failed payment link save
       try {
         await createLog({
@@ -84,7 +85,7 @@ export const PendingLinkModal = ({ invoice, onSuccess, onError }) => {
           status: "FAILURE",
         }).unwrap();
       } catch (logErr) {
-        console.error("Error logging payment link save failure:", logErr);
+        logger.error("Error logging payment link save failure:", logErr);
       }
 
       if (onError) {

@@ -170,8 +170,9 @@ frontend/src/
 │   ├── profile/
 │   │   ├── ProfileView.jsx
 │   │   ├── components/
-│   │   │   └── ProfileFormView.jsx # RHF + Zod form
-│   │   └── index.js
+│   │   │   ├── ProfileFormView.jsx      # RHF + Zod form
+│   │   │   └── UploadProfilePhoto.jsx   # Avatar upload dialog + getAvatarSrc helper
+│   │   └── index.js                     # Exports ProfileView, UploadProfilePhoto, getAvatarSrc
 │   │
 │   ├── reporting/
 │   │   ├── ReportingView.jsx
@@ -208,9 +209,10 @@ frontend/src/
 │
 ├── store/
 │   ├── api/                        # RTK Query API slices
-│   │   ├── authApi.js              # Login, logout, refresh, forgotPassword, verifyCode, resetPassword
+│   │   ├── baseQuery.js             # Shared createBaseQuery factory (JWT auth)
+│   │   ├── authApi.js              # Login, logout, forgotPassword, verifyCode, resetPassword
 │   │   ├── adminApi.js             # Users, clients, roles CRUD
-│   │   ├── profileApi.js           # Profile & password update
+│   │   ├── profileApi.js           # Profile, password, avatar upload/delete
 │   │   ├── invoicesApi.js          # Invoice management
 │   │   ├── audioRecordingsApi.js   # Audio recordings + call types
 │   │   ├── reportsApi.js           # Reports & folders
@@ -284,8 +286,33 @@ const { control, handleSubmit, formState: { errors } } = useForm({
 
 ### 4. RTK Query API Slices
 
+All internal API slices use the shared `createBaseQuery` factory from `store/api/baseQuery.js`:
+
 ```jsx
-// All API calls use RTK Query (no axios)
+// store/api/baseQuery.js — single source for auth header injection
+export const createBaseQuery = (endpoint = "") =>
+  fetchBaseQuery({
+    baseUrl: `${API_URL}${endpoint}`,
+    prepareHeaders: (headers, { getState }) => {
+      const token = getState().auth?.token;
+      if (token) headers.set("Authorization", `Bearer ${token}`);
+      return headers;
+    },
+  });
+
+// Usage in API slices:
+import { createBaseQuery } from "./baseQuery";
+export const adminApi = createApi({
+  reducerPath: "adminApi",
+  baseQuery: createBaseQuery("/admin"),
+  // ...
+});
+```
+
+**Exception**: `articlesApi` and `articlesSearchApi` use direct `fetchBaseQuery` (external intranet API with API key auth).
+
+```jsx
+// Component usage:
 const { data = [], isLoading, error } = useGetItemsQuery(params);
 const [createItem, { isLoading: creating }] = useCreateItemMutation();
 
@@ -412,6 +439,21 @@ Dashboard sections are controlled by individual permissions. The parent permissi
 
 The dashboard route (`/app/dashboard`) does not require any permission — any authenticated user can access it. This ensures users are always redirected to the dashboard after login. If `view_dashboard` is removed, `DashboardViewSelect` renders an empty container (only the page header from `DashboardView` is visible). Individual sub-permissions control each section independently.
 
+#### Profile Avatar Upload
+
+Users can upload a profile photo via `UploadProfilePhoto` dialog. The avatar is displayed in both the profile page and the AppBar. Architecture:
+
+- **Backend**: `POST/GET/DELETE /api/auth/avatar` — multer upload to `uploads/avatars/`, stores `avatarUrl` in User model
+- **Frontend**: `UploadProfilePhoto.jsx` — standalone dialog component with upload/delete/preview
+- **Shared helper**: `getAvatarSrc(avatarUrl)` — converts relative `avatarUrl` to full URL, exported from `modules/profile`
+- **Consumers**: `ProfileFormView` (profile page) and `AvatarButton` (AppBar) both use `getAvatarSrc`
+- **Redux sync**: After upload/delete, `setCredentials` updates `user.avatarUrl` so both avatars update immediately
+- **Fallback**: When no avatar image, displays user initials with `colors.primary` background
+
+#### Swiper Recommended Dimensions
+
+`SwiperControl` displays a warning-colored hint above the carousel preview: "Recommended size: 1920 x 600 px (16:5 ratio)". The hint is placed outside the swiper's `overflow: hidden` container to avoid clipping.
+
 #### Upload Invoice Form Validation
 
 The upload invoice button uses explicit required field checks instead of `react-hook-form`'s `isValid`, ensuring optional fields (`paymentMethod`, `paymentLink`, `description`) never block submission:
@@ -453,6 +495,7 @@ Backend audit logs are created for key admin operations via `backend/server/serv
 | Invoice CRUD | Invoice | CREATE/UPDATE/DELETE | Invoice number |
 | Announcement CRUD | Announcement | CREATE/DELETE | Title |
 | Carousel changes | Carousel | CREATE/DELETE | Image details |
+| Avatar upload/delete | User | UPDATE | Avatar URL |
 
 Logs are viewable in User Management > Logs with server-side pagination and inline column filters.
 
@@ -468,7 +511,7 @@ Logs are viewable in User Management > Logs with server-side pagination and inli
 | user-management | Users, clients, roles, permissions, logs | `admin_users` / `admin_clients` / `admin_roles` |
 | knowledge-base | Articles with rich text editor | `view_knowledge_base` |
 | tickets | Support ticket CRUD with attachments | `view_tickets` |
-| profile | User profile & password change | JWT auth |
+| profile | User profile, password change, avatar upload | JWT auth |
 | reporting | Report viewing | `view_reporting` |
 | reports-management | Upload/manage client reports & folders | `admin_reports` |
 | QuickBroadcast | Dashboard carousel & KPI management | `admin_broadcast` + granular sub-permissions |
@@ -489,6 +532,6 @@ Logs are viewable in User Management > Logs with server-side pagination and inli
 
 ---
 
-**Last updated:** 2026-03-06
+**Last updated:** 2026-03-16
 **Pattern:** Screaming Architecture
 **Status:** Active development

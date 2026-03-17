@@ -14,6 +14,7 @@ import { formatDistanceToNow } from "date-fns";
 import { es, enUS } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
 import { LoadingProgress } from "../../../../common/components/ui/LoadingProgress";
+import { logger } from "../../../../common/utils/logger";
 
 export const MasterRepository = () => {
   const { t, i18n } = useTranslation();
@@ -49,7 +50,7 @@ export const MasterRepository = () => {
       if (isNaN(parsedDate.getTime())) return t("common.na");
       return formatDistanceToNow(parsedDate, { locale });
     } catch (error) {
-      console.error("Error formatting date:", error);
+      logger.error("Error formatting date:", error);
       return t("common.na");
     }
   };

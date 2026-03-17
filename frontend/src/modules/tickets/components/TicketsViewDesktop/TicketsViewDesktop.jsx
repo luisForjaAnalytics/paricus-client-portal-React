@@ -14,6 +14,7 @@ import { getPriorityStyles, getStatusStyles } from "../../../../common/utils/get
 import { TicketsViewMobil } from "../TicketsViewMobil/TicketsViewMobil";
 import { MobileFilterPanel } from "../../../../common/components/ui/MobileFilterPanel";
 import { MobileSpeedDial } from "../../../../common/components/ui/MobileSpeedDial";
+import { logger } from "../../../../common/utils/logger";
 
 export const TicketsViewDesktop = () => {
   const { t } = useTranslation();
@@ -185,7 +186,7 @@ export const TicketsViewDesktop = () => {
         status: ticket.status,
       }));
     } catch (error) {
-      console.error("Error transforming ticket data:", error);
+      logger.error("Error transforming ticket data:", error);
       return [];
     }
   }, [filteredTickets]);
